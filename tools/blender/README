@@ -1,0 +1,36 @@
+GAMer plugin for Blender
+========================
+
+Installation
+------------
+  (1) Compile and install GAMer and PyGAMer
+  (2) Make sure you LD_LIBRARY_PATH (or DYLIB_LIBRARY_PATH on Mac) 
+      and PYTHONPATH is set so you can run
+
+      $> python -c"import gamer"
+
+      without errors
+
+  (3a) Blender 2.49
+       cp mesh_gamer_addon2.49.py to the blender scripts folder:
+
+       .blender/scripts
+
+  (3b) Blender 2.6X (Not working yet...)
+       cp mesh_gamer_addon.py to the blender scripts folder:
+
+      .blender/2.6X/addon/scripts
+ 
+      and activate the addon in the preference menu
+
+Run
+---
+Start Blender using the bundled blender file:
+
+  blender blamer.blend&
+
+Questions
+---------
+Send an email to Johan Hake <hake.dev@gmail.com>
+
+Have fun!

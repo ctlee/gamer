@@ -1,0 +1,12 @@
+all: TetSmooth clearall
+
+TetSmooth: TetSmooth.o DataStruct.o
+	c++ -o TetSmooth TetSmooth.o DataStruct.o
+
+TetSmooth.o: TetSmooth.cpp TetSmooth.h DataStruct.cpp DataStruct.h
+	c++ -c TetSmooth.cpp
+
+DataStruct.o: DataStruct.cpp DataStruct.h
+	c++ -c DataStruct.cpp
+clearall: 
+	rm -f TetSmooth.o DataStruct.o

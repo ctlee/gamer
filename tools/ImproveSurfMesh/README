@@ -1,0 +1,20 @@
+
+Usage:
+
+>>> ./GAMer 1CID.pdb
+No active site is specified
+
+>>> ./GAMer 1CID.pdb 1CID_active_site.dat
+Active sites are given in the *.dat file. 
+Check "1CID_active_site.dat" for format.
+
+*** Go to "../src/biom/gamer/biom.h" to update your prefered parameters.
+IsoValue and BLOBBYNESS are most critical. 
+SphereRatio is the size for the bounding sphere
+Increasing DIM_SCALE will slow down the speed and increase the memory usage.
+
+*** The input can be files ending "pdb", "pqr", "off", "rawiv", or "xyzr".
+*** THe output will be in both .m and .off formats
+
+
+

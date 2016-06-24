@@ -1,0 +1,13 @@
+all: tet2tet3 clearall
+
+tet2tet3: tet2tet3.o DataStruct.o
+	c++ -o tet2tet3 tet2tet3.o DataStruct.o
+
+tet2tet3.o: tet2tet3.cpp tet2tet3.h DataStruct.cpp DataStruct.h
+	c++ -c tet2tet3.cpp
+
+DataStruct.o: DataStruct.cpp DataStruct.h
+	c++ -c DataStruct.cpp
+
+clearall:
+	rm -f tet2tet3.o DataStruct.o

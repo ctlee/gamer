@@ -1,0 +1,3 @@
+#! /bin/sh
+../configure --prefix=${FETK_PREFIX} ${FETK_FLAGS} FETK_LIBRARY=${FETK_LIBRARY} FETK_INCLUDE=${FETK_INCLUDE}
+

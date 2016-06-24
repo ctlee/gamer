@@ -1,0 +1,14 @@
+==============================================================================
+The GAMer ChangeLog and the GAMer TODO List
+
+This file written and maintained by Michael Holst (mholst@math.ucsd.edu)
+rcsid="$Id: todo.txt,v 1.1 2008/03/12 07:00:42 fetk Exp $"
+==============================================================================
+
+
+The GAMer ChangeLog
+-------------------
+
+The GAMer TODO List
+-------------------
+

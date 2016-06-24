@@ -1,0 +1,5 @@
+#! /bin/sh
+FETK_ARCH=`. ../config/config.guess`
+. ../../build/${FETK_ARCH}/fetk-env
+../configure --prefix=${FETK_PREFIX} ${FETK_FLAGS} FETK_LIBRARY=${FETK_LIBRARY} FETK_INCLUDE=${FETK_INCLUDE}
+

@@ -1,0 +1,61 @@
+### ##########################################################################
+### MC = < Manifold Code >
+### Copyright (C) 1994-- Michael Holst
+###
+### This library is free software; you can redistribute it and/or
+### modify it under the terms of the GNU Lesser General Public
+### License as published by the Free Software Foundation; either
+### version 2.1 of the License, or (at your option) any later version.
+###
+### This library is distributed in the hope that it will be useful,
+### but WITHOUT ANY WARRANTY; without even the implied warranty of
+### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+### Lesser General Public License for more details.
+###
+### You should have received a copy of the GNU Lesser General Public
+### License along with this library; if not, write to the Free Software
+### Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+###
+### rcsid="$Id: Makefile.simple,v 1.1 2010/12/08 09:48:16 fetk Exp $"
+### ##########################################################################
+
+## ###########################################################################
+## File:    Makefile.simple
+##
+## Purpose: Simple makefile for building FEtk tools without using autoconf.
+##
+## Notes:   Edit as needed and then invoke via "make -f Makefile.simple"
+##
+## Author:  Michael Holst
+## ###########################################################################
+
+ARCH      = x86_64-apple-darwin10.5.0
+#ARCH     = x86_64-unknown-linux-gnu
+
+include ../../build/${ARCH}/fetk-env
+
+DMAL      =
+#DMAL     = -ldmalloc
+
+SYS_INC   = -I/usr/include/python2.6/ -I/System/Library/Frameworks/Python.framework/Versions/2.6/Extras/lib/python/numpy/core/include/
+#SYS_INC  = -I/usr/include/python2.6/
+
+SYS_LIB   = -L/usr/lib -lpython2.6 -L/usr/X11R6/lib -L/sw/lib -lm ${DMAL}
+#SYS_LIB  = -L/usr/lib -lpython2.6 -lm ${DMAL}
+
+FETK_INC  = -I${FETK_INCLUDE}
+FETK_LIB  = -L${FETK_LIBRARY} -lgamer -lpunc -lmaloc -lsuperlu -lumfpack -lamd ${DMAL}
+
+default : _cgamer.so
+
+_cgamer.so :
+	swig ${FETK_INC} -I./src -python -o cgamer_wrap.cc -oh cgamer_wrap.h ./src/gamer.i 
+	g++ -fPIC -c -o cgamer_wrap.o ${SYS_INC} ${FETK_INC} cgamer_wrap.cc
+	g++ ${FETK_LIB} -shared -lgamer -ltetgen ${SYS_LIB} -o _cgamer.so cgamer_wrap.o
+
+setdmal :
+	dmalloc -l logfile -i 100 high
+
+clean :
+	-rm -f *.o cgamer.py cgamer_wrap.cc cgamer_wrap.h _cgamer.so .gdb_history
+

@@ -1,0 +1,14 @@
+# First Line: 
+#     number of active sites
+#
+# The remaining lines are grouped by active sites.
+# For each active site:
+#     (x,y,z): coordinates of sphere centers
+#     (r): radius of the sphere
+#     (index): the index used to represent the active site
+#
+# Note that 2,4,5 have been reserved for other purposes
+# So, don't use these numbers for index
+#
+1
+-10.2360  24.5444  2.0876 8 1
