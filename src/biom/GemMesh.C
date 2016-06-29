@@ -49,8 +49,12 @@ bool same_face(int a, int b, int c, int* triface)
 {
   int i;
   for (i=0; i<3; i++)
+  {
     if (a != triface[i] && b != triface[i] && c != triface[i])
+    {
       return false;
+    }
+  }
   return true;
 }
 
@@ -76,9 +80,13 @@ GemMesh* GemMesh_ctor(unsigned int num_vertices, unsigned int num_cells, bool hi
   gem_mesh->higher_order = higher_order;
   
   if (higher_order)
+  {
     gem_mesh->hs = (INT6VECT *)malloc(sizeof(INT6VECT)*num_cells);
+  }
   else
+  {
     gem_mesh->hs = NULL;
+  }
 
   return gem_mesh;
 }
@@ -98,10 +106,14 @@ void GemMesh_dtor(GemMesh* gem_mesh)
   free(gem_mesh->ss);
   free(gem_mesh);
   if (gem_mesh->boundary)
+  {
     SurfaceMesh_dtor(gem_mesh->boundary);
+  }
   
   if (gem_mesh->hs!=NULL)
+  {
     free(gem_mesh->hs);
+  }
   
 }
 
@@ -155,7 +167,9 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh** surfmeshes, int num_surface_mes
 
     // Check if neighborlist is created
     if (surfmesh->neighbor_list == NULL)
+    {
       SurfaceMesh_createNeighborlist(surfmesh);
+    }
     
     if (surfmesh->num_vertices == 0 || surfmesh->num_faces == 0)
     {
@@ -174,9 +188,13 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh** surfmeshes, int num_surface_mes
     
     // Bump counters
     if (!surfmesh->as_hole)
+    {
       num_regions += 1;
+    }
     else
+    {
       num_holes += 1;
+    }
 
     num_vertices += surfmesh->num_vertices;
     num_faces += surfmesh->num_faces;
@@ -289,11 +307,13 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh** surfmeshes, int num_surface_mes
       // If volume constraints
       if (surfmesh->use_volume_constraint)
       {
-	printf("Volume constraint: %.5f\n", surfmesh->volume_constraint);
-	in.regionlist[num_regions*5 + 4] = surfmesh->volume_constraint;
+      	printf("Volume constraint: %.5f\n", surfmesh->volume_constraint);
+      	in.regionlist[num_regions*5 + 4] = surfmesh->volume_constraint;
       }
       else
-	in.regionlist[num_regions*5 + 4] = -1;
+      {
+      	in.regionlist[num_regions*5 + 4] = -1;
+      }
       
       // Bump counter
       num_regions += 1;
@@ -319,7 +339,9 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh** surfmeshes, int num_surface_mes
   // FIXME: Why? Aren't the markers set on the generatedmesh?
   in.pointmarkerlist = new int[in.numberofpoints];
   for (j = 0; j < in.numberofpoints; j++)
+  {
     in.pointmarkerlist[j] = 1;
+  }
 
   // Debug
   in.save_nodes("plc");
@@ -385,10 +407,14 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
   vertex_markers = new int[tetio.numberofpoints];
 
   for (i = 0; i < tetio.numberoftetrahedra; i++)
+  {
     tet_to_triface[i] = NULL;
+  }
   
   for (i = 0; i < tetio.numberofpoints; i++)
+  {
     vertex_markers[i] = 0;
+  }
   
   // Using the markers from the trifaces to mark vertices beeing on the boundary
   SurfaceMesh* boundary = SurfaceMesh_ctor(0, tetio.numberoftrifaces);
@@ -403,7 +429,9 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
     {
       // If no tet continue
       if (tetp[j] < 0)
-	continue;
+      {
+        continue;
+      }
       
       triface = new Triface;
       triface->next = NULL;
@@ -414,20 +442,29 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
       // If we are on a boundary face register it
       if (on_boundary[j])
       {
-	boundary->face[boundary_face].a = triface->points[0];
-	boundary->face[boundary_face].b = triface->points[1];
-	boundary->face[boundary_face].c = triface->points[2];
-	if (tetio.trifacemarkerlist != NULL)
-	  boundary->face[boundary_face].m = tetio.trifacemarkerlist[i];
-	else
-	  boundary->face[boundary_face].m = 1;
-	boundary_face++;
+      	boundary->face[boundary_face].a = triface->points[0];
+      	boundary->face[boundary_face].b = triface->points[1];
+      	boundary->face[boundary_face].c = triface->points[2];
+      	if (tetio.trifacemarkerlist != NULL)
+        {
+      	  boundary->face[boundary_face].m = tetio.trifacemarkerlist[i];
+        }
+      	else
+        {
+      	  boundary->face[boundary_face].m = 1;
+        }
+
+      	boundary_face++;
       }
       
       if (tetio.trifacemarkerlist != NULL)
-	triface->marker = tetio.trifacemarkerlist[i];
+      {
+      	triface->marker = tetio.trifacemarkerlist[i];
+      }
       else
-	triface->marker = 1;
+      {
+      	triface->marker = 1;
+      }
       
       triface->next = tet_to_triface[tetp[j]-1];
       tet_to_triface[tetp[j]-1] = triface;
@@ -447,8 +484,10 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
   for (i = 0; i < tetio.numberoftetrahedra; i++) {
     
     // Zero out all face types
-    for (j = 0; j < 4; j++) 
+    for (j = 0; j < 4; j++)
+    {
       face_type[i*4+j] = 0;
+    }
 
     // Check tetra orientation
     a = tetio.tetrahedronlist[i * tetio.numberofcorners + 0] - 1;
@@ -496,38 +535,38 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
       // If so find out which face is on the boundary
       if (same_face(b, c, d, tet_to_triface[i]->points))
       {
-	face_type[i*4] = tet_to_triface[i]->marker;
-	triface = tet_to_triface[i];
-	tet_to_triface[i] = triface->next;
-	delete triface;
-	continue;
+      	face_type[i*4] = tet_to_triface[i]->marker;
+      	triface = tet_to_triface[i];
+      	tet_to_triface[i] = triface->next;
+      	delete triface;
+      	continue;
       }
 
       if (same_face(a, c, d, tet_to_triface[i]->points))
       {
-	face_type[i*4+1] = tet_to_triface[i]->marker;
-	triface = tet_to_triface[i];
-	tet_to_triface[i] = triface->next;
-	delete triface;
-	continue;
+      	face_type[i*4+1] = tet_to_triface[i]->marker;
+      	triface = tet_to_triface[i];
+      	tet_to_triface[i] = triface->next;
+      	delete triface;
+      	continue;
       }
 
       if (same_face(a, b, d, tet_to_triface[i]->points))
       {
-	face_type[i*4+2] = tet_to_triface[i]->marker;
-	triface = tet_to_triface[i];
-	tet_to_triface[i] = triface->next;
-	delete triface;
-	continue;
+      	face_type[i*4+2] = tet_to_triface[i]->marker;
+      	triface = tet_to_triface[i];
+      	tet_to_triface[i] = triface->next;
+      	delete triface;
+      	continue;
       }
 
       if (same_face(a, b, c, tet_to_triface[i]->points))
       {
-	face_type[i*4+3] = tet_to_triface[i]->marker;
-	triface = tet_to_triface[i];
-	tet_to_triface[i] = triface->next;
-	delete triface;
-	continue;
+      	face_type[i*4+3] = tet_to_triface[i]->marker;
+      	triface = tet_to_triface[i];
+      	tet_to_triface[i] = triface->next;
+      	delete triface;
+      	continue;
       }
     }
   }
@@ -553,9 +592,13 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
     gem_mesh->ss[i].grp = 0;
   
     if (tetio.numberoftetrahedronattributes > 0)
+    {
       gem_mesh->ss[i].mat = (int)tetio.tetrahedronattributelist[i*tetio.numberoftetrahedronattributes];
+    }
     else
+    {
       gem_mesh->ss[i].mat = 0;
+    }
 
     gem_mesh->ss[i].fa = face_type[4*i+0];
     gem_mesh->ss[i].fb = face_type[4*i+1];
