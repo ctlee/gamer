@@ -127,7 +127,7 @@ SurfaceMesh* SurfaceMesh_readPDB_gauss(char* filename, float blobbyness,
  * ***************************************************************************
  */
 float PDB2Volume(char *filename, float **data, int *xd, int *yd, int *zd,
-		 float p_min[3], float p_max[3],ATOM **atomlist, int *atom_num, char IsXYZR)
+		 float p_min[3], float p_max[3], ATOM **atomlist, int *atom_num, char IsXYZR)
 {
   int m,n,k;
   char line[MAX_STRING];

@@ -173,7 +173,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
   char IsRawiv;
   char IsXYZR;
 
-  // Read sphere list from file if givven
+  // Read sphere list from file if given
   if (active_flag)
     ReadActiveSiteFile(input_site, num_spheres, sphere_list, sphere_markers);
   
@@ -231,7 +231,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 
   if (IsOFF) 
   {
-    // load user-defined molecualr surface meshes in OFF format
+    // load user-defined molecular surface meshes in OFF format
     printf("loading the user-specified surface/volumetric mesh....\n");
     surfmesh_inner = SurfaceMesh_readOFF(input_name);
     printf("begin surface smoothing ... \n");
@@ -320,7 +320,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
   }
   printf("\n");
   
-  printf("Mesh generated ....\n");
+  printf("Mesh generated...\n");
 
   // Merge molecular mesh and sphere mesh
   surfmesh = SurfaceMesh_merge(surfmesh_inner, surfmesh_outer);
@@ -330,6 +330,9 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 
   SurfaceMesh_writeOFF(surfmesh_inner, filename);
   
+  sprintf(filename, "%s.output.surf.outer.off", input_name);
+  SurfaceMesh_writeOFF(surfmesh_outer, filename);
+
   // Compute and Output all tetrahedra meshes into .m format
   printf("begin all tetrahedra generating ... \n");
   (void)time(&t1);
@@ -376,6 +379,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     else
       in.pointmarkerlist[j] = 1;
   
+  printf("Calling tetgen...\n");
   tetrahedralize("npq1.333VAAYY", &in, &out, &addin, NULL);
   
   (void)time(&t2);
