@@ -1,19 +1,32 @@
-# makefile for TetGen
-#
-# Type "make" to compile TetGen into an executable program (tetgen).
-# Type "make tetlib" to compile TetGen into a library (libtet.a).
-# Type "make distclean" to delete all object (*.o) files.
+###############################################################################
+#                                                                             #
+# makefile for TetGen                                                         #
+#                                                                             #
+# Type "make" to compile TetGen into an executable program (tetgen).          #
+# Type "make tetlib" to compile TetGen into a library (libtet.a).             #
+# Type "make distclean" to delete all object (*.o) files.                     #
+#                                                                             #
+###############################################################################
 
-# CC should be set to the name of your favorite C++ compiler.
+# CXX should be set to the name of your favorite C++ compiler.
+# ===========================================================
 
-CC = g++
+CXX = g++
+#CXX = icpc
+#CXX = CC
 
-# OPT is the level of optimiztion, default is -O. One should try -O2, -O3
-#   ... to find the best optimization level.
+# CXXFLAGS is the level of optimiztion, default is -O. One should try
+# -O2, -O3 ... to find the best optimization level.
+# ===================================================================
 
-OPT = -g
+CXXFLAGS = -O3
 
-# CFLAGS is a list of switches to compile TetGen.
+# PREDCXXFLAGS is for compiling J. Shewchuk's predicates. 
+
+PREDCXXFLAGS = -O0
+
+# SWITCHES is a list of switches to compile TetGen.
+# =================================================
 #
 # By default, TetGen uses double precision floating point numbers.  If you
 #   prefer single precision, use the -DSINGLE switch. 
@@ -23,15 +36,7 @@ OPT = -g
 #   down the speed of TetGen.  They can be skipped by define the -DNDEBUG
 #   switch.
 
-CFLAGS = -Wall -DSELF_CHECK
-
-#CFLAGS = -funroll-all-loops -fomit-frame-pointer\
-#         -Wall -Wabi -Wctor-dtor-privacy \
-#         -Woverloaded-virtual -Wno-pmf-conversions -Wsign-promo \
-#         -Wsynth  -Wchar-subscripts -Wconversion -Wsign-compare \
-#         -Wcomment  -Wimplicit -Wmissing-braces -Wparentheses \
-#         -Wreturn-type -Wswitch -Wswitch-default \
-#         -Wswitch-enum -Wtrigraphs -W
+SWITCHES = 
 
 # RM should be set to the name of your favorite rm (file deletion program).
 
@@ -40,17 +45,17 @@ RM = /bin/rm
 # The action starts here.
 
 tetgen:	tetgen.cxx predicates.o
-	$(CC) $(CFLAGS) $(OPT) -o tetgen tetgen.cxx predicates.o -lm
+	$(CXX) $(CXXFLAGS) $(SWITCHES) -o tetgen tetgen.cxx predicates.o -lm
 
 tetlib: tetgen.cxx predicates.o
-	$(CC) $(CFLAGS) $(OPT) -DTETLIBRARY -c tetgen.cxx
+	$(CXX) $(CXXFLAGS) $(SWITCHES) -DTETLIBRARY -c tetgen.cxx
 	ar r libtet.a tetgen.o predicates.o
 
 predicates.o: predicates.cxx
-	$(CC) $(CFLAGS) -g -c predicates.cxx
+	$(CXX) $(PREDCXXFLAGS) -c predicates.cxx
 
-distclean:
-	$(RM) $(SRC)*.o $(SRC)*.a
+clean:
+	$(RM) *.o *.a tetgen *~
 
 
 

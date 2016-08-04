@@ -326,7 +326,6 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     printf("Generating the mesh for the bounding sphere ....\n");
     surfmesh_outer = SurfaceMesh::sphere(5);
 
-
     for (auto& vertex : surfmesh_outer->vertices())
     {
         vertex.x = vertex.x * center_radius.radius * SphereRatio + center_radius.x;
