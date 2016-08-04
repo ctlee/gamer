@@ -34,92 +34,99 @@
 
 triangulateio* init_triangulateio()
 {
-  triangulateio* io = new triangulateio;
-  io->pointlist  = (double *) NULL;
-  io->pointattributelist = (double *) NULL;
-  io->pointmarkerlist = (int *) NULL;
-  io->numberofpoints = 0;
-  io->numberofpointattributes = 0;
+    triangulateio *io = new triangulateio;
 
-  io->trianglelist = (int *) NULL;
-  io->triangleattributelist = (double *) NULL;
-  io->trianglearealist = (double *) NULL;
-  io->neighborlist = (int *) NULL;
-  io->numberoftriangles = 0;
-  io->numberofcorners = 3;
-  io->numberoftriangleattributes = 0;
+    io->pointlist               = (double *)NULL;
+    io->pointattributelist      = (double *)NULL;
+    io->pointmarkerlist         = (int *)NULL;
+    io->numberofpoints          = 0;
+    io->numberofpointattributes = 0;
 
-  io->segmentlist = (int *) NULL;
-  io->segmentmarkerlist = (int *) NULL;
-  io->numberofsegments = 0;
+    io->trianglelist               = (int *)NULL;
+    io->triangleattributelist      = (double *)NULL;
+    io->trianglearealist           = (double *)NULL;
+    io->neighborlist               = (int *)NULL;
+    io->numberoftriangles          = 0;
+    io->numberofcorners            = 3;
+    io->numberoftriangleattributes = 0;
 
-  io->holelist = (double *) NULL;
-  io->numberofholes = 0;
+    io->segmentlist       = (int *)NULL;
+    io->segmentmarkerlist = (int *)NULL;
+    io->numberofsegments  = 0;
 
-  io->regionlist = (double *) NULL;
-  io->numberofregions = 0;      
+    io->holelist      = (double *)NULL;
+    io->numberofholes = 0;
 
-  io->edgelist = (int *) NULL;
-  io->edgemarkerlist = (int *) NULL;
-  io->normlist = (double *) NULL;
-  io->numberofedges = 0;
+    io->regionlist      = (double *)NULL;
+    io->numberofregions = 0;
+
+    io->edgelist       = (int *)NULL;
+    io->edgemarkerlist = (int *)NULL;
+    io->normlist       = (double *)NULL;
+    io->numberofedges  = 0;
+
+    return io;
 }
 
-SurfaceMesh* SurfaceMesh_triangulate(REAL* pointlist, int numberofcoordinates,
-				     char* triangle_params)
+SurfaceMesh * SurfaceMesh::triangulate(REAL *pointlist, int numberofcoordinates, const char *triangle_params)
 {
-  // Start with empty triangle structures
-  triangulateio* in = init_triangulateio();
-  triangulateio* out = init_triangulateio();
+    // Start with empty triangle structures
+    triangulateio *in  = init_triangulateio();
+    triangulateio *out = init_triangulateio();
 
-  // Attach the given points
-  in->pointlist = pointlist;
-  in->numberofpoints = numberofcoordinates/2;
-  
-  // Create segments list
-  in->numberofsegments = numberofcoordinates/2;
-  in->segmentlist = new int[numberofcoordinates];
+    // Attach the given points
+    in->pointlist      = pointlist;
+    in->numberofpoints = numberofcoordinates / 2;
 
-  // Fill segment list
-  for (int i = 0; i < numberofcoordinates/2; i++)
-  {
-    // First vertices is always i
-    in->segmentlist[i*2] = i;
-    
-    // Special case for last segment
-    if (i == numberofcoordinates/2-1)
-      in->segmentlist[i*2+1] = 0;
-    else
-      in->segmentlist[i*2+1] = i+1;
-  }
-  
-  // Call triangulate from triangle
-  triangulate(triangle_params, in, out, (struct triangulateio *) NULL);
-  
-  // Initiate an empty SurfaceMesh
-  SurfaceMesh* surfmesh = SurfaceMesh_ctor(out->numberofpoints, out->numberoftriangles);
-  
-  // Grab vertex coordinates from the triangulated mesh
-  for (int n=0; n < out->numberofpoints; n++)
-  {
-    surfmesh->vertex[n].x = out->pointlist[n*2];
-    surfmesh->vertex[n].y = out->pointlist[n*2+1];
-    surfmesh->vertex[n].z = 0.0;
-  }
+    // Create segments list
+    in->numberofsegments = numberofcoordinates / 2;
+    in->segmentlist      = new int[numberofcoordinates];
 
-  // Grab connectivity from the triangulated mesh
-  for (int n=0; n < out->numberoftriangles; n++)
-  {
-    surfmesh->face[n].a = out->trianglelist[n*3];
-    surfmesh->face[n].b = out->trianglelist[n*3+1];
-    surfmesh->face[n].c = out->trianglelist[n*3+2];
-  }
-  
-  // Clean up
-  free(out->pointlist);
-  free(out->trianglelist);
-  delete[] in->segmentlist;
-  delete out;
-  delete in;
-  return surfmesh;
+    // Fill segment list
+    for (int i = 0; i < numberofcoordinates / 2; i++)
+    {
+        // First vertices is always i
+        in->segmentlist[i * 2] = i;
+
+        // Special case for last segment
+        if (i == numberofcoordinates / 2 - 1)
+        {
+            in->segmentlist[i * 2 + 1] = 0;
+        }
+        else
+        {
+            in->segmentlist[i * 2 + 1] = i + 1;
+        }
+    }
+
+    // Call triangulate from triangle
+    ::triangulate((char*)(triangle_params), in, out, (struct triangulateio *)NULL);
+
+    // Initiate an empty SurfaceMesh
+    SurfaceMesh *surfmesh = new SurfaceMesh(out->numberofpoints, out->numberoftriangles);
+
+    // Grab vertex coordinates from the triangulated mesh
+    for (int n = 0; n < out->numberofpoints; n++)
+    {
+        //    surfmesh->vertex.push_back(FLTVECT(out->pointlist[n*2], out->pointlist[n*2+1], 0.0));
+        surfmesh->vertex[n].x = out->pointlist[n * 2];
+        surfmesh->vertex[n].y = out->pointlist[n * 2 + 1];
+        surfmesh->vertex[n].z = 0.0;
+    }
+
+    // Grab connectivity from the triangulated mesh
+    for (int n = 0; n < out->numberoftriangles; n++)
+    {
+        surfmesh->face[n].a = out->trianglelist[n * 3];
+        surfmesh->face[n].b = out->trianglelist[n * 3 + 1];
+        surfmesh->face[n].c = out->trianglelist[n * 3 + 2];
+    }
+
+    // Clean up
+    free(out->pointlist);
+    free(out->trianglelist);
+    delete[] in->segmentlist;
+    delete out;
+    delete in;
+    return surfmesh;
 }
