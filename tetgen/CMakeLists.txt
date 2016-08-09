@@ -8,8 +8,10 @@ add_executable(tetgen tetgen.cxx predicates.cxx)
 add_library(tet SHARED tetgen.cxx predicates.cxx)
 add_library(tetstatic STATIC tetgen.cxx predicates.cxx)
 
-#Set properties on a target. 
-#We use this here to set -DTETLIBRARY for when compiling the
-#library
-set_target_properties(tet PROPERTIES "COMPILE_DEFINITIONS" TETLIBRARY)
-set_target_properties(tetstatic PROPERTIES "COMPILE_DEFINITIONS" TETLIBRARY)
+# These targets are libraries
+set_target_properties(tet tetstatic PROPERTIES "COMPILE_DEFINITIONS" TETLIBRARY)
+target_include_directories(tet PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(FILES tetgen.h DESTINATION include/gamer)
+install(TARGETS tet tetstatic DESTINATION lib/gamer)
+install(TARGETS tetgen DESTINATION bin)

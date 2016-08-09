@@ -31,8 +31,8 @@
  */
 
 
-#include <gamer/biom.h>
-#include "gamercf.h"
+#include "biom.h"
+//#include "gamercf.h"
 
 
 #define MaxDist    29999

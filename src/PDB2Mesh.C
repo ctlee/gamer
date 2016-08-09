@@ -30,8 +30,8 @@
  * ***************************************************************************
  */
 
-#include <gamer/biom.h>
-#include "gamercf.h"
+#include "biom.h"
+//#include "gamercf.h"
 #include <vector>
 #include <cmath>
 

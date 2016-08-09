@@ -28,11 +28,11 @@
  * ****************************************************************************
  */
 
-#include <gamer/biom.h>
+#include "biom.h"
 #include <vector>
 #include <algorithm>
 #include <utility>
-#include "gamercf.h"
+//#include "gamercf.h"
 #include <cmath>
 
 // Declare internal GAMer methods

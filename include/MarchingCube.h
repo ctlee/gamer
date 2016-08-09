@@ -34,8 +34,8 @@
  */
 
 
-#include <gamer/biom.h>
-#include "gamercf.h"
+#include "biom.h"
+//#include "gamercf.h"
 
 #if 0
 #include <stdio.h>

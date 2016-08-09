@@ -107,9 +107,9 @@ void sort_connectivity(const std::vector<unsigned int>& conn,
 #include <map>
 #include <string>
 
-#include <gamer/biom.h>
-#include <gamer/tetgen.h>
-#include "gamercf.h"
+#include "biom.h"
+#include <tetgen/tetgen.h>
+//#include "gamercf.h"
 
 /*
  * All ISO-C headers are coming to us via MALOC, through the includes above.
@@ -136,7 +136,7 @@ void sort_connectivity(const std::vector<unsigned int>& conn,
 #if defined(HAVE_SYS_STAT_H)
 # include <sys/stat.h>
 #endif // if defined(HAVE_SYS_STAT_H)
-
+#include <sys/stat.h>
 
 /*
  * ***************************************************************************

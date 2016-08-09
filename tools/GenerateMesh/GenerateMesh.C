@@ -29,7 +29,7 @@
  * ***************************************************************************
  */
 
-#include <gamer/gamer.h>
+#include "gamer.h"
 
 const char* supported_formats[] = {"mcsf", "dolfin"};
 const char default_mesh_format[] = "mcsf";

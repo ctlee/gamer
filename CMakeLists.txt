@@ -20,20 +20,33 @@ message("CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
 message("CMAKE_CXX_FLAGS_RELWITHDEBINFO is ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 message("CMAKE_CXX_FLAGS_MINSIZEREL is ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 add_subdirectory(tetgen)
+add_subdirectory(triangle)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(include)
+# Hack to include maloc for now... TODO: fix
+include_directories(/Users/ctlee/fetk/build/x86_64-apple-darwin15.6.0/include)
 
-# Add an executable to the project using the specified source files.
-#add_executable(tetgen tetgen.cxx predicates.cxx)
+find_package(X11 QUIET)
+if(X11_FOUND)
+    include_directories(${X11_INCLUDE_DIR})
+endif(X11_FOUND)
 
-#Add a library to the project using the specified source files. 
-# In Linux/Unix, it will creates the libtet.a
-#add_library(tet STATIC tetgen.cxx predicates.cxx)
+# List the include directories...
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+    message(STATUS "dir='${dir}'")
+endforeach()
 
-#Set properties on a target. 
-#We use this here to set -DTETLIBRARY for when compiling the
-#library
-#set_target_properties(tet PROPERTIES "COMPILE_DEFINITIONS" TETLIBRARY)
+# Change this to not use GLOB
+file(GLOB SOURCES "src/*.C")
+
+add_library(gamer SHARED ${SOURCES})
+set_target_properties(gamer PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
+target_link_libraries(gamer tet tri)
+
+add_subdirectory(tools)

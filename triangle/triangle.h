@@ -15,6 +15,12 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#ifndef _TRIANGLE_H_
+#define _TRIANGLE_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*****************************************************************************/
 /*                                                                           */
 /*  How to call Triangle from another program                                */
@@ -287,3 +293,9 @@ void trifree(VOID *memptr);
 void triangulate();
 void trifree();
 #endif /* not ANSI_DECLARATORS */
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* _TRIANGLE_H_ */

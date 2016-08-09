@@ -30,7 +30,7 @@
  */
 
 
-#include <gamer/gamer.h>
+#include "gamer.h"
 
 // Constants and default values
 const char OUT_SUFFIX[] = "_improved_";

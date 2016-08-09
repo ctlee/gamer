@@ -32,10 +32,10 @@
 #ifndef _GEMMESH_H_
 #define _GEMMESH_H_
 
-#include <gamer/gamer_base.h>
+#include "gamer_base.h"
 
-#include <gamer/triangle.h>
-#include <gamer/tetgen.h>
+#include <triangle/triangle.h>
+#include <tetgen/tetgen.h>
 
 #if 0
 #include <stdio.h>       /* One of 15 ISO-C headers -- get via MALOC */

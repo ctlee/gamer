@@ -28,9 +28,10 @@
  * ****************************************************************************
  */
 
-#include <gamer/biom.h>
-#include <gamer/triangle.h>
-#include "gamercf.h"
+#include "biom.h"
+
+#include "triangle/triangle.h"
+//#include "gamercf.h"
 
 triangulateio* init_triangulateio()
 {

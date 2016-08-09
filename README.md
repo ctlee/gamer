@@ -9,6 +9,14 @@ is provided in this snapshot.
 
 Installation
 ------------
+
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+make all
+make install
+
+
 This installation instructions should work on any UNIX based platform.
 
   # Only needed during install

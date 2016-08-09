@@ -29,8 +29,8 @@
  * ****************************************************************************
  */
 
-#include <gamer/biom.h>
-#include "gamercf.h"
+#include "biom.h"
+//#include "gamercf.h"
 
 // Declare internal GAMer methods
 FLTVECT GetPositionSurfaceOnly(float,

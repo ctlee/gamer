@@ -28,11 +28,8 @@
  * ****************************************************************************
  */
 
-#include <gamer/biom.h>
-#include <gamer/tetgen.h>
-#include "gamercf.h"
-
-// #include "GemMesh.h"
+#include "biom.h"
+#include <tetgen/tetgen.h>
 #include <vector>
 #include <tuple>
 

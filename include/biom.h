@@ -35,10 +35,9 @@
 #include <vector>
 #include <tuple>
 
-#include <gamer/gamer_base.h>
-
-#include <gamer/triangle.h>
-#include <gamer/tetgen.h>
+#include "gamer_base.h"
+#include <triangle/triangle.h>
+#include <tetgen/tetgen.h>
 
 #if 0
 # include <stdio.h>     /* One of 15 ISO-C headers -- get via MALOC */
@@ -352,7 +351,7 @@ public:
     void        createNeighborlist();
     void        destroyNeighborlist();
     void        flipNormals();
-    void        releaseData();
+    //void        releaseData();
     void        correctNormals();
     void        writeOFF(char *filename);
     void        writePoly(char *filename);

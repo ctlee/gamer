@@ -35,11 +35,11 @@
 #ifndef _GAMER_H_
 #define _GAMER_H_
 
-#include <gamer/gamer_base.h>
+#include "gamer_base.h"
 
-#include <gamer/triangle.h>
-#include <gamer/tetgen.h>
-#include <gamer/biom.h>
+#include <triangle/triangle.h>
+#include <tetgen/tetgen.h>
+#include "biom.h"
 
 #endif /* _GAMER_H_ */
 

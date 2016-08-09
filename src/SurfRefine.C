@@ -29,8 +29,8 @@
  * ***************************************************************************
  */
 
-#include <gamer/biom.h>
-#include "gamercf.h"
+#include "biom.h"
+//#include "gamercf.h"
 
 
 /*
@@ -207,7 +207,7 @@ void SurfaceMesh::refine()
     surfmesh_refine->num_faces    *= 4;
 
     // Release old data
-    releaseData();
+    //surfmesh_refine->releaseData();
 
     // Assign the refined mesh to the passed
     num_vertices = surfmesh_refine->num_vertices;

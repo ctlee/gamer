@@ -33,8 +33,8 @@
  * ***************************************************************************
  */
 
-#include <gamer/biom.h>
-#include "gamercf.h"
+#include "biom.h"
+//#include "gamercf.h"
 
 
 typedef struct _PDBelementInformation

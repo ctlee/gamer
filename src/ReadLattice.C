@@ -31,7 +31,7 @@
 
 // FIXME: This is not included by maloc?
 #include <unistd.h>
-#include <gamer/biom.h>
+#include "biom.h"
 
 // Read a short integer, swapping the bytes
 int read_short_int(FILE *fptr, short int *n)
