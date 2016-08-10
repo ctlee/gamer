@@ -190,7 +190,7 @@ void GenerateMeshFromSurfaceMesh(char* input_name, char* input_site,
   basename[basename_index] = '\0';
 
   // Load surface meshes in OFF format
-  surfmesh = SurfaceMesh_readOFF(input_name);
+  surfmesh = SurfaceMesh::readOFF(input_name);
 
   printf("Begin generating tetrahedral mesh.\n");
   (void)time(&t0);
@@ -218,7 +218,7 @@ void GenerateMeshFromSurfaceMesh(char* input_name, char* input_site,
 
   // Release memory
   GemMesh_dtor(gem_out);
-  SurfaceMesh_dtor(surfmesh);
+  delete surfmesh;
 }
 
 

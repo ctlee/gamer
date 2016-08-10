@@ -491,7 +491,7 @@ SurfaceMesh* ReadSurfMeshFile(char* input_name, bool read_suffix_count,
   }
 
   // Load surface meshes in OFF format
-  return SurfaceMesh_readOFF(input_name);
+  return SurfaceMesh::readOFF(input_name);
 }
 
 /*
@@ -529,7 +529,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
   surfmesh = ReadSurfMeshFile(input_name, true, basename, suffix_count);
 
   // Create neighborhood information 
-  SurfaceMesh_createNeighborlist(surfmesh);
+  surfmesh->createNeighborlist();
 
   // Main action loop
   while (action != NULL){
@@ -545,10 +545,10 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	printf("\n\n");
 	printf("Refine mesh:\n");
 
-	SurfaceMesh_refine(surfmesh);
+	surfmesh->refine();
 
 	printf("After refinement:              \n"
-	       "   vertices: %d --- simplices: %d\n", surfmesh->num_vertices, surfmesh->num_faces);
+	       "   vertices: %d --- simplices: %d\n", surfmesh->numVertices(), surfmesh->numFaces());
       
 	(void)time(&t2);
 	printf("------------------------------------------\n");  
@@ -566,7 +566,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	(void)time(&t1);
 	printf("\n\n");
 	printf("Smooth mesh:\n");
-	SurfaceMesh_smooth(surfmesh, action->max_min_angle, 
+	surfmesh->smooth(action->max_min_angle, 
 			   action->min_max_angle, action->max_iter, 
 			   action->preserve_ridges == 1);
 	(void)time(&t2);
@@ -585,7 +585,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	(void)time(&t1);
 	printf("\n\n");
 	printf("Normal smooth mesh:\n");
-	SurfaceMesh_normalSmooth(surfmesh);
+	surfmesh->normalSmooth();
 	(void)time(&t2);
 	printf("-------------------------------------------------\n");  
 	printf("Time to normal smooth surface mesh: %4.1f seconds.\n", fabs(t2-t1));  
@@ -602,7 +602,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	(void)time(&t1);
 	printf("\n\n");
 	printf("Correct normals:\n");
-	SurfaceMesh_correctNormals(surfmesh);
+	surfmesh->correctNormals();
 	(void)time(&t2);
 	printf("---------------------------------------------------\n");  
 	printf("Time to correct surface mesh normals: %4.1f seconds.\n", fabs(t2-t1));  
@@ -625,15 +625,15 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	for (i=0; i<action->num_iter; i++){
 	  
 	  // Assign active sites
-	  SurfaceMesh_assignActiveSites(surfmesh, sphere_list, num_spheres, 
+	  surfmesh->assignActiveSites(sphere_list, num_spheres, 
 					sphere_markers);
 	  
 	  // Do the actuall coarsening
-	  SurfaceMesh_coarse(surfmesh, action->dense_rate, 0, 10, -1);
+	  surfmesh->coarse(action->dense_rate, 0, 10, -1);
 	  if (action->num_iter==1)
-	    printf("After coarsening:        \n   vertices: %d --- simplices: %d\n", surfmesh->num_vertices, surfmesh->num_faces);
+	    printf("After coarsening:        \n   vertices: %d --- simplices: %d\n", surfmesh->numVertices(), surfmesh->numFaces());
 	  else
-	    printf("%d After coarsening:        \n   vertices: %d --- simplices: %d\n", i, surfmesh->num_vertices, surfmesh->num_faces);
+	    printf("%d After coarsening:        \n   vertices: %d --- simplices: %d\n", i, surfmesh->numVertices(), surfmesh->numFaces());
 	}
 	
 	(void)time(&t2);
@@ -655,13 +655,13 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	printf("Coarse flat part of mesh:\n");
 
 	// Assign active sites
-	SurfaceMesh_assignActiveSites(surfmesh, sphere_list, num_spheres,
+	surfmesh->assignActiveSites(sphere_list, num_spheres,
 				      sphere_markers);
 	
 	// Do the actuall coarsening
-	SurfaceMesh_coarse(surfmesh, action->flat_rate, 1, 0, -1);
+	surfmesh->coarse(action->flat_rate, 1, 0, -1);
 	
-	printf("After coarsening:        \n   vertices: %d --- simplices: %d\n", surfmesh->num_vertices, surfmesh->num_faces);
+	printf("After coarsening:        \n   vertices: %d --- simplices: %d\n", surfmesh->numVertices(), surfmesh->numFaces());
       
 	(void)time(&t2);
 	printf("------------------------------------------\n");  
@@ -681,7 +681,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 
 	printf("\n\n");
 	printf("Surface mesh statistics:\n");
-	SurfaceMesh_getMinMaxAngles(surfmesh ,&min_angle, &max_angle, &num_small,
+	surfmesh->getMinMaxAngles(&min_angle, &max_angle, &num_small,
 				    &num_large, action->max_min_angle, 
 				    action->min_max_angle);
 
@@ -711,7 +711,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
     printf("Writing results to: %s%s%d.off\n", basename, OUT_SUFFIX, suffix_count);
 
     // Write surface mesh to file
-    SurfaceMesh_writeOFF(surfmesh, filename);
+    surfmesh->writeOFF(filename);
   
     (void)time(&t2);
     
@@ -721,8 +721,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
   }
 
   // Release memory
-  SurfaceMesh_dtor(surfmesh);
-  
+  delete surfmesh;
+
   // If any active sites have been read
   if (num_spheres){
     free(sphere_list);
