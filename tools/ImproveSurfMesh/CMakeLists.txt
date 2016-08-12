@@ -6,5 +6,5 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(improvesurfmesh ImproveSurfMesh.C)
 
 set_target_properties(improvesurfmesh PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
-target_link_libraries(improvesurfmesh gamer)
+target_link_libraries(improvesurfmesh gamershared)
 

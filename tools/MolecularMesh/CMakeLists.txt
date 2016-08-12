@@ -6,5 +6,5 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(molecularmesh MolecularMesh.C)
 
 set_target_properties(molecularmesh PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
-target_link_libraries(molecularmesh gamer)
+target_link_libraries(molecularmesh gamershared)
 
