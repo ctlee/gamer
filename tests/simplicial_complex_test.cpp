@@ -12,7 +12,7 @@
 #include <tuple>
 #include <future>
 #include <experimental/optional>
-#include "AbstractSimplicialComplex.hpp"
+#include "SimplicialComplex.h"
 
 
 struct Vec3 {
