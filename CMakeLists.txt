@@ -25,6 +25,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # Define where to put the libraries and binaries
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
 
 add_subdirectory(tetgen)
 add_subdirectory(triangle)

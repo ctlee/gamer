@@ -246,9 +246,14 @@ void compute_orientation(Complex& F)
 
 
 
-int main()
+int main(int argc, char* argv[])
 {
-	auto pF = readOFF("dude.off");
+	if(argc != 2)
+	{
+		std::cerr << "Wrong arguments passed" << std::endl;
+		return -1;
+	}
+	auto pF = readOFF(argv[1]);
 
 	init_orientation(*pF);
 
@@ -320,6 +325,8 @@ int main()
 	}
 	*/
 	delete pF;
+
+	return -1;
 }
 
 int rgb_to_marker(float r, float g, float b)
@@ -365,21 +372,19 @@ ASC* readOFF(const char *input_name)
 
     if (fscanf(fin, "%d %d %d\n", &v_n, &t_n, &e_n) != 3)
     {
-        printf("Read error. Expected 3 integer number for the number of vertices "
-               "and simplices.\n");
+
+        std::cerr << "Read error. Expected 3 integer number for the number of vertices and simplices." << std::endl;
         return NULL;
     }
 
-    printf("   vertices: %d --- simplices: %d \n", v_n, t_n);
+    std::cout << "   vertices: " << v_n << " --- simplices: " << t_n << std::endl;
 
     // Read vertex coordinates
     for (n = 0; n < v_n; n++) // surfmesh->num_vertices; n++) {
     {
         if (fscanf(fin, "%f %f %f\n", &x, &y, &z) != 3)
         {
-            printf(
-                "Read error. Expected 3 floats for the coordinates of vertex: %d.\n",
-                n);
+            std::cerr << "Read error. Expected 3 floats for the coordinates of vertex:" << n << std::endl;
             return NULL;
         }
 
@@ -397,20 +402,19 @@ ASC* readOFF(const char *input_name)
     // Check format of the read simplices
     if ((m != 3) && (m != 4))
     {
-        printf(
-            "Read error. Expected a 3 or 4 for the first value in the first simplex line.\n");
+        std::cerr << "Read error. Expected a 3 or 4 for the first value in the first simplex line." << std::endl;
         return NULL;
     }
 
     // Input is surface mesh
     else if (m == 3)
     {
-        printf("   Input is surface mesh.\n");
+        std::cout << "   Input is surface mesh." << std::endl;
 
         // Read the rest of the first line
         if (fscanf(fin, "%d %d %d", &a, &b, &c) != 3)
         {
-            printf("Read error. Expected 3 integers for the first simplex.\n");
+            std::cerr << "Read error. Expected 3 integers for the first simplex." << std::endl;
             return NULL;
         }
 
@@ -437,14 +441,13 @@ ASC* readOFF(const char *input_name)
             // Read first rgb values
             if (fscanf(fin, "%f %f %f %f", &color_r, &color_g, &color_b, &color_a) != 4)
             {
-                printf("Read error. Expected 4 floats for the RGBA values of the first face.\n");
+                std::cerr << "Read error. Expected 4 floats for the RGBA values of the first face." << std::endl;
                 return NULL;
             }
 
             while (fgetc(fin) != '\n')
             {}
 
-        	std::cout << "Insert: " << a << " " << b << " " << c << std::endl;
         	F->insert<3>({a,b,c}, Face(0, rgb_to_marker(color_r, color_g, color_b)));
         }
         else
@@ -457,7 +460,7 @@ ASC* readOFF(const char *input_name)
         {
             if (fscanf(fin, "%d %d %d %d", &m, &a, &b, &c) != 4)
             {
-                printf("Read error. Expected 4 integers for simplex %d.\n", n);
+                std::cerr << "Read error. Expected 4 integers for simplex " << n << std::endl;
                 return nullptr;
             }
 
@@ -468,15 +471,12 @@ ASC* readOFF(const char *input_name)
                 if (fscanf(fin, "%f %f %f %f", &color_r, &color_g, &color_b,
                            &color_a) != 4)
                 {
-                    printf(
-                        "Read error. Expected 4 floats for the RGBA values of face: %d.\n",
-                        n);
+                    std::cerr << "Read error. Expected 4 floats for the RGBA values of face:" << n << std::endl;
                     return NULL;
                 }
 
                 // Get the other face markers
                 //surfmesh->face[n].m = rgb_to_marker(color_r, color_g, color_b);
-	        	std::cout << "Insert: " << a << " " << b << " " << c << std::endl;
 	        	F->insert<3>({a,b,c}, Face(0, rgb_to_marker(color_r, color_g, color_b)));
             }
             else
