@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.6)
 
 project(GAMer VERSION 1.0.0)
 
+enable_testing()
+
 option(BUILD_BLENDER "BUild the GAMer addon for Blender" OFF)
 option(BUILD_STATIC_LIB "Build the static library" OFF)
 
@@ -30,7 +32,7 @@ add_subdirectory(triangle)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)
 # Hack to include maloc for now... TODO: fix
-include_directories(/Users/ctlee/fetk/build/x86_64-apple-darwin15.6.0/include)
+include_directories(/Users/brogan/include)
 
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -60,3 +62,5 @@ if(BUILD_BLENDER)
 endif(BUILD_BLENDER)
 
 add_subdirectory(tools)
+
+add_subdirectory(tests)
