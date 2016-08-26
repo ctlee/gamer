@@ -32,6 +32,7 @@
 // FIXME: This is not included by maloc?
 #include <unistd.h>
 #include "biom.h"
+#include "SurfaceMesh.h"
 
 // Read a short integer, swapping the bytes
 int read_short_int(FILE *fptr, short int *n)
@@ -156,7 +157,7 @@ void load_lattice_file(const char *input_name, unsigned int& xdim,
     FILE *fptr;
     unsigned int file_size, i, j, k, read_version, write_version, smsize, dim;
     unsigned int data_type, compression_type, elem_size, dsize;
-    size_t read_size, uint_size, double_size;
+    size_t read_size;
     unsigned char *buffer;
     unsigned char *cptr;
     char *header;
@@ -405,7 +406,6 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
     float  *intensity_data;
     double *mat_dim           = NULL;
     double *mat_dim_intensity = NULL;
-    unsigned int basename_index;
     char *basename_end_pointer;
     SurfaceMesh *surfmesh;
 

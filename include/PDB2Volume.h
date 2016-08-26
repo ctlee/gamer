@@ -34,7 +34,7 @@
 
 
 #include "biom.h"
-//#include "gamercf.h"
+#include "SurfaceMesh.h"
 
 typedef struct _PDBelementInformation 
 {

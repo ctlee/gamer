@@ -40,6 +40,7 @@
 #include <triangle/triangle.h>
 #include <tetgen/tetgen.h>
 #include "biom.h"
+#include "SurfaceMesh.h"
 
 #endif /* _GAMER_H_ */
 

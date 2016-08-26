@@ -31,6 +31,7 @@
 
 
 #include "biom.h"
+#include "SurfaceMesh.h"
 //#include "gamercf.h"
 
 
@@ -47,14 +48,12 @@
 void SurfaceExtract(TeTraMesh *volmesh, SurfaceMesh *surfmesh)
 {
     int   m, n, l;
-    int   start_index, face_num, num_vertices, vertex_index;
+    int   face_num, num_vertices, vertex_index;
     int  *vertex_indices;
     int   a0, b0, c0, d0;
     int   a, b, c, d;
-    float x, y, z;
     char *boundary_flag;
     char  surf_flag;
-    unsigned int num_surfaces_vertices;
     INT3VECT    *surfmesh_face;
 
     // Initalize enough memory

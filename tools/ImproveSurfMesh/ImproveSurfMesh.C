@@ -31,6 +31,7 @@
 
 
 #include "gamer.h"
+#include <iostream>
 
 // Constants and default values
 const char OUT_SUFFIX[] = "_improved_";
@@ -459,7 +460,6 @@ SurfaceMesh* ReadSurfMeshFile(char* input_name, bool read_suffix_count,
   unsigned int suffix_index;
   unsigned int basename_index;
   int suffix_offset;
-  SurfaceMesh* surfmesh;
 
   strcpy(filename, input_name);
 
@@ -505,7 +505,6 @@ SurfaceMesh* ReadSurfMeshFile(char* input_name, bool read_suffix_count,
  */
 int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_list)
 {
-  FILE *fout;
   time_t t0, t1, t2;
   SurfaceMesh* surfmesh = NULL;
   char filename[256], basename[256];
@@ -515,8 +514,7 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
   //float* area_constraint_list = NULL; // Not used
   int suffix_count = -1;
   ActionItem* action = action_list;
-  float acos_max_max_normal_angle;
-  unsigned int i, j;
+  unsigned int i;
 
   (void)time(&t0);
   
@@ -542,17 +540,16 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 
 	(void)time(&t1);
 	
-	printf("\n\n");
-	printf("Refine mesh:\n");
+	std::cout << "\n\n";
+	std::cout << "Refine mesh:\n";
 
 	surfmesh->refine();
 
-	printf("After refinement:              \n"
-	       "   vertices: %d --- simplices: %d\n", surfmesh->numVertices(), surfmesh->numFaces());
+	std::cout << "After refinement:              \n" << "   vertices: " << surfmesh->numVertices() << " --- simplices: " << surfmesh->numFaces() << std::endl;
       
 	(void)time(&t2);
-	printf("------------------------------------------\n");  
-	printf("Time to refine surface mesh: %4.1f seconds. \n", fabs(t2-t1));  
+	std::cout << "------------------------------------------\n";
+	std::cout << "Time to refine surface mesh: " << labs(t2-t1) << " seconds." << std::endl;
 	
 	// Set changed flag
 	mesh_changed = true;
@@ -570,8 +567,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 			   action->min_max_angle, action->max_iter, 
 			   action->preserve_ridges == 1);
 	(void)time(&t2);
-	printf("------------------------------------------\n");  
-	printf("Time to smooth surface mesh: %4.1f seconds. \n", fabs(t2-t1));  
+  std::cout << "------------------------------------------\n";
+  std::cout << "Time to smooth surface mesh: " << labs(t2-t1) << " seconds." << std::endl;
 
 	// Set changed flag
 	mesh_changed = true;
@@ -587,8 +584,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	printf("Normal smooth mesh:\n");
 	surfmesh->normalSmooth();
 	(void)time(&t2);
-	printf("-------------------------------------------------\n");  
-	printf("Time to normal smooth surface mesh: %4.1f seconds.\n", fabs(t2-t1));  
+  std::cout << "------------------------------------------\n";
+  std::cout << "Time to normal smooth surface mesh: " << labs(t2-t1) << " seconds." << std::endl;
 
 	// Set changed flag
 	mesh_changed = true;
@@ -604,8 +601,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	printf("Correct normals:\n");
 	surfmesh->correctNormals();
 	(void)time(&t2);
-	printf("---------------------------------------------------\n");  
-	printf("Time to correct surface mesh normals: %4.1f seconds.\n", fabs(t2-t1));  
+  std::cout << "------------------------------------------\n";
+  std::cout << "Time to correct surface mesh normals: " << labs(t2-t1) << " seconds." << std::endl;
 
 	// Set changed flag
 	mesh_changed = true;
@@ -637,8 +634,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	}
 	
 	(void)time(&t2);
-	printf("------------------------------------------\n");  
-	printf("Time to coarse surface mesh: %4.1f seconds.\n", fabs(t2-t1));  
+  std::cout << "------------------------------------------\n";
+  std::cout << "Time to coarse surface mesh: " << labs(t2-t1) << " seconds." << std::endl;
 
 	// Set changed flag
 	mesh_changed = true;
@@ -664,8 +661,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 	printf("After coarsening:        \n   vertices: %d --- simplices: %d\n", surfmesh->numVertices(), surfmesh->numFaces());
       
 	(void)time(&t2);
-	printf("------------------------------------------\n");  
-	printf("Time to coarse surface mesh: %4.1f seconds.\n", fabs(t2-t1));  
+  std::cout << "------------------------------------------\n";
+  std::cout << "Time to coarse surface mesh: " << labs(t2-t1) << " seconds." << std::endl;
 
 	// Set changed flag
 	mesh_changed = true;
@@ -692,7 +689,10 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
 
 	break;
       }
-    
+
+      case no_action:{
+            break;
+      }
     }
     
     // The next action
@@ -716,8 +716,8 @@ int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_li
     (void)time(&t2);
     
     printf("\n");
-    printf("----------------------------------------\n");  
-    printf("Total time improving mesh: %4.1f seconds. \n\n", fabs(t2-t0));  
+    std::cout << "------------------------------------------\n";
+    std::cout << "Total time improving mesh: " << labs(t2-t1) << " seconds." << std::endl;
   }
 
   // Release memory

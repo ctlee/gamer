@@ -29,6 +29,7 @@
  */
 
 #include "biom.h"
+#include "SurfaceMesh.h"
 #include <tetgen/tetgen.h>
 #include <vector>
 #include <tuple>
@@ -240,11 +241,13 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh **surfmeshes, int num_surface_mes
         surfmesh = surfmeshes[sm_index];
 
         // Assign vertex information
+        j = 0;
         for (auto v : surfmesh->vertices())
         {
             in.pointlist[j * 3 + 0 + num_vertices * 3] = v.x;
             in.pointlist[j * 3 + 1 + num_vertices * 3] = v.y;
             in.pointlist[j * 3 + 2 + num_vertices * 3] = v.z;
+            ++j;
         }
 
         // Assign face information
@@ -345,16 +348,17 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh **surfmeshes, int num_surface_mes
     }
 
     // Debug
-    in.save_nodes("plc");
-    in.save_poly("plc");
+    // Casting away const is an evil thing to do, however, tetgen has not yet conformed.
+    in.save_nodes(const_cast<char*>("plc"));
+    in.save_poly(const_cast<char*>("plc"));
 
     // Call TetGen
     tetrahedralize(tetgen_params, &in, &out, NULL);
 
     // Debug
-    out.save_nodes("result");
-    out.save_elements("result");
-    out.save_faces("result");
+    out.save_nodes(const_cast<char*>("result"));
+    out.save_elements(const_cast<char*>("result"));
+    out.save_faces(const_cast<char*>("result"));
 
     // Convert to a generalized tetrahedral mesh structure
     return GemMesh_fromTetgen(out);
@@ -377,22 +381,14 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
 {
     GemMesh *gem_mesh;
     unsigned int i, j, k;
-    FILE *fout;
-    long  node_index;
-    int  *face_type, tetra_node[4];
-    float x, y, z;
-    int   cell_type, boundary_face = 0;
-    float dist;
+    int  *face_type;
+    int   boundary_face = 0;
     long  a, b, c, d;
     float ax, ay, az;
     float bx, by, bz;
     float cx, cy, cz;
     float dx, dy, dz;
-    int   active, exterior_cell_type;
-    long  neighbor, neightype;
-    long *map_w_o, *map_w_i, *map_w_t;
     Triface **tet_to_triface;
-    int  tet0, tet1, tet2;
     int *tetp;
     bool on_boundary[2];
     int *vertex_markers;

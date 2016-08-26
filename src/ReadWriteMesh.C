@@ -108,6 +108,7 @@ void sort_connectivity(const std::vector<unsigned int>& conn,
 #include <string>
 
 #include "biom.h"
+#include "SurfaceMesh.h"
 #include <tetgen/tetgen.h>
 //#include "gamercf.h"
 
@@ -443,7 +444,7 @@ int rgb_to_marker(float r, float g, float b)
  */
 SurfaceMesh * SurfaceMesh::readPoly(const char *input_name)
 {
-    int n, i, j;
+    int n;
 
     // Use Tetgen's tetgenio to load poly file
     tetgenio tetio;
@@ -1148,7 +1149,6 @@ void GemMesh_writeCarp(GemMesh *out, char *basename, int num_boundaries,
     FILE *fout;
     FETK_VX  *vv;
     FETK_SS  *ss;
-    INT3VECT *triangle;
 
     // Collect face information
     std::map<int, std::set<int> > vertex_markers;
@@ -2950,7 +2950,7 @@ void ReadActiveSiteFile(char *input_site,
     char  buf[1024];
     int   i;
     unsigned int marker, c;
-    float x, y, z, radius, area_constraint;
+    float x, y, z, radius;
     char *ret_gets;
     int   ret_scan;
 

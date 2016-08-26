@@ -31,7 +31,7 @@
  */
 
 #include "biom.h"
-//#include "gamercf.h"
+#include "SurfaceMesh.h"
 #include <vector>
 #include <cmath>
 

@@ -29,6 +29,7 @@
  */
 
 #include "biom.h"
+#include "SurfaceMesh.h"
 
 #include "triangle/triangle.h"
 //#include "gamercf.h"

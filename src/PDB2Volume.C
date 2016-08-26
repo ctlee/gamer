@@ -93,11 +93,10 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
     int    xdim, ydim, zdim;
     int    atom_num  = 0;
     ATOM  *atom_list = NULL;
-    char   IsXYZR;
     float  min[3], max[3], span[3];
     SurfaceMesh *surfmesh;
     SPNT *holelist;
-    int   i, j, k;
+    char   IsXYZR = 0;
 
     printf("\nbegin blurring PDB/PQR coordinates ... \n");
     (void)time(&t1);
@@ -125,7 +124,7 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
     free(dataset);
 
     // convert from pixel to angstrom
-    for (j = 0; j < surfmesh->num_vertices; j++)
+    for (int j = 0; j < surfmesh->num_vertices; j++)
     {
         surfmesh->vertex[j].x = surfmesh->vertex[j].x * span[0] + min[0];
         surfmesh->vertex[j].y = surfmesh->vertex[j].y * span[1] + min[1];
@@ -155,7 +154,6 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
 float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
                  float p_min[3], float p_max[3], ATOM **atomlist, int *atom_num, char IsXYZR)
 {
-    int    m, n, k;
     char   line[MAX_STRING];
     ATOM  *atom_list;
     char   string[8];
@@ -165,9 +163,11 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
     float *dataset;
     FILE  *fp, *fout;
     PDBelementInformation eInfo;
-    char  IsPQR, IsPDB;
+    char  IsPQR = 0;
+    char  IsPDB = 0;
     float x, y, z, radius;
     char  file_name[256];
+    int   k, m, n;
 
 
     if (IsXYZR)
@@ -177,10 +177,11 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
             printf("read error...\n");
             exit(0);
         }
+
         fscanf(fp, "%d\n", &m);
         atom_list = (ATOM *)malloc(sizeof(ATOM) * m);
 
-        for (n = 0; n < m; n++)
+        for (int n = 0; n < m; n++)
         {
             fscanf(fp, "%f %f %f %f\n", &x, &y, &z, &radius);
 
@@ -196,10 +197,7 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
     }
     else
     {
-        IsPQR = 0;
-        IsPDB = 0;
-
-        for (m = 0; m < 256; m++)
+        for (int m = 0; m < 256; m++)
         {
             if (filename[m + 3] == '\0')
             {
@@ -249,8 +247,8 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
             printf("read error...\n");
             exit(0);
         }
-        m = 0;
 
+        m = 0;
         while (fgets(line, MAX_STRING, fp) != NULL)
         {
             if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))

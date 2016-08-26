@@ -45,7 +45,7 @@ endforeach()
 file(GLOB SOURCES "src/*.C")
 
 add_library(gamershared SHARED ${SOURCES})
-set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
+set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(gamershared tetshared trishared)
 # TODO: populate the list of headers to install...
 #install(FILES gamer.h DESTINATION include/gamer)
@@ -53,7 +53,7 @@ install(TARGETS gamershared DESTINATION lib/gamer)
 
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
-    set_target_properties(gamerstatic PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
+    set_target_properties(gamerstatic PROPERTIES COMPILE_FLAGS "-std=c++14")
     target_link_libraries(gamerstatic tetstatic tristatic)
     install(TARGETS gamerstatic DESTINATION lib/gamer)
 endif(BUILD_BLENDER OR BUILD_STATIC_LIB)

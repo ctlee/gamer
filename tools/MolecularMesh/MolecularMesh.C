@@ -59,8 +59,7 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
                             int           num_spheres,
                             unsigned int *sphere_markers)
 {
-    int m, n, a0, b0;
-    NPNT3 *first_ngr, *second_ngr, *tmp_ngr;
+    int m;
     char   stop;
 
     bool smoothed;
@@ -77,7 +76,6 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
         surfmesh->smooth(10, 160, ITER_NUM, false);
     }
 
-    // someone seriously used the construct "while(1)"? Why not break out the "goto" statements while we're at it?
     while (1) {
         // mesh coarsening ....
         if ((surfmesh->numVertices() > MeshSizeUpperLimit) || !off_flag) {
@@ -96,7 +94,6 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
             /* Feature-preserving quality improvement */
             m = 1;
 
-            // high class programming indeed!
             while (1) {
                 smoothed = surfmesh->smooth(20, 140, 1, true);
 
@@ -159,22 +156,19 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
                        char *input_site, int output_flag, GemMesh *Gem_mesh)
 {
     bool   write_to_file = Gem_mesh == NULL;
-    float  max_density;
     time_t t1, t2;
-    FILE  *fout;
     SurfaceMesh *surfmesh, *surfmesh_inner, *surfmesh_outer;
     int xdim, ydim, zdim;
     float *dataset;
-    float  distance, radius;
+    float  radius;
     SPNT  *holelist;
-    float  min[3], max[3], span[3];
+    float  min[3], span[3];
     char   filename[256];
     int    atom_num = 0;
     unsigned int num_spheres = 0;
     ATOM *atom_list = NULL;
     ATOM *sphere_list = NULL;
     unsigned int *sphere_markers = NULL;
-    float x, y, z;
     ATOM  center_radius;
 
     tetgenio in, out, addin;
@@ -467,6 +461,8 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 
     std::cout << "Constructing GemMesh  " << std::endl;
 
+    radius = 1.0; // JBM - radius was uninitialized. Unsure what to set it to. Setting it to 1.0 for now.
+    // TODO: figure out what a reasonable setting is here.
     Gem_mesh = GemMesh_fromPdb(&out,
                                radius * SphereRatio,
                                center_radius.x,

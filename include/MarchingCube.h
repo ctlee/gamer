@@ -35,7 +35,7 @@
 
 
 #include "biom.h"
-//#include "gamercf.h"
+#include "SurfaceMesh.h"
 
 #if 0
 #include <stdio.h>

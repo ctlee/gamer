@@ -51,7 +51,8 @@ typedef struct _PDBelementInformation
 
 static const int MAX_BIOCHEM_ELEMENTS = 172;
 
-static const PDBelementInformation defaultInformation = { " XX ", "XXX", 1.5f, 1.0f, 0.5f, 0.25f, 0, 0 };
+// This is unused, however, looks like it could be important.
+//static const PDBelementInformation defaultInformation = { " XX ", "XXX", 1.5f, 1.0f, 0.5f, 0.25f, 0, 0 };
 
 
 static PDBelementInformation PDBelementTable[MAX_BIOCHEM_ELEMENTS] =
