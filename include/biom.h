@@ -108,13 +108,6 @@ struct FLTVECT {
     bool  sel; /**< @brief selection flag */
 };
 
-/** @brief Other data structure DBLVECT (double float) */
-struct DBLVECT {
-    double x; /**< @brief x-coordinate */
-    double y; /**< @brief y-coordinate */
-    double z; /**< @brief z-coordinate */
-};
-
 /** @brief Other data structure INT3VECT (int) */
 struct INT3VECT {
     int  a;   /**< @brief first integer */
