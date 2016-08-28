@@ -11,3 +11,9 @@ add_test(orientable_test_klein   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TES
 add_test(orientable_test_icosa   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/icosa.off   true)
 add_test(orientable_test_tetra   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/tetra.off   true)
 add_test(orientable_test_protein ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/protein.off true)
+
+add_executable(readPDB_gauss readPDB_gauss.cpp)
+set_target_properties(readPDB_gauss PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(readPDB_gauss gamershared)
+
+add_test(readPDB_gauss ${EXECUTABLE_OUTPUT_PATH}/readPDB_gauss ${TEST_DATA_PATH}/1CID.pdb)
