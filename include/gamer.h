@@ -41,6 +41,7 @@
 #include <tetgen/tetgen.h>
 #include "biom.h"
 #include "SurfaceMesh.h"
+#include "PDB2Volume.h"
 
 #endif /* _GAMER_H_ */
 

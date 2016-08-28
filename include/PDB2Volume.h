@@ -36,6 +36,8 @@
 #include "biom.h"
 #include "SurfaceMesh.h"
 
+float PDB2Volume(const char *, float **, int *, int *, int *, float *, float *, ATOM **, int *, char);
+
 typedef struct _PDBelementInformation 
 {
   char	        atomName[5];

@@ -93,6 +93,14 @@
 /** @brief Other definition */
 #define _LITTLE_ENDIAN   1
 
+/** @brief Other data structure ATOM */
+struct ATOM {
+    float x;      /**< @brief x-coordinate */
+    float y;      /**< @brief y-coordinate */
+    float z;      /**< @brief z-coordinate */
+    float radius; /**< @brief radius */
+};
+
 /** @brief Other data structure FLT2VECT (float) */
 struct FLT2VECT {
     float x; /**< @brief x-coordinate */
@@ -151,14 +159,6 @@ struct Triface {
     int      points[3]; /**< @brief point list */
     int      marker;    /**< @brief marker integer */
     Triface *next;      /**< @brief pointer to the next Triface */
-};
-
-/** @brief Other data structure ATOM */
-struct ATOM {
-    float x;      /**< @brief x-coordinate */
-    float y;      /**< @brief y-coordinate */
-    float z;      /**< @brief z-coordinate */
-    float radius; /**< @brief radius */
 };
 
 /** @brief Other data structure TeTraMesh (for tetrahedral meshes) */
@@ -313,6 +313,5 @@ void GemMesh_writeOFF(GemMesh *Gem_mesh, char *filename);
 void  ReadActiveSiteFile(char *, unsigned int&, ATOM *&, unsigned int *&);
 void  ReadRawiv(int *, int *, int *, float **, char *, float *, float *);
 void  SurfaceExtract(TeTraMesh *, SurfaceMesh *);
-float PDB2Volume(char *, float **, int *, int *, int *, float *, float *, ATOM **, int *, char);
 
 #endif /* _BIOM_H_ */

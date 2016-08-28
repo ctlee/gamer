@@ -34,6 +34,8 @@
 
 
 #include "PDB2Volume.h"
+#include <limits>
+#include <regex>
 
 #define EPSILON          1.0e-3f
 #define MAX_STRING       256
@@ -197,37 +199,21 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
     }
     else
     {
-        for (int m = 0; m < 256; m++)
+        std::regex pdb(".*.[pP][dD][bB]$");
+        std::regex pqr(".*.[pP][qQ][rR]$");
+
+        if(std::regex_match(filename, pdb))
         {
-            if (filename[m + 3] == '\0')
-            {
-                break;
-            }
-            else if ((filename[m] == '.') &&
-                     ((filename[m + 1] == 'P') || (filename[m + 1] == 'p')) &&
-                     ((filename[m + 2] == 'Q') || (filename[m + 2] == 'q')) &&
-                     ((filename[m + 3] == 'R') || (filename[m + 3] == 'r')) /* &&
-                                                                               file_name[m+4] == '\0'*/
-                     )
-            {
-                IsPQR = 1;
-                break;
-            }
-            else if ((filename[m] == '.') &&
-                     ((filename[m + 1] == 'P') || (filename[m + 1] == 'p')) &&
-                     ((filename[m + 2] == 'D') || (filename[m + 2] == 'd')) &&
-                     ((filename[m + 3] == 'B') || (filename[m + 3] == 'b')) /*&&
-                                                                               file_name[m+4] == '\0'*/
-                     )
-            {
-                IsPDB = 1;
-                break;
-            }
+            IsPDB = 1;
+        }
+        else if(std::regex_match(filename, pqr))
+        {
+            IsPQR = 1;
         }
 
         if ((IsPQR == 0) && (IsPDB == 0))
         {
-            printf("Input file name must be ending with PDB/PQR/XYZR/RAWIV/OFF...\n");
+            printf("Input file name end with PDB/PQR/XYZR/RAWIV/OFF...\n");
             exit(0);
         }
 
@@ -458,27 +444,23 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
            (max[1] - min[1]) / (float)(dim[1] - 1), (max[2] - min[2]) / (float)(dim[2] - 1));
 
     float minval, maxval;
-    minval = 999999.0;
-    maxval = -999999.0;
+    minval = std::numeric_limits<float>::infinity();
+    maxval = -std::numeric_limits<float>::infinity();
 
-    for (k = 0; k < dim[2]; k++)
+    for (int i = 0; i < dim[2]*dim[1]*dim[0]; ++i)
     {
-        for (n = 0; n < dim[1]; n++)
+        float cval = dataset[i];
+        if (cval < minval)
         {
-            for (m = 0; m < dim[0]; m++)
-            {
-                if (dataset[((k) * dim[1] * dim[0] + (n) * dim[0] + (m))] < minval)
-                {
-                    minval = dataset[((k) * dim[1] * dim[0] + (n) * dim[0] + (m))];
-                }
+            minval = cval;
+        }
 
-                if (dataset[((k) * dim[1] * dim[0] + (n) * dim[0] + (m))] > maxval)
-                {
-                    maxval = dataset[((k) * dim[1] * dim[0] + (n) * dim[0] + (m))];
-                }
-            }
+        if (cval > maxval)
+        {
+            maxval = cval;
         }
     }
+
     printf("min_density: %f   max_density: %f \n", minval, maxval);
 
 
