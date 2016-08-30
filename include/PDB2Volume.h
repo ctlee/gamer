@@ -35,13 +35,14 @@
 
 #include "biom.h"
 #include "SurfaceMesh.h"
+#include <string>
 
 float PDB2Volume(const char *, float **, int *, int *, int *, float *, float *, ATOM **, int *, char);
 
 typedef struct _PDBelementInformation 
 {
-  char	        atomName[5];
-  char			residueName[4];
+  std::string	        atomName;
+  std::string			residueName;
   float			radius;
   float			red;
   float			green;

@@ -36,6 +36,7 @@
 #include "PDB2Volume.h"
 #include <limits>
 #include <regex>
+#include <iostream>
 
 #define EPSILON          1.0e-3f
 #define MAX_STRING       256
@@ -93,12 +94,12 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
     float  data_iso_val;
     time_t t1, t2;
     int    xdim, ydim, zdim;
-    int    atom_num  = 0;
+    int    atom_num = 0;
     ATOM  *atom_list = NULL;
     float  min[3], max[3], span[3];
     SurfaceMesh *surfmesh;
     SPNT *holelist;
-    char   IsXYZR = 0;
+    char  IsXYZR = 0;
 
     printf("\nbegin blurring PDB/PQR coordinates ... \n");
     (void)time(&t1);
@@ -199,14 +200,14 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
     }
     else
     {
-        std::regex pdb(".*.[pP][dD][bB]$");
-        std::regex pqr(".*.[pP][qQ][rR]$");
+        std::regex pdb(".*.pdb", std::regex::icase);
+        std::regex pqr(".*.pqr", std::regex::icase);
 
-        if(std::regex_match(filename, pdb))
+        if (std::regex_match(filename, pdb))
         {
             IsPDB = 1;
         }
-        else if(std::regex_match(filename, pqr))
+        else if (std::regex_match(filename, pqr))
         {
             IsPQR = 1;
         }
@@ -235,6 +236,7 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
         }
 
         m = 0;
+
         while (fgets(line, MAX_STRING, fp) != NULL)
         {
             if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))
@@ -257,94 +259,45 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
 
         while (fgets(line, MAX_STRING, fp) != NULL)
         {
-            if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))
+            //            std::regex atom("ATOM(\\s+([^\\s]+))*\n*");
+            std::regex  atom("ATOM.*\n*");
+            std::cmatch match;
+
+            if(IsPDB)
             {
-                /* more general format, could be used for pqr format */
-                k = 30;
-
-                while (line[k] == ' ')
+                if (std::regex_match(line, match, atom))
                 {
-                    k++;
-                }
-                n = 0;
-
-                while (line[k] != ' ')
-                {
-                    string[n] = line[k];
-                    n++;
-                    k++;
-
-                    if (line[k] == '-')
-                    {
-                        break;
-                    }
-                }
-                string[n]      = '\0';
-                atom_list[m].x = atof(string);
-
-                while (line[k] == ' ')
-                {
-                    k++;
-                }
-                n = 0;
-
-                while (line[k] != ' ')
-                {
-                    string[n] = line[k];
-                    n++;
-                    k++;
-
-                    if (line[k] == '-')
-                    {
-                        break;
-                    }
-                }
-                string[n]      = '\0';
-                atom_list[m].y = atof(string);
-
-                while (line[k] == ' ')
-                {
-                    k++;
-                }
-                n = 0;
-
-                while (line[k] != ' ')
-                {
-                    string[n] = line[k];
-                    n++;
-                    k++;
-
-                    if (line[k] == '-')
-                    {
-                        break;
-                    }
-                }
-                string[n]      = '\0';
-                atom_list[m].z = atof(string);
-
-                if (IsPDB)
-                {
+                    atom_list[m].x = atof(std::string(line + 30, line + 38).c_str());
+                    atom_list[m].y = atof(std::string(line + 38, line + 46).c_str());
+                    atom_list[m].z = atof(std::string(line + 46, line + 54).c_str());
+    
                     atom_list[m].radius = 1.0f; // default radius
-
-                    for (n = 0; n < MAX_BIOCHEM_ELEMENTS; n++)
+                    std::string atomName(line + 12, line + 16);
+                    std::string residueName(line + 17, line + 20);
+    
+                    for (PDBelementInformation curr : PDBelementTable)
                     {
-                        eInfo = PDBelementTable[n];
-
-                        if ((eInfo.atomName[0] == line[12]) &&
-                            (eInfo.atomName[1] == line[13]) &&
-                            (eInfo.atomName[2] == line[14]) &&
-                            (eInfo.atomName[3] == line[15]) &&
-                            (eInfo.residueName[0] == line[17]) &&
-                            (eInfo.residueName[1] == line[18]) &&
-                            (eInfo.residueName[2] == line[19]))
+                        if ((curr.atomName == atomName) && (curr.residueName == residueName))
                         {
-                            atom_list[m].radius = eInfo.radius;
+                            atom_list[m].radius = curr.radius;
                             break;
                         }
                     }
+    
+                    std::cout << atom_list[m].x << std::endl;
+                    std::cout << atom_list[m].y << std::endl;
+                    std::cout << atom_list[m].z << std::endl;
+                    std::cout << atom_list[m].radius << std::endl;
+                    m++;
                 }
-                else if (IsPQR)
+            }
+            else if (IsPQR)
+            {
+                if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))
                 {
+                    /* more general format, could be used for pqr format */
+                    k = 30;
+
                     while (line[k] == ' ')
                     {
                         k++;
@@ -362,7 +315,71 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
                             break;
                         }
                     }
+                    string[n]      = '\0';
+                    atom_list[m].x = atof(string);
 
+                    while (line[k] == ' ')
+                    {
+                        k++;
+                    }
+                    n = 0;
+
+                    while (line[k] != ' ')
+                    {
+                        string[n] = line[k];
+                        n++;
+                        k++;
+
+                        if (line[k] == '-')
+                        {
+                            break;
+                        }
+                    }
+                    string[n]      = '\0';
+                    atom_list[m].y = atof(string);
+
+                    while (line[k] == ' ')
+                    {
+                        k++;
+                    }
+                    n = 0;
+
+                    while (line[k] != ' ')
+                    {
+                        string[n] = line[k];
+                        n++;
+                        k++;
+
+                        if (line[k] == '-')
+                        {
+                            break;
+                        }
+                    }
+                    string[n]      = '\0';
+                    atom_list[m].z = atof(string);
+
+                    // skip whitespace
+                    while (line[k] == ' ')
+                    {
+                        k++;
+                    }
+                    n = 0;
+
+                    // read field
+                    while (line[k] != ' ')
+                    {
+                        string[n] = line[k];
+                        n++;
+                        k++;
+
+                        // This makes no sense
+                        if (line[k] == '-')
+                        {
+                            break;
+                        }
+                    }
+
+                    // skip whitespace
                     while (line[k] == ' ')
                     {
                         k++;
@@ -386,15 +403,16 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
                     }
 
                     fprintf(fout, "%f %f %f %f\n", atom_list[m].x, atom_list[m].y, atom_list[m].z, atom_list[m].radius);
+                    m++;
                 }
-                else
-                {
-                    printf("Input file name must be ending with PDB or PQR..\n");
-                    exit(0);
-                }
-
-                m++;
             }
+            else
+            {
+                printf("Input file name must end with PDB or PQR.\n");
+                exit(0);
+            }
+
+            std::cout << ":::: " << m << " ~ " << *atom_num<< std::endl;
         }
         fclose(fp);
     }
@@ -447,9 +465,10 @@ float PDB2Volume(const char *filename, float **data, int *xd, int *yd, int *zd,
     minval = std::numeric_limits<float>::infinity();
     maxval = -std::numeric_limits<float>::infinity();
 
-    for (int i = 0; i < dim[2]*dim[1]*dim[0]; ++i)
+    for (int i = 0; i < dim[2] * dim[1] * dim[0]; ++i)
     {
         float cval = dataset[i];
+
         if (cval < minval)
         {
             minval = cval;
@@ -621,7 +640,6 @@ void getMinMax(ATOM *atom_list, int size, float min[3], float max[3])
     int   i, j;
     float maxRad = 0.0;
     float tempRad;
-
 
     min[0] = max[0] = atom_list[0].x;
     min[1] = max[1] = atom_list[0].y;
