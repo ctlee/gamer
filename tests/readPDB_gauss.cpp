@@ -10,16 +10,15 @@ int main(int argc, char *argv[])
     float  max_density;
     float *dataset;
     int    xdim, ydim, zdim;
-    int    atom_num  = 0;
-    ATOM  *atom_list = NULL;
+    std::vector<ATOM>  atom_list;
     float  min[3], max[3];
     char   IsXYZR = 0;
 
     max_density = PDB2Volume(filename, &dataset, &xdim, &ydim, &zdim, min, max,
-                             &atom_list, &atom_num, IsXYZR);
+                             atom_list, IsXYZR);
 
 
-    std::cout << atom_num << std::endl;
+    std::cout << atom_list.size() << std::endl;
 
 
 /*
