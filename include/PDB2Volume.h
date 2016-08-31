@@ -38,7 +38,7 @@
 #include <string>
 #include <vector>
 
-float PDB2Volume(std::string, float **, int *, int *, int *, float *, float *, std::vector<ATOM>&, char);
+float PDB2Volume(std::string, float **, int *, int *, int *, float *, float *, std::vector<ATOM>&);
 
 typedef struct _PDBelementInformation 
 {
