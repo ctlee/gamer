@@ -464,7 +464,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
         }
 
         // Call the marhching cube rutine with intensity data
-        surfmesh = SurfaceMesh::marchingCube(xdim0, ydim0, zdim0, segmentation_data, 0.5, intensity_data, isovalue, &holelist);
+        surfmesh = std::get<0>(SurfaceMesh::marchingCube(xdim0, ydim0, zdim0, segmentation_data, 0.5, intensity_data, isovalue, &holelist));
 
         // Centralize and scale data
         surfmesh->centeralize();
@@ -479,7 +479,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
     else
     {
         // Call the marhching cube rutine without intensity data
-        surfmesh = SurfaceMesh::marchingCube(xdim0, ydim0, zdim0, segmentation_data, isovalue, &holelist);
+        surfmesh = std::get<0>(SurfaceMesh::marchingCube(xdim0, ydim0, zdim0, segmentation_data, isovalue, &holelist));
 
         // Centralize and scale data
         surfmesh->centeralize();

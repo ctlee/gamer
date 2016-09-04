@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <iterator>
+#include <array>
 #include "util.h"
 
 using Simplex = unsigned int;
@@ -610,3 +611,39 @@ private:
 
 template <typename KeyType, typename... Ts>
 using AbstractSimplicialComplex = simplicial_complex<simplicial_complex_traits_default<KeyType,Ts...>>;
+
+
+
+template <class Complex, std::size_t level, class InsertIter>
+void neighbors(Complex &F, typename Complex::template NodeId<level> nid, InsertIter iter)
+{
+	for (auto a : F.get_name(nid))
+	{
+		auto id = F.get_id_down(nid,a);
+		for(auto b : F.get_cover(id))
+		{
+			auto nbor = F.get_id_up(id,b);
+			if(nbor != nid)
+			{
+				*iter++ = nbor;
+			}
+		}
+	}
+}
+
+template <class Complex, std::size_t level, class InsertIter>
+void neighbors_up(Complex &F, typename Complex::template NodeId<level> nid, InsertIter iter)
+{
+	for (auto a : F.get_cover(nid))
+	{
+		auto id = F.get_id_up(nid,a);
+		for(auto b : F.get_name(id))
+		{
+			auto nbor = F.get_id_down(id,b);
+			if(nbor != nid)
+			{
+				*iter++ = nbor;
+			}
+		}
+	}
+}

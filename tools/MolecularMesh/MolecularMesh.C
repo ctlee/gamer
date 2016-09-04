@@ -60,7 +60,7 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
                             unsigned int *sphere_markers)
 {
     int m;
-    char   stop;
+    char stop;
 
     bool smoothed;
 
@@ -72,13 +72,16 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
     /* Feature-preserving quality improvement */
 
     // initial surface mesh smoothing if the input mesh is not in OFF format ...
-    if (!off_flag) {
+    if (!off_flag)
+    {
         surfmesh->smooth(10, 160, ITER_NUM, false);
     }
 
-    while (1) {
+    while (1)
+    {
         // mesh coarsening ....
-        if ((surfmesh->numVertices() > MeshSizeUpperLimit) || !off_flag) {
+        if ((surfmesh->numVertices() > MeshSizeUpperLimit) || !off_flag)
+        {
             off_flag = 1;
 
             /* Mesh-coarsening based on surface curvature */
@@ -94,10 +97,12 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
             /* Feature-preserving quality improvement */
             m = 1;
 
-            while (1) {
+            while (1)
+            {
                 smoothed = surfmesh->smooth(20, 140, 1, true);
 
-                if (smoothed) {
+                if (smoothed)
+                {
                     break;
                 }
 
@@ -106,7 +111,8 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
                 if (((surfmesh->numVertices() > MeshSizeUpperLimit) &&
                      (m > ITER_NUM)) ||
                     ((surfmesh->numVertices() <= MeshSizeUpperLimit) &&
-                     (m > 2 * ITER_NUM))) {
+                     (m > 2 * ITER_NUM)))
+                {
                     break;
                 }
             }
@@ -115,7 +121,8 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
             surfmesh->normalSmooth();
         }
 
-        else if (surfmesh->numVertices() < MeshSizeLowerLimit) {
+        else if (surfmesh->numVertices() < MeshSizeLowerLimit)
+        {
             surfmesh->refine();
 
             printf("After Refinement: Nodes = %d, Faces = %d\n",
@@ -123,20 +130,22 @@ void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
                    surfmesh->numFaces());
             surfmesh->smooth(10, 150, ITER_NUM, true);
 
-            if (surfmesh->numVertices() >= MeshSizeLowerLimit) {
+            if (surfmesh->numVertices() >= MeshSizeLowerLimit)
+            {
                 break;
             }
         }
 
         // nothing to be done...
-        else {
+        else
+        {
             break;
         }
     }
 
     // Assign active sites again
     surfmesh->assignActiveSites(sphere_list, num_spheres,
-                                  sphere_markers);
+                                sphere_markers);
 
     // GenerateHistogram(surfmesh);
 
@@ -164,12 +173,12 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     SPNT  *holelist;
     float  min[3], span[3];
     char   filename[256];
-    int    atom_num = 0;
-    unsigned int num_spheres = 0;
-    ATOM *atom_list = NULL;
-    ATOM *sphere_list = NULL;
+    int    atom_num              = 0;
+    unsigned int num_spheres     = 0;
+    ATOM *atom_list              = NULL;
+    ATOM *sphere_list            = NULL;
     unsigned int *sphere_markers = NULL;
-    ATOM  center_radius;
+    ATOM center_radius;
 
     tetgenio in, out, addin;
 
@@ -183,22 +192,26 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     char IsXYZR;
 
     // Read sphere list from file if givven
-    if (active_flag) {
+    if (active_flag)
+    {
         ReadActiveSiteFile(input_site, num_spheres, sphere_list, sphere_markers);
     }
 
     strcpy(filename, input_name);
     IsOFF = 0;
 
-    for (i = 0; i < 256; i++) {
-        if (filename[i + 3] == '\0') {
+    for (i = 0; i < 256; i++)
+    {
+        if (filename[i + 3] == '\0')
+        {
             break;
         }
         else if ((filename[i] == '.') &&
                  ((filename[i + 1] == 'O') || (filename[i + 1] == 'o')) &&
                  ((filename[i + 2] == 'F') || (filename[i + 2] == 'f')) &&
                  ((filename[i + 3] == 'F') || (filename[i + 3] == 'f')) &&
-                 (filename[i + 4] == '\0')) {
+                 (filename[i + 4] == '\0'))
+        {
             IsOFF = 1;
             break;
         }
@@ -206,8 +219,10 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     strcpy(filename, input_name);
     IsRawiv = 0;
 
-    for (i = 0; i < 256; i++) {
-        if (filename[i + 5] == '\0') {
+    for (i = 0; i < 256; i++)
+    {
+        if (filename[i + 5] == '\0')
+        {
             break;
         }
         else if ((filename[i] == '.') &&
@@ -216,7 +231,8 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
                  ((filename[i + 3] == 'W') || (filename[i + 3] == 'w')) &&
                  ((filename[i + 4] == 'I') || (filename[i + 4] == 'i')) &&
                  ((filename[i + 5] == 'V') || (filename[i + 5] == 'v')) &&
-                 (filename[i + 6] == '\0')) {
+                 (filename[i + 6] == '\0'))
+        {
             IsRawiv = 1;
             break;
         }
@@ -224,8 +240,10 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     strcpy(filename, input_name);
     IsXYZR = 0;
 
-    for (i = 0; i < 256; i++) {
-        if (filename[i + 4] == '\0') {
+    for (i = 0; i < 256; i++)
+    {
+        if (filename[i + 4] == '\0')
+        {
             break;
         }
         else if ((filename[i] == '.') &&
@@ -233,13 +251,15 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
                  ((filename[i + 2] == 'Y') || (filename[i + 2] == 'y')) &&
                  ((filename[i + 3] == 'Z') || (filename[i + 3] == 'z')) &&
                  ((filename[i + 4] == 'R') || (filename[i + 4] == 'r')) &&
-                 (filename[i + 5] == '\0')) {
+                 (filename[i + 5] == '\0'))
+        {
             IsXYZR = 1;
             break;
         }
     }
 
-    if (IsOFF) {
+    if (IsOFF)
+    {
         // load user-defined molecualr surface meshes in OFF format
         printf("loading the user-specified surface/volumetric mesh....\n");
         surfmesh_inner = SurfaceMesh::readOFF(input_name);
@@ -252,30 +272,33 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
         (void)time(&t2);
         printf("time to smooth surface mesh: %d seconds. \n\n", (int)(t2 - t1));
     }
-    else if (IsRawiv) {
+    else if (IsRawiv)
+    {
         ReadRawiv(&xdim, &ydim, &zdim, &dataset, input_name, span, min);
         printf("begin extracting isosurfaces ... \n");
         (void)time(&t1);
         float iso_val = 255;
 
-        if (iso_val > IsoValue) {
+        if (iso_val > IsoValue)
+        {
             iso_val = IsoValue;
         }
         printf("isovalue: %f \n", iso_val);
-        surfmesh_inner = SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset,
-                                                  iso_val, &holelist);
+        surfmesh_inner = std::get<0>(SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset,
+                                                           iso_val, &holelist));
         (void)time(&t2);
-        printf("vertices: %d, faces: %d\n", surfmesh_inner->numVertices(),surfmesh_inner->numFaces());
+        printf("vertices: %d, faces: %d\n",                    surfmesh_inner->numVertices(), surfmesh_inner->numFaces());
         printf("time to extract isosurface: %d seconds. \n\n", (int)(t2 - t1));
         free(dataset);
 
         // convert from pixel to angstrom
-        for (j = 0; j < surfmesh_inner->numVertices(); j++) {
+        for (j = 0; j < surfmesh_inner->numVertices(); j++)
+        {
             auto vertex = surfmesh_inner->vertex_attr(j);
-            vertex.x = vertex.x * span[0] + min[0];
-            vertex.y = vertex.y * span[1] + min[1];
-            vertex.z = vertex.z * span[2] + min[2];
-            surfmesh_inner->vertex_attr(j,vertex);
+            vertex.x    = vertex.x * span[0] + min[0];
+            vertex.y    = vertex.y * span[1] + min[1];
+            vertex.z    = vertex.z * span[2] + min[2];
+            surfmesh_inner->vertex_attr(j, vertex);
         }
 
         printf("begin surface smoothing ... \n");
@@ -285,15 +308,19 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
         (void)time(&t2);
         printf("time to smooth surface mesh: %d seconds. \n\n", (int)(t2 - t1));
     }
-    else {
+    else
+    {
         // Read PDB or PQR files, or XYZR format
-        if (molsurf == 0) {
-            surfmesh_inner = SurfaceMesh::readPDB_gauss(input_name, -0.2, 2.5);
+        if (molsurf == 0)
+        {
+            surfmesh_inner = std::get<0>(SurfaceMesh::readPDB_gauss(input_name, -0.2, 2.5));
         }
-        else if (molsurf == 1) {
+        else if (molsurf == 1)
+        {
             surfmesh_inner = SurfaceMesh::readPDB_molsurf(input_name);
         }
-        else {
+        else
+        {
             printf("molsurf can only be 0 or 1 \n");
             exit(0);
         }
@@ -320,14 +347,15 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     printf("Generating the mesh for the bounding sphere ....\n");
     surfmesh_outer = SurfaceMesh::sphere(5);
 
-    for (auto& vertex : surfmesh_outer->vertices())
+    for (auto & vertex : surfmesh_outer->vertices())
     {
         vertex.x = vertex.x * center_radius.radius * SphereRatio + center_radius.x;
         vertex.y = vertex.y * center_radius.radius * SphereRatio + center_radius.y;
         vertex.z = vertex.z * center_radius.radius * SphereRatio + center_radius.z;
     }
+
     /*
-    for (j = 0; j < surfmesh_outer->numVertices(); j++) {
+       for (j = 0; j < surfmesh_outer->numVertices(); j++) {
         auto vertex = surfmesh_outer->vertex_attr(j);
 
         vertex.x = vertex.x *
@@ -341,8 +369,8 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
                                       SphereRatio + center_radius.z;
 
         surfmesh_outer->vertex_attr(j, vertex);
-    }
-    */
+       }
+     */
     printf("\n");
 
     printf("Mesh generated ....\n");
@@ -363,7 +391,8 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     in.numberofpoints = surfmesh->numVertices();
     in.pointlist      = new REAL[in.numberofpoints * 3];
 
-    for (j = 0; j < in.numberofpoints; j++) {
+    for (j = 0; j < in.numberofpoints; j++)
+    {
         in.pointlist[j * 3 + 0] = surfmesh->vertex_attr(j).x;
         in.pointlist[j * 3 + 1] = surfmesh->vertex_attr(j).y;
         in.pointlist[j * 3 + 2] = surfmesh->vertex_attr(j).z;
@@ -371,7 +400,8 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     in.numberoffacets = surfmesh->numFaces();
     in.facetlist      = new tetgenio::facet[in.numberoffacets];
 
-    for (j = 0; j < in.numberoffacets; j++) {
+    for (j = 0; j < in.numberoffacets; j++)
+    {
         f                   = &in.facetlist[j];
         f->holelist         = (REAL *)NULL;
         f->numberofholes    = 0;
@@ -386,10 +416,12 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     }
 
     // insert each atom as a node
-    if (atom_num > 0) {
+    if (atom_num > 0)
+    {
         addin.pointlist = new REAL[atom_num * 3];
 
-        for (i = 0; i < atom_num; i++) {
+        for (i = 0; i < atom_num; i++)
+        {
             addin.pointlist[i * 3 + 0] = atom_list[i].x;
             addin.pointlist[i * 3 + 1] = atom_list[i].y;
             addin.pointlist[i * 3 + 2] = atom_list[i].z;
@@ -400,11 +432,14 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     // add boundary marker on each node
     in.pointmarkerlist = new int[in.numberofpoints];
 
-    for (j = 0; j < in.numberofpoints; j++) {
-        if (surfmesh_inner->vertex_attr(j).m > 0) {
+    for (j = 0; j < in.numberofpoints; j++)
+    {
+        if (surfmesh_inner->vertex_attr(j).m > 0)
+        {
             in.pointmarkerlist[j] = surfmesh_inner->vertex_attr(j).m;
         }
-        else {
+        else
+        {
             in.pointmarkerlist[j] = 1;
         }
     }
@@ -413,6 +448,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 
     strcpy(buf, "npq1.333VAAYY");
     tetrahedralize(buf, &in, &out, &addin, NULL);
+
     // tetrahedralize("npq1", &in, &out, &addin, NULL);
 
     (void)time(&t2);
@@ -425,23 +461,29 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     char *ActiveSite;
     ActiveSite = new char[out.numberofpoints];
 
-    for (i = 0; i < out.numberoftetrahedra; i++) {
+    for (i = 0; i < out.numberoftetrahedra; i++)
+    {
         c = 0;
 
-        for (j = 0; j < 4; j++) {
+        for (j = 0; j < 4; j++)
+        {
             k = out.tetrahedronlist[i * 4 + j] - 1;
 
-            if (k < surfmesh_inner->numVertices()) {
-                if (surfmesh_inner->vertex_attr(k).m > 0) {
+            if (k < surfmesh_inner->numVertices())
+            {
+                if (surfmesh_inner->vertex_attr(k).m > 0)
+                {
                     c = surfmesh_inner->vertex_attr(k).m;
                 }
             }
         }
 
-        for (j = 0; j < 4; j++) {
+        for (j = 0; j < 4; j++)
+        {
             k = out.tetrahedronlist[i * 4 + j] - 1;
 
-            if (out.pointmarkerlist[k]) {
+            if (out.pointmarkerlist[k])
+            {
                 // printf("ActiveSite: %d, %c\n", out.pointmarkerlist[k], c);
                 ActiveSite[k] = c;
             }
@@ -472,16 +514,20 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
                                output_flag);
 
     // Check if we are writing the mesh to file
-    if (write_to_file) {
-        if (output_flag == 1) {
+    if (write_to_file)
+    {
+        if (output_flag == 1)
+        {
             sprintf(filename, "%s.output.all.m", input_name);
         }
 
-        if (output_flag == 2) {
+        if (output_flag == 2)
+        {
             sprintf(filename, "%s.output.in.m", input_name);
         }
 
-        if (output_flag == 3) {
+        if (output_flag == 3)
+        {
             sprintf(filename, "%s.output.out.m", input_name);
         }
         std::cout << "Writing GemMesh  " << std::endl;
@@ -493,15 +539,18 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     std::cout << "Cleaning up" << std::endl;
     delete[] ActiveSite;
 
-    if (atom_list != NULL) {
+    if (atom_list != NULL)
+    {
         free(atom_list);
     }
 
-    if (sphere_list != NULL) {
+    if (sphere_list != NULL)
+    {
         free(sphere_list);
     }
 
-    if (sphere_markers != NULL) {
+    if (sphere_markers != NULL)
+    {
         free(sphere_markers);
     }
 
@@ -513,7 +562,8 @@ int main(int argc, char *argv[])
     int region_flag;
 
 
-    if ((argc != 4) && (argc != 3)) {
+    if ((argc != 4) && (argc != 3))
+    {
         printf("\nUsage: MolecularMesh <Input> <Domain> [ActiveSite] \n");
         printf("      <Input>: PDB, PQR, OFF, XYZR, or Rawiv \n");
         printf("      <Domain>: 1 --> generate both inner and outer meshes \n");
@@ -525,7 +575,8 @@ int main(int argc, char *argv[])
 
     region_flag = atoi(argv[2]);
 
-    if ((region_flag != 1) && (region_flag != 2) && (region_flag != 3)) {
+    if ((region_flag != 1) && (region_flag != 2) && (region_flag != 3))
+    {
         printf("\n<Domain> must be 1, 2 or 3....\n");
         printf("Type <MolecularMesh -help> for more information....\n\n");
         exit(0);
@@ -547,12 +598,12 @@ int main(int argc, char *argv[])
 
 
     // CASE 1:
-    if (argc == 4) {// active site is specified
-        // change the second parameter to 1 if the new approach is to be used
+    if (argc == 4) // active site is specified
+    {   // change the second parameter to 1 if the new approach is to be used
         MolecularMesh_CALL(1, 1, argv[1], argv[3], region_flag, NULL);
     }
-    else { // no active site is specified
-        // change the second parameter to 1 if the new approach is to be used
+    else // no active site is specified
+    {   // change the second parameter to 1 if the new approach is to be used
         MolecularMesh_CALL(0, 1, argv[1], NULL, region_flag, NULL);
     }
 

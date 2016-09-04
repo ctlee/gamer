@@ -37,6 +37,8 @@
 
 
 #include "MarchingCube.h"
+#include <iostream>
+#include <tuple>
 
 // SurfaceMesh* SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float* dataset, float isovalue, float* intensity, float intensity_isovalue, SPNT
 // **holelist);
@@ -69,7 +71,7 @@ float get_intensity_ratio(float den1, float den2, float isovalue)
     return 0.5;
 }
 
-SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim,
+std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, int ydim, int zdim,
                                         float *dataset, float isovalue,
                                         SPNT **holelist)
 {
@@ -77,7 +79,7 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim,
                                      NULL, 0.0, holelist);
 }
 
-SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dataset,
+std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dataset,
                                         float isovalue, float *intensity,
                                         float intensity_isovalue, SPNT **holelist)
 {
@@ -99,7 +101,7 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dat
     float   max_density = -9999.0;
     bool    use_intensity;
 
-    // Check if we are using intensity values (neede for Lattice Data)
+    // Check if we are using intensity values (needed for Lattice Data)
     use_intensity = intensity != NULL;
 
     // Initialize memory
@@ -112,19 +114,13 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dat
     mc_sign = (unsigned char *)malloc(sizeof(unsigned char) * xdim * ydim * zdim);
 
     // preprocessing: removing small holes
-    for (k = 0; k < zdim; k++)
+    for (i = 0; i < xdim * ydim * zdim; ++i)
     {
-        for (j = 0; j < ydim; j++)
+        if (dataset[i] > max_density)
         {
-            for (i = 0; i < xdim; i++)
-            {
-                if (dataset[IndexVect(i, j, k)] > max_density)
-                {
-                    max_density = dataset[IndexVect(i, j, k)];
-                }
-                mc_sign[IndexVect(i, j, k)] = 0;
-            }
+            max_density = dataset[i];
         }
+        mc_sign[i] = 0;
     }
 
     triangle[0].a = 0;
@@ -133,6 +129,8 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dat
     mc_sign[0]    = 1;
     stack_size    = 1;
 
+    // This loop sets mc_sign = 1 for all cubes which are connected to cube (0,0,0)
+    // through paths which stay on the outside of the iso-surface.
     while (stack_size > 0)
     {
         stack_size--;
@@ -140,11 +138,11 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dat
         tempt_y = triangle[stack_size].b;
         tempt_z = triangle[stack_size].c;
 
-        for (k = std::max(tempt_z - 1, 0); k <= std::min(tempt_z + 1, zdim - 1); k++)
+        for (k = std::max(tempt_z - 1, 0); k <= std::min(tempt_z + 1, zdim - 1); ++k)
         {
-            for (j = std::max(tempt_y - 1, 0); j <= std::min(tempt_y + 1, ydim - 1); j++)
+            for (j = std::max(tempt_y - 1, 0); j <= std::min(tempt_y + 1, ydim - 1); ++j)
             {
-                for (i = std::max(tempt_x - 1, 0); i <= std::min(tempt_x + 1, xdim - 1); i++)
+                for (i = std::max(tempt_x - 1, 0); i <= std::min(tempt_x + 1, xdim - 1); ++i)
                 {
                     if ((dataset[IndexVect(i, j, k)] < isovalue) &&
                         (mc_sign[IndexVect(i, j, k)] == 0))
@@ -831,19 +829,38 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dat
     // Allocate memory
     surfmesh = new SurfaceMesh(v_num, t_num);
 
-    for (n = 0; n < surfmesh->num_vertices; n++)
+    for (n = 0; n < surfmesh->num_vertices; ++n)
     {
         surfmesh->vertex[n].x = vertex[n].x;
         surfmesh->vertex[n].y = vertex[n].y;
         surfmesh->vertex[n].z = vertex[n].z;
     }
 
-    for (n = 0; n < surfmesh->num_faces; n++)
+    for (n = 0; n < surfmesh->num_faces; ++n)
     {
         surfmesh->face[n].a = triangle[n].a;
         surfmesh->face[n].b = triangle[n].b;
         surfmesh->face[n].c = triangle[n].c;
     }
+
+    SurfaceMesh_ASC* pF = new SurfaceMesh_ASC();
+
+    for (n = 0; n < v_num; ++n)
+    {
+        pF->insert<1>({n}, vertex[n]);
+    }
+
+    for (n = 0; n < t_num; ++n)
+    {
+        INT3VECT& tri = triangle[n];
+        pF->insert<3>({tri.a, tri.b, tri.c});
+    }
+
+    std::cout << pF->size<1>() << std::endl;
+
+    init_orientation(*pF);
+    clear_orientation(*pF);
+    compute_orientation(*pF);
 
     free(vertex);
     free(triangle);
@@ -851,5 +868,5 @@ SurfaceMesh * SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dat
     free(mc_sign);
 
     // Return created SurfaceMesh
-    return surfmesh;
+    return std::make_tuple(surfmesh, pF);
 }

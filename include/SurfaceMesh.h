@@ -2,6 +2,35 @@
 
 #include "biom.h"
 #include "util.h"
+#include "SimplicialComplex.h"
+#include "Orientable.h"
+#include <tuple>
+
+struct Face : Orientable, INT3VECT {};
+
+struct Global
+{
+    bool  closed;                /**< @brief is the surface mesh closed or not */
+    int   _marker;               /**< @brief doman marker, to be used when tetrahedralizing */
+    float volume_constraint;     /**< @brief volume constraint of the tetrahedralized domain */
+    bool  use_volume_constraint; /**< @brief flag that determines if the volume constraint is used */
+
+    float min[3];                /**< @brief minimal coordinate of nodes */
+    float max[3];                /**< @brief maximal coordinate of nodes */
+
+    float avglen;                /**< @brief average edge length */
+
+    bool hole;                   /**< @brief flag that determines if the mesh is a hole or not */
+};
+
+struct complex_traits
+{
+    using KeyType = int;
+    using NodeTypes = util::type_holder<Global,FLTVECT,void,Face>;
+    using EdgeTypes = util::type_holder<Orientable,Orientable,Orientable>;
+};
+
+using SurfaceMesh_ASC = simplicial_complex<complex_traits>;
 
 
 /** @brief Other data structure SurfaceMesh (for surface meshes) */
@@ -22,10 +51,10 @@ public:
     static SurfaceMesh* readOFF(const char *filename);
     static SurfaceMesh* readPoly(const char *filename);
     static SurfaceMesh* readPDB_molsurf(const char *filename);
-    static SurfaceMesh* readPDB_gauss(const char *filename, float blobbyness, float iso_value);
+    static std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> readPDB_gauss(const char *filename, float blobbyness, float iso_value);
     static SurfaceMesh* sphere(int);
-    static SurfaceMesh* marchingCube(int, int, int, float *, float, SPNT **);
-    static SurfaceMesh* marchingCube(int, int, int, float *, float, float *, float, SPNT **);
+    static std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, SPNT **);
+    static std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, float *, float, SPNT **);
     static SurfaceMesh* readLattice(const char *, float, bool);
     static SurfaceMesh* readLattice(const char *, const char *, float, bool);
     static SurfaceMesh* triangulate(REAL *pointlist, int numberofpoints, const char *triangle_params);

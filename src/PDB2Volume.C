@@ -623,7 +623,7 @@ float PDB2Volume(std::string filename, float **data, int *xd, int *yd, int *zd,
  *           - blobbyness: the decay rate of the Gaussian function
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
+std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
                                          float iso_value)
 {
     float  max_density;
@@ -632,12 +632,11 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
     time_t t1, t2;
     int    xdim, ydim, zdim;
     float  min[3], max[3], span[3];
-    SurfaceMesh *surfmesh;
     SPNT *holelist;
     std::vector<ATOM> atom_list;
 
     printf("\nbegin blurring PDB/PQR coordinates ... \n");
-    (void)time(&t1);
+    time(&t1);
     max_density = PDB2Volume(filename, &dataset, &xdim, &ydim, &zdim, min, max,
                              atom_list);
     (void)time(&t2);
@@ -654,11 +653,17 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
     {
         iso_value = data_iso_val;
     }
-    printf("isovalue: %f \n",                              iso_value);
-    surfmesh = SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset, iso_value, &holelist);
-    (void)time(&t2);
-    printf("vertices: %d, faces: %d\n",                    surfmesh->num_vertices, surfmesh->num_faces);
+
+    printf("isovalue: %f \n", iso_value);
+
+    auto meshes = SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset, iso_value, &holelist);
+    auto surfmesh = std::get<0>(meshes);
+    auto pF = std::get<1>(meshes);
+
+    time(&t2);
+    std::cout << "vertices: " << pF->size<1>() << ", faces: " << pF->size<3>() << std::endl;
     printf("time to extract isosurface: %d seconds. \n\n", (int)(t2 - t1));
+
     free(dataset);
 
     // convert from pixel to angstrom
@@ -669,9 +674,16 @@ SurfaceMesh * SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
         surfmesh->vertex[j].z = surfmesh->vertex[j].z * span[2] + min[2];
     }
 
+    for (auto& curr : pF->get_level<1>())
+    {
+        curr.x = curr.x * span[0] + min[0];
+        curr.y = curr.y * span[1] + min[1];
+        curr.z = curr.z * span[2] + min[2];
+    }
+
     // Flip normals so they now points outwards
     surfmesh->flipNormals();
 
     // Return generated SurfaceMesh
-    return surfmesh;
+    return meshes;
 }
