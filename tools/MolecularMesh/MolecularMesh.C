@@ -327,7 +327,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 
         printf("Save initial Molecular mesh.\n");
 
-        // SurfaceMesh_writeOFF(surfmesh_inner, "Initial_surfmesh.off");
+        surfmesh_inner->writeOFF(const_cast<char*>("Initial_surfmesh.off"));
 
         printf("begin surface smoothing ... \n");
         (void)time(&t1);

@@ -32,10 +32,11 @@
 
 #include "biom.h"
 #include "SurfaceMesh.h"
+#include "ReadPDB.h"
 #include <vector>
 #include <cmath>
 
-typedef struct {
+struct MOL_VERTEX {
     float         x;     // vertex coordinate
     float         y;
     float         z;
@@ -45,17 +46,19 @@ typedef struct {
     unsigned short px;   // the corresponding index
     unsigned short py;
     unsigned short pz;
-} MOL_VERTEX;
+};
 
-// This is filthy. Shame on you.
-int *segment_index;
-int *atom_index;
-INT4VECT   *quads;
-MOL_VERTEX *vertex;
-int vert_num;
-int quad_num;
-int xdim, ydim, zdim;
+int *GLOBAL_segment_index;
+int *GLOBAL_atom_index;
+INT4VECT   *GLOBAL_quads;
+MOL_VERTEX *GLOBAL_vertex;
+int GLOBAL_vert_num;
+int GLOBAL_quad_num;
+int GLOBAL_xdim, GLOBAL_ydim, GLOBAL_zdim;
 
+
+#undef IndexVect
+#define IndexVect(i, j, k) ( ( (k) * GLOBAL_ydim + (j) ) * GLOBAL_xdim + (i) )
 
 int  CheckFaceCorner(float x,
                      float y,
@@ -82,13 +85,13 @@ char  CheckManifold(int i,
 float GetAngle(int a,
                int b,
                int c);
-void  ReadPDB(const char  *filename,
+void  ReadPDB(std::string filename,
               int   *atom_num,
               ATOM **atomlist,
               float  min[3],
               float  max[3]);
 
-SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
+SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
 {
     int       i, j, k;
     int       a, b, c, d;
@@ -102,40 +105,40 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
     MinHeapS *min_heap;
     SEEDS    *AllSeeds;
     SurfaceMesh *surfmesh;
-    int   atom_num;
-    ATOM *atom_list = NULL;
+    std::vector<ATOM> atom_list;
     float min[3], max[3];
 
     // Read in the PDB file
-    ReadPDB(input_name, &atom_num, &atom_list, min, max);
+    readPDB(input_name, std::back_inserter(atom_list));
+    getMinMax(atom_list.begin(), atom_list.end(), min, max);
 
-    xdim   = (int)(((max[0] - min[0]) + 1) * DIM_SCALE);
-    ydim   = (int)(((max[1] - min[1]) + 1) * DIM_SCALE);
-    zdim   = (int)(((max[2] - min[2]) + 1) * DIM_SCALE);
-    xydim  = xdim * ydim;
-    xyzdim = xdim * ydim * zdim;
+    GLOBAL_xdim   = (int)(((max[0] - min[0]) + 1) * DIM_SCALE);
+    GLOBAL_ydim   = (int)(((max[1] - min[1]) + 1) * DIM_SCALE);
+    GLOBAL_zdim   = (int)(((max[2] - min[2]) + 1) * DIM_SCALE);
+    xydim  = GLOBAL_xdim * GLOBAL_ydim;
+    xyzdim = xydim * GLOBAL_zdim;
 
     // printf("dimension: %d X %d X %d\n",xdim,ydim,zdim);
 
-    atom_index    = (int *)malloc(sizeof(int) * xyzdim);
-    segment_index = (int *)malloc(sizeof(int) * xyzdim);
+    GLOBAL_atom_index    = (int *)malloc(sizeof(int) * xyzdim);
+    GLOBAL_segment_index = (int *)malloc(sizeof(int) * xyzdim);
 
     for (k = 0; k < xyzdim; k++)
     {
-        atom_index[k] = 0;
+        GLOBAL_atom_index[k] = 0;
     }
 
     orig[0] = min[0];
     orig[1] = min[1];
     orig[2] = min[2];
-    span[0] = (max[0] - min[0]) / (double)(xdim - 1);
-    span[1] = (max[1] - min[1]) / (double)(ydim - 1);
-    span[2] = (max[2] - min[2]) / (double)(zdim - 1);
-    dim[0]  = xdim;
-    dim[1]  = ydim;
-    dim[2]  = zdim;
+    span[0] = (max[0] - min[0]) / (double)(GLOBAL_xdim - 1);
+    span[1] = (max[1] - min[1]) / (double)(GLOBAL_ydim - 1);
+    span[2] = (max[2] - min[2]) / (double)(GLOBAL_zdim - 1);
+    dim[0]  = GLOBAL_xdim;
+    dim[1]  = GLOBAL_ydim;
+    dim[2]  = GLOBAL_zdim;
 
-    for (m = 0; m < atom_num; m++)
+    for (m = 0; m < atom_list.size(); m++)
     {
         atom_list[m].x      = (atom_list[m].x - orig[0]) / span[0];
         atom_list[m].y      = (atom_list[m].y - orig[1]) / span[1];
@@ -144,7 +147,7 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
     }
 
     begin  = clock();
-    num    = ExtractSAS(atom_num, atom_list);
+    num    = ExtractSAS(atom_list.size(), atom_list.data());
     finish = clock();
 
     // printf("   Extract SAS voxels: CPU Time = %f seconds \n",(double)(finish-begin)/CLOCKS_PER_SEC);
@@ -160,7 +163,16 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
     min_heap->seed = (int *)malloc(sizeof(int) * num * 3);
     min_heap->dist = (float *)malloc(sizeof(float) * num * 3);
     AllSeeds       = (SEEDS *)malloc(sizeof(SEEDS) * num);
-    ExtractSES(min_heap, AllSeeds, segment_index, xdim, ydim, zdim, atom_index, atom_num, atom_list, threshold * threshold);
+    ExtractSES(min_heap,
+               AllSeeds,
+               GLOBAL_segment_index,
+               GLOBAL_xdim,
+               GLOBAL_ydim,
+               GLOBAL_zdim,
+               GLOBAL_atom_index,
+               atom_list.size(),
+               atom_list.data(),
+               threshold * threshold);
     finish = clock();
 
     // printf("   Extract SES voxels: CPU Time = %f seconds \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
@@ -171,17 +183,17 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
     {
         b = 0;
 
-        for (k = 0; k < zdim; k++)
+        for (k = 0; k < GLOBAL_zdim; k++)
         {
-            for (j = 0; j < ydim; j++)
+            for (j = 0; j < GLOBAL_ydim; j++)
             {
-                for (i = 0; i < xdim; i++)
+                for (i = 0; i < GLOBAL_xdim; i++)
                 {
-                    if (segment_index[IndexVect(i, j, k)] == MaxVal)
+                    if (GLOBAL_segment_index[IndexVect(i, j, k)] == MaxVal)
                     {
                         if (!CheckManifold(i, j, k)) // non-manifold occurs
                         {
-                            segment_index[IndexVect(i, j, k)] = 0;
+                            GLOBAL_segment_index[IndexVect(i, j, k)] = 0;
                             min_heap->x[min_heap->size]       = i;
                             min_heap->y[min_heap->size]       = j;
                             min_heap->z[min_heap->size]       = k;
@@ -202,21 +214,21 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
 
 
     // generate the surface mesh
-    ::vertex = (MOL_VERTEX *)malloc(sizeof(MOL_VERTEX) * num * 8);
-    ::quads  = (INT4VECT *)malloc(sizeof(INT4VECT) * num * 6);
+    GLOBAL_vertex = (MOL_VERTEX *)malloc(sizeof(MOL_VERTEX) * num * 8);
+    GLOBAL_quads  = (INT4VECT *)malloc(sizeof(INT4VECT) * num * 6);
 
     for (k = 0; k < num * 8; k++)
     {
-        ::vertex[k].neigh = 0;
+        GLOBAL_vertex[k].neigh = 0;
     }
 
     for (k = 0; k < xyzdim; k++)
     {
-        atom_index[k] = -1;
+        GLOBAL_atom_index[k] = -1;
     }
     begin    = clock();
-    vert_num = 0;
-    quad_num = 0;
+    GLOBAL_vert_num = 0;
+    GLOBAL_quad_num = 0;
 
     for (num = 0; num < min_heap->size; num++)
     {
@@ -225,123 +237,123 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
         k = min_heap->z[num];
 
         // back face
-        if (segment_index[IndexVect(i - 1, j, k)] == MaxVal)
+        if (GLOBAL_segment_index[IndexVect(i - 1, j, k)] == MaxVal)
         {
             a                  = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
-            ::vertex[a].neigh |= 40; // +y and +z
+            GLOBAL_vertex[a].neigh |= 40; // +y and +z
             b                  = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
-            ::vertex[b].neigh |= 24; // +y and -z
+            GLOBAL_vertex[b].neigh |= 24; // +y and -z
             c                  = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
-            ::vertex[c].neigh |= 20; // -y and -z
+            GLOBAL_vertex[c].neigh |= 20; // -y and -z
             d                  = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
-            ::vertex[d].neigh |= 36; // -y and +z
+            GLOBAL_vertex[d].neigh |= 36; // -y and +z
 
-            quads[quad_num].a = a;
-            quads[quad_num].b = b;
-            quads[quad_num].c = c;
-            quads[quad_num].d = d;
-            quad_num++;
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
         }
 
         // front face
-        if (segment_index[IndexVect(i + 1, j, k)] == MaxVal)
+        if (GLOBAL_segment_index[IndexVect(i + 1, j, k)] == MaxVal)
         {
             a                  = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
-            ::vertex[a].neigh |= 40; // +y and +z
+            GLOBAL_vertex[a].neigh |= 40; // +y and +z
             b                  = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
-            ::vertex[b].neigh |= 36; // -y and +z
+            GLOBAL_vertex[b].neigh |= 36; // -y and +z
             c                  = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
-            ::vertex[c].neigh |= 20; // -y and -z
+            GLOBAL_vertex[c].neigh |= 20; // -y and -z
             d                  = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
-            ::vertex[d].neigh |= 24; // +y and -z
+            GLOBAL_vertex[d].neigh |= 24; // +y and -z
 
-            quads[quad_num].a = a;
-            quads[quad_num].b = b;
-            quads[quad_num].c = c;
-            quads[quad_num].d = d;
-            quad_num++;
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
         }
 
         // left face
-        if (segment_index[IndexVect(i, j - 1, k)] == MaxVal)
+        if (GLOBAL_segment_index[IndexVect(i, j - 1, k)] == MaxVal)
         {
             a                  = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
-            ::vertex[a].neigh |= 33; // -x and +z
+            GLOBAL_vertex[a].neigh |= 33; // -x and +z
             b                  = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
-            ::vertex[b].neigh |= 17; // -x and -z
+            GLOBAL_vertex[b].neigh |= 17; // -x and -z
             c                  = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
-            ::vertex[c].neigh |= 18; // +x and -z
+            GLOBAL_vertex[c].neigh |= 18; // +x and -z
             d                  = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
-            ::vertex[d].neigh |= 34; // +x and +z
+            GLOBAL_vertex[d].neigh |= 34; // +x and +z
 
-            quads[quad_num].a = a;
-            quads[quad_num].b = b;
-            quads[quad_num].c = c;
-            quads[quad_num].d = d;
-            quad_num++;
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
         }
 
         // right face
-        if (segment_index[IndexVect(i, j + 1, k)] == MaxVal)
+        if (GLOBAL_segment_index[IndexVect(i, j + 1, k)] == MaxVal)
         {
             a                  = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
-            ::vertex[a].neigh |= 33; // -x and +z
+            GLOBAL_vertex[a].neigh |= 33; // -x and +z
             b                  = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
-            ::vertex[b].neigh |= 34; // +x and +z
+            GLOBAL_vertex[b].neigh |= 34; // +x and +z
             c                  = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
-            ::vertex[c].neigh |= 18; // +x and -z
+            GLOBAL_vertex[c].neigh |= 18; // +x and -z
             d                  = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
-            ::vertex[d].neigh |= 17; // -x and -z
+            GLOBAL_vertex[d].neigh |= 17; // -x and -z
 
-            quads[quad_num].a = a;
-            quads[quad_num].b = b;
-            quads[quad_num].c = c;
-            quads[quad_num].d = d;
-            quad_num++;
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
         }
 
         // bottom face
-        if (segment_index[IndexVect(i, j, k - 1)] == MaxVal)
+        if (GLOBAL_segment_index[IndexVect(i, j, k - 1)] == MaxVal)
         {
             a                  = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
-            ::vertex[a].neigh |= 9;  // -x and +y
+            GLOBAL_vertex[a].neigh |= 9;  // -x and +y
             b                  = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
-            ::vertex[b].neigh |= 10; // +x and +y
+            GLOBAL_vertex[b].neigh |= 10; // +x and +y
             c                  = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
-            ::vertex[c].neigh |= 6;  // +x and -y
+            GLOBAL_vertex[c].neigh |= 6;  // +x and -y
             d                  = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
-            ::vertex[d].neigh |= 5;  // -x and -y
+            GLOBAL_vertex[d].neigh |= 5;  // -x and -y
 
-            quads[quad_num].a = a;
-            quads[quad_num].b = b;
-            quads[quad_num].c = c;
-            quads[quad_num].d = d;
-            quad_num++;
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
         }
 
         // top face
-        if (segment_index[IndexVect(i, j, k + 1)] == MaxVal)
+        if (GLOBAL_segment_index[IndexVect(i, j, k + 1)] == MaxVal)
         {
             a                  = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
-            ::vertex[a].neigh |= 9;  // -x and +y
+            GLOBAL_vertex[a].neigh |= 9;  // -x and +y
             b                  = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
-            ::vertex[b].neigh |= 5;  // -x and -y
+            GLOBAL_vertex[b].neigh |= 5;  // -x and -y
             c                  = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
-            ::vertex[c].neigh |= 6;  // +x and -y
+            GLOBAL_vertex[c].neigh |= 6;  // +x and -y
             d                  = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
-            ::vertex[d].neigh |= 10; // +x and +y
+            GLOBAL_vertex[d].neigh |= 10; // +x and +y
 
-            quads[quad_num].a = a;
-            quads[quad_num].b = b;
-            quads[quad_num].c = c;
-            quads[quad_num].d = d;
-            quad_num++;
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
         }
     }
     finish = clock();
 
     // printf("   Generate quad meshes: CPU Time = %f seconds \n",(double)(finish-begin)/CLOCKS_PER_SEC);
-    // printf("   vert-num : %d -- quad-num: %d \n\n",vert_num,quad_num);
+    // printf("   vert-num : %d -- quad-num: %d \n\n",vert_num,GLOBAL_quad_num);
 
 
     // Smooth the mesh
@@ -350,76 +362,76 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
 
     for (num = 0; num < 3; num++)
     {
-        for (n = 0; n < vert_num; n++)
+        for (n = 0; n < GLOBAL_vert_num; n++)
         {
             nx       = 0;
             ny       = 0;
             nz       = 0;
             m        = 0;
-            neighbor = ::vertex[n].neigh;
+            neighbor = GLOBAL_vertex[n].neigh;
 
-            i = ::vertex[n].px;
-            j = ::vertex[n].py;
-            k = ::vertex[n].pz;
+            i = GLOBAL_vertex[n].px;
+            j = GLOBAL_vertex[n].py;
+            k = GLOBAL_vertex[n].pz;
 
             if (neighbor & 1)
             {
                 m++;
-                l   = atom_index[IndexVect(i - 1, j, k)];
-                nx += ::vertex[l].x;
-                ny += ::vertex[l].y;
-                nz += ::vertex[l].z;
+                l   = GLOBAL_atom_index[IndexVect(i - 1, j, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
             }
 
             if (neighbor & 2)
             {
                 m++;
-                l   = atom_index[IndexVect(i + 1, j, k)];
-                nx += ::vertex[l].x;
-                ny += ::vertex[l].y;
-                nz += ::vertex[l].z;
+                l   = GLOBAL_atom_index[IndexVect(i + 1, j, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
             }
 
             if (neighbor & 4)
             {
                 m++;
-                l   = atom_index[IndexVect(i, j - 1, k)];
-                nx += ::vertex[l].x;
-                ny += ::vertex[l].y;
-                nz += ::vertex[l].z;
+                l   = GLOBAL_atom_index[IndexVect(i, j - 1, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
             }
 
             if (neighbor & 8)
             {
                 m++;
-                l   = atom_index[IndexVect(i, j + 1, k)];
-                nx += ::vertex[l].x;
-                ny += ::vertex[l].y;
-                nz += ::vertex[l].z;
+                l   = GLOBAL_atom_index[IndexVect(i, j + 1, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
             }
 
             if (neighbor & 16)
             {
                 m++;
-                l   = atom_index[IndexVect(i, j, k - 1)];
-                nx += ::vertex[l].x;
-                ny += ::vertex[l].y;
-                nz += ::vertex[l].z;
+                l   = GLOBAL_atom_index[IndexVect(i, j, k - 1)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
             }
 
             if (neighbor & 32)
             {
                 m++;
-                l   = atom_index[IndexVect(i, j, k + 1)];
-                nx += ::vertex[l].x;
-                ny += ::vertex[l].y;
-                nz += ::vertex[l].z;
+                l   = GLOBAL_atom_index[IndexVect(i, j, k + 1)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
             }
 
             // update the position
-            ::vertex[n].x = nx / (float)m;
-            ::vertex[n].y = ny / (float)m;
-            ::vertex[n].z = nz / (float)m;
+            GLOBAL_vertex[n].x = nx / (float)m;
+            GLOBAL_vertex[n].y = ny / (float)m;
+            GLOBAL_vertex[n].z = nz / (float)m;
         }
     }
     finish = clock();
@@ -427,25 +439,25 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
     // printf("   Smooth the quad meshes: CPU Time = %f seconds \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
 
     // Allocate memory
-    surfmesh = new SurfaceMesh(vert_num, quad_num * 2);
+    surfmesh = new SurfaceMesh(GLOBAL_vert_num, GLOBAL_quad_num * 2);
 
     // write vertices
     for (i = 0; i < surfmesh->num_vertices; i++)
     {
-        surfmesh->vertex[i].x = ::vertex[i].x * span[0] + orig[0];
-        surfmesh->vertex[i].y = ::vertex[i].y * span[1] + orig[1];
-        surfmesh->vertex[i].z = ::vertex[i].z * span[2] + orig[2];
+        surfmesh->vertex[i].x = GLOBAL_vertex[i].x * span[0] + orig[0];
+        surfmesh->vertex[i].y = GLOBAL_vertex[i].y * span[1] + orig[1];
+        surfmesh->vertex[i].z = GLOBAL_vertex[i].z * span[2] + orig[2];
     }
 
     // write triangles
     float angle, angle1, angle2;
 
-    for (i = 0; i < quad_num; i++)
+    for (i = 0; i < GLOBAL_quad_num; i++)
     {
-        a = quads[i].a;
-        b = quads[i].b;
-        c = quads[i].c;
-        d = quads[i].d;
+        a = GLOBAL_quads[i].a;
+        b = GLOBAL_quads[i].b;
+        c = GLOBAL_quads[i].c;
+        d = GLOBAL_quads[i].d;
 
         angle1 = -999.0;
         angle2 = -999.0;
@@ -527,8 +539,8 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
        };
 
        fprintf(fout, "OFF\n");
-       fprintf(fout, "%d %d %d\n",vert_num,quad_num*2,vert_num+quad_num*2-2);
-       for (i = 0; i < vert_num; i++)
+       fprintf(fout, "%d %d %d\n",GLOBAL_vert_num,quad_num*2,GLOBAL_vert_num+quad_num*2-2);
+       for (i = 0; i < GLOBAL_vert_num; i++)
        fprintf(fout, "%f %f %f \n",surfmesh->vertex[i].x,surfmesh->vertex[i].y,surfmesh->vertex[i].z);
 
        for (i = 0; i < quad_num*2; i++) {
@@ -538,17 +550,16 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(const char *input_name)
      */
 
     free(AllSeeds);
-    free(segment_index);
-    free(atom_index);
-    free(atom_list);
+    free(GLOBAL_segment_index);
+    free(GLOBAL_atom_index);
     free(min_heap->x);
     free(min_heap->y);
     free(min_heap->z);
     free(min_heap->seed);
     free(min_heap->dist);
     free(min_heap);
-    free(::vertex);
-    free(quads);
+    free(GLOBAL_vertex);
+    free(GLOBAL_quads);
 
     // Split multiple connectedsurfaces
     surfmesh->splitMultipleConnectedSurfaces();
@@ -565,9 +576,9 @@ float GetAngle(int a, int b, int c)
     float bx, by, bz;
     float dist;
 
-    ax   = vertex[b].x - vertex[a].x;
-    ay   = vertex[b].y - vertex[a].y;
-    az   = vertex[b].z - vertex[a].z;
+    ax   = GLOBAL_vertex[b].x - GLOBAL_vertex[a].x;
+    ay   = GLOBAL_vertex[b].y - GLOBAL_vertex[a].y;
+    az   = GLOBAL_vertex[b].z - GLOBAL_vertex[a].z;
     dist = sqrt(ax * ax + ay * ay + az * az);
 
     if (dist > 0)
@@ -576,9 +587,9 @@ float GetAngle(int a, int b, int c)
         ay /= dist;
         az /= dist;
     }
-    bx   = vertex[c].x - vertex[a].x;
-    by   = vertex[c].y - vertex[a].y;
-    bz   = vertex[c].z - vertex[a].z;
+    bx   = GLOBAL_vertex[c].x - GLOBAL_vertex[a].x;
+    by   = GLOBAL_vertex[c].y - GLOBAL_vertex[a].y;
+    bz   = GLOBAL_vertex[c].z - GLOBAL_vertex[a].z;
     dist = sqrt(bx * bx + by * by + bz * bz);
 
     if (dist > 0)
@@ -616,21 +627,21 @@ char CheckManifold(int i, int j, int k)
             {
                 if ((m != i) || (n != j) || (l != k))
                 {
-                    if (segment_index[IndexVect(m, n, l)] == MaxVal)
+                    if (GLOBAL_segment_index[IndexVect(m, n, l)] == MaxVal)
                     {
                         nonmanifold = 1;
 
-                        if ((m != i) && (segment_index[IndexVect(m, j, k)] == MaxVal))
+                        if ((m != i) && (GLOBAL_segment_index[IndexVect(m, j, k)] == MaxVal))
                         {
                             nonmanifold = 0;
                         }
 
-                        if ((n != j) && (segment_index[IndexVect(i, n, k)] == MaxVal))
+                        if ((n != j) && (GLOBAL_segment_index[IndexVect(i, n, k)] == MaxVal))
                         {
                             nonmanifold = 0;
                         }
 
-                        if ((l != k) && (segment_index[IndexVect(i, j, l)] == MaxVal))
+                        if ((l != k) && (GLOBAL_segment_index[IndexVect(i, j, l)] == MaxVal))
                         {
                             nonmanifold = 0;
                         }
@@ -662,21 +673,21 @@ int CheckFaceCorner(float x, float y, float z)
     n = (int)y;
     l = (int)z;
 
-    if (atom_index[IndexVect(m, n, l)] < 0)
+    if (GLOBAL_atom_index[IndexVect(m, n, l)] < 0)
     {
-        vertex[vert_num].x             = x;
-        vertex[vert_num].y             = y;
-        vertex[vert_num].z             = z;
-        vertex[vert_num].px            = m;
-        vertex[vert_num].py            = n;
-        vertex[vert_num].pz            = l;
-        atom_index[IndexVect(m, n, l)] = vert_num;
-        a                              = vert_num;
-        vert_num++;
+        GLOBAL_vertex[GLOBAL_vert_num].x             = x;
+        GLOBAL_vertex[GLOBAL_vert_num].y             = y;
+        GLOBAL_vertex[GLOBAL_vert_num].z             = z;
+        GLOBAL_vertex[GLOBAL_vert_num].px            = m;
+        GLOBAL_vertex[GLOBAL_vert_num].py            = n;
+        GLOBAL_vertex[GLOBAL_vert_num].pz            = l;
+        GLOBAL_atom_index[IndexVect(m, n, l)]        = GLOBAL_vert_num;
+        a                                            = GLOBAL_vert_num;
+        GLOBAL_vert_num++;
     }
     else
     {
-        a = atom_index[IndexVect(m, n, l)];
+        a = GLOBAL_atom_index[IndexVect(m, n, l)];
     }
 
     return a;
@@ -771,9 +782,9 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
     FLT2VECT intersect;
 
 
-    dim[0] = xdim;
-    dim[1] = ydim;
-    dim[2] = zdim;
+    dim[0] = GLOBAL_xdim;
+    dim[1] = GLOBAL_ydim;
+    dim[2] = GLOBAL_zdim;
 
 
     for (m = 0; m < atom_num; m++)
@@ -814,18 +825,18 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
                         (y - atom_list[m].y) * (y - atom_list[m].y) +
                         (z - atom_list[m].z) * (z - atom_list[m].z) <= radius)
                     {
-                        if (atom_index[IndexVect(i, j, k)] > 0)
+                        if (GLOBAL_atom_index[IndexVect(i, j, k)] > 0)
                         {
-                            intersect = FindIntersection(atom_index[IndexVect(i, j, k)], m + 1, j, k, atom_list);
+                            intersect = FindIntersection(GLOBAL_atom_index[IndexVect(i, j, k)], m + 1, j, k, atom_list);
 
                             if ((i >= intersect.x) && (i <= intersect.y))
                             {
-                                atom_index[IndexVect(i, j, k)] = m + 1;
+                                GLOBAL_atom_index[IndexVect(i, j, k)] = m + 1;
                             }
                         }
                         else
                         {
-                            atom_index[IndexVect(i, j, k)] = m + 1;
+                            GLOBAL_atom_index[IndexVect(i, j, k)] = m + 1;
                         }
                     }
                 }
@@ -837,24 +848,24 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
     // find voxels on the border
     int total = 0;
 
-    for (l = 1; l < zdim - 1; l++)
+    for (l = 1; l < GLOBAL_zdim - 1; l++)
     {
-        for (n = 1; n < ydim - 1; n++)
+        for (n = 1; n < GLOBAL_ydim - 1; n++)
         {
-            for (m = 1; m < xdim - 1; m++)
+            for (m = 1; m < GLOBAL_xdim - 1; m++)
             {
-                if (atom_index[IndexVect(m, n, l)])
+                if (GLOBAL_atom_index[IndexVect(m, n, l)])
                 {
                     int count = 0;
 
-                    for (k = std::max(l - 1, 0); k <= std::min(l + 1, zdim - 1); k++)
+                    for (k = std::max(l - 1, 0); k <= std::min(l + 1, GLOBAL_zdim - 1); k++)
                     {
-                        for (j = std::max(n - 1, 0); j <= std::min(n + 1, ydim - 1); j++)
+                        for (j = std::max(n - 1, 0); j <= std::min(n + 1, GLOBAL_ydim - 1); j++)
                         {
-                            for (i = std::max(m - 1, 0); i <= std::min(m + 1, xdim - 1); i++)
+                            for (i = std::max(m - 1, 0); i <= std::min(m + 1, GLOBAL_xdim - 1); i++)
                             {
                                 if ((((i == m) && (j == n)) || ((i == m) && (k == l)) || ((k == l) && (j == n))) &&
-                                    (atom_index[IndexVect(i, j, k)] == 0))
+                                    (GLOBAL_atom_index[IndexVect(i, j, k)] == 0))
                                 {
                                     count = 1;
                                 }
@@ -864,7 +875,7 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
 
                     if (count)
                     {
-                        atom_index[IndexVect(m, n, l)] = -atom_index[IndexVect(m, n, l)];
+                        GLOBAL_atom_index[IndexVect(m, n, l)] = -GLOBAL_atom_index[IndexVect(m, n, l)];
                         total++;
                     }
                 }

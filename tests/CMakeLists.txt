@@ -17,3 +17,17 @@ set_target_properties(readPDB_gauss PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(readPDB_gauss gamershared)
 
 add_test(readPDB_gauss ${EXECUTABLE_OUTPUT_PATH}/readPDB_gauss ${TEST_DATA_PATH}/1CID.pdb)
+
+
+add_executable(readPDB_molsurf readPDB_molsurf.cpp)
+set_target_properties(readPDB_molsurf PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(readPDB_molsurf gamershared)
+
+add_test(readPDB_molsurf ${EXECUTABLE_OUTPUT_PATH}/readPDB_molsurf ${TEST_DATA_PATH}/1CID.pdb)
+
+
+add_executable(cmdtest cmdtest.cpp)
+set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(cmdtest gamershared)
+
+add_test(cmdtest ${EXECUTABLE_OUTPUT_PATH}/cmdtest)

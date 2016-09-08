@@ -48,9 +48,9 @@ public:
     // Move as many of these as possible to global functions.
     // SurfaceMesh 
     static SurfaceMesh* merge(SurfaceMesh *, SurfaceMesh *);
-    static SurfaceMesh* readOFF(const char *filename);
-    static SurfaceMesh* readPoly(const char *filename);
-    static SurfaceMesh* readPDB_molsurf(const char *filename);
+    static SurfaceMesh* readOFF(std::string filename);
+    static SurfaceMesh* readPoly(std::string filename);
+    static SurfaceMesh* readPDB_molsurf(std::string filename);
     static std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> readPDB_gauss(const char *filename, float blobbyness, float iso_value);
     static SurfaceMesh* sphere(int);
     static std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, SPNT **);

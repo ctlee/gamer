@@ -38,92 +38,17 @@
 #include <regex>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <cstdlib>
+#include "ReadPDB.h"
 
-#define EPSILON          1.0e-3f
 #define MAX_STRING       256
-
-namespace detail
-{
-    std::regex PDB(".*.pdb", std::regex::icase | std::regex::optimize);
-    std::regex PQR(".*.pqr", std::regex::icase | std::regex::optimize);
-    std::regex XYZR(".*.xyzr", std::regex::icase | std::regex::optimize);
-    std::regex atom("ATOM.*\n*", std::regex::optimize);
-}
 
 void write_rawiv_float(FILE *,
                        float *,
                        int *,
                        float *,
                        float *);
-
-
-/*
- * ***************************************************************************
- * Routine:  getMinMax    < ... >
- *
- * Author:   Zeyun Yu (zeyun.yu@gmail.com)
- *
- * Purpose:  Calculate the minimum and maximum range of the blurred atoms
- * ***************************************************************************
- */
-void getMinMax(std::vector<ATOM>::const_iterator begin,
-               std::vector<ATOM>::const_iterator end,
-               float min[3],
-               float max[3])
-{
-    float maxRad = 0.0;
-    float tempRad;
-
-    min[0] = min[1] = min[2] = std::numeric_limits<float>::infinity();
-    max[0] = max[1] = max[2] = -std::numeric_limits<float>::infinity();
-    maxRad = 0;
-
-    for (auto curr = begin; curr != end; ++curr)
-    {
-        if (curr->x < min[0])
-        {
-            min[0] = curr->x;
-        }
-
-        if (curr->y < min[1])
-        {
-            min[1] = curr->y;
-        }
-
-        if (curr->z < min[2])
-        {
-            min[2] = curr->z;
-        }
-
-        if (curr->x > max[0])
-        {
-            max[0] = curr->x;
-        }
-
-        if (curr->y > max[1])
-        {
-            max[1] = curr->y;
-        }
-
-        if (curr->z > max[2])
-        {
-            max[2] = curr->z;
-        }
-
-        tempRad = curr->radius * sqrt(1.0 + log(EPSILON) / BLOBBYNESS);
-
-        if (maxRad < tempRad)
-        {
-            maxRad = tempRad;
-        }
-    }
-
-    for (int i = 0; i < 3; i++)
-    {
-        min[i] -= maxRad;
-        max[i] += maxRad;
-    }
-}
 
 
 
@@ -209,7 +134,7 @@ void blurAtoms(std::vector<ATOM>::const_iterator begin,
     m = 0;
     for (auto curr = begin; curr != end; ++curr)
     {
-        maxRad = curr->radius * sqrt(1.0 + log(EPSILON) / (2.0 * BLOBBYNESS));
+        maxRad = curr->radius * sqrt(1.0 + log(detail::EPSILON) / (2.0 * BLOBBYNESS));
 
         // compute the dataset coordinates of the atom's center
         c[0] = (curr->x - orig[0]) / span[0];
@@ -261,238 +186,6 @@ void blurAtoms(std::vector<ATOM>::const_iterator begin,
 }
 
 
-/*
- * ***************************************************************************
- * Routine:  PDB2Volume    < ... >
- *
- * Author:   John Moody (brogan@gmail.com)
- *
- * Purpose:  Read a PDB file and extract the Atom records.
- *
- * Notes:    Requires strict adherence to the PDB file format.
- * ***************************************************************************
- */
-template <typename Inserter>
-void readPDB(std::string filename, Inserter inserter)
-{
-    std::ifstream infile(filename);
-    std::string line;
-
-    if(infile.is_open())
-    {
-        while (std::getline(infile, line))
-        {
-            std::smatch match;
-            if (std::regex_match(line, match, detail::atom))
-            {
-                ATOM new_atom;
-                // see Format_v33_Letter.pdf in gamer/doc
-                new_atom.x = atof(line.substr(30,8).c_str());
-                new_atom.y = atof(line.substr(38,8).c_str());
-                new_atom.z = atof(line.substr(46,8).c_str());
-
-                new_atom.radius = 1.0f; // default radius
-                std::string atomName = line.substr(12,4);
-                std::string residueName = line.substr(17,3);
-
-                for (PDBelementInformation curr : PDBelementTable)
-                {
-                    if ((curr.atomName == atomName) && (curr.residueName == residueName))
-                    {
-                        new_atom.radius = curr.radius;
-                        break;
-                    }
-                }
-
-                *inserter++ = new_atom;
-            }
-        }
-    }
-    else
-    {
-        std::cerr << "Unable to open \"" << filename << "\"" << std::endl;
-    }
-}
-
-
-template <typename Inserter>
-void readPQR(std::string filename, Inserter inserter)
-{
-    char   line[MAX_STRING];
-    char   string[8];
-    PDBelementInformation eInfo;
-    int   k, m, n;
-    FILE  *fp, *fout;
-    char  file_name[256];
-    sprintf(file_name, "%s.xyzr", filename.c_str());
-
-    if ((fout = fopen(file_name, "wb")) == NULL)
-    {
-        printf("write error...\n");
-        exit(0);
-    }
-
-    if ((fp = fopen(filename.c_str(), "r")) == NULL)
-    {
-        printf("read error...\n");
-        exit(0);
-    }
-
-    m = 0;
-    while (fgets(line, MAX_STRING, fp) != NULL)
-    {
-        if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))
-        {
-            /* more general format, could be used for pqr format */
-            k = 30;
-
-            ATOM new_atom;
-
-            while (line[k] == ' ')
-            {
-                k++;
-            }
-            n = 0;
-
-            while (line[k] != ' ')
-            {
-                string[n] = line[k];
-                n++;
-                k++;
-
-                if (line[k] == '-')
-                {
-                    break;
-                }
-            }
-            string[n]      = '\0';
-            new_atom.x = atof(string);
-
-            while (line[k] == ' ')
-            {
-                k++;
-            }
-            n = 0;
-
-            while (line[k] != ' ')
-            {
-                string[n] = line[k];
-                n++;
-                k++;
-
-                if (line[k] == '-')
-                {
-                    break;
-                }
-            }
-            string[n]      = '\0';
-            new_atom.y = atof(string);
-
-            while (line[k] == ' ')
-            {
-                k++;
-            }
-            n = 0;
-
-            while (line[k] != ' ')
-            {
-                string[n] = line[k];
-                n++;
-                k++;
-
-                if (line[k] == '-')
-                {
-                    break;
-                }
-            }
-            string[n]      = '\0';
-            new_atom.z = atof(string);
-
-            // skip whitespace
-            while (line[k] == ' ')
-            {
-                k++;
-            }
-            n = 0;
-
-            // read field
-            while (line[k] != ' ')
-            {
-                string[n] = line[k];
-                n++;
-                k++;
-
-                // This makes no sense
-                if (line[k] == '-')
-                {
-                    break;
-                }
-            }
-
-            // skip whitespace
-            while (line[k] == ' ')
-            {
-                k++;
-            }
-            n = 0;
-
-            while (line[k] != ' ' && line[k] != '\n' && line[k] != '\0')
-            {
-                string[n] = line[k];
-                n++;
-                k++;
-            }
-            string[n]           = '\0';
-            new_atom.radius = atof(string);
-
-            // new_atom.radius += 1.0;
-
-            if (new_atom.radius < 1.0)
-            {
-                new_atom.radius = 1.0;
-            }
-
-            *inserter++ = new_atom;
-            fprintf(fout, "%f %f %f %f\n", new_atom.x, new_atom.y, new_atom.z, new_atom.radius);
-            m++;
-        }
-    }
-    fclose(fp);
-    fclose(fout);
-}
-
-
-template <typename Inserter>
-void readXYZR(std::string filename, Inserter inserter)
-{
-    float x, y, z, radius;
-    ATOM new_atom;
-    FILE *fp;
-    int   m;
-
-    if ((fp = fopen(filename.c_str(), "r")) == NULL)
-    {
-        printf("read error...\n");
-        exit(0);
-    }
-
-    fscanf(fp, "%d\n", &m);
-
-    for (int n = 0; n < m; n++)
-    {
-        fscanf(fp, "%f %f %f %f\n", &x, &y, &z, &radius);
-
-        new_atom.x      = x;
-        new_atom.y      = y;
-        new_atom.z      = z;
-        new_atom.radius = radius;
-
-        *inserter++ = new_atom;
-    }
-
-    printf("number of atoms: %d\n", m);
-}
-
 
 /*
  * ***************************************************************************
@@ -515,27 +208,7 @@ float PDB2Volume(std::string filename, float **data, int *xd, int *yd, int *zd,
     float *dataset;
     PDBelementInformation eInfo;
 
-    // XYZR file
-    if (std::regex_match(filename, detail::XYZR))
-    {
-        readXYZR(filename, std::back_inserter(atom_list));
-    }
-    // PDB file
-    if (std::regex_match(filename, detail::PDB))
-    {
-        readPDB(filename, std::back_inserter(atom_list));
-    }
-    // PQR file
-    else if (std::regex_match(filename, detail::PQR))
-    {
-        readPQR(filename, std::back_inserter(atom_list));
-    }
-    else
-    {
-        printf("Input file name end with PDB/PQR/XYZR.\n");
-        exit(0);
-    }
-
+    readAtomFile(filename, std::back_inserter(atom_list));
 
     getMinMax(atom_list.cbegin(), atom_list.cend(), min, max);
 

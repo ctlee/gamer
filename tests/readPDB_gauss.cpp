@@ -155,5 +155,5 @@ int main(int argc, char *argv[])
 
 //    std::cerr << mesh->numVertices() << std::endl;
 */
-    return -1;
+    return 0;
 }

@@ -30,6 +30,7 @@
  */
 #include <vector>
 #include <limits>
+#include <iostream>
 
 void sort_connectivity(const std::vector<unsigned int>& conn,
                        unsigned int                    *indices)
@@ -442,17 +443,16 @@ int rgb_to_marker(float r, float g, float b)
  * Purpose:  Read a tetgen poly file representing a Piecewise Linear Complex
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readPoly(const char *input_name)
+SurfaceMesh * SurfaceMesh::readPoly(std::string input_name)
 {
     int n;
 
     // Use Tetgen's tetgenio to load poly file
     tetgenio tetio;
 
-    // tetgen, please fix your const-ness!
-    if (!tetio.load_poly((char*)(input_name)))
+    if (!tetio.load_poly(const_cast<char*>(input_name.c_str())))
     {
-        printf("Read error. File \'%s\' could not be read.\n", input_name);
+        std::cerr << "Read error. File \'" << input_name << "\' could not be read." << std::endl;
         return NULL;
     }
 
@@ -497,14 +497,13 @@ SurfaceMesh * SurfaceMesh::readPoly(const char *input_name)
         // Check that we have something sane
         if (tetio.facetlist[n].numberofpolygons != 1)
         {
-            printf("Read error: %s. A Facet can only include one polygon.\n",
-                   input_name);
+            std::cerr << "Read error: " << input_name << ". A Facet can only include one polygon." << std::endl;
             return NULL;
         }
 
         if (tetio.facetlist[n].polygonlist[0].numberofvertices != 3)
         {
-            printf("Read error: %s. Facets can only be triangles.\n", input_name);
+            std::cerr << "Read error: " << input_name << ". Facets can only be triangles." << std::endl;
             return NULL;
         }
 
@@ -590,7 +589,7 @@ void SurfaceMesh::writePoly(char *filename)
  *           provided, a surface mesh will be extracted
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readOFF(const char *input_name)
+SurfaceMesh * SurfaceMesh::readOFF(std::string input_name)
 {
     unsigned int n, m;
     unsigned int a, b, c, d;
@@ -604,9 +603,9 @@ SurfaceMesh * SurfaceMesh::readOFF(const char *input_name)
     SurfaceMesh *surfmesh   = NULL;
 
 
-    if ((fin = fopen(input_name, "r")) == NULL)
+    if ((fin = fopen(input_name.c_str(), "r")) == NULL)
     {
-        printf("Read error. File \'%s\' could not be read.\n", input_name);
+        std::cerr << "Read error. File \'" << input_name << "\' could not be read." << std::endl;
         return NULL;
     }
 
@@ -1989,15 +1988,10 @@ GemMesh* GemMesh_fromPdb(tetgenio *out, float radius, float centerx,
 
     for (i = 0; i < out->numberoftetrahedra; i++)
     {
-        std::cout << out->numberoftetrahedronattributes << std::endl;
-        std::cout << out->tetrahedronattributelist << std::endl;
-
         type = (int)(out->tetrahedronattributelist[i * out->numberoftetrahedronattributes]);
-        std::cout << "2" << std::endl;
 
         for (j = 0; j < out->numberofcorners; j++)
         {
-            std::cout << "3 - " << j << std::endl;
             neighbor = out->neighborlist[i * 4 + j] - 1;
 
             if (neighbor < 0)

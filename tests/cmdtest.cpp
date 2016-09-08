@@ -1,40 +1,6 @@
-/*
- * ***************************************************************************
- * BIMoS = < Biomedical Image-based Modeling and Simulation >
- * Copyright (C) 2009-2010 -- Zeyun Yu (yuz@uwm.edu)
- * Dept. Computer Science, The University of Wisconsin-Milwaukee
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- * ***************************************************************************
- */
 
-/*
- * ***************************************************************************
- * File:     ReadPDB.C    < ... >
- *
- * Author:   Zeyun Yu
- *
- * Purpose:  Read the atoms from a PDB or PQR input
- *
- * Source:   The "PDBelementInformation" was adapted from the PDBParser of
- *           Chandrajit Bajaj's group at The University of Texas at Austin.
- * ***************************************************************************
- */
-
-#include "biom.h"
-//#include "gamercf.h"
+#include <iostream>
+#include <map>
 
 
 typedef struct _PDBelementInformation
@@ -49,7 +15,7 @@ typedef struct _PDBelementInformation
     unsigned char residueIndex;
 } PDBelementInformation;
 
-static const int MAX_BIOCHEM_ELEMENTS = 172;
+static const int MAX_BIOCHEM_ELEMENTS = 167;
 
 // This is unused, however, looks like it could be important.
 //static const PDBelementInformation defaultInformation = { " XX ", "XXX", 1.5f, 1.0f, 0.5f, 0.25f, 0, 0 };
@@ -226,248 +192,44 @@ static PDBelementInformation PDBelementTable[MAX_BIOCHEM_ELEMENTS] =
     { " OE2", "GLU", 1.480f, 1.0f, 0.0f, 0.0f,  1,  8 }
 };
 
-#define MAX_STRING       256
 
-
-char* get_next(int& k, char *buf, const char *line)
+unsigned long str2long(const char* begin, const char* end)
 {
-    int n = 0;
+	unsigned long rval = 0;
 
-    while (line[k] == ' ')
-    {
-        k++;
-    }
+	for(const char* curr = begin; curr != end; ++curr)
+	{
+		rval |= *curr;
+		rval = rval << 8;
+	}
 
-    while (line[k] != ' ')
-    {
-        buf[n] = line[k];
-        n++;
-        k++;
-
-        if (line[k] == '-')
-        {
-            break;
-        }
-    }
-    buf[n] = '\0';
-    return buf;
+	return rval;
 }
 
-char* get_last(int& k, char *buf, char *line)
+std::map<unsigned long, std::map<unsigned long, PDBelementInformation>> PDBelementMap;
+
+int main(int argc, char *argv[])
 {
-    int n = 0;
+	std::cout << "Test complete" << std::endl;
 
-    while (line[k] == ' ')
-    {
-        k++;
-    }
-    n = 0;
+	for(int i = 0; i < MAX_BIOCHEM_ELEMENTS; ++i)
+	{
+		const char* atomName    = PDBelementTable[i].atomName;
+		const char* residueName = PDBelementTable[i].residueName;
 
-    while (line[k] != ' ' && line[k] != '\n' && line[k] != '\0')
-    {
-        buf[n] = line[k];
-        n++;
-        k++;
-    }
-    buf[n] = '\0';
-    return buf;
-}
+		PDBelementMap[str2long(atomName,atomName+4)][str2long(residueName,residueName+3)] = PDBelementTable[i];
+	}
 
-void ReadPDB(const char *filename, int *atom_num, ATOM **atomlist,
-             float min[3], float max[3])
-{
-    int   m, n, k;
-    char  line[MAX_STRING];
-    ATOM *atom_list_loc;
-    char  string[8];
-    FILE *fp;
-    PDBelementInformation eInfo;
-    char  IsPQR, IsPDB;
-    float maxrad;
+//	for(int i = 0; i < MAX_BIOCHEM_ELEMENTS; ++i)
+	for(int i = 0; i < 0; ++i)
+	{
+		const char* atomName    = PDBelementTable[i].atomName;
+		const char* residueName = PDBelementTable[i].residueName;
 
+		auto& element = PDBelementMap[str2long(atomName,atomName+4)][str2long(residueName,residueName+3)];
 
-    IsPQR = 0;
-    IsPDB = 0;
+		std::cout << element.atomName << " " << element.residueName << std::endl;
+	}
 
-    for (m = 0; m < 256; m++)
-    {
-        if (filename[m + 3] == '\0')
-        {
-            break;
-        }
-        else if ((filename[m] == '.') &&
-                 ((filename[m + 1] == 'P') || (filename[m + 1] == 'p')) &&
-                 ((filename[m + 2] == 'Q') || (filename[m + 2] == 'q')) &&
-                 ((filename[m + 3] == 'R') || (filename[m + 3] == 'r')) &&
-                 (filename[m + 4] == '\0'))
-        {
-            IsPQR = 1;
-            break;
-        }
-        else if ((filename[m] == '.') &&
-                 ((filename[m + 1] == 'P') || (filename[m + 1] == 'p')) &&
-                 ((filename[m + 2] == 'D') || (filename[m + 2] == 'd')) &&
-                 ((filename[m + 3] == 'B') || (filename[m + 3] == 'b')) &&
-                 (filename[m + 4] == '\0'))
-        {
-            IsPDB = 1;
-            break;
-        }
-    }
-
-    if ((IsPQR == 0) && (IsPDB == 0))
-    {
-        printf("Input file name must be ending with PDB/pdb or PQR/pqr...\n");
-        exit(0);
-    }
-
-    if ((fp = fopen(filename, "r")) == NULL)
-    {
-        printf("read error...\n");
-        exit(0);
-    }
-
-    m = 0;
-
-    while (fgets(line, MAX_STRING, fp) != NULL)
-    {
-        if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))
-        {
-            m++;
-        }
-    }
-    fclose(fp);
-
-    atom_list_loc = (ATOM *)malloc(sizeof(ATOM) * m);
-
-    if ((fp = fopen(filename, "r")) == NULL)
-    {
-        printf("read error...\n");
-        exit(0);
-    }
-
-    min[0] = min[1] = min[2] = 999999.0;
-    max[0] = max[1] = max[2] = -999999.0;
-    maxrad = 0;
-
-    m = 0;
-
-    while (fgets(line, MAX_STRING, fp) != NULL)
-    {
-        if ((line[0] == 'A') && (line[1] == 'T') && (line[2] == 'O') && (line[3] == 'M'))
-        {
-/* more general format, could be used for pqr format */
-            k = 30;
-
-            atom_list_loc[m].x = atof(get_next(k, string, line));
-
-            if (atom_list_loc[m].x < min[0])
-            {
-                min[0] = atom_list_loc[m].x;
-            }
-
-            if (atom_list_loc[m].x > max[0])
-            {
-                max[0] = atom_list_loc[m].x;
-            }
-
-            atom_list_loc[m].y = atof(get_next(k, string, line));
-
-            if (atom_list_loc[m].y < min[1])
-            {
-                min[1] = atom_list_loc[m].y;
-            }
-
-            if (atom_list_loc[m].y > max[1])
-            {
-                max[1] = atom_list_loc[m].y;
-            }
-
-            atom_list_loc[m].z = atof(get_next(k, string, line));
-
-            if (atom_list_loc[m].z < min[2])
-            {
-                min[2] = atom_list_loc[m].z;
-            }
-
-            if (atom_list_loc[m].z > max[2])
-            {
-                max[2] = atom_list_loc[m].z;
-            }
-
-            if (IsPDB)
-            {
-                atom_list_loc[m].radius = 1.0f; // default radius
-
-                for (n = 0; n < MAX_BIOCHEM_ELEMENTS; n++)
-                {
-                    eInfo = PDBelementTable[n];
-
-                    if ((eInfo.atomName[0] == line[12]) &&
-                        (eInfo.atomName[1] == line[13]) &&
-                        (eInfo.atomName[2] == line[14]) &&
-                        (eInfo.atomName[3] == line[15]) &&
-                        (eInfo.residueName[0] == line[17]) &&
-                        (eInfo.residueName[1] == line[18]) &&
-                        (eInfo.residueName[2] == line[19]))
-                    {
-                        atom_list_loc[m].radius = eInfo.radius;
-                        break;
-                    }
-                }
-
-                if (atom_list_loc[m].radius > maxrad)
-                {
-                    maxrad = atom_list_loc[m].radius;
-                }
-            }
-            else if (IsPQR)
-            {
-                get_next(k, string, line); // and throw away result
-
-                atom_list_loc[m].radius = atof(get_last(k, string, line));
-
-                // atom_list_loc[m].radius += 1.0;
-// if (atom_list_loc[m].radius < 1.0)
-// atom_list_loc[m].radius = 1.0;
-                if (atom_list_loc[m].radius > maxrad)
-                {
-                    maxrad = atom_list_loc[m].radius;
-                }
-            }
-
-
-            k = 0;
-
-            for (n = 0; n < m; n++)
-            {
-                if ((atom_list_loc[m].x - atom_list_loc[n].x) * (atom_list_loc[m].x - atom_list_loc[n].x) +
-                    (atom_list_loc[m].y - atom_list_loc[n].y) * (atom_list_loc[m].y - atom_list_loc[n].y) +
-                    (atom_list_loc[m].z - atom_list_loc[n].z) * (atom_list_loc[m].z - atom_list_loc[n].z) < 0.0001)
-                {
-                    k = 1;
-                    break;
-                }
-            }
-
-            if (k)
-            {
-                m--;
-            }
-            m++;
-        }
-    }
-    fclose(fp);
-
-    // printf("number of atoms: %d \n",m);
-    *atomlist = atom_list_loc;
-    *atom_num = m;
-
-    maxrad += 1.0;
-
-    for (m = 0; m < 3; m++)
-    {
-        min[m] -= 2 * maxrad;
-        max[m] += 2 * maxrad;
-    }
+	return 0;
 }
