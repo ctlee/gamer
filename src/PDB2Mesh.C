@@ -183,17 +183,18 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
     {
         b = 0;
 
+        int index = 0;
         for (k = 0; k < GLOBAL_zdim; k++)
         {
             for (j = 0; j < GLOBAL_ydim; j++)
             {
-                for (i = 0; i < GLOBAL_xdim; i++)
+                for (i = 0; i < GLOBAL_xdim; i++, ++index)
                 {
-                    if (GLOBAL_segment_index[IndexVect(i, j, k)] == MaxVal)
+                    if (GLOBAL_segment_index[index] == MaxVal)
                     {
                         if (!CheckManifold(i, j, k)) // non-manifold occurs
                         {
-                            GLOBAL_segment_index[IndexVect(i, j, k)] = 0;
+                            GLOBAL_segment_index[index] = 0;
                             min_heap->x[min_heap->size]       = i;
                             min_heap->y[min_heap->size]       = j;
                             min_heap->z[min_heap->size]       = k;

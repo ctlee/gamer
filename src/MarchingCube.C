@@ -161,6 +161,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
     hole_end   = NULL;
     den1       = 0;
 
+
     for (l = 0; l < zdim; l++)
     {
         for (n = 0; n < ydim; n++)
@@ -319,45 +320,45 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
 
                 if (mc_sign[IndexVect(tempt_x, tempt_y, tempt_z)] == 255)
                 {
-                    cellIndex |= 1;
+                    cellIndex |= (1 << 0);
                 }
 
                 if (mc_sign[IndexVect(tempt_x, tempt_y + 1, tempt_z)] == 255)
                 {
-                    cellIndex |= 2;
+                    cellIndex |= (1 << 1);
                 }
 
                 if (mc_sign[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)] == 255)
                 {
-                    cellIndex |= 4;
+                    cellIndex |= (1 << 2);
                 }
 
                 if (mc_sign[IndexVect(tempt_x + 1, tempt_y, tempt_z)] == 255)
                 {
-                    cellIndex |= 8;
+                    cellIndex |= (1 << 3);
                 }
 
                 if (mc_sign[IndexVect(tempt_x, tempt_y, tempt_z + 1)] == 255)
                 {
-                    cellIndex |= 16;
+                    cellIndex |= (1 << 4);
                 }
 
                 if (mc_sign[IndexVect(tempt_x, tempt_y + 1, tempt_z + 1)] == 255)
                 {
-                    cellIndex |= 32;
+                    cellIndex |= (1 << 5);
                 }
 
                 if (mc_sign[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z + 1)] == 255)
                 {
-                    cellIndex |= 64;
+                    cellIndex |= (1 << 6);
                 }
 
                 if (mc_sign[IndexVect(tempt_x + 1, tempt_y, tempt_z + 1)] == 255)
                 {
-                    cellIndex |= 128;
+                    cellIndex |= (1 << 7);
                 }
 
-                if (edgeTable[cellIndex] & 1)
+                if (edgeTable[cellIndex] & (1 << 0))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y, tempt_z)].b == -1)
                     {
@@ -395,7 +396,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 2)
+                if (edgeTable[cellIndex] & (1 << 1))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y + 1, tempt_z)].a == -1)
                     {
@@ -433,7 +434,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 4)
+                if (edgeTable[cellIndex] & (1 << 2))
                 {
                     if (mc_edge[IndexVect(tempt_x + 1, tempt_y, tempt_z)].b == -1)
                     {
@@ -471,7 +472,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 8)
+                if (edgeTable[cellIndex] & (1 << 3))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y, tempt_z)].a == -1)
                     {
@@ -509,7 +510,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 16)
+                if (edgeTable[cellIndex] & (1 << 4))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y, tempt_z + 1)].b == -1)
                     {
@@ -547,7 +548,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 32)
+                if (edgeTable[cellIndex] & (1 << 5))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y + 1, tempt_z + 1)].a == -1)
                     {
@@ -585,7 +586,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 64)
+                if (edgeTable[cellIndex] & (1 << 6))
                 {
                     if (mc_edge[IndexVect(tempt_x + 1, tempt_y, tempt_z + 1)].b == -1)
                     {
@@ -623,7 +624,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 128)
+                if (edgeTable[cellIndex] & (1 << 7))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y, tempt_z + 1)].a == -1)
                     {
@@ -661,7 +662,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 256)
+                if (edgeTable[cellIndex] & (1 << 8))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y, tempt_z)].c == -1)
                     {
@@ -699,7 +700,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 512)
+                if (edgeTable[cellIndex] & (1 << 9))
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y + 1, tempt_z)].c == -1)
                     {
@@ -737,7 +738,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 1024)
+                if (edgeTable[cellIndex] & (1 << 10))
                 {
                     if (mc_edge[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)].c == -1)
                     {
@@ -775,7 +776,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     }
                 }
 
-                if (edgeTable[cellIndex] & 2048)
+                if (edgeTable[cellIndex] & (1 << 11))
                 {
                     if (mc_edge[IndexVect(tempt_x + 1, tempt_y, tempt_z)].c == -1)
                     {
@@ -822,6 +823,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
                     triangle[t_num].c = cellVerts[triTable[cellIndex][ii++]];
                     t_num++;
                 }
+
             }
         }
     }

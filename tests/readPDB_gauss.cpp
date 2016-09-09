@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
 
 
     SurfaceMesh_ASC* mesh = std::get<1>(SurfaceMesh::readPDB_gauss(filename.c_str(), 0.0, 2.5));
-
-//    mesh->writeOFF(const_cast<char*>("1CID_01.off"));
 /*
+    mesh->writeOFF(const_cast<char*>("1CID_01.off"));
+
     if(mesh->numVertices() != 45532)
     {
         return -1;
@@ -88,8 +88,12 @@ int main(int argc, char *argv[])
     if(fabs(hash - hash_correct) / (hash_correct + 1e-16) > tol)
     {
         std::cout << "Hash incorrect" << std::endl;
-        return -1;
+//        return -1;
     }
+
+
+    SurfaceMesh* smesh = std::get<0>(SurfaceMesh::readPDB_gauss(filename.c_str(), 0.0, 2.5));
+    smesh->writeOFF(const_cast<char*>("1CID_01.off"));
 /*
     for(int i = 0; i < atom_num; ++i)
     {

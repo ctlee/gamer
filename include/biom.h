@@ -59,7 +59,7 @@
 #define BLOBBYNESS        -0.2f
 
 /** @brief Discretization rate of 3D volumes */
-#define DIM_SCALE         2
+#define DIM_SCALE         1.99
 
 /** @brief Coarsening Rate in surface post-processing */
 #define CoarsenRate       0.1666
