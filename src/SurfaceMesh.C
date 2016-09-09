@@ -29,10 +29,10 @@
  */
 
 #include "biom.h"
+#include "SurfaceMesh.h"
 #include <vector>
 #include <algorithm>
 #include <utility>
-//#include "gamercf.h"
 #include <cmath>
 
 // Declare internal GAMer methods
@@ -143,9 +143,9 @@ SurfaceMesh::~SurfaceMesh()
  */
 void SurfaceMesh::createNeighborlist()
 {
-    int m, n, a0, b0;
+    int n, a0, b0;
     int a, b, c, d;
-    NPNT3 *first_ngr, *second_ngr, *tmp_ngr, *last_ngr;
+    NPNT3 *first_ngr, *second_ngr, *tmp_ngr;
     bool   closed;
 
     if (neighbor_list)
@@ -976,9 +976,9 @@ void SurfaceMesh::eigenvalues()
  */
 void SurfaceMesh::splitMultipleConnectedSurfaces()
 {
-    int m, n, a0, b0;
-    int a, b, c, d;
-    NPNT3 *first_ngr, *second_ngr, *tmp_ngr, *last_ngr;
+    int m, n, b0 = 0;
+    int a, c = 0;
+    NPNT3 *tmp_ngr, *last_ngr;
     bool   closed;
 
     // First stl library class... Let there be more...
@@ -988,7 +988,7 @@ void SurfaceMesh::splitMultipleConnectedSurfaces()
     createNeighborlist();
 
     // Nothing to do
-    if (closed)
+    if (this->isClosed())
     {
         return;
     }
@@ -1028,6 +1028,7 @@ void SurfaceMesh::splitMultipleConnectedSurfaces()
             closed = false;
 
             // FIXME: Should we add non_manifold vertex for this case too?
+            // FIXME: This code does not work at all. -JBM
         }
     }
 

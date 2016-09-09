@@ -30,7 +30,7 @@
  */
 
 #include "biom.h"
-//#include "gamercf.h"
+#include "SurfaceMesh.h"
 
 // Declare internal GAMer methods
 FLTVECT GetPositionSurfaceOnly(float,
@@ -98,7 +98,7 @@ FLTVECT GetNormals(SurfaceMesh *,
  */
 void GenerateHistogram(SurfaceMesh *surfmesh)
 {
-    int   n, m;
+    int   m;
     int   a, b, c;
     float angle;
     int   histogram[18];
@@ -359,7 +359,7 @@ char SurfaceMesh::coarse(float coarse_rate,
     int    m, n, a0, b0;
     int    a, b, c, face_marker;
     float  x, y, z;
-    NPNT3 *first_ngr, *second_ngr, *tmp_ngr, *tmp_ngr1;
+    NPNT3 *first_ngr, *second_ngr, *tmp_ngr;
     int    number, neighbor_number, num;
     float  nx, ny, nz;
     EIGENVECT eigen_vect;
@@ -1550,6 +1550,8 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
         return tmp;
     }
 
+
+    // TODO: use a vector to represent these... and call SORT!
     tx = std::max(x1, std::max(x2, x3));
 
     if (tx == x1)
@@ -1578,7 +1580,7 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
             tz = x1;
         }
     }
-    else if (tx == x3)
+    else // if (tx == x3)
     {
         if (x1 >= x2)
         {
@@ -1591,6 +1593,7 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
             tz = x1;
         }
     }
+
     x1             = tx;
     x2             = ty;
     x3             = tz;
@@ -1827,7 +1830,6 @@ FLTVECT GetNormals(SurfaceMesh *surfmesh, int n)
 char CheckFlipAction(SurfaceMesh *surfmesh,
                      int a, int b, int c, int d, bool preserve_ridges)
 {
-    NPNT3 **neighbor_list = surfmesh->neighbor_list;
     float   min_angle1, min_angle2, angle;
     FLTVECT normal_a, normal_b;
 

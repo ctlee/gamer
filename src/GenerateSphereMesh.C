@@ -49,7 +49,7 @@
 
 
 #include "biom.h"
-//#include "gamercf.h"
+#include "SurfaceMesh.h"
 
 SurfaceMesh * SurfaceMesh::sphere(int level)
 {

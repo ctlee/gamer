@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.6)
 
 project(GAMer VERSION 1.0.0)
 
+enable_testing()
+
 option(BUILD_BLENDER "BUild the GAMer addon for Blender" OFF)
 option(BUILD_STATIC_LIB "Build the static library" OFF)
 
@@ -23,6 +25,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # Define where to put the libraries and binaries
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
 
 add_subdirectory(tetgen)
 add_subdirectory(triangle)
@@ -30,7 +33,7 @@ add_subdirectory(triangle)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)
 # Hack to include maloc for now... TODO: fix
-include_directories(/Users/ctlee/fetk/build/x86_64-apple-darwin15.6.0/include)
+include_directories(/Users/brogan/include)
 
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -42,7 +45,7 @@ endforeach()
 file(GLOB SOURCES "src/*.C")
 
 add_library(gamershared SHARED ${SOURCES})
-set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
+set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(gamershared tetshared trishared)
 # TODO: populate the list of headers to install...
 #install(FILES gamer.h DESTINATION include/gamer)
@@ -50,7 +53,7 @@ install(TARGETS gamershared DESTINATION lib/gamer)
 
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
-    set_target_properties(gamerstatic PROPERTIES COMPILE_FLAGS "-std=c++14 -Wno-error")
+    set_target_properties(gamerstatic PROPERTIES COMPILE_FLAGS "-std=c++14")
     target_link_libraries(gamerstatic tetstatic tristatic)
     install(TARGETS gamerstatic DESTINATION lib/gamer)
 endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
@@ -60,3 +63,5 @@ if(BUILD_BLENDER)
 endif(BUILD_BLENDER)
 
 add_subdirectory(tools)
+
+add_subdirectory(tests)

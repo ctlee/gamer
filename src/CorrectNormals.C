@@ -20,6 +20,7 @@
  */
 
 #include "biom.h"
+#include "SurfaceMesh.h"
 
 /*
  * ***************************************************************************
@@ -32,16 +33,15 @@
  */
 void SurfaceMesh::correctNormals()
 {
-    int  n, m;
+    int  n;
     int  i, j;
-    int  a, b, c, d;
+    int  a, b, c;
     int  a0, b0, c0;
     int *stack;
     unsigned char *visited;
     int   start, end;
     float x, y, z;
     float distance, max_dist;
-    int  *face_list;
     int   progress;
     float max_x, max_y, max_z;
     float ax, ay, az;

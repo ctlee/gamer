@@ -146,28 +146,17 @@ const char tetgen_default_quality_params[] = "qq20";
 void GenerateMeshFromSurfaceMesh(char* input_name, char* input_site, 
 				 char* mesh_format, char* tetgen_params)
 {
-  FILE *fout;
-
-  time_t t0, t1, t2;
+  time_t t0;
   SurfaceMesh* surfmesh = NULL;
   char filename[256], basename[256];
   char* basename_end_pointer;
-  char* suffix_end_pointer;
   unsigned int basename_index;
 
   unsigned int num_spheres = 0;
   ATOM *sphere_list = NULL;
   unsigned int* marker_list = NULL;
-  unsigned char* active_sites = NULL;
-  float* area_constraint_list = NULL;
-  int dummy_count = -1;
-  bool use_facemarkers = false;
 
   tetgenio in, out;
-  tetgenio::facet *f;
-  tetgenio::polygon *p;
-
-  unsigned int i, j;
 
   // Read any active sites from file
   if (input_site != NULL)

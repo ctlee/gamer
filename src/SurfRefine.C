@@ -30,7 +30,7 @@
  */
 
 #include "biom.h"
-//#include "gamercf.h"
+#include "SurfaceMesh.h"
 
 
 /*
@@ -47,7 +47,6 @@ void SurfaceMesh::refine()
     unsigned int  local_num_edges = 0, total_num_edges = 0, edge_num = 0;
     unsigned int  min_vertex_num, max_vertex_num, face_num;
     unsigned int  k, m, n, nv;
-    unsigned int  a, b, c;
     unsigned int *num_edges;
     unsigned int *offsets;
     unsigned int *vertex2edge;
