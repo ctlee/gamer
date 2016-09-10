@@ -9,6 +9,9 @@ option(BUILD_TRIANGLE_BIN "Build the triangle binaries" OFF)
 option(BUILD_STATIC_LIB "Build the static library" OFF)
 
 set(TARGET_BINS "")
+set(BIN_COMPILE_DEFS "")
+set(LIB_COMPILE_DEFS "")
+set(ALL_COMPILE_DEFS "")
 
 ## Set the library targets
 # The shared library is required for building standard GAMer.
@@ -21,8 +24,7 @@ if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     list(APPEND TARGET_LIBS tristatic)
 endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
 
-set_target_properties(${TARGET_LIBS} PROPERTIES 
-        "COMPILE_DEFINITIONS" ANSI_DECLARATORS)
+list(APPEND LIB_COMPILE_DEFS ANSI_DECLARATORS)
 install(TARGETS ${TARGET_LIBS} DESTINATION lib/triangle)
 
 ## Set the binary targets
@@ -46,26 +48,24 @@ endif(BUILD_TRIANGLE_BIN)
 
 
 # Tell the libraries they're libraries
-set_target_properties(${TARGET_LIBS} PROPERTIES "COMPILE_DEFINITIONS" TRILIBRARY)
+list(APPEND LIB_COMPILE_DEFS TRILIBRARY)
 
 if(SINGLE)
-    set_target_properties(${TARGET_LIBS} ${TARGET_BINS} PROPERTIES 
-            "COMPILE_DEFINITIONS" SINGLE)
+    list(APPEND LIB_COMPILE_DEFS SINGLE)
 endif(SINGLE)
 
 # Set some definitions in accord with Shewchuk's recommendations
 # TODO: Check if there are other cases... I suspect there are some.
 if(CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_COMPILER_IS_GNUCC)
-    set_target_properties(${TARGET_LIBS} ${TARGET_BINS} PROPERTIES 
-            "COMPILE_DEFINITIONS" LINUX)
+    list(APPEND LIB_COMPILE_DEFS LINUX)
 elseif(WIN32)
-    set_target_properties(${TARGET_LIBS} ${TARGET_BINS} PROPERTIES
-            "COMPILE_DEFINITIONS" CPU86)
+    list(APPEND LIB_COMPILE_DEFS CPU86)
 endif(CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_COMPILER_IS_GNUCC)
 
 if(NOT UNIX)
-set_target_properties(${TARGET_LIBS} ${TARGET_BINS} PROPERTIES 
-        "COMPILE_DEFINITIONS" NO_TIMER)
+    list(APPEND LIB_COMPILE_DEFS NO_TIMER)
 endif(NOT UNIX)
+
+target_compile_definitions(${TARGET_LIBS} PRIVATE ${LIB_COMPILE_DEFS})
 
 #target_include_directories(trishared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

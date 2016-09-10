@@ -270,7 +270,6 @@ int main(int argc, char* argv[])
 		X[curr] = pF->get(curr).orientation;
 	}
 
-	std::size_t count = 0;
 	for(auto curr : pF->get_level_id<3>())
 	{
 		std::array<ASC::KeyType,3> w = pF->get_name(curr);
@@ -290,7 +289,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	count = 0;
 	for(auto curr : pF->get_level_id<2>())
 	{
 		std::array<ASC::KeyType,2> w = pF->get_name(curr);
@@ -331,7 +329,7 @@ int main(int argc, char* argv[])
 
 int rgb_to_marker(float r, float g, float b)
 {
-    if (r < 0 | r > 1 | g < 0 | g > 1 | b < 0 | b > 1)
+    if (r < 0 || r > 1 || g < 0 || g > 1 || b < 0 || b > 1)
     {
         printf("Expected individual RGB value to be betwen 0 and 1.\n");
         exit(1);
@@ -347,7 +345,7 @@ ASC* readOFF(const char *input_name)
     unsigned int n, m;
     unsigned int a, b, c;
     float x, y, z, color_r, color_g, color_b, color_a;
-    int          v_n, t_n, e_n, character;
+    unsigned int          v_n, t_n, e_n, character;
     char         line[256];
     FILE        *fin = NULL;
     fpos_t       fp;

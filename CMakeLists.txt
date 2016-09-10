@@ -8,8 +8,8 @@ option(BUILD_BLENDER "BUild the GAMer addon for Blender" OFF)
 option(BUILD_STATIC_LIB "Build the static library" OFF)
 
 # Set the flags for empty build and print all build flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall -Werror")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall -Wno-error")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wno-error")
 message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
 message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
 message(STATUS "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
@@ -33,7 +33,7 @@ add_subdirectory(triangle)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)
 # Hack to include maloc for now... TODO: fix
-include_directories(/Users/brogan/include)
+include_directories(/home/brogan/include)
 
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)

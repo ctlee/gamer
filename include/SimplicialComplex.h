@@ -166,9 +166,9 @@ public:
 		: node_count(0)
 	{
 		_root = create_node<0>();
-		for(int i = 0; i < numLevels; ++i)
+		for(auto& x : level_count)
 		{
-			level_count[i] = 0;
+			x = 0;
 		}
 	}
 

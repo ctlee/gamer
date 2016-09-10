@@ -412,7 +412,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
     printf("Load Lattice\n");
 
     // Check if input is a .lat file
-    basename_end_pointer = strstr(segmentation_filename, ".lat");
+    basename_end_pointer = strstr(const_cast<char*>(segmentation_filename), ".lat");
 
     if (basename_end_pointer == NULL)
     {
@@ -437,7 +437,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
         printf("Intensity file given\n");
 
         // Check if input is a .flat file
-        basename_end_pointer = strstr(intensity_filename, ".flat");
+        basename_end_pointer = strstr(const_cast<char*>(intensity_filename), ".flat");
 
         if (basename_end_pointer == NULL)
         {
