@@ -33,7 +33,7 @@ add_subdirectory(triangle)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)
 # Hack to include maloc for now... TODO: fix
-include_directories(/home/brogan/include)
+include_directories(/Users/brogan/include)
 
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
