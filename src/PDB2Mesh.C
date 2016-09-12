@@ -454,7 +454,7 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_molsurf(std::stri
     SurfaceMesh_ASC* mesh = new SurfaceMesh_ASC();
 
     // write vertices
-    for (std::size_t i = 0; i < surfmesh->num_vertices; i++)
+    for (int i = 0; i < surfmesh->num_vertices; i++)
     {
         float x = GLOBAL_vertex[i].x * span[0] + orig[0];
         float y = GLOBAL_vertex[i].y * span[1] + orig[1];
