@@ -66,6 +66,6 @@ if(NOT UNIX)
     list(APPEND LIB_COMPILE_DEFS NO_TIMER)
 endif(NOT UNIX)
 
-target_compile_definitions(${TARGET_LIBS} PRIVATE ${LIB_COMPILE_DEFS})
-
-#target_include_directories(trishared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+foreach(LIB IN LISTS TARGET_LIBS)
+    target_compile_definitions(${LIB} PRIVATE ${LIB_COMPILE_DEFS})
+endforeach(LIB IN LISTS TARGET_LIBS)
