@@ -32,8 +32,6 @@ add_subdirectory(triangle)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)
-# Hack to include maloc for now... TODO: fix
-include_directories(/home/brogan/include)
 
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -59,7 +57,9 @@ if(BUILD_BLENDER OR BUILD_STATIC_LIB)
 endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
 
 if(BUILD_BLENDER)
-    # TODO: actually build the swigs and blender stuff
+    # build swig wrapper for python
+    add_subdirectory(swig)
+    # TODO: add the install stuff
 endif(BUILD_BLENDER)
 
 add_subdirectory(tools)

@@ -44,8 +44,6 @@
 #ifndef _GAMER_BASE_H_
 #define _GAMER_BASE_H_
 
-#include <maloc/maloc.h>
-
 /** @brief Triangle-specific macros */
 #define TRILIBRARY
 /** @brief Triangle-specific macros */
