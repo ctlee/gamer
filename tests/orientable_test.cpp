@@ -257,6 +257,8 @@ int main(int argc, char* argv[])
 	clear_orientation(*pF);
 	auto rval = compute_orientation(*pF);
 
+	std::cout << std::get<0>(rval) << " " << std::get<1>(rval) << " " << std::get<2>(rval) << std::endl;
+
 	if(strcmp(argv[2], "true") == 0)
 	{
 		if(std::get<1>(rval))

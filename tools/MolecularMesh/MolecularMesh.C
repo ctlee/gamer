@@ -317,7 +317,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
         }
         else if (molsurf == 1)
         {
-            surfmesh_inner = SurfaceMesh::readPDB_molsurf(input_name);
+            surfmesh_inner = std::get<0>(SurfaceMesh::readPDB_molsurf(input_name));
         }
         else
         {

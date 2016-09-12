@@ -11,7 +11,6 @@ public:
 	using IndexType = std::array<std::size_t, index_dimension>;
 	using DataType  = std::vector<ElemType>;
 
-
 	struct index_iterator : public std::iterator<std::bidirectional_iterator_tag, IndexType>
 	{
 		using super = std::iterator<std::bidirectional_iterator_tag, IndexType>;
@@ -24,18 +23,12 @@ public:
 		index_iterator(const IndexType& m)
 			: n(m)
 		{
-			for(auto& x : i)
-			{
-				x = 0;
-			}
+			i.fill(0);
 		}
 		index_iterator(int, const IndexType& m)
 			: n(m)
 		{
-			for(auto& x : i)
-			{
-				x = 0;
-			}
+			i.fill(0);
 			i[0] = m[0];
 		}
 		index_iterator(const IndexType& j, const IndexType& m)
@@ -120,7 +113,7 @@ public:
 	void resize(const IndexType& size)
 	{
 		std::size_t n = 1;
-		std::for_each(_dimensions.begin(), _dimensions.end(), [&n](auto x){n *= x;});
+		std::for_each(size.begin(), size.end(), [&n](auto x){n *= x;});
 		_data.resize(n);
 		_dimensions = size;
 	}

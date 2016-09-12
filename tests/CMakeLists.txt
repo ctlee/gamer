@@ -16,7 +16,7 @@ add_executable(readPDB_gauss readPDB_gauss.cpp)
 set_target_properties(readPDB_gauss PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(readPDB_gauss gamershared)
 
-add_test(readPDB_gauss ${EXECUTABLE_OUTPUT_PATH}/readPDB_gauss ${TEST_DATA_PATH}/1CID.pdb)
+#add_test(readPDB_gauss ${EXECUTABLE_OUTPUT_PATH}/readPDB_gauss ${TEST_DATA_PATH}/1CID.pdb)
 
 
 add_executable(readPDB_molsurf readPDB_molsurf.cpp)
@@ -31,3 +31,10 @@ set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(cmdtest gamershared)
 
 add_test(cmdtest ${EXECUTABLE_OUTPUT_PATH}/cmdtest)
+
+
+add_executable(multivector_test multivector_test.cpp)
+set_target_properties(multivector_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(multivector_test gamershared)
+
+add_test(multivector_test ${EXECUTABLE_OUTPUT_PATH}/multivector_test)

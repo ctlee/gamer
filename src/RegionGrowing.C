@@ -243,51 +243,39 @@ void GetMinimum(void)
 
 void InsertHeap(int x, int y, int z, float dist)
 {
-    int pointer, parent;
+    int parent = 0;
 
 
     min_heap->size++;
-    pointer = min_heap->size;
+    int pointer = min_heap->size;
 
     while (pointer > 1)
     {
         if (pointer % 2 == 0)
         {
             parent = pointer / 2;
-
-            if (dist < min_heap->dist[parent - 1])
-            {
-                min_heap->x[pointer - 1]                                                                               = min_heap->x[parent - 1];
-                min_heap->y[pointer - 1]                                                                               = min_heap->y[parent - 1];
-                min_heap->z[pointer - 1]                                                                               = min_heap->z[parent - 1];
-                min_heap->seed[pointer - 1]                                                                            = min_heap->seed[parent - 1];
-                min_heap->dist[pointer - 1]                                                                            = min_heap->dist[parent - 1];
-                heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-                pointer                                                                                                = parent;
-            }
-            else
-            {
-                break;
-            }
         }
         else if (pointer % 2 == 1)
         {
             parent = (pointer - 1) / 2;
+        }
 
-            if (dist < min_heap->dist[parent - 1])
-            {
-                min_heap->x[pointer - 1]                                                                               = min_heap->x[parent - 1];
-                min_heap->y[pointer - 1]                                                                               = min_heap->y[parent - 1];
-                min_heap->z[pointer - 1]                                                                               = min_heap->z[parent - 1];
-                min_heap->seed[pointer - 1]                                                                            = min_heap->seed[parent - 1];
-                min_heap->dist[pointer - 1]                                                                            = min_heap->dist[parent - 1];
-                heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-                pointer                                                                                                = parent;
-            }
-            else
-            {
-                break;
-            }
+        if (dist < min_heap->dist[parent - 1])
+        {
+            min_heap->x[pointer - 1]    = min_heap->x[parent - 1];
+            min_heap->y[pointer - 1]    = min_heap->y[parent - 1];
+            min_heap->z[pointer - 1]    = min_heap->z[parent - 1];
+            min_heap->seed[pointer - 1] = min_heap->seed[parent - 1];
+            min_heap->dist[pointer - 1] = min_heap->dist[parent - 1];
+
+            int index = IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1]);
+            heap_pointer[index] = pointer - 1;
+
+            pointer             = parent;
+        }
+        else
+        {
+            break;
         }
     }
     min_heap->x[pointer - 1]    = x;
@@ -301,12 +289,12 @@ void InsertHeap(int x, int y, int z, float dist)
 
 void UpdateHeap(int x, int y, int z, float dist)
 {
-    int  pointer, parent;
+    int  parent = 0;
     int  left, right;
     char up = 0;
 
 
-    pointer = heap_pointer[IndexVect1(x, y, z)] + 1;
+    int pointer = heap_pointer[IndexVect1(x, y, z)] + 1;
 
     // checking the upper elements
     while (pointer > 1)
@@ -314,42 +302,28 @@ void UpdateHeap(int x, int y, int z, float dist)
         if (pointer % 2 == 0)
         {
             parent = pointer / 2;
-
-            if (dist < min_heap->dist[parent - 1])
-            {
-                up                                                                                                     = 1;
-                min_heap->x[pointer - 1]                                                                               = min_heap->x[parent - 1];
-                min_heap->y[pointer - 1]                                                                               = min_heap->y[parent - 1];
-                min_heap->z[pointer - 1]                                                                               = min_heap->z[parent - 1];
-                min_heap->seed[pointer - 1]                                                                            = min_heap->seed[parent - 1];
-                min_heap->dist[pointer - 1]                                                                            = min_heap->dist[parent - 1];
-                heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-                pointer                                                                                                = parent;
-            }
-            else
-            {
-                break;
-            }
         }
         else if (pointer % 2 == 1)
         {
             parent = (pointer - 1) / 2;
+        }
 
-            if (dist < min_heap->dist[parent - 1])
-            {
-                up                                                                                                     = 1;
-                min_heap->x[pointer - 1]                                                                               = min_heap->x[parent - 1];
-                min_heap->y[pointer - 1]                                                                               = min_heap->y[parent - 1];
-                min_heap->z[pointer - 1]                                                                               = min_heap->z[parent - 1];
-                min_heap->seed[pointer - 1]                                                                            = min_heap->seed[parent - 1];
-                min_heap->dist[pointer - 1]                                                                            = min_heap->dist[parent - 1];
-                heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-                pointer                                                                                                = parent;
-            }
-            else
-            {
-                break;
-            }
+        if (dist < min_heap->dist[parent - 1])
+        {
+            min_heap->x[pointer - 1]    = min_heap->x[parent - 1];
+            min_heap->y[pointer - 1]    = min_heap->y[parent - 1];
+            min_heap->z[pointer - 1]    = min_heap->z[parent - 1];
+            min_heap->seed[pointer - 1] = min_heap->seed[parent - 1];
+            min_heap->dist[pointer - 1] = min_heap->dist[parent - 1];
+
+            int index = IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1]);
+            heap_pointer[index] = pointer - 1;
+
+            pointer             = parent;
+        }
+        else
+        {
+            break;
         }
     }
 

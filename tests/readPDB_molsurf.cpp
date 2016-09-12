@@ -7,18 +7,36 @@ int main(int argc, char *argv[])
 {
     std::string filename(argv[1]);
 
-    SurfaceMesh* mesh = SurfaceMesh::readPDB_molsurf(filename.c_str());
+    SurfaceMesh* mesh = std::get<0>(SurfaceMesh::readPDB_molsurf(filename.c_str()));
 
-//    mesh->writeOFF(const_cast<char*>("1CID_01.off"));
+    mesh->writeOFF(const_cast<char*>("1CID_01.off"));
 
-    if(mesh->numVertices() != 45532)
+    std::cout << mesh->numVertices() << std::endl;
+    std::cout << mesh->numFaces() << std::endl;
+
+    if(mesh->numVertices() != 48734)
     {
         return -1;
     }
-    if(mesh->numFaces() != 91068)
+    if(mesh->numFaces() != 97464)
     {
         return -1;
     }
+
+    SurfaceMesh_ASC* amesh = std::get<1>(SurfaceMesh::readPDB_molsurf(filename.c_str()));
+
+    std::cout << amesh->size<1>() << std::endl;
+    std::cout << amesh->size<3>() << std::endl;
+
+    if(amesh->size<1>() != 48734)
+    {
+        return -1;
+    }
+    if(amesh->size<3>() != 97464)
+    {
+        return -1;
+    }
+
 /*
     double hash = 0.0;
     double hash_correct = 1.15136e8;

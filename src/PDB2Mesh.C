@@ -36,6 +36,7 @@
 #include <vector>
 #include <cmath>
 
+
 struct MOL_VERTEX {
     float         x;     // vertex coordinate
     float         y;
@@ -48,17 +49,23 @@ struct MOL_VERTEX {
     unsigned short pz;
 };
 
+
+
+int GLOBAL_xdim, GLOBAL_ydim, GLOBAL_zdim;
+
+// GRID variables
 int *GLOBAL_segment_index;
 int *GLOBAL_atom_index;
-INT4VECT   *GLOBAL_quads;
-MOL_VERTEX *GLOBAL_vertex;
-int GLOBAL_vert_num;
-int GLOBAL_quad_num;
-int GLOBAL_xdim, GLOBAL_ydim, GLOBAL_zdim;
+
+// Border variables
+INT4VECT   *GLOBAL_quads;   int GLOBAL_vert_num;
+MOL_VERTEX *GLOBAL_vertex;  int GLOBAL_quad_num;
+
 
 
 #undef IndexVect
 #define IndexVect(i, j, k) ( ( (k) * GLOBAL_ydim + (j) ) * GLOBAL_xdim + (i) )
+
 
 int  CheckFaceCorner(float x,
                      float y,
@@ -91,7 +98,7 @@ void  ReadPDB(std::string filename,
               float  min[3],
               float  max[3]);
 
-SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
+std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_molsurf(std::string input_name)
 {
     int       i, j, k;
     int       a, b, c, d;
@@ -102,11 +109,13 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
     double    nx, ny, nz;
     int       xydim, xyzdim;
     clock_t   begin, finish;
-    MinHeapS *min_heap;
-    SEEDS    *AllSeeds;
     SurfaceMesh *surfmesh;
     std::vector<ATOM> atom_list;
     float min[3], max[3];
+    SEEDS    *AllSeeds; // Border variable
+    MinHeapS *min_heap;
+
+
 
     // Read in the PDB file
     readPDB(input_name, std::back_inserter(atom_list));
@@ -184,6 +193,7 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
         b = 0;
 
         int index = 0;
+
         for (k = 0; k < GLOBAL_zdim; k++)
         {
             for (j = 0; j < GLOBAL_ydim; j++)
@@ -440,14 +450,21 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
     // printf("   Smooth the quad meshes: CPU Time = %f seconds \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
 
     // Allocate memory
-    surfmesh = new SurfaceMesh(GLOBAL_vert_num, GLOBAL_quad_num * 2);
+    surfmesh              = new SurfaceMesh(GLOBAL_vert_num, GLOBAL_quad_num * 2);
+    SurfaceMesh_ASC* mesh = new SurfaceMesh_ASC();
 
     // write vertices
-    for (i = 0; i < surfmesh->num_vertices; i++)
+    for (std::size_t i = 0; i < surfmesh->num_vertices; i++)
     {
-        surfmesh->vertex[i].x = GLOBAL_vertex[i].x * span[0] + orig[0];
-        surfmesh->vertex[i].y = GLOBAL_vertex[i].y * span[1] + orig[1];
-        surfmesh->vertex[i].z = GLOBAL_vertex[i].z * span[2] + orig[2];
+        float x = GLOBAL_vertex[i].x * span[0] + orig[0];
+        float y = GLOBAL_vertex[i].y * span[1] + orig[1];
+        float z = GLOBAL_vertex[i].z * span[2] + orig[2];
+
+        surfmesh->vertex[i].x = x;
+        surfmesh->vertex[i].y = y;
+        surfmesh->vertex[i].z = z;
+
+        mesh->insert<1>({i}, FLTVECT({x,y,z}));
     }
 
     // write triangles
@@ -520,6 +537,9 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
             surfmesh->face[2 * i + 1].a = a;
             surfmesh->face[2 * i + 1].b = c;
             surfmesh->face[2 * i + 1].c = d;
+
+            mesh->insert<3>({a,b,c});
+            mesh->insert<3>({a,c,d});
         }
         else
         {
@@ -529,6 +549,9 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
             surfmesh->face[2 * i + 1].a = b;
             surfmesh->face[2 * i + 1].b = c;
             surfmesh->face[2 * i + 1].c = d;
+
+            mesh->insert<3>({a,b,d});
+            mesh->insert<3>({b,c,d});
         }
     }
 
@@ -568,7 +591,7 @@ SurfaceMesh * SurfaceMesh::readPDB_molsurf(std::string input_name)
     // Flip normals so they now points outwards
     surfmesh->flipNormals();
 
-    return surfmesh;
+    return std::make_tuple(surfmesh, mesh);
 }
 
 float GetAngle(int a, int b, int c)
