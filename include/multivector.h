@@ -2,11 +2,13 @@
 #include <array>
 #include <vector>
 #include <algorithm>
+#include <cassert>
+#include "util.h"
 
 template <typename _ElemType, std::size_t _index_dimension>
 class multivector {
 public:
-	const static std::size_t index_dimension = _index_dimension;
+	constexpr static std::size_t index_dimension = _index_dimension;
 	using ElemType  = _ElemType;
 	using IndexType = std::array<std::size_t, index_dimension>;
 	using DataType  = std::vector<ElemType>;
@@ -93,10 +95,30 @@ public:
 		IndexType n;
 	};
 
+	template <typename... Ts>
+	multivector(Ts... args)
+	{
+		util::fill_array(_dimensions, args...);
+		resize(_dimensions);
+	}
+
+	multivector(std::initializer_list<std::size_t> init)
+	{
+		assert(init.size() == index_dimension);
+		int i = 0;
+		for(auto curr : init)
+		{
+			_dimensions[i++] = curr;
+		}
+		std::size_t n = 1;
+		std::for_each(_dimensions.begin(), _dimensions.end(), [&n](auto x){n *= x;});
+		_data.resize(n);
+	}
 
 	multivector(const IndexType& dims)
 		: _dimensions(dims)
 	{
+		assert(dims.size() == index_dimension);
 		std::size_t n = 1;
 		std::for_each(_dimensions.begin(), _dimensions.end(), [&n](auto x){n *= x;});
 		_data.resize(n);
@@ -105,6 +127,7 @@ public:
 	multivector(const IndexType&& dims)
 		: _dimensions(std::move(dims))
 	{
+		assert(dims.size() == index_dimension);
 		std::size_t n = 1;
 		std::for_each(_dimensions.begin(), _dimensions.end(), [&n](auto x){n *= x;});
 		_data.resize(n);
@@ -112,9 +135,7 @@ public:
 
 	void resize(const IndexType& size)
 	{
-		std::size_t n = 1;
-		std::for_each(size.begin(), size.end(), [&n](auto x){n *= x;});
-		_data.resize(n);
+		_data.resize(compute_size(size));
 		_dimensions = size;
 	}
 
@@ -143,6 +164,13 @@ public:
 	typename DataType::const_iterator end()   const { return _data.end();   }
 
 private:
+	std::size_t compute_size(const IndexType& size)
+	{
+		std::size_t n = 1;
+		std::for_each(size.begin(), size.end(), [&n](auto x){n *= x;});
+		return n;
+	}
+
 	std::size_t get_index(const IndexType& index) const
 	{
 		std::size_t rval = 0;

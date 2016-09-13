@@ -109,4 +109,27 @@ namespace util
 	{
 		using type = TUPLE<Ts...>;
 	};
+
+
+
+	template <typename S, std::size_t depth, std::size_t N, typename T>
+	void fill_arrayH(std::array<S,N>& arr, S arg)
+	{
+		static_assert(depth + 1 == N, "Size of array must match number of input arguments");
+		arr[depth] = arg;
+	}
+
+	template <typename S, std::size_t depth, std::size_t N, typename T, typename... Ts>
+	void fill_arrayH(std::array<S,N>& arr, S head, Ts... tail)
+	{
+		arr[depth] = head;
+		fill_arrayH<S,depth+1,N,Ts...>(arr, tail...);
+	}
+
+	template <typename S, std::size_t N, typename... Ts>
+	void fill_array(std::array<S,N>& arr, Ts... args)
+	{
+		static_assert(sizeof...(args) == N, "Size of array must match number of input arguments");
+		fill_arrayH<S,0,N,Ts...>(arr, args...);
+	}
 }
