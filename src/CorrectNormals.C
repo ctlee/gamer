@@ -21,6 +21,7 @@
 
 #include "biom.h"
 #include "SurfaceMesh.h"
+#include <limits>
 
 /*
  * ***************************************************************************
@@ -49,9 +50,9 @@ void SurfaceMesh::correctNormals()
     float cx, cy, cz;
 
     // get the max coordinates of the nodes
-    max_x = -999999.0f;
-    max_y = -999999.0f;
-    max_z = -999999.0f;
+    max_x = -std::numeric_limits<float>::max();
+    max_y = -std::numeric_limits<float>::max();
+    max_z = -std::numeric_limits<float>::max();
 
     for (n = 0; n < num_vertices; n++)
     {
