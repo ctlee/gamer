@@ -2,36 +2,95 @@
 #include "util.h"
 #include <iostream>
 #include <array>
+#include <random>
 
+
+template <typename Fn, typename... Ts>
+struct flattenH {};
+
+template <typename Fn, typename T, typename... Ts>
+struct flattenH<Fn,T,Ts...> {
+	template <std::size_t N>
+	static void apply(Fn f, T head, Ts... tail)
+	{
+		f(N, head);
+		flattenH<Fn,Ts...>::template apply<N+1>(f,tail...);
+	}
+};
+
+template <typename Fn>
+struct flattenH<Fn> {
+	template <std::size_t N>
+	static void apply(Fn f) {}
+};
+
+template <typename Fn, std::size_t K, typename T, typename... Ts>
+struct flattenH<Fn, std::array<T,K>, Ts...> {
+	template <std::size_t N>
+	static void apply(Fn f, const std::array<T,K>& head, Ts... tail)
+	{
+		for(std::size_t k = 0; k < K; ++k)
+		{
+			f(N+k,head[k]);
+		}
+		flattenH<Fn,Ts...>::template apply<N+K>(f,tail...);
+	}
+};
+
+template <typename Fn, typename... Ts>
+void flatten(Fn f, Ts... args)
+{
+	flattenH<Fn,Ts...>::template apply<0>(f,args...);
+}
+
+template <typename... Ts>
+void testme(Ts... args)
+{
+	std::cout << sizeof...(Ts) << std::endl;
+}
 
 int main()
 {
-	multivector<std::string, 2> v(5,5);
-	v[{1,2}] = "Hello, sir!";
-	std::cout << v[{1,2}] << std::endl;
-	std::cout << "dude" << std::endl;
+	multivector<double, 1> v0(3);
+	multivector<double, 1> v1(3);
+	multivector<double, 1> v2(3);
+/*
+	std::default_random_engine generator;
+	std::normal_distribution<double> distribution;
 
-	for(std::string curr : v)
+	for(auto& curr : v0)
 	{
-		std::cout << curr << std::endl;
+		curr = distribution(generator);
 	}
+	for(auto& curr : v1)
+	{
+		curr = distribution(generator);
+	}
+*/
+	v0[{0}] = 1; v0[{1}] = 0; v0[{2}] = 0;
+	v1[{0}] = 0; v1[{1}] = 1; v1[{2}] = 0;
+	v2[{0}] = 0; v2[{1}] = 0; v2[{2}] = 1;
 
-	v.resize({6,6});
+	auto uu = v0 ^ v1;
+	auto w  = uu ^ v2;
 
 	int m = 0;
-	for(auto curr = v.index_begin(); curr != v.index_end() && m < 100; ++curr, ++m)
+	for(auto curr = uu.index_begin(); curr != uu.index_end() && m < 100; ++curr, ++m)
 	{
 		for(auto x : (*curr))
 		{
 			std::cout << x << " ";
 		}
-		std::cout << v[*curr] << std::endl;
+		std::cout << ": " << uu[*curr] << std::endl;
 	}
 
+	std::cout << dot(w,w) << std::endl;
 	std::cout << "Test Complete" << std::endl;
 
 	std::array<std::size_t,5> x;
-	util::fill_array(x,2,3,5,7,11);
+	std::array<std::size_t,3> a{{2,3,4}};
+	std::array<std::size_t,2> b{{7,11}};
+	flatten([&x](std::size_t i, std::size_t y){ x[i] = y; std::cout << i << " " << y << std::endl; },a,b);
 
 	for(auto a : x)
 	{

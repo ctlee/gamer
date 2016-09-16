@@ -5,6 +5,18 @@
 #include <cassert>
 #include "util.h"
 
+namespace detail {
+	template <std::size_t k>
+	struct factorial {
+		constexpr static std::size_t value = k*factorial<k-1>::value;
+	};
+
+	template <>
+	struct factorial<0> {
+		constexpr static std::size_t value = 1;
+	};
+}
+
 template <typename _ElemType, std::size_t _index_dimension>
 class multivector {
 public:
@@ -102,6 +114,10 @@ public:
 		resize(_dimensions);
 	}
 
+	multivector(const multivector& x) : _dimensions(x._dimensions), _data(x._data) {}
+
+	multivector(const multivector&& x) : _dimensions(std::move(x._dimensions)), _data(std::move(x._data)) {}
+
 	multivector(std::initializer_list<std::size_t> init)
 	{
 		assert(init.size() == index_dimension);
@@ -133,6 +149,11 @@ public:
 		_data.resize(n);
 	}
 
+	const IndexType& dims() const
+	{
+		return _dimensions;
+	}
+
 	void resize(const IndexType& size)
 	{
 		_data.resize(compute_size(size));
@@ -154,8 +175,44 @@ public:
 		return _data[get_index(index)];
 	}
 
+	multivector& operator+=(const multivector& rhs)
+	{
+		assert(_dimensions == rhs._dimensions);
+
+		typename DataType::const_iterator rhs_curr = rhs.begin();
+		for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+		{
+			*tcurr += *rhs_curr;
+		}
+		return *this;
+	}
+
+	multivector& operator-=(const multivector& rhs)
+	{
+		assert(_dimensions == rhs._dimensions);
+
+		typename DataType::const_iterator rhs_curr = rhs.begin();
+		for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+		{
+			*tcurr -= *rhs_curr;
+		}
+		return *this;
+	}
+
+	multivector& operator*=(ElemType x)
+	{
+		for(auto& a : *this)
+		{
+			a *= x;
+		}
+		return *this;
+	}
+
 	index_iterator index_begin() { return index_iterator(_dimensions); }
 	index_iterator index_end()   { return index_iterator(0,_dimensions); }
+
+	index_iterator index_begin() const { return index_iterator(_dimensions); }
+	index_iterator index_end()   const { return index_iterator(0,_dimensions); }
 
 	typename DataType::iterator       begin()       { return _data.begin(); }
 	typename DataType::iterator       end()         { return _data.end();   }
@@ -185,6 +242,88 @@ private:
 		return rval;
 	}
 private:
-	DataType  _data;
 	IndexType _dimensions;
+	DataType  _data;
 };
+
+
+template <typename ElemType, std::size_t N, std::size_t M>
+multivector<ElemType,N+M> operator*(const multivector<ElemType,N>& A, const multivector<ElemType,M>& B)
+{
+	std::array<std::size_t,N+M> dimensions;
+	{
+		std::size_t i = 0;
+		for(auto k : A.dims())
+		{
+			dimensions[i++] = k;
+		}
+		for(auto k : B.dims())
+		{
+			dimensions[i++] = k;
+		}
+	}
+	multivector<ElemType,N+M> rval(dimensions);
+
+
+	for(auto pA = A.index_begin(); pA != A.index_end(); ++pA)
+	{
+		for(auto pB = B.index_begin(); pB != B.index_end(); ++pB)
+		{
+			std::size_t i = 0;
+			for(auto k : *pA)
+			{
+				dimensions[i++] = k;
+			}
+			for(auto k : *pB)
+			{
+				dimensions[i++] = k;
+			}
+			rval[dimensions] = A[*pA] * B[*pB];
+		}
+	}
+
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t N>
+multivector<ElemType,N> operator-(const multivector<ElemType,N>& A, const multivector<ElemType,N>& B)
+{
+	multivector<ElemType,N> rval(A);
+	rval -= B;
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t N>
+multivector<ElemType,N> operator*(const multivector<ElemType,N>& A, ElemType x)
+{
+	auto rval(A);
+	for(auto& a : rval)
+	{
+		a *= x;
+	}
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t N, std::size_t M>
+multivector<ElemType,N+M> operator^(const multivector<ElemType,N>& A, const multivector<ElemType,M>& B)
+{
+	auto rval = A*B - B*A;
+	ElemType num = 1;//detail::factorial<N+M>::value;
+	ElemType den = detail::factorial<N>::value * detail::factorial<M>::value;
+	rval *= num / den;
+	std::cout << " ~ " << N << " " << M << " " << num << " " << den << std::endl;
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t N>
+ElemType dot(const multivector<ElemType,N>& A, const multivector<ElemType,N>& B)
+{
+	ElemType rval = 0;
+	auto Acurr = A.begin();
+	auto Bcurr = B.begin();
+	for(; Acurr != A.end(); ++Acurr, ++Bcurr)
+	{
+		rval += (*Acurr)*(*Bcurr);
+	}
+	return rval;
+}
