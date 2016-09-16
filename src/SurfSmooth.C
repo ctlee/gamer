@@ -31,7 +31,8 @@
 
 #include "biom.h"
 #include "SurfaceMesh.h"
-
+#include <limits>
+ 
 // Declare internal GAMer methods
 FLTVECT GetPositionSurfaceOnly(float,
                                float,
@@ -1445,7 +1446,7 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
     IndexArray[start_ptr] = index0;
     DistArray[start_ptr]  = 0;
 
-    max_angle = 99999.0;
+    max_angle = std::numeric_limits<float>::max();
     normal0.x = normal.x;
     normal0.y = normal.y;
     normal0.z = normal.z;
