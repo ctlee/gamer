@@ -97,5 +97,5 @@ int main()
 		std::cout << a << " ";
 	}
 	std::cout << std::endl;
-	return -1;
+	return 0;
 }

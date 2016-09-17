@@ -356,5 +356,6 @@ ElemType dot(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 	{
 		rval += (*Acurr)*(*Bcurr);
 	}
-	return rval;
+	double scale = detail::factorial<N>::value;
+	return rval / scale;
 }
