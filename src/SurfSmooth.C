@@ -210,7 +210,7 @@ bool SurfaceMesh::smooth(unsigned int max_min_angle,
         // Smooth all vertices
         for (n = 0; n < num_vertices; n++)
         {
-            // If we have a vertex wich is not selected we continue
+            // If we have a vertex which is not selected we continue
             if (!vertex[n].sel)
             {
                 continue;
