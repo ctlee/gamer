@@ -29,11 +29,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 SET(CMAKE_SWIG_FLAGS "")
 
-#SET_SOURCE_FILES_PROPERTIES(example.i PROPERTIES CPLUSPLUS ON)
+#SET_SOURCE_FILES_PROPERTIES(../src/WrapSimplicialComplex.C PROPERTIES CPLUSPLUS ON)
 #SET_SOURCE_FILES_PROPERTIES(example.i PROPERTIES SWIG_FLAGS "-includeall")
-SWIG_ADD_MODULE(example python example.i example.c)
+SWIG_ADD_MODULE(gamer python gamer.i)
 #SWIG_ADD_MODULE(gamer python gamer.i gamer_wrap.cc)
-SWIG_LINK_LIBRARIES(example ${PYTHON_LIBRARIES})
+SWIG_LINK_LIBRARIES(gamer ${PYTHON_LIBRARIES} gamerstatic)
 
-install(TARGETS _example DESTINATION lib/site-packages)
-install(FILES ${CMAKE_BINARY_DIR}/swig/example.py DESTINATION lib/site-packages)
+install(TARGETS _gamer DESTINATION lib/site-packages)
+install(FILES ${CMAKE_BINARY_DIR}/swig/gamer.py DESTINATION lib/site-packages)
