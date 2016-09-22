@@ -5,8 +5,21 @@
 #include "SimplicialComplex.h"
 #include "Orientable.h"
 #include <tuple>
+#include <string>
 
-struct Face : Orientable, INT3VECT {};
+struct FaceProperties
+{
+    int  m;   /**< @brief Marker */
+    bool sel; /**< @brief selection flag */
+};
+
+struct Face : Orientable, FaceProperties
+{
+    Face() {}
+    Face(Orientable orient, FaceProperties prop)
+        : Orientable(orient), FaceProperties(prop)
+    {}
+};
 
 struct Global
 {
@@ -31,6 +44,9 @@ struct complex_traits
 };
 
 using SurfaceMesh_ASC = simplicial_complex<complex_traits>;
+
+
+SurfaceMesh_ASC* OFF_to_SimplicialComplex(const std::string& filename);
 
 
 /** @brief Other data structure SurfaceMesh (for surface meshes) */
