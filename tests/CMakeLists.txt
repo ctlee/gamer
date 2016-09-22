@@ -6,6 +6,7 @@ set_target_properties(simplicial_complex_test PROPERTIES COMPILE_FLAGS "-std=c++
 
 add_executable(orientable_test orientable_test.cpp)
 set_target_properties(orientable_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(orientable_test gamershared)
 
 add_test(orientable_test_klein   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/klein.off   false)
 add_test(orientable_test_icosa   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/icosa.off   true)

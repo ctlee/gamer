@@ -1511,6 +1511,9 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
     A[2][0] = A[0][2];
     A[2][1] = A[1][2];
 
+
+    // A is the "Local Structure Tensor"
+    // Now compute the eigenvalues using Cardano's Method (del Ferro and Tartaglia should also be noted).
     c0 = A[0][0] * A[1][1] * A[2][2] + 2 * A[0][1] * A[0][2] * A[1][2] - A[0][0] * A[1][2] * A[1][2]
          - A[1][1] * A[0][2] * A[0][2] - A[2][2] * A[0][1] * A[0][1];
     c1 = A[0][0] * A[1][1] - A[0][1] * A[0][1] + A[0][0] * A[2][2] -
