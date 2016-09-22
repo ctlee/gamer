@@ -4,6 +4,7 @@
 #include <set>
 #include <iterator>
 #include <array>
+#include <vector>
 #include "util.h"
 
 using Simplex = unsigned int;

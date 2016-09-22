@@ -43,6 +43,8 @@ endforeach()
 file(GLOB SOURCES "src/*.C")
 
 add_library(gamershared SHARED ${SOURCES})
+
+message(STATUS "SOURCES: ${SOURCES}")
 set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(gamershared tetshared trishared)
 # TODO: populate the list of headers to install...
@@ -59,9 +61,7 @@ endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
 if(BUILD_BLENDER)
     # build swig wrapper for python
     add_subdirectory(swig)
-    # TODO: add the install stuff
 endif(BUILD_BLENDER)
 
 add_subdirectory(tools)
-
 add_subdirectory(tests)
