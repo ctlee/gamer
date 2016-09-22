@@ -47,4 +47,14 @@ extern "C" {
         ASC* asc = (ASC*) casc;
         asc->insert<3>({a,b,c});
     }
+
+    int numVertices(CASC* casc){
+        ASC* asc = (ASC*) casc;
+        return asc->size<1>(); 
+    }
+
+    int numFaces(CASC* casc){
+        ASC* asc = (ASC*) casc;
+        return asc->size<3>();
+    }
 }
