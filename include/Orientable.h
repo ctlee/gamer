@@ -63,8 +63,9 @@ void clear_orientation(Complex& F)
 	}
 }
 
+
 template <typename Complex>
-void compute_orientation(Complex& F)
+std::tuple<int, bool, bool> compute_orientation(Complex& F)
 {
 	constexpr std::size_t k = Complex::topLevel - 1;
 
@@ -160,7 +161,5 @@ void compute_orientation(Complex& F)
 		}
 	}
 
-	std::cout << "Connected Components: " << connected_components << std::endl;
-	std::cout << "Orientable: " << orientable << std::endl;
-	std::cout << "Psuedo-manifold: " << psuedo_manifold << std::endl;
+	return std::make_tuple(connected_components, orientable, psuedo_manifold);
 }
