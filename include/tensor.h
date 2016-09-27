@@ -202,6 +202,15 @@ public:
 		return *this;
 	}
 
+	tensor& operator/=(ElemType x)
+	{
+		for(auto& a : *this)
+		{
+			a /= x;
+		}
+		return *this;
+	}
+
 	index_iterator index_begin() { return index_iterator(0); }
 	index_iterator index_end()   { return index_iterator(); }
 
@@ -316,26 +325,24 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,M>& B)
 {
-	std::array<std::size_t,N+M> dimensions;
 	tensor<ElemType,D,N+M> rval;
 
 	for(auto pA = A.index_begin(); pA != A.index_end(); ++pA)
 	{
 		for(auto pB = B.index_begin(); pB != B.index_end(); ++pB)
 		{
-			std::size_t i = 0;
-			for(auto k : *pA)
-			{
-				dimensions[i++] = k;
-			}
-			for(auto k : *pB)
-			{
-				dimensions[i++] = k;
-			}
 			rval.get(*pA,*pB) = A[*pA] * B[*pB];
 		}
 	}
 
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t D, std::size_t N>
+tensor<ElemType,D,N> operator+(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
+{
+	tensor<ElemType,D,N> rval(A);
+	rval += B;
 	return std::move(rval);
 }
 
@@ -351,10 +358,23 @@ template <typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> operator*(const tensor<ElemType,D,N>& A, ElemType x)
 {
 	auto rval(A);
-	for(auto& a : rval)
-	{
-		a *= x;
-	}
+	rval *= x;
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t D, std::size_t N>
+tensor<ElemType,D,N> operator*(ElemType x, const tensor<ElemType,D,N>& A)
+{
+	auto rval(A);
+	rval *= x;
+	return std::move(rval);
+}
+
+template <typename ElemType, std::size_t D, std::size_t N>
+tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ElemType x)
+{
+	auto rval(A);
+	rval /= x;
 	return std::move(rval);
 }
 
