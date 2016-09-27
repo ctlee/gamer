@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
         for(auto a : mesh->get_name(face))
         {
             auto vertex = mesh->get<1>({a});
-            x *= vertex.x;
-            y *= vertex.y;
-            z *= vertex.z;
+            x *= vertex.position.get(0,0);
+            y *= vertex.position.get(1,0);
+            z *= vertex.position.get(2,0);
         }
         hash += sqrt(sqrt(fabs(x))*sqrt(fabs(y))*sqrt(fabs(z)));
     }

@@ -37,6 +37,7 @@
 
 
 #include "MarchingCube.h"
+#include "SurfaceMesh.h"
 #include <iostream>
 #include <tuple>
 
@@ -849,7 +850,9 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
 
     for (n = 0; n < v_num; ++n)
     {
-        pF->insert<1>({n}, vertex[n]);
+        Vertex v = Vertex(vertex[n].x, vertex[n].y, vertex[n].z,
+                vertex[n].m, vertex[n].sel);
+        pF->insert<1>({n}, v);
     }
 
     for (n = 0; n < t_num; ++n)

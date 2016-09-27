@@ -5,10 +5,8 @@ class  WrappedSimplicialComplex{
 public:
     WrappedSimplicialComplex();
     ~WrappedSimplicialComplex();
-    template<typename KeyType> 
-    void insertVertex(KeyType n, double x, double y, double z);
-    template<typename KeyType>
-    void insertFace(KeyType a, KeyType b, KeyType c);
+    void insertVertex(size_t n, double x, double y, double z);
+    void insertFace(size_t a, size_t b, size_t c);
     int numVertices();
     int numFaces();
 private:

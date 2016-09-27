@@ -20,7 +20,7 @@ struct Face : Orientable {
 struct complex_traits
 {
     using KeyType = size_t;
-    using NodeTypes = util::type_holder<int,Vec3,int, Orientable>;
+    using NodeTypes = util::type_holder<int,Vec3,int,Orientable>;
     using EdgeTypes = util::type_holder<Orientable,Orientable,Orientable>;
 };
 using ASC = simplicial_complex<complex_traits>; 
@@ -35,15 +35,13 @@ WSC::~WrappedSimplicialComplex(){
     delete asc;
     }
 
-template<> void WSC::insertVertex<>(complex_traits::KeyType n, 
-        double x, double y, double z){
+void WSC::insertVertex(size_t n, double x, double y, double z){
     ASC* asc = (ASC*) this->ptr_asc; 
     Vec3 v{x,y,z};
     asc->insert<1>({n},v);
 }
 
-template<> void WSC::insertFace<>(complex_traits::KeyType a, 
-        complex_traits::KeyType b, complex_traits::KeyType c){
+void WSC::insertFace(size_t a, size_t b, size_t c){
     ASC* asc = (ASC*) this->ptr_asc; 
     asc->insert<3>({a,b,c});
 }

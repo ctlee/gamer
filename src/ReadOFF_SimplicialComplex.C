@@ -62,7 +62,7 @@ SurfaceMesh_ASC* OFF_to_SimplicialComplex(const std::string& filename)
 
         //        surfmesh->vertex.push_back(FLTVECT(x,y,z));
 
-        FLTVECT v{x,y,z};
+        Vertex v{x,y,z};  
         F->insert<1>({n}, v);
     }
 
