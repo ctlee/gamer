@@ -266,7 +266,7 @@ tensor<ElemType,D,N> Sym(const tensor<ElemType,D,N>& A)
 	} while(std::next_permutation(sigma.begin(), sigma.end()));
 
 	rval *= 1.0/detail::factorial<N>::value;
-	return std::move(rval);
+	return rval;
 }
 
 template <std::size_t N>
@@ -320,7 +320,7 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 	} while(std::next_permutation(sigma.begin(), sigma.end()));
 
 	rval *= 1.0/detail::factorial<N>::value;
-	return std::move(rval);
+	return rval;
 }
 
 
@@ -337,7 +337,7 @@ tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<Ele
 		}
 	}
 
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N>
@@ -345,7 +345,7 @@ tensor<ElemType,D,N> operator+(const tensor<ElemType,D,N>& A, const tensor<ElemT
 {
 	tensor<ElemType,D,N> rval(A);
 	rval += B;
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N>
@@ -353,7 +353,7 @@ tensor<ElemType,D,N> operator-(const tensor<ElemType,D,N>& A, const tensor<ElemT
 {
 	tensor<ElemType,D,N> rval(A);
 	rval -= B;
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N>
@@ -361,7 +361,7 @@ tensor<ElemType,D,N> operator*(const tensor<ElemType,D,N>& A, ElemType x)
 {
 	auto rval(A);
 	rval *= x;
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N>
@@ -369,7 +369,7 @@ tensor<ElemType,D,N> operator*(ElemType x, const tensor<ElemType,D,N>& A)
 {
 	auto rval(A);
 	rval *= x;
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N>
@@ -377,7 +377,7 @@ tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ElemType x)
 {
 	auto rval(A);
 	rval /= x;
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
@@ -388,11 +388,25 @@ tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<Ele
 	ElemType den = detail::factorial<N>::value * detail::factorial<M>::value;
 	rval *= num / den;
 	std::cout << " ~ " << N << " " << M << " " << num << " " << den << std::endl;
-	return std::move(rval);
+	return rval;
 }
 
 template <typename ElemType, std::size_t D, std::size_t N>
 ElemType dot(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
+{
+	ElemType rval = 0;
+	auto Acurr = A.begin();
+	auto Bcurr = B.begin();
+	for(; Acurr != A.end(); ++Acurr, ++Bcurr)
+	{
+		rval += (*Acurr)*(*Bcurr);
+	}
+	double scale = detail::factorial<N>::value;
+	return rval / scale;
+}
+
+template <typename ElemType, std::size_t D, std::size_t N>
+ElemType operator|(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {
 	ElemType rval = 0;
 	auto Acurr = A.begin();
