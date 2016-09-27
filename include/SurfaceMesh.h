@@ -4,9 +4,10 @@
 #include "util.h"
 #include "SimplicialComplex.h"
 #include "Orientable.h"
-#include "tensor.h"
+#include "Vertex.h"
 #include <tuple>
 #include <string>
+
 
 struct FaceProperties
 {
@@ -35,24 +36,6 @@ struct Global
     float avglen;                /**< @brief average edge length */
 
     bool hole;                   /**< @brief flag that determines if the mesh is a hole or not */
-};
-
-struct Vertex
-{
-    tensor<double,3,1> position;
-    size_t marker = 0;
-    bool selected = false;
-    Vertex(): Vertex(0,0,0) {}
-    Vertex(double x, double y, double z): Vertex(x,y,z, 0, false){}
-    Vertex(double x, double y, double z, size_t marker, bool selected){
-        position.get(0,0) = x;
-        position.get(1,0) = y;
-        position.get(2,0) = z;
-    }
-    
-    const Vertex& operator=(const Vertex& v){
-        return *this;
-    }
 };
 
 struct complex_traits
