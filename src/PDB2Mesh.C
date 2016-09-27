@@ -464,7 +464,7 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_molsurf(std::stri
         surfmesh->vertex[i].y = y;
         surfmesh->vertex[i].z = z;
 
-        mesh->insert<1>({i}, FLTVECT({x,y,z}));
+        mesh->insert<1>({i}, Vertex({x,y,z}));
     }
 
     // write triangles

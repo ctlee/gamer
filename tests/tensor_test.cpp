@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
         curr = distribution(generator);
     }
 */
-    v0[{0}] = 1; v0[{1}] = 1; v0[{2}] = 0; v0[{3}] = 0;
-    v1[{0}] = 1; v1[{1}] = 1; v1[{2}] = 0; v1[{3}] = 0;
-    v2[{0}] = 0; v2[{1}] = 0; v2[{2}] = 1; v2[{3}] = 0;
-    v3[{0}] = 1; v3[{1}] = 0; v3[{2}] = 0; v3[{3}] = 2;
+    v0.get(0) = 1; v0.get(1) = 1; v0.get(2) = 0; v0.get(3) = 0;
+    v1.get(0) = 1; v1.get(1) = 1; v1.get(2) = 0; v1.get(3) = 0;
+    v2.get(0) = 0; v2.get(1) = 0; v2.get(2) = 1; v2.get(3) = 0;
+    v3.get(0) = 1; v3.get(1) = 0; v3.get(2) = 0; v3.get(3) = 2;
 
     auto uu = v0 * v1;
     auto w  = v0 ^ v1 ^ v2 ^ v3;
