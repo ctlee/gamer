@@ -45,3 +45,9 @@ set_target_properties(tensor_test PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(tensor_test gamershared)
 
 add_test(tensor_test ${EXECUTABLE_OUTPUT_PATH}/tensor_test)
+
+add_executable(vertex_test vertex_test.cpp)
+set_target_properties(vertex_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(vertex_test gamershared)
+
+add_test(vertex_test ${EXECUTABLE_OUTPUT_PATH}/vertex_test)

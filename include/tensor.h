@@ -175,6 +175,35 @@ public:
 		return _data[index];
 	}
 
+    bool operator==(const tensor& rhs)
+    {   
+        typename DataType::const_iterator rhs_curr = rhs.begin();
+        for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+        {
+             if(*tcurr != *rhs_curr) return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const tensor& rhs)
+    {
+        typename DataType::const_iterator rhs_curr = rhs.begin();
+        for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+        {
+             if(*tcurr != *rhs_curr) return true;
+        }
+        return false;
+    }
+
+    void operator=(const tensor& rhs)
+    {
+        typename DataType::const_iterator rhs_curr = rhs.begin();
+        for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+        {
+            *tcurr = *rhs_curr;
+        }
+    }
+
 	tensor& operator+=(const tensor& rhs)
 	{
 		typename DataType::const_iterator rhs_curr = rhs.begin();
@@ -322,7 +351,6 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 	rval *= 1.0/detail::factorial<N>::value;
 	return rval;
 }
-
 
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,M>& B)
