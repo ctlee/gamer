@@ -175,30 +175,25 @@ public:
 		return _data[index];
 	}
 
-    bool operator==(const tensor& rhs)
+    bool operator==(const tensor& rhs) const
     {   
-        typename DataType::const_iterator rhs_curr = rhs.begin();
-        for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+        auto rhs_curr = rhs.begin();
+        for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
         {
              if(*tcurr != *rhs_curr) return false;
         }
         return true;
     }
 
-    bool operator!=(const tensor& rhs)
+    bool operator!=(const tensor& rhs) const
     {
-        typename DataType::const_iterator rhs_curr = rhs.begin();
-        for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-        {
-             if(*tcurr != *rhs_curr) return true;
-        }
-        return false;
+    	return !(*this == rhs);
     }
 
     void operator=(const tensor& rhs)
     {
-        typename DataType::const_iterator rhs_curr = rhs.begin();
-        for(typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+        auto rhs_curr = rhs.begin();
+        for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
         {
             *tcurr = *rhs_curr;
         }
