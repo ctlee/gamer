@@ -132,4 +132,43 @@ namespace util
 		static_assert(sizeof...(args) == N, "Size of array must match number of input arguments");
 		fill_arrayH<S,0,N,Ts...>(arr, args...);
 	}
+
+
+	template <typename Fn, typename... Ts>
+	struct flattenH {};
+
+	template <typename Fn, typename T, typename... Ts>
+	struct flattenH<Fn,T,Ts...> {
+		template <std::size_t N>
+		static void apply(Fn f, T head, Ts... tail)
+		{
+			f(N, head);
+			flattenH<Fn,Ts...>::template apply<N+1>(f,tail...);
+		}
+	};
+
+	template <typename Fn>
+	struct flattenH<Fn> {
+		template <std::size_t N>
+		static void apply(Fn f) {}
+	};
+
+	template <typename Fn, std::size_t K, typename T, typename... Ts>
+	struct flattenH<Fn, std::array<T,K>, Ts...> {
+		template <std::size_t N>
+		static void apply(Fn f, const std::array<T,K>& head, Ts... tail)
+		{
+			for(std::size_t k = 0; k < K; ++k)
+			{
+				f(N+k,head[k]);
+			}
+			flattenH<Fn,Ts...>::template apply<N+K>(f,tail...);
+		}
+	};
+
+	template <typename Fn, typename... Ts>
+	void flatten(Fn f, Ts... args)
+	{
+		flattenH<Fn,Ts...>::template apply<0>(f,args...);
+	}
 }
