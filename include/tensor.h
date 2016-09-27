@@ -140,6 +140,7 @@ public:
 		return _dimensions;
 	}
 */
+
 	template <typename... Ts>
 	const _ElemType& get(Ts&&... index) const
 	{
@@ -160,6 +161,18 @@ public:
 	_ElemType& operator[](const IndexType& index)
 	{
 		return _data[get_index(index)];
+	}
+
+	const _ElemType& operator[](std::size_t index) const
+	{
+		static_assert(_index_dimension == 1, "operator[] with integer index only allowed on 1-tensors");
+		return _data[index];
+	}
+
+	_ElemType& operator[](std::size_t index)
+	{
+		static_assert(_index_dimension == 1, "operator[] with integer index only allowed on 1-tensors");
+		return _data[index];
 	}
 
 	tensor& operator+=(const tensor& rhs)
@@ -205,30 +218,19 @@ public:
 
 private:
 	template <typename... Ts>
-	std::size_t get_index(Ts... args)
+	std::size_t get_index(Ts... args) const
 	{
 		std::size_t rval = 0;
-		util::flatten([&rval](std::size_t ignored, std::size_t i){ rval *= vector_dimension; rval += i; });
+		util::flatten([&rval](std::size_t ignored, std::size_t i){
+			rval *= vector_dimension;
+			rval += i;
+		}, args...);
 		return rval;
 	}
 
-	std::size_t get_index(const IndexType& index) const
-	{
-		std::size_t rval = 0;
-		for(auto i : index)
-		{
-			rval *= vector_dimension;
-			rval += i;
-		}
-		return rval;
-	}
 private:
 	DataType  _data;
 };
-
-
-
-
 
 template <typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> Sym(const tensor<ElemType,D,N>& A)
@@ -332,7 +334,7 @@ tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<Ele
 			{
 				dimensions[i++] = k;
 			}
-			rval[dimensions] = A[*pA] * B[*pB];
+			rval.get(*pA,*pB) = A[*pA] * B[*pB];
 		}
 	}
 

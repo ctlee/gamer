@@ -3,8 +3,6 @@
 #include <map>
 #include <cmath>
 #include "tensor.h"
-#include "SurfaceMesh.h"
-#include "kdtree.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,19 +28,22 @@ int main(int argc, char *argv[])
     v2.get(0) = 0; v2.get(1) = 0; v2.get(2) = 1; v2.get(3) = 0;
     v3.get(0) = 1; v3.get(1) = 0; v3.get(2) = 0; v3.get(3) = 2;
 
-    auto uu = v0 * v1;
+    auto uu = v0 * v0;
     auto w  = v0 ^ v1 ^ v2 ^ v3;
 
-    std::cout << uu.get(0,0) << std::endl;
+    for(auto x : w)
+    {
+        std::cout << x << " ";
+    }
+    std::cout << std::endl;
 
-    int m = 0;
-    for(auto curr = uu.index_begin(); curr != uu.index_end() && m < 100; ++curr, ++m)
+    for(auto curr = uu.index_begin(); curr != uu.index_end(); ++curr)
     {
         for(auto x : (*curr))
         {
             std::cout << x << " ";
         }
-        std::cout << ": " << uu.get(*curr) << std::endl;
+        std::cout << ":: " << uu[*curr] << std::endl;
     }
 
     for(auto curr = v0.index_begin(); curr != v0.index_end(); ++curr)
@@ -50,9 +51,7 @@ int main(int argc, char *argv[])
         std::cout << ": " << uu.get(*curr,*curr) << std::endl;
     }
 
-    std::cout << std::sqrt(dot(uu,uu)) << std::endl;
+    std::cout << std::sqrt(dot(w,w)) << std::endl;
     std::cout << "Test Complete" << std::endl;
-
-	std::cout << "Test complete" << std::endl;
 	return -1;
 }

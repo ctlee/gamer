@@ -349,6 +349,7 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_gauss(const char 
 
     for (auto& curr : pF->get_level<1>())
     {
+        auto& pos = curr.pos;
         curr.position.get(0) = curr.position.get(0) * span[0] + min[0];
         curr.position.get(1) = curr.position.get(1) * span[1] + min[1];
         curr.position.get(2) = curr.position.get(2) * span[2] + min[2];
