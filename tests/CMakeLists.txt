@@ -39,3 +39,9 @@ set_target_properties(multivector_test PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(multivector_test gamershared)
 
 add_test(multivector_test ${EXECUTABLE_OUTPUT_PATH}/multivector_test)
+
+add_executable(tensor_test tensor_test.cpp)
+set_target_properties(tensor_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(tensor_test gamershared)
+
+add_test(tensor_test ${EXECUTABLE_OUTPUT_PATH}/tensor_test)

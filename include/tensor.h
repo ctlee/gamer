@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cassert>
 #include "util.h"
+#include <utility>
 
 namespace detail {
 	template <std::size_t k>
@@ -137,6 +138,18 @@ public:
 		return _dimensions;
 	}
 */
+	template <typename... Ts>
+	const _ElemType& get(Ts&&... index) const
+	{
+		return _data[get_index(std::forward<Ts>(index)...)];
+	}
+
+	template <typename... Ts>
+	_ElemType& get(Ts&&... index)
+	{
+		return _data[get_index(std::forward<Ts>(index)...)];
+	}
+
 	const _ElemType& operator[](const IndexType& index) const
 	{
 		return _data[get_index(index)];
@@ -189,6 +202,14 @@ public:
 	typename DataType::const_iterator end()   const { return _data.end();   }
 
 private:
+	template <typename... Ts>
+	std::size_t get_index(Ts... args)
+	{
+		std::size_t rval = 0;
+		util::flatten([&rval](std::size_t ignored, std::size_t i){ rval *= vector_dimension; rval += i; });
+		return rval;
+	}
+
 	std::size_t get_index(const IndexType& index) const
 	{
 		std::size_t rval = 0;
