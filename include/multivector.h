@@ -175,6 +175,18 @@ public:
 		return _data[get_index(index)];
 	}
 
+	const _ElemType& operator[](std::size_t index) const
+	{
+		static_assert(_index_dimension == 1, "operator[] with integer index only allowed on 1-tensors");
+		return _data[index];
+	}
+
+	_ElemType& operator[](std::size_t index)
+	{
+		static_assert(_index_dimension == 1, "operator[] with integer index only allowed on 1-tensors");
+		return _data[index];
+	}
+
 	multivector& operator+=(const multivector& rhs)
 	{
 		assert(_dimensions == rhs._dimensions);
@@ -208,6 +220,11 @@ public:
 		return *this;
 	}
 
+	multivector& Sym()
+	{
+		
+	}
+
 	index_iterator index_begin() { return index_iterator(_dimensions); }
 	index_iterator index_end()   { return index_iterator(0,_dimensions); }
 
@@ -228,6 +245,7 @@ private:
 		return n;
 	}
 
+/*
 	std::size_t get_index(const IndexType& index) const
 	{
 		std::size_t rval = 0;
@@ -241,49 +259,24 @@ private:
 
 		return rval;
 	}
+*/
+	template <typename... Ts>
+	std::size_t get_index(Ts... args) const
+	{
+		std::size_t rval = 0;
+		util::flatten([&rval,this](std::size_t i, std::size_t j){
+			rval *= this->_dimensions[i];
+			rval += j;
+		}, args...);
+		return rval;
+	}
+
+
 private:
 	IndexType _dimensions;
 	DataType  _data;
 };
 
-
-template <typename ElemType, std::size_t N, std::size_t M>
-multivector<ElemType,N+M> operator*(const multivector<ElemType,N>& A, const multivector<ElemType,M>& B)
-{
-	std::array<std::size_t,N+M> dimensions;
-	{
-		std::size_t i = 0;
-		for(auto k : A.dims())
-		{
-			dimensions[i++] = k;
-		}
-		for(auto k : B.dims())
-		{
-			dimensions[i++] = k;
-		}
-	}
-	multivector<ElemType,N+M> rval(dimensions);
-
-
-	for(auto pA = A.index_begin(); pA != A.index_end(); ++pA)
-	{
-		for(auto pB = B.index_begin(); pB != B.index_end(); ++pB)
-		{
-			std::size_t i = 0;
-			for(auto k : *pA)
-			{
-				dimensions[i++] = k;
-			}
-			for(auto k : *pB)
-			{
-				dimensions[i++] = k;
-			}
-			rval[dimensions] = A[*pA] * B[*pB];
-		}
-	}
-
-	return std::move(rval);
-}
 
 template <typename ElemType, std::size_t N>
 multivector<ElemType,N> operator-(const multivector<ElemType,N>& A, const multivector<ElemType,N>& B)
@@ -302,28 +295,4 @@ multivector<ElemType,N> operator*(const multivector<ElemType,N>& A, ElemType x)
 		a *= x;
 	}
 	return std::move(rval);
-}
-
-template <typename ElemType, std::size_t N, std::size_t M>
-multivector<ElemType,N+M> operator^(const multivector<ElemType,N>& A, const multivector<ElemType,M>& B)
-{
-	auto rval = A*B - B*A;
-	ElemType num = 1;//detail::factorial<N+M>::value;
-	ElemType den = detail::factorial<N>::value * detail::factorial<M>::value;
-	rval *= num / den;
-	std::cout << " ~ " << N << " " << M << " " << num << " " << den << std::endl;
-	return std::move(rval);
-}
-
-template <typename ElemType, std::size_t N>
-ElemType dot(const multivector<ElemType,N>& A, const multivector<ElemType,N>& B)
-{
-	ElemType rval = 0;
-	auto Acurr = A.begin();
-	auto Bcurr = B.begin();
-	for(; Acurr != A.end(); ++Acurr, ++Bcurr)
-	{
-		rval += (*Acurr)*(*Bcurr);
-	}
-	return rval;
 }
