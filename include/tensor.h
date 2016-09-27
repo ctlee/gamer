@@ -203,14 +203,17 @@ public:
 
 private:
 	template <typename... Ts>
-	std::size_t get_index(Ts... args)
+	std::size_t get_index(Ts... args) const
 	{
 		std::size_t rval = 0;
-		util::flatten([&rval](std::size_t ignored, std::size_t i){ rval *= vector_dimension; rval += i; });
+		util::flatten([&rval](std::size_t ignored, std::size_t i){
+			rval *= vector_dimension;
+			rval += i;
+		}, args...);
 		return rval;
 	}
-
-	std::size_t get_index(const IndexType& index) const
+/*
+	std::size_t get_index_(const IndexType& index) const
 	{
 		std::size_t rval = 0;
 		for(auto i : index)
@@ -220,6 +223,7 @@ private:
 		}
 		return rval;
 	}
+	*/
 private:
 	DataType  _data;
 };
@@ -330,7 +334,7 @@ tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<Ele
 			{
 				dimensions[i++] = k;
 			}
-			rval[dimensions] = A[*pA] * B[*pB];
+			rval.get(*pA,*pB) = A[*pA] * B[*pB];
 		}
 	}
 
