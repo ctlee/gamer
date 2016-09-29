@@ -1,53 +1,45 @@
-add_executable(simplicial_complex_test simplicial_complex_test.cpp)
-set_target_properties(simplicial_complex_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+find_package(Threads REQUIRED)
+include(ExternalProject)
 
-# add_test(simplicial_complex_test ${EXECUTABLE_OUTPUT_PATH}/simplicial_complex_test ${TEST_DATA_PATH}/klein.off)
+ExternalProject_Add(
+    gtest
+	# URL https://github.com/google/googletest/archive/master.zip
+    URL https://github.com/google/googletest/archive/release-1.8.0.zip
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
+    INSTALL_COMMAND ""
+)
 
+# Get GTest source and binary directories from CMake project
+ExternalProject_Get_Property(gtest source_dir binary_dir)
 
-add_executable(orientable_test orientable_test.cpp)
-set_target_properties(orientable_test PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(orientable_test gamershared)
+message(STATUS "source_dir ${source_dir}")
+message(STATUS "binary_dir ${binary_dir}")
+# Create a libgtest target to be used as a dependency by test programs
+add_library(libgtest IMPORTED STATIC GLOBAL)
+add_dependencies(libgtest gtest)
 
-add_test(orientable_test_klein   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/klein.off   false)
-add_test(orientable_test_icosa   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/icosa.off   true)
-add_test(orientable_test_tetra   ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/tetra.off   true)
-add_test(orientable_test_protein ${EXECUTABLE_OUTPUT_PATH}/orientable_test ${TEST_DATA_PATH}/protein.off true)
+# Set libgtest properties
+set_target_properties(libgtest PROPERTIES
+    "IMPORTED_LOCATION" "${binary_dir}/googlemock/gtest/libgtest.a"
+    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
+)
 
-add_executable(readPDB_gauss readPDB_gauss.cpp)
-set_target_properties(readPDB_gauss PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(readPDB_gauss gamershared)
+# Create a libgmock target to be used as a dependency by test programs
+add_library(libgmock IMPORTED STATIC GLOBAL)
+add_dependencies(libgmock gtest)
 
-#add_test(readPDB_gauss ${EXECUTABLE_OUTPUT_PATH}/readPDB_gauss ${TEST_DATA_PATH}/1CID.pdb)
+# Set libgmock properties
+set_target_properties(libgmock PROPERTIES
+    "IMPORTED_LOCATION" "${binary_dir}/googlemock/libgmock.a"
+    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
+)
 
+# I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
+include_directories("${source_dir}/googletest/include"
+                    "${source_dir}/googlemock/include")
 
-add_executable(readPDB_molsurf readPDB_molsurf.cpp)
-set_target_properties(readPDB_molsurf PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(readPDB_molsurf gamershared)
+add_executable(objecttests main.cpp vertex_test.cpp)
+set_target_properties(objecttests PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(objecttests gamershared libgtest)
 
-add_test(readPDB_molsurf ${EXECUTABLE_OUTPUT_PATH}/readPDB_molsurf ${TEST_DATA_PATH}/1CID.pdb)
-
-
-add_executable(cmdtest cmdtest.cpp)
-set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(cmdtest gamershared)
-
-add_test(cmdtest ${EXECUTABLE_OUTPUT_PATH}/cmdtest)
-
-
-add_executable(multivector_test multivector_test.cpp)
-set_target_properties(multivector_test PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(multivector_test gamershared)
-
-add_test(multivector_test ${EXECUTABLE_OUTPUT_PATH}/multivector_test)
-
-add_executable(tensor_test tensor_test.cpp)
-set_target_properties(tensor_test PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(tensor_test gamershared)
-
-add_test(tensor_test ${EXECUTABLE_OUTPUT_PATH}/tensor_test)
-
-add_executable(vertex_test vertex_test.cpp)
-set_target_properties(vertex_test PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(vertex_test gamershared)
-
-add_test(vertex_test ${EXECUTABLE_OUTPUT_PATH}/vertex_test)
+add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
