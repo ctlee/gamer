@@ -86,7 +86,7 @@ TEST_P(VertexTest,RandomDoubleAddition)
 // Run the randomdoubles 100 times
 INSTANTIATE_TEST_CASE_P(RandomDoubles,
                         VertexTest,
-                        Range(1,100));
+                        Range(1,10));
 
 #else
 TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}

@@ -20,6 +20,16 @@ struct Vertex
     }
     Vertex(const Vertex& x) : position(x.position), marker(x.marker), selected(x.selected){}
     Vertex(const Vertex&& x) : position(std::move(x.position)), marker(std::move(x.marker)), selected(std::move(x.selected)) {}
+
+    friend std::ostream& operator<<(std::ostream& output, const Vertex& v){
+        output  << "Vertex(x:" << v[0]
+                << ",y:" << v[1] 
+                << ",z:" << v[2]
+                << ";m:" << v.marker
+                << ";sel:" << v.selected
+                << ")";
+        return output;
+    }
     
     const double& operator[](std::size_t index) const{
         return position[index];
