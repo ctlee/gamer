@@ -27,9 +27,10 @@ target_link_libraries(readPDB_molsurf gamershared)
 add_test(readPDB_molsurf ${EXECUTABLE_OUTPUT_PATH}/readPDB_molsurf ${TEST_DATA_PATH}/1CID.pdb)
 
 
+find_library(GLPK glpk "/usr/local/lib")
 add_executable(cmdtest cmdtest.cpp)
-set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(cmdtest gamershared)
+set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14 -I/usr/local/include -L/usr/local/lib")
+target_link_libraries(cmdtest gamershared ${GLPK})
 
 add_test(cmdtest ${EXECUTABLE_OUTPUT_PATH}/cmdtest)
 
