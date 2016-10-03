@@ -1,6 +1,5 @@
 
 %module gamer
-%{
-#include "WrapSimplicialComplex.h"
-%}
+
+%include <std_string.i>
 %include "WrapSimplicialComplex.i"
