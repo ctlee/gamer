@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "tensor.h"
 
 struct Vertex
@@ -17,7 +18,7 @@ struct Vertex
         marker = m;
         selected = sel;
     }
-    Vertex(const Vertex& x) : position(x.position), selected(x.selected){}
+    Vertex(const Vertex& x) : position(x.position), marker(x.marker), selected(x.selected){}
     Vertex(const Vertex&& x) : position(std::move(x.position)), marker(std::move(x.marker)), selected(std::move(x.selected)) {}
     
     const double& operator[](std::size_t index) const{
@@ -34,7 +35,7 @@ struct Vertex
         selected = v.selected;
     }
    
-    bool operator==(const Vertex& rhs){
+    bool operator==(const Vertex& rhs) const{
         Vertex temp(rhs); 
         if(position != temp.position) return false;
         if(marker != temp.marker) return false;
@@ -42,8 +43,8 @@ struct Vertex
         return true;
     }
 
-    bool operator!=(const Vertex& rhs){
-        return !this->operator==(rhs);
+    bool operator!=(const Vertex& rhs) const{
+        return !(*this == rhs);
     }
 
     Vertex& operator+=(const Vertex& rhs){

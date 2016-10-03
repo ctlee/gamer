@@ -38,16 +38,11 @@ set_target_properties(libgmock PROPERTIES
 include_directories("${source_dir}/googletest/include"
                     "${source_dir}/googlemock/include")
 
-add_executable(objecttests main.cpp vertex_test.cpp)
-set_target_properties(objecttests PROPERTIES COMPILE_FLAGS "-std=c++14")
-target_link_libraries(objecttests gamershared libgtest)
-
-add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
-
-
 
 add_executable(simplicial_complex_test simplicial_complex_test.cpp)
 set_target_properties(simplicial_complex_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+
+# add_test(simplicial_complex_test ${EXECUTABLE_OUTPUT_PATH}/simplicial_complex_test ${TEST_DATA_PATH}/klein.off)
 
 
 add_executable(orientable_test orientable_test.cpp)
@@ -73,10 +68,9 @@ target_link_libraries(readPDB_molsurf gamershared)
 add_test(readPDB_molsurf ${EXECUTABLE_OUTPUT_PATH}/readPDB_molsurf ${TEST_DATA_PATH}/1CID.pdb)
 
 
-find_library(GLPK glpk "/usr/local/lib")
 add_executable(cmdtest cmdtest.cpp)
-set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14 -I/usr/local/include -L/usr/local/lib")
-target_link_libraries(cmdtest gamershared ${GLPK})
+set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(cmdtest gamershared)
 
 add_test(cmdtest ${EXECUTABLE_OUTPUT_PATH}/cmdtest)
 
@@ -92,3 +86,9 @@ set_target_properties(tensor_test PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(tensor_test gamershared)
 
 add_test(tensor_test ${EXECUTABLE_OUTPUT_PATH}/tensor_test)
+
+add_executable(vertex_test vertex_test.cpp)
+set_target_properties(vertex_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(vertex_test gamershared)
+
+add_test(vertex_test ${EXECUTABLE_OUTPUT_PATH}/vertex_test)

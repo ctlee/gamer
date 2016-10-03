@@ -2,14 +2,21 @@ cmake_minimum_required(VERSION 3.6)
 
 project(GAMer VERSION 1.0.0)
 
-enable_testing()
 
-option(BUILD_BLENDER "BUild the GAMer addon for Blender" OFF)
-option(BUILD_STATIC_LIB "Build the static library" OFF)
+option(BUILD_STATIC_LIB "Build the static libraries" OFF)
+# BUILD_BLENDER will build static libraries as well
+option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
+
+option(BUILD_TESTS "Build the test scripts" OFF)
+
+if(BUILD_TESTS)
+    enable_testing()
+endif(BUILD_TESTS)
 
 # Set the flags for empty build and print all build flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall -Wno-error")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wno-error")
+
 message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
 message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
 message(STATUS "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
@@ -21,6 +28,8 @@ message(STATUS "CMAKE_CXX_FLAGS_RELEASE is: ${CMAKE_CXX_FLAGS_RELEASE}")
 message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO is: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL is: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+#MESSAGE( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
 # Define where to put the libraries and binaries
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -64,4 +73,7 @@ if(BUILD_BLENDER)
 endif(BUILD_BLENDER)
 
 add_subdirectory(tools)
-add_subdirectory(tests)
+
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif(BUILD_TESTS)
