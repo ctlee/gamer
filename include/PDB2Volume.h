@@ -34,7 +34,7 @@
 
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <string>
 #include <vector>
 

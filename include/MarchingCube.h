@@ -35,7 +35,7 @@
 
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 
 #if 0
 #include <stdio.h>

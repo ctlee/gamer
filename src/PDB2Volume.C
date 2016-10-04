@@ -284,11 +284,11 @@ float PDB2Volume(std::string filename, float **data, int *xd, int *yd, int *zd,
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::readPDB_gauss    < ... >
+ * Routine:  SurfaceMeshOld::readPDB_gauss    < ... >
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
- * Purpose:  Convert a PDB/PQR/XYZR formats into a SurfaceMesh using Gaussian
+ * Purpose:  Convert a PDB/PQR/XYZR formats into a SurfaceMeshOld using Gaussian
  *           scalar function
  *
  * Notes:    Each atom is treated as a Gaussian function defined by
@@ -296,7 +296,7 @@ float PDB2Volume(std::string filename, float **data, int *xd, int *yd, int *zd,
  *           - blobbyness: the decay rate of the Gaussian function
  * ***************************************************************************
  */
-std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_gauss(const char *filename, float blobbyness,
+std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> SurfaceMeshOld::readPDB_gauss(const char *filename, float blobbyness,
                                          float iso_value)
 {
     float  max_density;
@@ -329,7 +329,7 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_gauss(const char 
 
     printf("isovalue: %f \n", iso_value);
 
-    auto meshes = SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset, iso_value, &holelist);
+    auto meshes = SurfaceMeshOld::marchingCube(xdim, ydim, zdim, dataset, iso_value, &holelist);
     auto surfmesh = std::get<0>(meshes);
     auto pF = std::get<1>(meshes);
 
@@ -357,6 +357,6 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_gauss(const char 
     // Flip normals so they now points outwards
     surfmesh->flipNormals();
 
-    // Return generated SurfaceMesh
+    // Return generated SurfaceMeshOld
     return meshes;
 }

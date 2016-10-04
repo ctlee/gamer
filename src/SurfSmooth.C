@@ -30,7 +30,7 @@
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <limits>
  
 // Declare internal GAMer methods
@@ -40,34 +40,34 @@ FLTVECT GetPositionSurfaceOnly(float,
                                int,
                                int,
                                int,
-                               SurfaceMesh *);
-float GetAngleSurfaceOnly(SurfaceMesh *,
+                               SurfaceMeshOld *);
+float GetAngleSurfaceOnly(SurfaceMeshOld *,
                           int,
                           int,
                           int);
-void      MoveVerticesSurfaceOnly(SurfaceMesh *,
+void      MoveVerticesSurfaceOnly(SurfaceMeshOld *,
                                   int);
-FLTVECT   GetNormals(SurfaceMesh *,
+FLTVECT   GetNormals(SurfaceMeshOld *,
                      int);
-EIGENVECT GetEigenVector(SurfaceMesh *,
+EIGENVECT GetEigenVector(SurfaceMeshOld *,
                          int,
                          FLTVECT *,
                          float *);
-void PolygonSubdivision(SurfaceMesh *,
+void PolygonSubdivision(SurfaceMeshOld *,
                         NPNT3 *,
                         int *,
                         int *,
                         int);
-char CheckFlipAction(SurfaceMesh *,
+char CheckFlipAction(SurfaceMeshOld *,
                      int,
                      int,
                      int,
                      int,
                      bool);
-void  EdgeFlipping(SurfaceMesh *,
+void  EdgeFlipping(SurfaceMeshOld *,
                    int,
                    bool);
-float GetDotProduct(SurfaceMesh *,
+float GetDotProduct(SurfaceMeshOld *,
                     int,
                     int,
                     int);
@@ -77,13 +77,13 @@ FLTVECT Rotate(float,
                float,
                float,
                float);
-FLTVECT GetCrossProduct(SurfaceMesh *,
+FLTVECT GetCrossProduct(SurfaceMeshOld *,
                         int,
                         int,
                         int);
-void    NormalSmooth(SurfaceMesh *,
+void    NormalSmooth(SurfaceMeshOld *,
                      int);
-FLTVECT GetNormals(SurfaceMesh *,
+FLTVECT GetNormals(SurfaceMeshOld *,
                    int,
                    int,
                    int);
@@ -97,7 +97,7 @@ FLTVECT GetNormals(SurfaceMesh *,
  * Purpose:  Generate the angle distribution (0 - 180 degrees)
  * ***************************************************************************
  */
-void GenerateHistogram(SurfaceMesh *surfmesh)
+void GenerateHistogram(SurfaceMeshOld *surfmesh)
 {
     int   m;
     int   a, b, c;
@@ -155,14 +155,14 @@ void GenerateHistogram(SurfaceMesh *surfmesh)
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::smooth
+ * Routine:  SurfaceMeshOld::smooth
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Function for surface smoothing
  * ***************************************************************************
  */
-bool SurfaceMesh::smooth(unsigned int max_min_angle,
+bool SurfaceMeshOld::smooth(unsigned int max_min_angle,
                          unsigned int min_max_angle,
                          unsigned int max_iter,
                          bool         preserve_ridges)
@@ -249,14 +249,14 @@ bool SurfaceMesh::smooth(unsigned int max_min_angle,
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::normalSmooth
+ * Routine:  SurfaceMeshOld::normalSmooth
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Function for surface smoothing using normal smoothing
  * ***************************************************************************
  */
-void SurfaceMesh::normalSmooth()
+void SurfaceMeshOld::normalSmooth()
 {
     unsigned int n;
     float min_angle, max_angle;
@@ -296,7 +296,7 @@ void SurfaceMesh::normalSmooth()
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::assignActiveSites
+ * Routine:  SurfaceMeshOld::assignActiveSites
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com), Johan Hake (hake.dev@gmail.com)
  *
@@ -305,7 +305,7 @@ void SurfaceMesh::normalSmooth()
  *           the marker from the last sphere.
  * ***************************************************************************
  */
-void SurfaceMesh::assignActiveSites(ATOM         *sphere_list,
+void SurfaceMeshOld::assignActiveSites(ATOM         *sphere_list,
                                     unsigned int  num_spheres,
                                     unsigned int *sphere_markers)
 {
@@ -346,14 +346,14 @@ void SurfaceMesh::assignActiveSites(ATOM         *sphere_list,
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::coarse
+ * Routine:  SurfaceMeshOld::coarse
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Coarsen a surface mesh
  * ***************************************************************************
  */
-char SurfaceMesh::coarse(float coarse_rate,
+char SurfaceMeshOld::coarse(float coarse_rate,
                          float flatness_rate, float denseness_weight,
                          float max_normal_angle)
 {
@@ -899,7 +899,7 @@ char SurfaceMesh::coarse(float coarse_rate,
  * Purpose:  Recursively re-triangulate the "empty" polygon
  * ***************************************************************************
  */
-void PolygonSubdivision(SurfaceMesh *surfmesh,
+void PolygonSubdivision(SurfaceMeshOld *surfmesh,
                         NPNT3 *start_ngr, int *face_available_list,
                         int *face_available_index, int face_marker)
 {
@@ -1057,7 +1057,7 @@ void PolygonSubdivision(SurfaceMesh *surfmesh,
  *           and local structure tensor
  * ***************************************************************************
  */
-void MoveVerticesSurfaceOnly(SurfaceMesh *surfmesh, int n)
+void MoveVerticesSurfaceOnly(SurfaceMeshOld *surfmesh, int n)
 {
     int       a, b, c;
     float     x, y, z;
@@ -1161,7 +1161,7 @@ void MoveVerticesSurfaceOnly(SurfaceMesh *surfmesh, int n)
  * Purpose:  Move each of the vertices based on the angle-based method
  * ***************************************************************************
  */
-FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, SurfaceMesh *surfmesh)
+FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, SurfaceMeshOld *surfmesh)
 {
     float   ax, ay, az;
     float   bx, by, bz;
@@ -1245,14 +1245,14 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::getMinMaxAngles
+ * Routine:  SurfaceMeshOld::getMinMaxAngles
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Calculate the minimum and maximum angles in a surface mesh
  * ***************************************************************************
  */
-void SurfaceMesh::getMinMaxAngles(float *minangle,
+void SurfaceMeshOld::getMinMaxAngles(float *minangle,
                                   float *maxangle, int *num_small, int *num_large,
                                   int max_min_angle, int min_max_angle)
 {
@@ -1362,7 +1362,7 @@ void SurfaceMesh::getMinMaxAngles(float *minangle,
  * Purpose:  Calculate the angle defined by three vertices
  * ***************************************************************************
  */
-float GetAngleSurfaceOnly(SurfaceMesh *surfmesh, int a, int b, int c)
+float GetAngleSurfaceOnly(SurfaceMeshOld *surfmesh, int a, int b, int c)
 {
     float ax, ay, az;
     float bx, by, bz;
@@ -1407,7 +1407,7 @@ float GetAngleSurfaceOnly(SurfaceMesh *surfmesh, int a, int b, int c)
  *           the local structure tensor in a neighborhood of "index0"
  * ***************************************************************************
  */
-EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
+EIGENVECT GetEigenVector(SurfaceMeshOld *surfmesh,
                          int index0, FLTVECT *eigen_value, float *max_ang)
 {
     int index, dist;
@@ -1720,7 +1720,7 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
  * Purpose:  Calculate the normal vector at vertex "n"
  * ***************************************************************************
  */
-FLTVECT GetNormals(SurfaceMesh *surfmesh, int n)
+FLTVECT GetNormals(SurfaceMeshOld *surfmesh, int n)
 {
     int     a, b;
     float   x, y, z;
@@ -1831,7 +1831,7 @@ FLTVECT GetNormals(SurfaceMesh *surfmesh, int n)
  *           "smaller angle criterion"
  * ***************************************************************************
  */
-char CheckFlipAction(SurfaceMesh *surfmesh,
+char CheckFlipAction(SurfaceMeshOld *surfmesh,
                      int a, int b, int c, int d, bool preserve_ridges)
 {
     float   min_angle1, min_angle2, angle;
@@ -1920,7 +1920,7 @@ char CheckFlipAction(SurfaceMesh *surfmesh,
  * Purpose:  Calculate the dot product of two vectors (b-a) and (c-a)
  * ***************************************************************************
  */
-float GetDotProduct(SurfaceMesh *surfmesh, int a, int b, int c)
+float GetDotProduct(SurfaceMeshOld *surfmesh, int a, int b, int c)
 {
     float cx, cy, cz;
     float bx, by, bz;
@@ -1964,7 +1964,7 @@ float GetDotProduct(SurfaceMesh *surfmesh, int a, int b, int c)
  * Purpose:  Perform the edge flipping
  * ***************************************************************************
  */
-void EdgeFlipping(SurfaceMesh *surfmesh, int n, bool preserve_ridges)
+void EdgeFlipping(SurfaceMeshOld *surfmesh, int n, bool preserve_ridges)
 {
     int a, b, c;
     NPNT3 **neighbor_list = surfmesh->neighbor_list;
@@ -2210,7 +2210,7 @@ void EdgeFlipping(SurfaceMesh *surfmesh, int n, bool preserve_ridges)
  * Purpose:  Smooth the surface mesh by anisotropic normal-based averaging
  * ***************************************************************************
  */
-void NormalSmooth(SurfaceMesh *surfmesh, int n)
+void NormalSmooth(SurfaceMeshOld *surfmesh, int n)
 {
     int a, b, c, d, e;
     NPNT3 **neighbor_list = surfmesh->neighbor_list;
@@ -2384,7 +2384,7 @@ void NormalSmooth(SurfaceMesh *surfmesh, int n)
  * Purpose:  Calculate the cross product vector between (b-a) and (c-a)
  * ***************************************************************************
  */
-FLTVECT GetCrossProduct(SurfaceMesh *surfmesh, int a, int b, int c)
+FLTVECT GetCrossProduct(SurfaceMeshOld *surfmesh, int a, int b, int c)
 {
     float   gx, gy, gz;
     float   cx, cy, cz;

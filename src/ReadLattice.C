@@ -32,7 +32,7 @@
 // FIXME: This is not included by maloc?
 #include <unistd.h>
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 
 // Read a short integer, swapping the bytes
 int read_short_int(FILE *fptr, short int *n)
@@ -370,7 +370,7 @@ void load_lattice_file(const char *input_name, unsigned int& xdim,
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::readLattice
+ * Routine:  SurfaceMeshOld::readLattice
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
@@ -378,16 +378,16 @@ void load_lattice_file(const char *input_name, unsigned int& xdim,
  *           surface mesh
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
+SurfaceMeshOld * SurfaceMeshOld::readLattice(const char *segmentation_filename,
                                        float isovalue,
                                        bool  padd)
 {
-    return SurfaceMesh::readLattice(segmentation_filename, NULL, isovalue, padd);
+    return SurfaceMeshOld::readLattice(segmentation_filename, NULL, isovalue, padd);
 }
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::readLattice
+ * Routine:  SurfaceMeshOld::readLattice
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
@@ -395,7 +395,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
  *           surface mesh, potential using intensity values
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
+SurfaceMeshOld * SurfaceMeshOld::readLattice(const char *segmentation_filename,
                                        const char *intensity_filename,
                                        float isovalue,
                                        bool  padd)
@@ -407,7 +407,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
     double *mat_dim           = NULL;
     double *mat_dim_intensity = NULL;
     char *basename_end_pointer;
-    SurfaceMesh *surfmesh;
+    SurfaceMeshOld *surfmesh;
 
     printf("Load Lattice\n");
 
@@ -464,7 +464,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
         }
 
         // Call the marhching cube rutine with intensity data
-        surfmesh = std::get<0>(SurfaceMesh::marchingCube(xdim0, ydim0, zdim0, segmentation_data, 0.5, intensity_data, isovalue, &holelist));
+        surfmesh = std::get<0>(SurfaceMeshOld::marchingCube(xdim0, ydim0, zdim0, segmentation_data, 0.5, intensity_data, isovalue, &holelist));
 
         // Centralize and scale data
         surfmesh->centeralize();
@@ -479,7 +479,7 @@ SurfaceMesh * SurfaceMesh::readLattice(const char *segmentation_filename,
     else
     {
         // Call the marhching cube rutine without intensity data
-        surfmesh = std::get<0>(SurfaceMesh::marchingCube(xdim0, ydim0, zdim0, segmentation_data, isovalue, &holelist));
+        surfmesh = std::get<0>(SurfaceMeshOld::marchingCube(xdim0, ydim0, zdim0, segmentation_data, isovalue, &holelist));
 
         // Centralize and scale data
         surfmesh->centeralize();

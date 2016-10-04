@@ -29,7 +29,7 @@
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 
 #include "triangle/triangle.h"
 //#include "gamercf.h"
@@ -70,7 +70,7 @@ triangulateio* init_triangulateio()
     return io;
 }
 
-SurfaceMesh * SurfaceMesh::triangulate(REAL *pointlist, int numberofcoordinates, const char *triangle_params)
+SurfaceMeshOld * SurfaceMeshOld::triangulate(REAL *pointlist, int numberofcoordinates, const char *triangle_params)
 {
     // Start with empty triangle structures
     triangulateio *in  = init_triangulateio();
@@ -104,8 +104,8 @@ SurfaceMesh * SurfaceMesh::triangulate(REAL *pointlist, int numberofcoordinates,
     // Call triangulate from triangle
     ::triangulate((char*)(triangle_params), in, out, (struct triangulateio *)NULL);
 
-    // Initiate an empty SurfaceMesh
-    SurfaceMesh *surfmesh = new SurfaceMesh(out->numberofpoints, out->numberoftriangles);
+    // Initiate an empty SurfaceMeshOld
+    SurfaceMeshOld *surfmesh = new SurfaceMeshOld(out->numberofpoints, out->numberoftriangles);
 
     // Grab vertex coordinates from the triangulated mesh
     for (int n = 0; n < out->numberofpoints; n++)

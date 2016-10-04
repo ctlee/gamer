@@ -31,7 +31,7 @@
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include "ReadPDB.h"
 #include <vector>
 #include <cmath>
@@ -98,7 +98,7 @@ void  ReadPDB(std::string filename,
               float  min[3],
               float  max[3]);
 
-std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_molsurf(std::string input_name)
+std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> SurfaceMeshOld::readPDB_molsurf(std::string input_name)
 {
     int       i, j, k;
     int       a, b, c, d;
@@ -109,7 +109,7 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_molsurf(std::stri
     double    nx, ny, nz;
     int       xydim, xyzdim;
     clock_t   begin, finish;
-    SurfaceMesh *surfmesh;
+    SurfaceMeshOld *surfmesh;
     std::vector<ATOM> atom_list;
     float min[3], max[3];
     SEEDS    *AllSeeds; // Border variable
@@ -450,7 +450,7 @@ std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> SurfaceMesh::readPDB_molsurf(std::stri
     // printf("   Smooth the quad meshes: CPU Time = %f seconds \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
 
     // Allocate memory
-    surfmesh              = new SurfaceMesh(GLOBAL_vert_num, GLOBAL_quad_num * 2);
+    surfmesh              = new SurfaceMeshOld(GLOBAL_vert_num, GLOBAL_quad_num * 2);
     SurfaceMesh_ASC* mesh = new SurfaceMesh_ASC();
 
     // write vertices

@@ -20,30 +20,30 @@
  */
 
 /* ***************************************************************************
- * File:     SurfaceMesh.C    < ... >
+ * File:     SurfaceMeshOld.C    < ... >
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
- * Purpose:  Create and destroy SurfaceMesh data
+ * Purpose:  Create and destroy SurfaceMeshOld data
  * ****************************************************************************
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <vector>
 #include <algorithm>
 #include <utility>
 #include <cmath>
 
 // Declare internal GAMer methods
-EIGENVECT GetEigenVector(SurfaceMesh *,
+EIGENVECT GetEigenVector(SurfaceMeshOld *,
                          int,
                          FLTVECT *,
                          float *);
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh
+ * Routine:  SurfaceMeshOld
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  * c++ Revisions: John Moody (brogan@gmail.com)
@@ -51,7 +51,7 @@ EIGENVECT GetEigenVector(SurfaceMesh *,
  * Purpose:  Create a surface mesh instance
  * ***************************************************************************
  */
-SurfaceMesh::SurfaceMesh(unsigned int num_vertices, unsigned int num_faces)
+SurfaceMeshOld::SurfaceMeshOld(unsigned int num_vertices, unsigned int num_faces)
 {
     this->num_vertices = num_vertices;
     this->num_faces    = num_faces;
@@ -80,7 +80,7 @@ SurfaceMesh::SurfaceMesh(unsigned int num_vertices, unsigned int num_faces)
     min[0]        = 0.; min[1] = 0.; min[2] = 0.;
     max[0]        = 0.; max[1] = 0.; max[2] = 0.;
 
-    // Initialize SurfaceMesh structures
+    // Initialize SurfaceMeshOld structures
     for (int n = 0; n < num_vertices; n++)
     {
         FLTVECT& vert = vertex[n];
@@ -105,15 +105,15 @@ SurfaceMesh::SurfaceMesh(unsigned int num_vertices, unsigned int num_faces)
 
 /*
  * ***************************************************************************
- * Routine:  ~SurfaceMesh()
+ * Routine:  ~SurfaceMeshOld()
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  * c++ Revisions: John Moody (brogan@gmail.com)
  *
- * Purpose:  Release memory from a SurfaceMesh instance
+ * Purpose:  Release memory from a SurfaceMeshOld instance
  * ***************************************************************************
  */
-SurfaceMesh::~SurfaceMesh()
+SurfaceMeshOld::~SurfaceMeshOld()
 {
     // Free allocated memory
     if (vertex)
@@ -134,14 +134,14 @@ SurfaceMesh::~SurfaceMesh()
 
 /*
  * ***************************************************************************
- * SubRoutine:  SurfaceMesh::createNeighborList
+ * SubRoutine:  SurfaceMeshOld::createNeighborList
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com) and Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Create a neighbor list from a surface mesh
  * ***************************************************************************
  */
-void SurfaceMesh::createNeighborlist()
+void SurfaceMeshOld::createNeighborlist()
 {
     int n, a0, b0;
     int a, b, c, d;
@@ -335,7 +335,7 @@ void SurfaceMesh::createNeighborlist()
 
 /*
  * ***************************************************************************
- * SubRoutine:  SurfaceMesh::destroyNeighborlist
+ * SubRoutine:  SurfaceMeshOld::destroyNeighborlist
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  * c++ revisions: John Moody (brogan@gmail.com)
@@ -343,7 +343,7 @@ void SurfaceMesh::createNeighborlist()
  * Purpose:  Release memory from a neighborlist
  * ***************************************************************************
  */
-void SurfaceMesh::destroyNeighborlist()
+void SurfaceMeshOld::destroyNeighborlist()
 {
     unsigned int n;
     NPNT3 *first_ngr = NULL;
@@ -372,14 +372,14 @@ void SurfaceMesh::destroyNeighborlist()
 
 /*
  * ***************************************************************************
- * SubRoutine:  SurfaceMesh::flipNormals
+ * SubRoutine:  SurfaceMeshOld::flipNormals
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Release memory from a neighborlist
  * ***************************************************************************
  */
-void SurfaceMesh::flipNormals()
+void SurfaceMeshOld::flipNormals()
 {
     // First destroy neighborlist
     destroyNeighborlist();
@@ -395,14 +395,14 @@ void SurfaceMesh::flipNormals()
 
 /*
  * ***************************************************************************
- * SubRoutine: SurfaceMesh::remove_unconnected_vertices
+ * SubRoutine: SurfaceMeshOld::remove_unconnected_vertices
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Remove vertices which are not connected to any face
  * ***************************************************************************
  */
-void SurfaceMesh::removeUnconnectedVertices()
+void SurfaceMeshOld::removeUnconnectedVertices()
 {
     // Collect statistics
     int num_to_be_removed = 0;
@@ -452,14 +452,14 @@ void SurfaceMesh::removeUnconnectedVertices()
 
 /*
  * ***************************************************************************
- * SubRoutine: SurfaceMesh::deleteVertices
+ * SubRoutine: SurfaceMeshOld::deleteVertices
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Remove vertices which are marked with -1 as a vertex marker
  * ***************************************************************************
  */
-void SurfaceMesh::deleteVertices()
+void SurfaceMeshOld::deleteVertices()
 {
     // Mark faces connected to vertices for deletion
     for (int n = 0; n < num_faces; n++)
@@ -478,14 +478,14 @@ void SurfaceMesh::deleteVertices()
 
 /*
  * ***************************************************************************
- * SubRoutine: SurfaceMesh::deleteFaces
+ * SubRoutine: SurfaceMeshOld::deleteFaces
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Remove faces which are marked with -1 as a face marker
  * ***************************************************************************
  */
-void SurfaceMesh::deleteFaces()
+void SurfaceMeshOld::deleteFaces()
 {
     // Iterate over vertices and mark all for deletion
     for (int n = 0; n < num_vertices; n++)
@@ -530,14 +530,14 @@ void SurfaceMesh::deleteFaces()
 
 /*
  * ***************************************************************************
- * SubRoutine: SurfaceMesh::getCenterRadius
+ * SubRoutine: SurfaceMeshOld::getCenterRadius
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
- * Purpose:  Return the center and radius of SurfaceMesh
+ * Purpose:  Return the center and radius of SurfaceMeshOld
  * ***************************************************************************
  */
-ATOM SurfaceMesh::getCenterRadius()
+ATOM SurfaceMeshOld::getCenterRadius()
 {
     ATOM data;
     int  i;
@@ -588,7 +588,7 @@ ATOM SurfaceMesh::getCenterRadius()
     return data;
 }
 
-void SurfaceMesh::translate(float dx, float dy, float dz)
+void SurfaceMeshOld::translate(float dx, float dy, float dz)
 {
     int i;
 
@@ -600,7 +600,7 @@ void SurfaceMesh::translate(float dx, float dy, float dz)
     }
 }
 
-void SurfaceMesh::scale(float scale_x,
+void SurfaceMeshOld::scale(float scale_x,
                         float scale_y, float scale_z)
 {
     int i;
@@ -613,19 +613,19 @@ void SurfaceMesh::scale(float scale_x,
     }
 }
 
-void SurfaceMesh::scale(float s)
+void SurfaceMeshOld::scale(float s)
 {
     scale(s, s, s);
 }
 
-void SurfaceMesh::centeralize()
+void SurfaceMeshOld::centeralize()
 {
     ATOM center = getCenterRadius();
 
     translate(-center.x, -center.y, -center.z);
 }
 
-void SurfaceMesh::eigenvalues()
+void SurfaceMeshOld::eigenvalues()
 {
     EIGENVECT eigen_vect;
     FLTVECT   eigen_value;
@@ -662,7 +662,7 @@ void SurfaceMesh::eigenvalues()
 }
 
 
-void SurfaceMesh::splitMultipleConnectedSurfaces()
+void SurfaceMeshOld::splitMultipleConnectedSurfaces()
 {
     int m, n, b0 = 0;
     int a, c = 0;
@@ -986,13 +986,13 @@ void SurfaceMesh::splitMultipleConnectedSurfaces()
     closed       = true;
 
     // Debug
-    // SurfaceMesh::writeOFF(surfmesh, "new_surfmesh.off");
+    // SurfaceMeshOld::writeOFF(surfmesh, "new_surfmesh.off");
 
     // Re-create neighbors
     createNeighborlist();
 }
 
-void SurfaceMesh::removeUnconnectedPatches(int minimal_number)
+void SurfaceMeshOld::removeUnconnectedPatches(int minimal_number)
 {
     // Re-create the neigborlist
     createNeighborlist();

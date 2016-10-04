@@ -20,19 +20,19 @@
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <limits>
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::correctNormals
+ * Routine:  SurfaceMeshOld::correctNormals
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Function to correct normals so all facet normals point outwards
  * ***************************************************************************
  */
-void SurfaceMesh::correctNormals()
+void SurfaceMeshOld::correctNormals()
 {
     int  n;
     int  i, j;

@@ -30,19 +30,19 @@
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::refine
+ * Routine:  SurfaceMeshOld::refine
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Refine a surface mesh and recalculate the neighbors
  * ***************************************************************************
  */
-void SurfaceMesh::refine()
+void SurfaceMeshOld::refine()
 {
     unsigned int  local_num_edges = 0, total_num_edges = 0, edge_num = 0;
     unsigned int  min_vertex_num, max_vertex_num, face_num;
@@ -52,7 +52,7 @@ void SurfaceMesh::refine()
     unsigned int *vertex2edge;
     unsigned int  local_vertices[3], local_additional_vertices[3];
     NPNT3 *ngr;
-    SurfaceMesh *surfmesh_refine;
+    SurfaceMeshOld *surfmesh_refine;
     float ax, ay, az;
     float nx, ny, nz;
 
@@ -92,7 +92,7 @@ void SurfaceMesh::refine()
     }
 
     // Create memory for the refined mesh
-    surfmesh_refine               = new SurfaceMesh(nv + total_num_edges, num_faces * 4);
+    surfmesh_refine               = new SurfaceMeshOld(nv + total_num_edges, num_faces * 4);
     surfmesh_refine->num_vertices = nv;
     surfmesh_refine->num_faces    = num_faces;
 

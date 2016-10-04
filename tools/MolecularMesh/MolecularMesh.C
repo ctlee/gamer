@@ -53,7 +53,7 @@
  *           a molecular surface mesh
  * ***************************************************************************
  */
-void SmoothMolecularSurface(SurfaceMesh  *surfmesh,
+void SmoothMolecularSurface(SurfaceMeshOld  *surfmesh,
                             int           off_flag,
                             ATOM         *sphere_list,
                             int           num_spheres,
@@ -166,7 +166,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 {
     bool   write_to_file = Gem_mesh == NULL;
     time_t t1, t2;
-    SurfaceMesh *surfmesh, *surfmesh_inner, *surfmesh_outer;
+    SurfaceMeshOld *surfmesh, *surfmesh_inner, *surfmesh_outer;
     int xdim, ydim, zdim;
     float *dataset;
     float  radius;
@@ -262,7 +262,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     {
         // load user-defined molecualr surface meshes in OFF format
         printf("loading the user-specified surface/volumetric mesh....\n");
-        surfmesh_inner = SurfaceMesh::readOFF(input_name);
+        surfmesh_inner = SurfaceMeshOld::readOFF(input_name);
         printf("begin surface smoothing ... \n");
 
         (void)time(&t1);
@@ -284,7 +284,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
             iso_val = IsoValue;
         }
         printf("isovalue: %f \n", iso_val);
-        surfmesh_inner = std::get<0>(SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset,
+        surfmesh_inner = std::get<0>(SurfaceMeshOld::marchingCube(xdim, ydim, zdim, dataset,
                                                            iso_val, &holelist));
         (void)time(&t2);
         printf("vertices: %d, faces: %d\n",                    surfmesh_inner->numVertices(), surfmesh_inner->numFaces());
@@ -313,11 +313,11 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
         // Read PDB or PQR files, or XYZR format
         if (molsurf == 0)
         {
-            surfmesh_inner = std::get<0>(SurfaceMesh::readPDB_gauss(input_name, -0.2, 2.5));
+            surfmesh_inner = std::get<0>(SurfaceMeshOld::readPDB_gauss(input_name, -0.2, 2.5));
         }
         else if (molsurf == 1)
         {
-            surfmesh_inner = std::get<0>(SurfaceMesh::readPDB_molsurf(input_name));
+            surfmesh_inner = std::get<0>(SurfaceMeshOld::readPDB_molsurf(input_name));
         }
         else
         {
@@ -345,7 +345,7 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
 
     // Generate exterior sphere mesh
     printf("Generating the mesh for the bounding sphere ....\n");
-    surfmesh_outer = SurfaceMesh::sphere(5);
+    surfmesh_outer = SurfaceMeshOld::sphere(5);
 
     for (auto & vertex : surfmesh_outer->vertices())
     {
@@ -376,12 +376,12 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     printf("Mesh generated ....\n");
 
     // Merge molecular mesh and sphere mesh
-    surfmesh = SurfaceMesh::merge(surfmesh_inner, surfmesh_outer);
+    surfmesh = SurfaceMeshOld::merge(surfmesh_inner, surfmesh_outer);
 
     // Output surface meshes
     sprintf(filename, "%s.output.surf.off", input_name);
 
-    // SurfaceMesh_writeOFF(surfmesh_inner, filename);
+    // SurfaceMeshOld_writeOFF(surfmesh_inner, filename);
     surfmesh_inner->writeOFF(filename);
 
     // Compute and Output all tetrahedra meshes into .m format

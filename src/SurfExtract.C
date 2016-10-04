@@ -31,7 +31,7 @@
 
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 //#include "gamercf.h"
 
 
@@ -45,7 +45,7 @@
  *           FIXME: It should be possible to speed up this...
  * ***************************************************************************
  */
-void SurfaceExtract(TeTraMesh *volmesh, SurfaceMesh *surfmesh)
+void SurfaceExtract(TeTraMesh *volmesh, SurfaceMeshOld *surfmesh)
 {
     int   m, n, l;
     int   face_num, num_vertices, vertex_index;
@@ -329,19 +329,19 @@ void SurfaceExtract(TeTraMesh *volmesh, SurfaceMesh *surfmesh)
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::merge
+ * Routine:  SurfaceMeshOld::merge
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Merge two surface meshes into a single one
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::merge(SurfaceMesh *surfmesh_in0, SurfaceMesh *surfmesh_in1)
+SurfaceMeshOld * SurfaceMeshOld::merge(SurfaceMeshOld *surfmesh_in0, SurfaceMeshOld *surfmesh_in1)
 {
-    SurfaceMesh *surfmesh;
+    SurfaceMeshOld *surfmesh;
     int i;
 
-    surfmesh = new SurfaceMesh(surfmesh_in0->num_vertices + surfmesh_in1->num_vertices,
+    surfmesh = new SurfaceMeshOld(surfmesh_in0->num_vertices + surfmesh_in1->num_vertices,
                                surfmesh_in0->num_faces + surfmesh_in1->num_faces);
 
 

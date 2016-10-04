@@ -29,14 +29,14 @@
  */
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <tetgen/tetgen.h>
 #include <vector>
 #include <tuple>
 
 
 // Declare internal GAMer methods
-FLTVECT GetCrossProduct(SurfaceMesh *,
+FLTVECT GetCrossProduct(SurfaceMeshOld *,
                         int,
                         int,
                         int);
@@ -127,35 +127,35 @@ void GemMesh_dtor(GemMesh *gem_mesh)
 
 /*
  * ***************************************************************************
- * Routine:  GemMesh_fromSurfaceMesh
+ * Routine:  GemMesh_fromSurfaceMeshOld
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Use tetgen to generate a GemMesh from a surface mesh
  * ***************************************************************************
  */
-GemMesh* GemMesh_fromSurfaceMesh(SurfaceMesh *surfmesh, char *tetgen_params)
+GemMesh* GemMesh_fromSurfaceMeshOld(SurfaceMeshOld *surfmesh, char *tetgen_params)
 {
-    SurfaceMesh *surfmeshes[1] = { surfmesh };
+    SurfaceMeshOld *surfmeshes[1] = { surfmesh };
 
-    return GemMesh_fromSurfaceMeshes(surfmeshes, 1, tetgen_params);
+    return GemMesh_fromSurfaceMeshOldes(surfmeshes, 1, tetgen_params);
 }
 
 /*
  * ***************************************************************************
- * Routine:  GemMesh_fromSurfaceMeshes
+ * Routine:  GemMesh_fromSurfaceMeshOldes
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Use tetgen to generate a GemMesh from a surface mesh
  * ***************************************************************************
  */
-GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh **surfmeshes, int num_surface_meshes,
+GemMesh* GemMesh_fromSurfaceMeshOldes(SurfaceMeshOld **surfmeshes, int num_surface_meshes,
                                    char *tetgen_params)
 {
     unsigned int j, sm_index, num_vertices = 0, num_faces = 0;
     unsigned int num_regions = 0, num_holes = 0;
-    SurfaceMesh *surfmesh;
+    SurfaceMeshOld *surfmesh;
     FLTVECT  normal, midpoint;
     INT3VECT face0;
 
@@ -429,7 +429,7 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
     }
 
     // Using the markers from the trifaces to mark vertices being on the boundary
-    SurfaceMesh *boundary = new SurfaceMesh(0, boundary_face);
+    SurfaceMeshOld *boundary = new SurfaceMeshOld(0, boundary_face);
 
     for (i = 0; i < tetio.numberoftrifaces; i++)
     {

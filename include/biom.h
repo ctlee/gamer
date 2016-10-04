@@ -249,7 +249,7 @@ struct FETK_SS {
     int nd;  /**< @brief Face marker for face consisting of first, second, and third vertex */
 };
 
-class SurfaceMesh;
+class SurfaceMeshOld;
 
 /** @brief Other data structure GemMesh (for volumetric meshes) */
 class GemMesh {
@@ -262,8 +262,8 @@ public:
 
     GemMesh(unsigned int num_vertices, unsigned int num_cells, bool higher_order = false);
     GemMesh(tetgenio& tetio);
-    GemMesh(SurfaceMesh **surfmeshes, int num_meshes, char *tetgen_params);
-    GemMesh(SurfaceMesh *surfmesh, char *tetgen_params);
+    GemMesh(SurfaceMeshOld **surfmeshes, int num_meshes, char *tetgen_params);
+    GemMesh(SurfaceMeshOld *surfmesh, char *tetgen_params);
     GemMesh(tetgenio *out, float radius, float centerx, float centery, float centerz, char *ActiveSite, int output_flag);
 
     // Methods working on a GemMesh
@@ -285,7 +285,7 @@ public:
     FETK_VX  *vv;          /**< @brief Vertex array */
     FETK_SS  *ss;          /**< @brief Cell array */
     INT6VECT *hs;          /**< @brief Higher order Cell array */
-    SurfaceMesh *boundary; /**< @brief Boundary facets */
+    SurfaceMeshOld *boundary; /**< @brief Boundary facets */
 };
 
 
@@ -295,8 +295,8 @@ class tetgenio;
 // GemMesh constructors
 GemMesh* GemMesh_ctor(unsigned int num_vertices, unsigned int num_cells, bool higher_order = false);
 GemMesh* GemMesh_fromTetgen(tetgenio& tetio);
-GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh **surfmeshes, int num_meshes, char *tetgen_params);
-GemMesh* GemMesh_fromSurfaceMesh(SurfaceMesh *surfmesh, char *tetgen_params);
+GemMesh* GemMesh_fromSurfaceMeshOldes(SurfaceMeshOld **surfmeshes, int num_meshes, char *tetgen_params);
+GemMesh* GemMesh_fromSurfaceMeshOld(SurfaceMeshOld *surfmesh, char *tetgen_params);
 GemMesh* GemMesh_fromPdb(tetgenio *out, float radius, float centerx, float centery, float centerz,
                          char *ActiveSite, int output_flag);
 
@@ -312,6 +312,6 @@ void GemMesh_writeOFF(GemMesh *Gem_mesh, char *filename);
 // void ReadActiveSiteFile(char*, unsigned int&, ATOM*&, unsigned int*&, float*&);
 void  ReadActiveSiteFile(char *, unsigned int&, ATOM *&, unsigned int *&);
 void  ReadRawiv(int *, int *, int *, float **, char *, float *, float *);
-void  SurfaceExtract(TeTraMesh *, SurfaceMesh *);
+void  SurfaceExtract(TeTraMesh *, SurfaceMeshOld *);
 
 #endif /* _BIOM_H_ */
