@@ -1,5 +1,8 @@
 #pragma once
 
+#include <utility>
+#include <array>
+
 namespace util
 {
     template<typename T> struct range

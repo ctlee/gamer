@@ -43,3 +43,7 @@ set_target_properties(objecttests PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(objecttests gamershared libgtest)
 
 add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
+
+add_executable(scratchtest scratchtest.cpp)
+set_target_properties(scratchtest PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(objecttests gamershared)
