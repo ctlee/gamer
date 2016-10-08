@@ -5,13 +5,14 @@
 #include <iterator>
 #include <array>
 #include <vector>
+#include <iostream>
 #include "util.h"
 
-using Simplex = unsigned int;
+//using Simplex = unsigned int;
 
 namespace detail {
 	template <class T> using vector = std::vector<T>;
-
+	template <class KeyType, class T> using map = std::map<KeyType,T>;
 	/*
 	 * asc_Node must be defined outside of simplicial_complex because c++ does not allow
 	 * internal templates to be partially specialized. I admit that I do not understand
@@ -24,7 +25,7 @@ namespace detail {
 		asc_NodeBase(int id) : _node(id) {}
 		virtual ~asc_NodeBase() {};
 
-		Simplex _node;
+		size_t _node;
 	};
 
 	template <class DataType>
@@ -65,7 +66,21 @@ namespace detail {
 					  public asc_NodeDown<KeyType, k, N, NodeDataTypes, EdgeDataTypes>,
 					  public asc_NodeUp<KeyType, k, N, NodeDataTypes, EdgeDataTypes>
 	{
+		using DownNodeT = asc_Node<KeyType,k-1,N,NodeDataTypes,EdgeDataTypes>;
+		using UpNodeT = asc_Node<KeyType,k+1,N,NodeDataTypes,EdgeDataTypes>;
 		asc_Node(int id) : asc_NodeBase(id) {}
+        
+        friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
+            output  << "Node(level=" << k << ", " << "id=" << node._node;
+            if(node._down.size() > 1)
+                for(typename std::map<KeyType, DownNodeT*>::const_iterator it=node._down.cbegin(); it!=node._down.cend(); ++it)
+                    output << ", NodeDownID=" << it->second->_node;
+            if(node._up.size() > 1)
+                for(typename std::map<KeyType, UpNodeT*>::const_iterator it=node._up.cbegin(); it!=node._up.cend(); ++it)
+                    output << ", NodeUpID=" << it->second->_node;
+            output  << ")";
+            return output;
+        }
 	};
 
 	template <class KeyType, size_t N, class NodeDataTypes, class EdgeDataTypes>
@@ -73,7 +88,18 @@ namespace detail {
 											 public asc_NodeData<typename util::type_get<0,NodeDataTypes>::type>,
 											 public asc_NodeUp<KeyType, 0, N, NodeDataTypes, EdgeDataTypes>
 	{
+		using UpNodeT = asc_Node<KeyType,1,N,NodeDataTypes,EdgeDataTypes>;
 		asc_Node(int id) : asc_NodeBase(id) {}
+       
+        friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
+            output  << "Node(level=" << 0
+                    << ", id=" << node._node;
+            if(node._up.size() > 1)
+                for(typename std::map<KeyType, UpNodeT*>::const_iterator it=node._up.cbegin(); it!=node._up.cend(); ++it)
+                    output << ", NodeUpID=" << it->second->_node;
+            output << ")";
+            return output;
+        }
 	};
 
 	template <class KeyType, size_t N, class NodeDataTypes, class EdgeDataTypes>
@@ -81,7 +107,18 @@ namespace detail {
 											 public asc_NodeData<typename util::type_get<N,NodeDataTypes>::type>,
 					  						 public asc_NodeDown<KeyType, N, N, NodeDataTypes, EdgeDataTypes>
 	{
+		using DownNodeT = asc_Node<KeyType,N-1,N,NodeDataTypes,EdgeDataTypes>;
 		asc_Node(int id) : asc_NodeBase(id) {}
+       
+        friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
+            output  << "Node(level=" << N
+                    << ", id=" << node._node;
+            if(node._down.size() > 1)
+                for(typename std::map<KeyType, DownNodeT*>::const_iterator it=node._down.cbegin(); it!=node._down.cend(); ++it)
+                    output << ", NodeDownID=" << it->second->_node;
+            output << ")";
+            return output;
+        }
 	};
 
 	/*
@@ -100,7 +137,7 @@ namespace detail {
 		bool operator==(node_id_iterator j) const { return i == j.i; }
 		bool operator!=(node_id_iterator j) const { return !(*this == j); }
 		typename super::reference operator*() { return (*i); }
-		typename super::pointer operator->() { return &(*i); }
+        typename super::pointer operator->() { return &(*i); }
 	protected:
 		Iter i;
 	};
@@ -335,8 +372,8 @@ public:
 	{
 		auto begin = std::get<k>(levels).begin();
 		auto end = std::get<k>(levels).end();
-		auto data_begin = detail::make_node_id_iterator<decltype(begin),NodeData<k>>(begin);
-		auto data_end = detail::make_node_id_iterator<decltype(end),NodeData<k>>(end);
+		auto data_begin = detail::make_node_id_iterator<decltype(begin),NodePtr<k>>(begin);
+		auto data_end = detail::make_node_id_iterator<decltype(end),NodePtr<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
@@ -364,14 +401,27 @@ public:
 	size_t remove(const KeyType (&s)[n])
 	{
 		Node<n>* root = get_recurse<0,n>::apply(this, s, _root);
+	    std::cout << "Remove node: " << *root << std::endl;
 		size_t count = 0;
 		return remove_recurse<n,0>::apply(this, &root, &root + 1, count);
 	}
 
+	template <std::size_t k>
+	auto print_id()
+	{
+        std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
+        auto ids = this->get_level_id<k>();
+        for(auto& id : ids){
+            std::cout << *id << std::endl;
+        }
+	}
 
 
 private:
-	// the foo argument is necessary to get the compiler to shut up.
+	/**
+	 * Recursively deletes dependent nodes
+	 * the foo argument is necessary to get the compiler to shut up.
+     */
 	template <size_t level, size_t foo>
 	struct remove_recurse
 	{
@@ -379,6 +429,7 @@ private:
 		static size_t apply(type_this* that, T begin, T end, size_t& count)
 		{
 			std::set<Node<level+1>*> next;
+			// for each node of interest...
 			for(auto i = begin; i != end; ++i)
 			{
 				auto up = (*i)->_up;
@@ -386,6 +437,8 @@ private:
 				{
 					next.insert(j->second);
 				}
+
+	            std::cout << "Remove_recurse node: " << **i << std::endl;
 				that->remove_node(*i);
 				++count;
 			}
@@ -393,6 +446,7 @@ private:
 		}
 	};
 
+    // Terminal condition for remove_recurse
 	template <size_t foo>
 	struct remove_recurse<numLevels-1,foo>
 	{
@@ -401,6 +455,7 @@ private:
 		{
 			for(auto i = begin; i != end; ++i)
 			{
+	            std::cout << "Remove_recurse node: " << **i << std::endl;
 				that->remove_node(*i);
 				++count;
 			}
@@ -563,7 +618,7 @@ private:
 	{
 		auto p = new Node<level>(node_count++);//nodes.size());
 		++(level_count[level]);
-		std::get<level>(levels).push_back(p);
+		std::get<level>(levels).insert(p);
 
 		return p;
 	}
@@ -571,6 +626,7 @@ private:
 	template <size_t level>
 	void remove_node(Node<level>* p)
 	{
+	    std::cout << "remove_node: " << *p << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
 			curr->second->_up.erase(curr->first);
@@ -585,6 +641,7 @@ private:
 
 	void remove_node(Node<0>* p)
 	{
+	    std::cout << "remove_node: " << *p << std::endl;
 		for(auto curr = p->_up.begin(); curr != p->_up.end(); ++curr)
 		{
 			curr->second->_down.erase(curr->first);
@@ -595,6 +652,7 @@ private:
 
 	void remove_node(Node<topLevel>* p)
 	{
+	    std::cout << "remove_node: " << *p << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
 			curr->second->_up.erase(curr->first);
@@ -607,7 +665,7 @@ private:
 	size_t node_count;
 	std::array<size_t,numLevels> level_count;
 	using NodePtrLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, NodePtr>::type;
-	typename util::type_map<NodePtrLevel, detail::vector>::type levels;
+	typename util::type_map<NodePtrLevel, detail::map>::type levels;
 };
 
 template <typename KeyType, typename... Ts>
