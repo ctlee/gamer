@@ -49,9 +49,9 @@
 
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 
-SurfaceMesh * SurfaceMesh::sphere(int level)
+SurfaceMeshOld * SurfaceMeshOld::sphere(int level)
 {
     int   n, m, l, k;
     int   a, b, c, e, f, g;
@@ -61,18 +61,18 @@ SurfaceMesh * SurfaceMesh::sphere(int level)
     float ex, ey, ez;
     float fx, fy, fz;
     float gx, gy, gz;
-    SurfaceMesh *surfmesh;
+    SurfaceMeshOld *surfmesh;
     int   n_v, n_f;
     float length, dist;
 
     // Allocate memory
     if (level == 1)
     {
-        surfmesh = new SurfaceMesh(6, 8 * (int)pow(4, (level - 1)));
+        surfmesh = new SurfaceMeshOld(6, 8 * (int)pow(4, (level - 1)));
     }
     else if (level > 1)
     {
-        surfmesh = new SurfaceMesh(12 * (int)pow(2, (level - 2)) + 8 * (int)pow(2, (2 * level - 3)) -
+        surfmesh = new SurfaceMeshOld(12 * (int)pow(2, (level - 2)) + 8 * (int)pow(2, (2 * level - 3)) -
                                    8 * (int)pow(2, (level - 2)) - (int)pow(2, level) + 2,
                                    8 * (int)pow(4, (level - 1)));
     }

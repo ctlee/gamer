@@ -51,31 +51,31 @@ using SurfaceMesh_ASC = simplicial_complex<complex_traits>;
 SurfaceMesh_ASC* OFF_to_SimplicialComplex(const std::string& filename);
 
 
-/** @brief Other data structure SurfaceMesh (for surface meshes) */
-class SurfaceMesh {
+/** @brief Other data structure SurfaceMeshOld (for surface meshes) */
+class SurfaceMeshOld {
 public:
 
     typedef FLTVECT *vertex_iterator;
 
     // Surface mesh constructors
-    SurfaceMesh() {}
+    SurfaceMeshOld() {}
 
-    SurfaceMesh(unsigned int, unsigned int);
-    ~SurfaceMesh();
+    SurfaceMeshOld(unsigned int, unsigned int);
+    ~SurfaceMeshOld();
 
     // Move as many of these as possible to global functions.
-    // SurfaceMesh 
-    static SurfaceMesh* merge(SurfaceMesh *, SurfaceMesh *);
-    static SurfaceMesh* readOFF(std::string filename);
-    static SurfaceMesh* readPoly(std::string filename);
-    static std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> readPDB_molsurf(std::string filename);
-    static std::tuple<SurfaceMesh*,SurfaceMesh_ASC*> readPDB_gauss(const char *filename, float blobbyness, float iso_value);
-    static SurfaceMesh* sphere(int);
-    static std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, SPNT **);
-    static std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, float *, float, SPNT **);
-    static SurfaceMesh* readLattice(const char *, float, bool);
-    static SurfaceMesh* readLattice(const char *, const char *, float, bool);
-    static SurfaceMesh* triangulate(REAL *pointlist, int numberofpoints, const char *triangle_params);
+    // SurfaceMeshOld 
+    static SurfaceMeshOld* merge(SurfaceMeshOld *, SurfaceMeshOld *);
+    static SurfaceMeshOld* readOFF(std::string filename);
+    static SurfaceMeshOld* readPoly(std::string filename);
+    static std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> readPDB_molsurf(std::string filename);
+    static std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> readPDB_gauss(const char *filename, float blobbyness, float iso_value);
+    static SurfaceMeshOld* sphere(int);
+    static std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, SPNT **);
+    static std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> marchingCube(int, int, int, float *, float, float *, float, SPNT **);
+    static SurfaceMeshOld* readLattice(const char *, float, bool);
+    static SurfaceMeshOld* readLattice(const char *, const char *, float, bool);
+    static SurfaceMeshOld* triangulate(REAL *pointlist, int numberofpoints, const char *triangle_params);
 
 public:
 
@@ -134,13 +134,13 @@ public:
 public:
 
     // Almost all of these should *not* be public member functions.
-    // We need to re-factor the interface of SurfaceMesh so that these can be implemented cleanly
+    // We need to re-factor the interface of SurfaceMeshOld so that these can be implemented cleanly
     // in terms of that interface.
-    // SurfaceMesh should merely handle the proper construction and destruction of a Surface Mesh.
+    // SurfaceMeshOld should merely handle the proper construction and destruction of a Surface Mesh.
     // But... baby steps... baby steps.
 
     // Having a needless friend function like this is a special kind of terrible, but one step at a time.
-    friend void SurfaceExtract(TeTraMesh *volmesh, SurfaceMesh *surfmesh);
+    friend void SurfaceExtract(TeTraMesh *volmesh, SurfaceMeshOld *surfmesh);
 
     void        createNeighborlist();
     void        destroyNeighborlist();

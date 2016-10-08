@@ -1,12 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include "tensor.h"
 
 struct Vertex
 {
     tensor<double,3,1> position;
-    size_t marker = 0;
+    int marker = 0;
     bool selected = false;
     
     Vertex(): Vertex(0,0,0) {}
@@ -31,6 +32,17 @@ struct Vertex
         return output;
     }
     
+    std::string to_string() const{
+        std::ostringstream output;
+        output  << "Vertex(x:" << position[0]
+                << ",y:" << position[1] 
+                << ",z:" << position[2]
+                << ";m:" << marker
+                << ";sel:" << selected
+                << ")";
+        return output.str();
+    }
+
     const double& operator[](std::size_t index) const{
         return position[index];
     }

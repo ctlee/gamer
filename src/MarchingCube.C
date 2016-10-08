@@ -37,11 +37,11 @@
 
 
 #include "MarchingCube.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <iostream>
 #include <tuple>
 
-// SurfaceMesh* SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float* dataset, float isovalue, float* intensity, float intensity_isovalue, SPNT
+// SurfaceMeshOld* SurfaceMeshOld::marchingCube(int xdim, int ydim, int zdim, float* dataset, float isovalue, float* intensity, float intensity_isovalue, SPNT
 // **holelist);
 
 float get_intensity_ratio(float den1, float den2, float isovalue)
@@ -72,15 +72,15 @@ float get_intensity_ratio(float den1, float den2, float isovalue)
     return 0.5;
 }
 
-std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, int ydim, int zdim,
+std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> SurfaceMeshOld::marchingCube(int xdim, int ydim, int zdim,
                                         float *dataset, float isovalue,
                                         SPNT **holelist)
 {
-    return SurfaceMesh::marchingCube(xdim, ydim, zdim, dataset, isovalue,
+    return SurfaceMeshOld::marchingCube(xdim, ydim, zdim, dataset, isovalue,
                                      NULL, 0.0, holelist);
 }
 
-std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, int ydim, int zdim, float *dataset,
+std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> SurfaceMeshOld::marchingCube(int xdim, int ydim, int zdim, float *dataset,
                                         float isovalue, float *intensity,
                                         float intensity_isovalue, SPNT **holelist)
 {
@@ -96,7 +96,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
     unsigned char  cellIndex;
     INT3VECT      *mc_edge;
     unsigned char *mc_sign;
-    SurfaceMesh   *surfmesh;
+    SurfaceMeshOld   *surfmesh;
     SPNT   *hole_end, *hole_start;
     FLTVECT interior_seed;
     float   max_density = -9999.0;
@@ -830,7 +830,7 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
     }
 
     // Allocate memory
-    surfmesh = new SurfaceMesh(v_num, t_num);
+    surfmesh = new SurfaceMeshOld(v_num, t_num);
 
     for (n = 0; n < surfmesh->num_vertices; ++n)
     {
@@ -872,6 +872,6 @@ std::tuple<SurfaceMesh*, SurfaceMesh_ASC*> SurfaceMesh::marchingCube(int xdim, i
     free(mc_edge);
     free(mc_sign);
 
-    // Return created SurfaceMesh
+    // Return created SurfaceMeshOld
     return std::make_tuple(surfmesh, pF);
 }

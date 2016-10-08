@@ -450,7 +450,7 @@ void parse_comand_line(int argc, char *argv[], char*& input_filename,
  * Purpose:  Read a surface mesh file stored in OFF format
  * ***************************************************************************
  */
-SurfaceMesh* ReadSurfMeshFile(char* input_name, bool read_suffix_count, 
+SurfaceMeshOld* ReadSurfMeshFile(char* input_name, bool read_suffix_count, 
 			      char* basename, int& suffix_count)
 {
   char filename[256];
@@ -491,22 +491,22 @@ SurfaceMesh* ReadSurfMeshFile(char* input_name, bool read_suffix_count,
   }
 
   // Load surface meshes in OFF format
-  return SurfaceMesh::readOFF(input_name);
+  return SurfaceMeshOld::readOFF(input_name);
 }
 
 /*
  * ***************************************************************************
- * Routine:  ImproveSurfaceMesh
+ * Routine:  ImproveSurfaceMeshOld
  *
  * Author:   Johan Hake (hake.dev@gmail.com), Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Improve a surface mesh
  * ***************************************************************************
  */
-int ImproveSurfaceMesh(char* input_name, char* input_site, ActionItem* action_list)
+int ImproveSurfaceMeshOld(char* input_name, char* input_site, ActionItem* action_list)
 {
   time_t t0, t1, t2;
-  SurfaceMesh* surfmesh = NULL;
+  SurfaceMeshOld* surfmesh = NULL;
   char filename[256], basename[256];
   unsigned int num_spheres = 0;
   ATOM *sphere_list = NULL;
@@ -743,8 +743,8 @@ int main(int argc, char *argv[])
   // Parse command line
   parse_comand_line(argc, argv, input_filename, input_sites, action_list);
 
-  // Call ImproveSurfaceMesh routine
-  ImproveSurfaceMesh(input_filename, input_sites, action_list);
+  // Call ImproveSurfaceMeshOld routine
+  ImproveSurfaceMeshOld(input_filename, input_sites, action_list);
 
   // Clean action list
   delete_ActionItem(action_list);

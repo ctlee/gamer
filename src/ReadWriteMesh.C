@@ -109,7 +109,7 @@ void sort_connectivity(const std::vector<unsigned int>& conn,
 #include <string>
 
 #include "biom.h"
-#include "SurfaceMesh.h"
+#include "SurfaceMeshOld.h"
 #include <tetgen/tetgen.h>
 //#include "gamercf.h"
 
@@ -436,14 +436,14 @@ int rgb_to_marker(float r, float g, float b)
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::readPoly
+ * Routine:  SurfaceMeshOld::readPoly
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Read a tetgen poly file representing a Piecewise Linear Complex
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readPoly(std::string input_name)
+SurfaceMeshOld * SurfaceMeshOld::readPoly(std::string input_name)
 {
     int n;
 
@@ -456,8 +456,8 @@ SurfaceMesh * SurfaceMesh::readPoly(std::string input_name)
         return NULL;
     }
 
-    // Create the SurfaceMesh
-    SurfaceMesh *surfmesh = new SurfaceMesh(tetio.numberofpoints, tetio.numberoffacets);
+    // Create the SurfaceMeshOld
+    SurfaceMeshOld *surfmesh = new SurfaceMeshOld(tetio.numberofpoints, tetio.numberoffacets);
 
     n = 0;
 
@@ -529,14 +529,14 @@ SurfaceMesh * SurfaceMesh::readPoly(std::string input_name)
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::writePoly
+ * Routine:  SurfaceMeshOld::writePoly
  *
  * Author:   Johan Hake (hake.dev@gmail.com)
  *
  * Purpose:  Write a tetgen poly file representing a Piecewise Linear Complex
  * ***************************************************************************
  */
-void SurfaceMesh::writePoly(char *filename)
+void SurfaceMeshOld::writePoly(char *filename)
 {
     int   i;
     FILE *fout;
@@ -581,7 +581,7 @@ void SurfaceMesh::writePoly(char *filename)
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::readOFF
+ * Routine:  SurfaceMeshOld::readOFF
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
@@ -589,7 +589,7 @@ void SurfaceMesh::writePoly(char *filename)
  *           provided, a surface mesh will be extracted
  * ***************************************************************************
  */
-SurfaceMesh * SurfaceMesh::readOFF(std::string input_name)
+SurfaceMeshOld * SurfaceMeshOld::readOFF(std::string input_name)
 {
     unsigned int n, m;
     unsigned int a, b, c, d;
@@ -600,7 +600,7 @@ SurfaceMesh * SurfaceMesh::readOFF(std::string input_name)
     FILE        *fin = NULL;
     fpos_t       position;
     bool         has_marker = false;
-    SurfaceMesh *surfmesh   = NULL;
+    SurfaceMeshOld *surfmesh   = NULL;
 
 
     if ((fin = fopen(input_name.c_str(), "r")) == NULL)
@@ -627,7 +627,7 @@ SurfaceMesh * SurfaceMesh::readOFF(std::string input_name)
     printf("   vertices: %d --- simplices: %d \n", v_n, t_n);
 
     // Assign memory
-    surfmesh = new SurfaceMesh(v_n, t_n);
+    surfmesh = new SurfaceMeshOld(v_n, t_n);
 
     // Read vertex coordinates
     for (n = 0; n < v_n; n++) // surfmesh->num_vertices; n++) {
@@ -896,14 +896,14 @@ void write_rawiv_float(FILE *fp, float *dataset, int dim[3],
 
 /*
  * ***************************************************************************
- * Routine:  SurfaceMesh::writeOFF
+ * Routine:  SurfaceMeshOld::writeOFF
  *
  * Author:   Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  write a surface mesh into an OFF file
  * ***************************************************************************
  */
-void SurfaceMesh::writeOFF(char *filename)
+void SurfaceMeshOld::writeOFF(char *filename)
 {
     int   i;
     FILE *fout;

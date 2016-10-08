@@ -46,7 +46,7 @@ const char tetgen_default_quality_params[] = "qq20";
  * Purpose:  Assign active sites from a list of user-defined spheres
  * ***************************************************************************
  */
-//void SetAreaConstraint(SurfaceMesh* surfmesh, ATOM* sphere_list, 
+//void SetAreaConstraint(SurfaceMeshOld* surfmesh, ATOM* sphere_list, 
 //		       unsigned int* marker_list, int num_spheres,
 //		       float* area_constraint_list,
 //		       int& num_facet_area_constraints,
@@ -136,18 +136,18 @@ const char tetgen_default_quality_params[] = "qq20";
 
 /*
  * ***************************************************************************
- * Routine:  GenerateMeshFromSurfaceMesh    < ... >
+ * Routine:  GenerateMeshFromSurfaceMeshOld    < ... >
  *
  * Author:   Johan Hake (hake.dev@gmail.com), Zeyun Yu (zeyun.yu@gmail.com)
  *
  * Purpose:  Tetrahedralize a surface mesh
  * ***************************************************************************
  */
-void GenerateMeshFromSurfaceMesh(char* input_name, char* input_site, 
+void GenerateMeshFromSurfaceMeshOld(char* input_name, char* input_site, 
 				 char* mesh_format, char* tetgen_params)
 {
   time_t t0;
-  SurfaceMesh* surfmesh = NULL;
+  SurfaceMeshOld* surfmesh = NULL;
   char filename[256], basename[256];
   char* basename_end_pointer;
   unsigned int basename_index;
@@ -179,13 +179,13 @@ void GenerateMeshFromSurfaceMesh(char* input_name, char* input_site,
   basename[basename_index] = '\0';
 
   // Load surface meshes in OFF format
-  surfmesh = SurfaceMesh::readOFF(input_name);
+  surfmesh = SurfaceMeshOld::readOFF(input_name);
 
   printf("Begin generating tetrahedral mesh.\n");
   (void)time(&t0);
 
   // Convert to a generalized tetrahedral mesh structure
-  GemMesh* gem_out = GemMesh_fromSurfaceMesh(surfmesh, tetgen_params);//GemMesh_fromTetgen(out);
+  GemMesh* gem_out = GemMesh_fromSurfaceMeshOld(surfmesh, tetgen_params);//GemMesh_fromTetgen(out);
 
   // Save output mesh in given format
   if (strcmp(mesh_format, "mcsf")==0)
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
     sprintf(passed_mesh_format, "%s", mesh_format);
 
   // Call GenerateMesh routine
-  GenerateMeshFromSurfaceMesh(input_filename, input_sites, 
+  GenerateMeshFromSurfaceMeshOld(input_filename, input_sites, 
 			      passed_mesh_format, tetgen_params);
   
   // Free memory
