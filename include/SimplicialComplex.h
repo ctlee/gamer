@@ -188,7 +188,7 @@ public:
 	template <size_t n>
 	void insert(const KeyType (&s)[n], const NodeData<n>& data)
 	{
-		Node<n>* rval = insert_for<0,n,false>::apply(this, _root, s);
+		Node<n>* rval = insert_for<0,n,true>::apply(this, _root, s);
 		rval->_data = data;
 	}
 
@@ -548,7 +548,15 @@ private:
 	{
 		if(root->_up.find(value) == root->_up.end())
 		{
-			Node<level+1>* nn = create_node<level+1>();
+			Node<level+1>* nn;
+			if(n == 0) // we are inserting the node the user requested.
+			{
+				nn = create_node<level+1>();
+			}
+			else // we are backfilling. The user may or may not want this.
+			{
+				nn = create_node<level+1>();
+			}
 			nn->_down[value] = root;
 			root->_up[value] = nn;
 
