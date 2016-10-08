@@ -51,7 +51,7 @@ public:
     SurfaceMesh() : ASC(){};
     ~SurfaceMesh(){};
     void print() const{
-        for(auto& x: this->get_level<1>()) {
+        for(auto x: this->get_level<1>()) {
             std::cout << x << ", ";
         }
         std::cout << std::endl;

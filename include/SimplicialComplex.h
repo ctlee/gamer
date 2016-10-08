@@ -12,7 +12,7 @@
 
 namespace detail {
 	template <class T> using vector = std::vector<T>;
-	template <class KeyType, class T> using map = std::map<KeyType,T>;
+	template <class T> using map = std::map<size_t,T>;
 	/*
 	 * asc_Node must be defined outside of simplicial_complex because c++ does not allow
 	 * internal templates to be partially specialized. I admit that I do not understand
@@ -136,8 +136,8 @@ namespace detail {
 		node_id_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
 		bool operator==(node_id_iterator j) const { return i == j.i; }
 		bool operator!=(node_id_iterator j) const { return !(*this == j); }
-		typename super::reference operator*() { return (*i); }
-        typename super::pointer operator->() { return &(*i); }
+		typename super::reference operator*() { return i->second; }
+        typename super::pointer operator->() { return i->second; }
 	protected:
 		Iter i;
 	};
@@ -157,14 +157,15 @@ namespace detail {
 		node_data_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
 		bool operator==(node_data_iterator j) const { return i == j.i; }
 		bool operator!=(node_data_iterator j) const { return !(*this == j); }
-		typename super::reference operator*() { return (*i)->_data; }
-		typename super::pointer operator->() { return &(*i)->_data; }
+		typename super::reference operator*() { return i->second->_data; }
+		typename super::pointer operator->() { return i->second->_data; }
 	protected:
 		Iter i;
 	};
 
 	template <typename Iter, typename Data>
-	inline node_data_iterator<Iter,Data> make_node_data_iterator(Iter j) { return node_data_iterator<Iter,Data>(j); }
+	inline 
+	node_data_iterator<Iter,Data> make_node_data_iterator(Iter j) { return node_data_iterator<Iter,Data>(j); }
 }
 
 
@@ -338,6 +339,7 @@ public:
 	template <size_t n>
 	bool exists(const KeyType (&s)[n]) const
 	{
+		
 		return get_recurse<0,n>::apply(this, s, _root) != 0;
 	}
 
@@ -401,7 +403,6 @@ public:
 	size_t remove(const KeyType (&s)[n])
 	{
 		Node<n>* root = get_recurse<0,n>::apply(this, s, _root);
-	    std::cout << "Remove node: " << *root << std::endl;
 		size_t count = 0;
 		return remove_recurse<n,0>::apply(this, &root, &root + 1, count);
 	}
@@ -437,8 +438,6 @@ private:
 				{
 					next.insert(j->second);
 				}
-
-	            std::cout << "Remove_recurse node: " << **i << std::endl;
 				that->remove_node(*i);
 				++count;
 			}
@@ -455,7 +454,6 @@ private:
 		{
 			for(auto i = begin; i != end; ++i)
 			{
-	            std::cout << "Remove_recurse node: " << **i << std::endl;
 				that->remove_node(*i);
 				++count;
 			}
@@ -616,17 +614,20 @@ private:
 	template <size_t level>
 	Node<level>* create_node()
 	{
-		auto p = new Node<level>(node_count++);//nodes.size());
+		auto p = new Node<level>(node_count++);
 		++(level_count[level]);
-		std::get<level>(levels).insert(p);
-
+	    
+	    bool ret = std::get<level>(levels).insert(std::pair<size_t,NodeId<level>>(node_count-1, p)).second; // node_count-1 to match the id's correctly
+        // sanity check to make sure there aren't duplicate keys... 
+        if (ret==false) {
+            std::cout << "Error: Node '" << node_count << "' already existed with value " << *p << std::endl;
+        }
 		return p;
 	}
 
 	template <size_t level>
 	void remove_node(Node<level>* p)
 	{
-	    std::cout << "remove_node: " << *p << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
 			curr->second->_up.erase(curr->first);
@@ -636,28 +637,29 @@ private:
 			curr->second->_down.erase(curr->first);
 		}
 		--(level_count[level]);
+		std::get<level>(levels).erase(p->_node);
 		delete p;
 	}
 
 	void remove_node(Node<0>* p)
 	{
-	    std::cout << "remove_node: " << *p << std::endl;
 		for(auto curr = p->_up.begin(); curr != p->_up.end(); ++curr)
 		{
 			curr->second->_down.erase(curr->first);
 		}
 		--(level_count[0]);
+		std::get<0>(levels).erase(p->_node);
 		delete p;
 	}
 
 	void remove_node(Node<topLevel>* p)
 	{
-	    std::cout << "remove_node: " << *p << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
 			curr->second->_up.erase(curr->first);
 		}
 		--(level_count[topLevel]);
+		std::get<topLevel>(levels).erase(p->_node);
 		delete p;
 	}
 
