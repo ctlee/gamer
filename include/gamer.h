@@ -36,7 +36,6 @@
 #define _GAMER_H_
 
 #include "gamer_base.h"
-
 #include <triangle/triangle.h>
 #include <tetgen/tetgen.h>
 #include "biom.h"

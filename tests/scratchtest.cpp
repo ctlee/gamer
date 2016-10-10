@@ -1,6 +1,11 @@
+/**
+ * This is a scratch space for testing new functions and such on the fly.
+ */
+
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 #include <iostream>
+#include <string>
 
 int main(int argc, char *argv[])
 {
@@ -8,14 +13,14 @@ int main(int argc, char *argv[])
     x.insert<1>({1}, Vertex(1,2,3));
     x.insert<1>({2}, Vertex(3,4,5));
     x.insert<1>({3}, Vertex(5,6,7));
-    x.insert<1>({4}, Vertex(7,8,9));
+    x.insert<1>({6}, Vertex(7,8,9));
     x.insert<1>({5}, Vertex(9,10,11));
-    x.insert<1>({6}, Vertex(11,12,13));
+    x.insert<1>({4}, Vertex(11,12,13));
     
     x.insert<3>({1,2,3});
     x.insert<1>({7}, Vertex(-1,-1,-1));
     x.insert<3>({2,3,4});
-    x.print();
+    x.print_vertices();
 
     Vertex v = x.get<1>({7});
     std::cout << "Node<7>=" << v << std::endl;
@@ -24,7 +29,9 @@ int main(int argc, char *argv[])
     x.print_id<2>();
     x.print_id<3>();
     std::cout<<std::endl;
-    
+
+    writeOFF("test.off", &x);
+        
     x.remove<1>({1});
 
     v = x.get<1>({7});
