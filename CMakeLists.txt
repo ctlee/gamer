@@ -54,6 +54,9 @@ file(GLOB SOURCES "src/*.C")
 add_library(gamershared SHARED ${SOURCES})
 
 message(STATUS "SOURCES: ${SOURCES}")
+
+
+
 set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(gamershared tetshared trishared)
 # TODO: populate the list of headers to install...
@@ -62,6 +65,7 @@ install(TARGETS gamershared DESTINATION lib/gamer)
 
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
+    
     set_target_properties(gamerstatic PROPERTIES COMPILE_FLAGS "-std=c++14")
     target_link_libraries(gamerstatic tetstatic tristatic)
     install(TARGETS gamerstatic DESTINATION lib/gamer)
@@ -77,3 +81,16 @@ add_subdirectory(tools)
 if(BUILD_TESTS)
     add_subdirectory(tests)
 endif(BUILD_TESTS)
+
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+
+message(STATUS "Doxygen ${DOXYGEN_EXECUTABLE}")
+if(DOXYGEN_FOUND)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen" VERBATIM
+    )
+endif(DOXYGEN_FOUND)

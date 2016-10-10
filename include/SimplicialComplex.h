@@ -202,17 +202,17 @@ namespace detail {
 	 * These are iterator adapters. The use of boost libraries is indicated.
 	 */
 	template <typename Iter, typename Data>
-	struct node_id_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
+	struct node_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
 	public:
 		using super = std::iterator<std::bidirectional_iterator_tag, Data>;
-		node_id_iterator() {}
-		node_id_iterator(Iter j) : i(j) {}
-		node_id_iterator& operator++() { ++i; return *this; }
-		node_id_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
-		node_id_iterator& operator--() { --i; return *this; }
-		node_id_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
-		bool operator==(node_id_iterator j) const { return i == j.i; }
-		bool operator!=(node_id_iterator j) const { return !(*this == j); }
+		node_iterator() {}
+		node_iterator(Iter j) : i(j) {}
+		node_iterator& operator++() { ++i; return *this; }
+		node_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
+		node_iterator& operator--() { --i; return *this; }
+		node_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
+		bool operator==(node_iterator j) const { return i == j.i; }
+		bool operator!=(node_iterator j) const { return !(*this == j); }
 		typename super::reference operator*() { return i->second; }
         typename super::pointer operator->() { return i->second; }
 	protected:
@@ -220,7 +220,7 @@ namespace detail {
 	};
 
 	template <typename Iter, typename Data>
-	inline node_id_iterator<Iter,Data> make_node_id_iterator(Iter j) { return node_id_iterator<Iter,Data>(j); }
+	inline node_iterator<Iter,Data> make_node_iterator(Iter j) { return node_iterator<Iter,Data>(j); }
 
 	template <typename Iter, typename Data>
 	struct node_data_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
@@ -243,25 +243,6 @@ namespace detail {
 	template <typename Iter, typename Data>
 	inline 
 	node_data_iterator<Iter,Data> make_node_data_iterator(Iter j) { return node_data_iterator<Iter,Data>(j); }
-
-	template <typename Iter, typename Data>
-	struct node_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
-	public:
-		using super = std::iterator<std::bidirectional_iterator_tag, Data>;
-		node_iterator() {}
-		node_iterator(Iter j) : i(j) {}
-		node_iterator& operator++() { ++i; return *this; }
-		node_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
-		node_iterator& operator--() { --i; return *this; }
-		node_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
-		bool operator==(node_iterator j) const { return i == j.i; }
-		bool operator!=(node_iterator j) const { return !(*this == j); }
-	protected:
-		Iter i;
-	};
-
-	template <typename Iter, typename Data>
-	inline node_iterator<Iter,Data> make_node_iterator(Iter j) { return node_iterator<Iter,Data>(j); }
 } // end namespace
 
 
@@ -375,6 +356,15 @@ public:
 		return get_down_recurse<i,1>::apply(this, &s, nid);
 	}
 
+	/**
+	 * @brief      Get the node data by node key
+	 *
+	 * @param[in]  s     An array of keys
+	 *
+	 * @tparam     n     The level of simplicial complex
+	 *
+	 * @return     The associate
+	 */
 	template <size_t n>
 	NodeData<n>& get(const KeyType (&s)[n])
 	{
@@ -397,6 +387,16 @@ public:
 	NodeData<i>& get(NodePtr<i> nid)
 	{
 		return nid->_data;
+	}
+
+	NodeData<0>& get()
+	{
+		return _root->_data;
+	}
+
+	const NodeData<0>& get() const
+	{
+		return _root->_data;
 	}
 
 	template <size_t n, class Inserter>
@@ -437,18 +437,8 @@ public:
 		return get_recurse<0,n>::apply(this, s, _root) != 0;
 	}
 
-	NodeData<0>& get()
-	{
-		return _root->_data;
-	}
-
-	const NodeData<0>& get() const
-	{
-		return _root->_data;
-	}
-
 	template <std::size_t k>
-	auto size()
+	auto size() const
 	{
 		return std::get<k>(levels).size();
 	}
@@ -458,18 +448,18 @@ public:
 	{
 		auto begin = std::get<k>(levels).begin();
 		auto end = std::get<k>(levels).end();
-		auto data_begin = detail::make_node_id_iterator<decltype(begin),NodePtr<k>>(begin);
-		auto data_end = detail::make_node_id_iterator<decltype(end),NodePtr<k>>(end);
+		auto data_begin = detail::make_node_iterator<decltype(begin),NodePtr<k>>(begin);
+		auto data_end = detail::make_node_iterator<decltype(end),NodePtr<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
 	template <std::size_t k>
 	auto get_level_id() const
 	{
-		auto begin = std::get<k>(levels).begin();
-		auto end = std::get<k>(levels).end();
-		auto data_begin = detail::make_node_id_iterator<decltype(begin),NodePtr<k>>(begin);
-		auto data_end = detail::make_node_id_iterator<decltype(end),NodePtr<k>>(end);
+		auto begin = std::get<k>(levels).cbegin();
+		auto end = std::get<k>(levels).cend();
+		auto data_begin = detail::make_node_iterator<decltype(begin), const NodePtr<k>>(begin);
+		auto data_end = detail::make_node_iterator<decltype(end), const NodePtr<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
@@ -486,10 +476,10 @@ public:
 	template <std::size_t k>
 	auto get_level() const
 	{
-		auto begin = std::get<k>(levels).begin();
-		auto end = std::get<k>(levels).end();
-		auto data_begin = detail::make_node_data_iterator<decltype(begin),NodeData<k>>(begin);
-		auto data_end = detail::make_node_data_iterator<decltype(end),NodeData<k>>(end);
+		auto begin = std::get<k>(levels).cbegin();
+		auto end = std::get<k>(levels).cend();
+		auto data_begin = detail::make_node_data_iterator<decltype(begin), const NodeData<k>>(begin);
+		auto data_end = detail::make_node_data_iterator<decltype(end), const NodeData<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
@@ -502,7 +492,7 @@ public:
 	}
 
 	template <std::size_t k>
-	auto print_id()
+	void print_id()
 	{
         std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
 		
@@ -515,9 +505,12 @@ public:
 
 private:
 	/**
-	 * Recursively deletes dependent nodes
-	 * the foo argument is necessary to get the compiler to shut up.
-     */
+	 * Recursively deletes dependent nodes.
+	 *
+	 * @tparam     level  { description }
+	 * @tparam     foo    { description }
+	 */
+	// The foo argument is necessary to get the compiler to shut up...
 	template <size_t level, size_t foo>
 	struct remove_recurse
 	{

@@ -1,22 +1,25 @@
-#include "SurfaceMeshOld.h"
+#include "SurfaceMesh.h"
+#include <string>
+#include <iostream>
 #include <fstream>
+#include <ostream>
 #include <regex>
+#include <cmath>
 
 int get_marker(float r, float g, float b)
 {
     if (r < 0 || r > 1 || g < 0 || g > 1 || b < 0 || b > 1)
     {
-        printf("Expected individual RGB value to be betwen 0 and 1.\n");
+        std::cerr << "Expected individual RGB value to be betwen 0 and 1." << std::endl;
         exit(1);
     }
-
     return round(r * 10) * 121 + round(g * 10) * 11 + round(b * 10);
 }
 
 
-SurfaceMesh_ASC* OFF_to_SimplicialComplex(const std::string& filename)
+SurfaceMesh* readOFF(const std::string filename)
 {
-	auto F = new SurfaceMesh_ASC();
+	auto F = new SurfaceMesh();
     int n, m;
     int a, b, c;
     float x, y, z, color_r, color_g, color_b, color_a;
@@ -160,3 +163,37 @@ SurfaceMesh_ASC* OFF_to_SimplicialComplex(const std::string& filename)
     return F;
 }
 
+void writeOFF(const std::string& filename, const SurfaceMesh* mesh){
+
+    std::ofstream fout(filename);
+    if(!fout.is_open())
+    {
+        std::cerr   << "File '" << filename 
+                    << "' could not be writen to." << std::endl;
+        exit(1); 
+    }
+
+    fout << "OFF" << std::endl;
+
+    int numVertices = mesh->size<1>();
+    int numFaces = mesh->size<3>();
+    fout << numVertices << numFaces << numVertices + numFaces - 2 << "\n"; 
+
+    fout.precision(10); 
+    // Get the vertex data directly 
+    for(auto& vertex : mesh->get_level<1>()){
+        fout    << vertex[0] 
+                << vertex[1] 
+                << vertex[2] 
+                << "\n";
+    }
+
+    // Get the face nodes
+    for(auto& faceNode : mesh->get_level_id<3>()){
+        fout << "3 ";
+        for(auto it=faceNode->_down.cbegin(); it!=faceNode->_down.cend(); ++it)
+                fout << it->first << " ";
+        fout << "\n";
+    }
+    fout.close();
+}

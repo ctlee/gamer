@@ -4,6 +4,7 @@
 #include "SimplicialComplex.h"
 #include "Orientable.h"
 #include "Vertex.h"
+#include <string>
 #include <iostream>
 
 /**
@@ -74,10 +75,13 @@ public:
     /**
      * @brief      prints out the simplicial complex
      */
-    void print() const{
+    void print_vertices() const{
         for(auto x: this->get_level<1>()) {
             std::cout << x << ", ";
         }
         std::cout << std::endl;
     } 
 };
+
+SurfaceMesh* readOFF(const std::string& filename);
+void writeOFF(const std::string& filename, const SurfaceMesh* mesh);
