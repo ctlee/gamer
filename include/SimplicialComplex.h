@@ -11,7 +11,6 @@
 //using Simplex = unsigned int;
 
 namespace detail {
-	template <class T> using vector = std::vector<T>;
 	template <class T> using map = std::map<size_t,T>;
 	/*
 	 * asc_Node must be defined outside of simplicial_complex because c++ does not allow
@@ -21,101 +20,179 @@ namespace detail {
 	 */
 	template <class KeyType, size_t k, size_t N, typename DataTypes, class> struct asc_Node;
 
+	/**
+	 * @brief      A base class for a Simplicial Complex Node
+	 */
 	struct asc_NodeBase {
+		/**
+		 * @brief      Node constructor
+		 *
+		 * @param[in]  id    The identifier
+		 */
 		asc_NodeBase(int id) : _node(id) {}
+		
+		/**
+		 * @brief      Destroys the object
+		 */
 		virtual ~asc_NodeBase() {};
 
-		size_t _node;
+		size_t _node;	/**< Internal Node ID*/
 	};
 
+	/**
+	 * @brief      Base class for Node with some data
+	 *
+	 * @tparam     DataType  type of the data to be contained
+	 */
 	template <class DataType>
 	struct asc_NodeData {
-		DataType _data;
+		DataType _data; /**< stored data with type DataType */
 	};
 
+	/**
+	 * @brief      Base class for Node with DataType of void
+	 */
 	template <>
 	struct asc_NodeData<void>
 	{};
 
+	/**
+	 * @brief      Base class for Node with edge data of type DataType
+	 *
+	 * @tparam     KeyType   type for indexing Nodes
+	 * @tparam     DataType  type of edge_data stored
+	 */
 	template <class KeyType, class DataType>
 	struct asc_EdgeData
 	{
 		std::map<KeyType, DataType> _edge_data;
-	};
+	};	
 
+	/**
+	 * @brief      Base class for Node with no edge data
+	 *
+	 * @tparam     KeyType  type for indexing Nodes
+	 */
 	template <class KeyType>
 	struct asc_EdgeData<KeyType,void>
 	{};
 
+	/**
+	 * @brief      Base class for Node with parent Nodes
+	 *
+	 * @tparam     KeyType        type for indexing Nodes
+	 * @tparam     k              the depth of the Node
+	 * @tparam     N              the maximum depth of Nodes in the simplicial complex
+	 * @tparam     NodeDataTypes  a util::type_holder array of Node types
+	 * @tparam     EdgeDataTypes  a util::type_holder array of Edge types
+	 */
 	template <class KeyType, size_t k, size_t N, class NodeDataTypes, class EdgeDataTypes>
 	struct asc_NodeDown : public asc_EdgeData<KeyType,typename util::type_get<k-1,EdgeDataTypes>::type>
 	{
 		using DownNodeT = asc_Node<KeyType,k-1,N,NodeDataTypes,EdgeDataTypes>;
-		std::map<KeyType, DownNodeT*> _down;
+		std::map<KeyType, DownNodeT*> _down;	/**< @brief Map of pointers to parents */
 	};
 
+	/**
+	 * @brief      Base class for Node with children Nodes
+	 *
+	 * @tparam     KeyType        type for indexing Nodes
+	 * @tparam     k              the depth of the Node
+	 * @tparam     N              the maximum depth of Nodes in the simplicial complex
+	 * @tparam     NodeDataTypes  a util::type_holder array of Node types
+	 * @tparam     EdgeDataTypes  a util::type_holder array of Edge types
+	 */
 	template <class KeyType, size_t k, size_t N, class NodeDataTypes, class EdgeDataTypes>
 	struct asc_NodeUp {
 		using UpNodeT = asc_Node<KeyType,k+1,N,NodeDataTypes,EdgeDataTypes>;
-		std::map<KeyType, UpNodeT*> _up;
+		std::map<KeyType, UpNodeT*> _up;	/**< @brief Map of pointers to children */
 	};
 
+	/**
+	 * @brief      Node with both parents and children 
+	 *
+	 * @tparam     KeyType        index typename
+	 * @tparam     k              level of the node
+	 * @tparam     N              max level of the simplicial complex
+	 * @tparam     NodeDataTypes  util::type_holder of node types
+	 * @tparam     EdgeDataTypes  util::type_holder of edge types
+	 */
 	template <class KeyType, size_t k, size_t N, class NodeDataTypes, class EdgeDataTypes>
 	struct asc_Node : public asc_NodeBase,
 					  public asc_NodeData<typename util::type_get<k,NodeDataTypes>::type>,
 					  public asc_NodeDown<KeyType, k, N, NodeDataTypes, EdgeDataTypes>,
 					  public asc_NodeUp<KeyType, k, N, NodeDataTypes, EdgeDataTypes>
 	{
-		using DownNodeT = asc_Node<KeyType,k-1,N,NodeDataTypes,EdgeDataTypes>;
-		using UpNodeT = asc_Node<KeyType,k+1,N,NodeDataTypes,EdgeDataTypes>;
 		asc_Node(int id) : asc_NodeBase(id) {}
         
         friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
             output  << "Node(level=" << k << ", " << "id=" << node._node;
-            if(node._down.size() > 1)
-                for(typename std::map<KeyType, DownNodeT*>::const_iterator it=node._down.cbegin(); it!=node._down.cend(); ++it)
-                    output << ", NodeDownID=" << it->second->_node;
-            if(node._up.size() > 1)
-                for(typename std::map<KeyType, UpNodeT*>::const_iterator it=node._up.cbegin(); it!=node._up.cend(); ++it)
-                    output << ", NodeUpID=" << it->second->_node;
+            if(node._down.size() > 0)
+                for(auto it=node._down.cbegin(); it!=node._down.cend(); ++it)
+                    output  << ", NodeDownID={'"
+                            << it->first << "', "
+                            << it->second->_node << "}";
+            if(node._up.size() > 0)
+               for(auto it=node._up.cbegin(); it!=node._up.cend(); ++it)
+                    output  << ", NodeUpID={'"
+                            << it->first << "', "
+                            << it->second->_node << "}";
             output  << ")";
             return output;
         }
 	};
 
+	/**
+	 * @brief      Root node with only children
+	 *
+	 * @tparam     KeyType        index typename
+	 * @tparam     N              max level of the simplicial complex
+	 * @tparam     NodeDataTypes  util::type_holder of node types
+	 * @tparam     EdgeDataTypes  util::type_holder of edge types
+	 */
 	template <class KeyType, size_t N, class NodeDataTypes, class EdgeDataTypes>
 	struct asc_Node<KeyType,0,N,NodeDataTypes,EdgeDataTypes> : public asc_NodeBase,
 											 public asc_NodeData<typename util::type_get<0,NodeDataTypes>::type>,
 											 public asc_NodeUp<KeyType, 0, N, NodeDataTypes, EdgeDataTypes>
 	{
-		using UpNodeT = asc_Node<KeyType,1,N,NodeDataTypes,EdgeDataTypes>;
 		asc_Node(int id) : asc_NodeBase(id) {}
        
         friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
             output  << "Node(level=" << 0
                     << ", id=" << node._node;
-            if(node._up.size() > 1)
-                for(typename std::map<KeyType, UpNodeT*>::const_iterator it=node._up.cbegin(); it!=node._up.cend(); ++it)
-                    output << ", NodeUpID=" << it->second->_node;
+            if(node._up.size() > 0)
+                for(auto it=node._up.cbegin(); it!=node._up.cend(); ++it)
+                    output  << ", NodeUpID={'"
+                            << it->first << "', "
+                            << it->second->_node << "}";
             output << ")";
             return output;
         }
 	};
 
+	/**
+	 * @brief      Top level node with only parents
+	 *
+	 * @tparam     KeyType        index typename
+	 * @tparam     N              max level of the simplicial complex
+	 * @tparam     NodeDataTypes  util::type_holder of node types
+	 * @tparam     EdgeDataTypes  util::type_holder of edge types
+	 */
 	template <class KeyType, size_t N, class NodeDataTypes, class EdgeDataTypes>
 	struct asc_Node<KeyType,N,N,NodeDataTypes,EdgeDataTypes> : public asc_NodeBase,
 											 public asc_NodeData<typename util::type_get<N,NodeDataTypes>::type>,
 					  						 public asc_NodeDown<KeyType, N, N, NodeDataTypes, EdgeDataTypes>
 	{
-		using DownNodeT = asc_Node<KeyType,N-1,N,NodeDataTypes,EdgeDataTypes>;
 		asc_Node(int id) : asc_NodeBase(id) {}
        
         friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
             output  << "Node(level=" << N
                     << ", id=" << node._node;
-            if(node._down.size() > 1)
-                for(typename std::map<KeyType, DownNodeT*>::const_iterator it=node._down.cbegin(); it!=node._down.cend(); ++it)
-                    output << ", NodeDownID=" << it->second->_node;
+            if(node._down.size() > 0)
+                for(auto it=node._down.cbegin(); it!=node._down.cend(); ++it)
+                    output  << ", NodeDownID={'"
+                            << it->first << "', "
+                            << it->second->_node << "}";
             output << ")";
             return output;
         }
@@ -166,7 +243,26 @@ namespace detail {
 	template <typename Iter, typename Data>
 	inline 
 	node_data_iterator<Iter,Data> make_node_data_iterator(Iter j) { return node_data_iterator<Iter,Data>(j); }
-}
+
+	template <typename Iter, typename Data>
+	struct node_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
+	public:
+		using super = std::iterator<std::bidirectional_iterator_tag, Data>;
+		node_iterator() {}
+		node_iterator(Iter j) : i(j) {}
+		node_iterator& operator++() { ++i; return *this; }
+		node_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
+		node_iterator& operator--() { --i; return *this; }
+		node_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
+		bool operator==(node_iterator j) const { return i == j.i; }
+		bool operator!=(node_iterator j) const { return !(*this == j); }
+	protected:
+		Iter i;
+	};
+
+	template <typename Iter, typename Data>
+	inline node_iterator<Iter,Data> make_node_iterator(Iter j) { return node_iterator<Iter,Data>(j); }
+} // end namespace
 
 
 template <typename K, typename... Ts>
@@ -197,8 +293,6 @@ public:
 	template <std::size_t k> using NodeData = typename util::type_get<k,NodeDataTypes>::type;
 	template <std::size_t k> using EdgeData = typename util::type_get<k,EdgeDataTypes>::type;
 	template <std::size_t k> using NodePtr = Node<k>*;
-
-	template <size_t level> using NodeId = Node<level>*;
 
 
 	simplicial_complex()
@@ -231,7 +325,7 @@ public:
 	}
 
 	template <size_t n>
-	std::array<KeyType,n> get_name(NodeId<n> id)
+	std::array<KeyType,n> get_name(NodePtr<n> id)
 	{
 		std::array<KeyType,n> s;
 
@@ -244,7 +338,7 @@ public:
 		return std::move(s);
 	}
 
-	std::array<KeyType,0> get_name(NodeId<0> id)
+	std::array<KeyType,0> get_name(NodePtr<0> id)
 	{
 		std::array<KeyType,0> name;		
 		return std::move(name);
@@ -252,31 +346,31 @@ public:
 
 	// Node
 	template <size_t n>
-	NodeId<n> get_id_up(const std::array<KeyType,n>& s)
+	NodePtr<n> get_id_up(const std::array<KeyType,n>& s)
 	{
 		return get_recurse<0,n>::apply(this, s.data(), _root);
 	}
 
 	template <size_t i, size_t j>
-	auto get_id_up(NodeId<i> nid, const std::array<KeyType,j>& s)
+	auto get_id_up(NodePtr<i> nid, const std::array<KeyType,j>& s)
 	{
 		return get_recurse<i,j>::apply(this, s.data(), nid);
 	}
 
 	template <size_t i>
-	auto get_id_up(NodeId<i> nid, KeyType s)
+	auto get_id_up(NodePtr<i> nid, KeyType s)
 	{
 		return get_recurse<i,1>::apply(this, &s, nid);
 	}
 
 	template <size_t i, size_t j>
-	auto get_id_down(NodeId<i> nid, const std::array<KeyType,j>& s)
+	auto get_id_down(NodePtr<i> nid, const std::array<KeyType,j>& s)
 	{
 		return get_down_recurse<i,j>::apply(this, s.data(), nid);
 	}
 
 	template <size_t i>
-	auto get_id_down(NodeId<i> nid, KeyType s)
+	auto get_id_down(NodePtr<i> nid, KeyType s)
 	{
 		return get_down_recurse<i,1>::apply(this, &s, nid);
 	}
@@ -294,19 +388,19 @@ public:
 	}
 
 	template <size_t i>
-	NodeData<i+1>& get(NodeId<i> nid, KeyType s)
+	NodeData<i+1>& get(NodePtr<i> nid, KeyType s)
 	{
 		return get_recurse<i,1>::apply(this, &s, nid)->_data;
 	}
 
 	template <size_t i>
-	NodeData<i>& get(NodeId<i> nid)
+	NodeData<i>& get(NodePtr<i> nid)
 	{
 		return nid->_data;
 	}
 
 	template <size_t n, class Inserter>
-	void get_cover(NodeId<n> id, Inserter pos)
+	void get_cover(NodePtr<n> id, Inserter pos)
 	{
 		for(auto curr : id->_up)
 		{
@@ -315,7 +409,7 @@ public:
 	}
 
 	template <size_t n>
-	auto get_cover(NodeId<n> id)
+	auto get_cover(NodePtr<n> id)
 	{
 		std::vector<KeyType> rval;
 		get_cover(id, std::back_inserter(rval));
@@ -324,13 +418,13 @@ public:
 
 	// Edge
 	template <size_t n>
-	EdgeData<n>& get_edge_up(NodeId<n> nid, KeyType a)
+	EdgeData<n>& get_edge_up(NodePtr<n> nid, KeyType a)
 	{
 		return nid->_up[a]->_edge_data[a];
 	}
 
 	template <size_t n>
-	EdgeData<n-1>& get_edge_down(NodeId<n> nid, KeyType a)
+	EdgeData<n-1>& get_edge_down(NodePtr<n> nid, KeyType a)
 	{
 		return nid->_edge_data[a];
 	}
@@ -411,6 +505,7 @@ public:
 	auto print_id()
 	{
         std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
+		
         auto ids = this->get_level_id<k>();
         for(auto& id : ids){
             std::cout << *id << std::endl;
@@ -575,6 +670,13 @@ private:
 		}
 	};
 
+    /**
+     *  @brief Backfill in the pointers from prior nodes to the new node
+     *  @param root is a parent node
+     *  @param nn is the new child node
+     *  @param value is the exposed id of nn
+     *  @return void
+     */
 	template <size_t level>
 	void backfill(Node<level>* root, Node<level+1>* nn, int value)
 	{
@@ -583,14 +685,20 @@ private:
 			int v = curr->first;
 
 			Node<level-1>* parent = curr->second;
-
-			Node<level>* child = parent->_up[value];
+			Node<level>* child = parent->_up[value]; 
 
 			nn->_down[v] = child;
 			child->_up[v] = nn;
 		}
 	}
 
+    /**
+     *  @brief Fill in the pointers from level 1 to 0.
+     *  @param root is a level 0 node
+     *  @param nn is a level 1 node
+     *  @param value is the exposed id of nn
+     *  @return void
+     */
 	void backfill(Node<0>* root, Node<1>* nn, int value)
 	{
 		return;
@@ -625,7 +733,7 @@ private:
 		auto p = new Node<level>(node_count++);
 		++(level_count[level]);
 	    
-	    bool ret = std::get<level>(levels).insert(std::pair<size_t,NodeId<level>>(node_count-1, p)).second; // node_count-1 to match the id's correctly
+	    bool ret = std::get<level>(levels).insert(std::pair<size_t,NodePtr<level>>(node_count-1, p)).second; // node_count-1 to match the id's correctly
         // sanity check to make sure there aren't duplicate keys... 
         if (ret==false) {
             std::cout << "Error: Node '" << node_count << "' already existed with value " << *p << std::endl;
@@ -684,7 +792,7 @@ using AbstractSimplicialComplex = simplicial_complex<simplicial_complex_traits_d
 
 
 template <class Complex, std::size_t level, class InsertIter>
-void neighbors(Complex &F, typename Complex::template NodeId<level> nid, InsertIter iter)
+void neighbors(Complex &F, typename Complex::template NodePtr<level> nid, InsertIter iter)
 {
 	for (auto a : F.get_name(nid))
 	{
@@ -701,7 +809,7 @@ void neighbors(Complex &F, typename Complex::template NodeId<level> nid, InsertI
 }
 
 template <class Complex, std::size_t level, class InsertIter>
-void neighbors_up(Complex &F, typename Complex::template NodeId<level> nid, InsertIter iter)
+void neighbors_up(Complex &F, typename Complex::template NodePtr<level> nid, InsertIter iter)
 {
 	for (auto a : F.get_cover(nid))
 	{

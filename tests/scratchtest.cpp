@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     
     x.insert<3>({1,2,3});
     x.insert<1>({7}, Vertex(-1,-1,-1));
-    x.insert<3>({5,6,7});
+    x.insert<3>({2,3,4});
     x.print();
 
     Vertex v = x.get<1>({7});
@@ -23,10 +23,9 @@ int main(int argc, char *argv[])
     x.print_id<1>();
     x.print_id<2>();
     x.print_id<3>();
-
     std::cout<<std::endl;
+    
     x.remove<1>({1});
-    std::cout<<std::endl;
 
     v = x.get<1>({7});
     std::cout << "Node<7>=" << v << std::endl;
@@ -34,5 +33,5 @@ int main(int argc, char *argv[])
     x.print_id<1>();
     x.print_id<2>();
     x.print_id<3>();
-    std::cout << "EOF" << std::endl << std::endl;
+    std::cout << "EOF" << std::endl;
 }
