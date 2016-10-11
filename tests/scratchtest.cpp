@@ -4,6 +4,7 @@
 
 #include "SurfaceMesh.h"
 #include "Vertex.h"
+#include <vector>
 #include <iostream>
 #include <string>
 
@@ -20,14 +21,14 @@ int main(int argc, char *argv[])
     x.insert<3>({1,2,3});
     x.insert<1>({7}, Vertex(-1,-1,-1));
     x.insert<3>({2,3,4});
-    x.print_vertices();
+    print_vertices(x);
 
     Vertex v = x.get<1>({7});
     std::cout << "Node<7>=" << v << std::endl;
-    x.print_id<0>();
-    x.print_id<1>();
-    x.print_id<2>();
-    x.print_id<3>();
+    print_nodes<0>(x);
+    print_nodes<1>(x);
+    print_nodes<2>(x);
+    print_nodes<3>(x);
     std::cout<<std::endl;
 
     writeOFF("test.off", &x);
@@ -36,9 +37,11 @@ int main(int argc, char *argv[])
 
     v = x.get<1>({7});
     std::cout << "Node<7>=" << v << std::endl;
-    x.print_id<0>();
-    x.print_id<1>();
-    x.print_id<2>();
-    x.print_id<3>();
+
+    print_nodes<0>(x);
+    print_nodes<1>(x);
+    print_nodes<2>(x);
+    print_nodes<3>(x);
+
     std::cout << "EOF" << std::endl;
 }

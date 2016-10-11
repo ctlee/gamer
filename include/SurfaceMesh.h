@@ -55,33 +55,39 @@ struct complex_traits
 
 // This alias is for legacy purposes...
 using SurfaceMesh_ASC = simplicial_complex<complex_traits>;
-using ASC = simplicial_complex<complex_traits>; // Alias for the laz
+using ASC = simplicial_complex<complex_traits>; // Alias for the lazy
+using SurfaceMesh = simplicial_complex<complex_traits>;
 
 /**
- * @brief      Class for surface mesh.
+ * @brief      Reads off.
+ *
+ * @param[in]  filename  The filename
+ *
+ * @return     { description_of_the_return_value }
  */
-class SurfaceMesh : public ASC {
-public:
-    /**
-     * @brief      Constructor
-     */
-    SurfaceMesh() : ASC(){};
-    
-    /**
-     * @brief      Destroys the object.
-     */
-    ~SurfaceMesh(){};
-
-    /**
-     * @brief      prints out the simplicial complex
-     */
-    void print_vertices() const{
-        for(auto x: this->get_level<1>()) {
-            std::cout << x << ", ";
-        }
-        std::cout << std::endl;
-    } 
-};
-
 SurfaceMesh* readOFF(const std::string& filename);
+
+/**
+ * @brief      Writes off.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
 void writeOFF(const std::string& filename, const SurfaceMesh* mesh);
+
+/**
+ * @brief      Convenience function to print the vertices
+ *
+ * @param[in]  mesh  The mesh
+ */
+void print_vertices(const SurfaceMesh& mesh);
+
+template <std::size_t k>
+void print_nodes(const SurfaceMesh& mesh){
+    std::cout << "level<" << k << ">.size()=" << mesh.size<k>() << std::endl; 
+    
+    auto ids = mesh.get_level_id<k>();
+    for(auto& id : ids){
+        std::cout << *id << std::endl;
+    } 
+}
