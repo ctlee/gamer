@@ -123,6 +123,8 @@ namespace detail {
 					  public asc_NodeDown<KeyType, k, N, NodeDataTypes, EdgeDataTypes>,
 					  public asc_NodeUp<KeyType, k, N, NodeDataTypes, EdgeDataTypes>
 	{
+		static constexpr size_t level = k;
+
 		asc_Node(int id) : asc_NodeBase(id) {}
         
         friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
@@ -155,6 +157,8 @@ namespace detail {
 											 public asc_NodeData<typename util::type_get<0,NodeDataTypes>::type>,
 											 public asc_NodeUp<KeyType, 0, N, NodeDataTypes, EdgeDataTypes>
 	{
+		static constexpr size_t level = 0;
+
 		asc_Node(int id) : asc_NodeBase(id) {}
        
         friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
@@ -183,6 +187,8 @@ namespace detail {
 											 public asc_NodeData<typename util::type_get<N,NodeDataTypes>::type>,
 					  						 public asc_NodeDown<KeyType, N, N, NodeDataTypes, EdgeDataTypes>
 	{
+		static constexpr size_t level = N;
+
 		asc_Node(int id) : asc_NodeBase(id) {}
        
         friend std::ostream& operator<<(std::ostream& output, const asc_Node& node){
@@ -787,6 +793,12 @@ void neighbors(Complex &F, typename Complex::template NodePtr<level> nid, Insert
 			}
 		}
 	}
+}
+
+template <class Complex, class Node, class InsertIter>
+void neighbors(Complex& F, Node* nid, InsertIter iter)
+{
+	neighbors<Complex, Node::level, InsertIter>(F,nid,iter);
 }
 
 template <class Complex, std::size_t level, class InsertIter>
