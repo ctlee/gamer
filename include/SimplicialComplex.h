@@ -491,18 +491,6 @@ public:
 		return remove_recurse<n,0>::apply(this, &root, &root + 1, count);
 	}
 
-	template <std::size_t k>
-	void print_id()
-	{
-        std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
-		
-        auto ids = this->get_level_id<k>();
-        for(auto& id : ids){
-            std::cout << *id << std::endl;
-        }
-	}
-
-
 private:
 	/**
 	 * Recursively deletes dependent nodes.
