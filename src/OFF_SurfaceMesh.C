@@ -163,7 +163,7 @@ SurfaceMesh* readOFF(const std::string filename)
     return F;
 }
 
-void writeOFF(const std::string& filename, const SurfaceMesh* mesh){
+void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
     std::ofstream fout(filename);
     if(!fout.is_open())
@@ -175,13 +175,14 @@ void writeOFF(const std::string& filename, const SurfaceMesh* mesh){
 
     fout << "OFF" << std::endl;
 
-    int numVertices = mesh->size<1>();
-    int numFaces = mesh->size<3>();
+    int numVertices = mesh.size<1>();
+    int numFaces = mesh.size<3>();
     fout << numVertices << numFaces << numVertices + numFaces - 2 << "\n"; 
 
     fout.precision(10); 
     // Get the vertex data directly 
-    for(auto& vertex : mesh->get_level<1>()){
+    // TODO: this actually has to print out the vertices in order of the index...
+    for(auto& vertex : mesh.get_level<1>()){
         fout    << vertex[0] 
                 << vertex[1] 
                 << vertex[2] 
@@ -189,11 +190,9 @@ void writeOFF(const std::string& filename, const SurfaceMesh* mesh){
     }
 
     // Get the face nodes
-    for(auto& faceNode : mesh->get_level_id<3>()){
-        fout << "3 ";
-        for(auto it=faceNode->_down.cbegin(); it!=faceNode->_down.cend(); ++it)
-                fout << it->first << " ";
-        fout << "\n";
+    for(auto faceNode : mesh.get_level_id<3>()){
+        auto w = mesh.get_name(faceNode);
+        fout << "3 " << w[0] << " " << w[1] << " " << w[2] << "\n";
     }
     fout.close();
 }

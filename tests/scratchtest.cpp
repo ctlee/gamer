@@ -31,8 +31,19 @@ int main(int argc, char *argv[])
     print_nodes<3>(x);
     std::cout<<std::endl;
 
-    writeOFF("test.off", &x);
-        
+    writeOFF("test.off", x);
+    
+    std::cout << "Try to get neighbors" << std::endl;
+    
+    for(auto nodeID : x.get_level_id<1>()){
+        std::cout << *nodeID << std::endl;
+        auto w = x.get_cover<1>(nodeID);
+        for(int i=0; i < w.size(); i++)
+            std::cout << w[i] << std::endl;
+        std::vector<SurfaceMesh::NodeID<1>> tmp;
+        neighbors(x, nodeID, std::back_inserter(tmp));
+    }
+
     x.remove<1>({1});
 
     v = x.get<1>({7});
