@@ -54,8 +54,7 @@ namespace detail {
 	 * @brief      Base class for Node with DataType of void
 	 */
 	template <>
-	struct asc_NodeData<void>
-	{};
+	struct asc_NodeData<void> {};
 
 	/**
 	 * @brief      Base class for Node with edge data of type DataType
@@ -64,8 +63,7 @@ namespace detail {
 	 * @tparam     DataType  type of edge_data stored
 	 */
 	template <class KeyType, class DataType>
-	struct asc_EdgeData
-	{
+	struct asc_EdgeData {
 		std::map<KeyType, DataType> _edge_data;
 	};	
 
@@ -88,8 +86,7 @@ namespace detail {
 	 * @tparam     EdgeDataTypes  a util::type_holder array of Edge types
 	 */
 	template <class KeyType, size_t k, size_t N, class NodeDataTypes, class EdgeDataTypes>
-	struct asc_NodeDown : public asc_EdgeData<KeyType,typename util::type_get<k-1,EdgeDataTypes>::type>
-	{
+	struct asc_NodeDown : public asc_EdgeData<KeyType,typename util::type_get<k-1,EdgeDataTypes>::type> {
 		using DownNodeT = asc_Node<KeyType,k-1,N,NodeDataTypes,EdgeDataTypes>;
 		std::map<KeyType, DownNodeT*> _down;	/**< @brief Map of pointers to parents */
 	};
@@ -220,8 +217,8 @@ namespace detail {
 		node_id_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
 		bool operator==(node_id_iterator j) const { return i == j.i; }
 		bool operator!=(node_id_iterator j) const { return !(*this == j); }
-		typename super::reference operator*() { return i->second; }
-        typename super::pointer operator->() { return i->second; }
+		Data operator*() { return Data(i->second); }
+        typename super::pointer operator->() { return Data(i->second); }
 	protected:
 		Iter i;
 	};
@@ -266,6 +263,7 @@ struct simplicial_complex_traits_default
 };
 
 
+
 template <typename traits>
 class simplicial_complex {
 public:
@@ -280,7 +278,32 @@ public:
 	template <std::size_t k> using Node = detail::asc_Node<KeyType,k,topLevel,NodeDataTypes,EdgeDataTypes>;
 	template <std::size_t k> using NodeData = typename util::type_get<k,NodeDataTypes>::type;
 	template <std::size_t k> using EdgeData = typename util::type_get<k,EdgeDataTypes>::type;
-	template <std::size_t k> using NodeID = Node<k>*;
+	template <std::size_t k> using NodePtr = Node<k>*;
+
+
+	template <std::size_t k>
+	struct NodeID {
+		friend simplicial_complex<traits>;
+		static constexpr size_t level = k;
+
+		NodeID() : ptr(nullptr) {}
+		NodeID(NodePtr<k> p) : ptr(p) {}
+		NodeID(const NodeID& rhs) : ptr(rhs.ptr) {}
+
+		NodeID& operator=(const NodeID& rhs) { ptr = rhs.ptr; }
+		friend bool operator==(NodeID lhs, NodeID rhs) { return lhs.ptr == rhs.ptr; }
+		friend bool operator!=(NodeID lhs, NodeID rhs) { return lhs.ptr != rhs.ptr; }
+		friend bool operator<=(NodeID lhs, NodeID rhs) { return lhs.ptr <= rhs.ptr; }
+		friend bool operator>=(NodeID lhs, NodeID rhs) { return lhs.ptr >= rhs.ptr; }
+		friend bool operator<(NodeID lhs, NodeID rhs)  { return lhs.ptr < rhs.ptr; }
+		friend bool operator>(NodeID lhs, NodeID rhs)  { return lhs.ptr > rhs.ptr; }
+
+		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
+
+	private:
+		NodePtr<k> ptr;
+	};
+
 
 
 	simplicial_complex()
@@ -318,18 +341,18 @@ public:
 		std::array<KeyType,n> s;
 
 		int i = 0;
-		for(auto curr : id->_down)
+		for(auto curr : id.ptr->_down)
 		{
 			s[i++] = curr.first;
 		}
 		
-		return std::move(s);
+		return s;
 	}
 
 	std::array<KeyType,0> get_name(NodeID<0> id) const
 	{
-		std::array<KeyType,0> name;		
-		return std::move(name);
+		std::array<KeyType,0> name;
+		return name;
 	}
 
 	// Node
@@ -340,27 +363,27 @@ public:
 	}
 
 	template <size_t i, size_t j>
-	auto get_id_up(NodeID<i> nid, const std::array<KeyType,j>& s)
+	NodeID<i+j> get_id_up(NodeID<i> nid, const std::array<KeyType,j>& s)
 	{
 		return get_recurse<i,j>::apply(this, s.data(), nid);
 	}
 
 	template <size_t i>
-	auto get_id_up(NodeID<i> nid, KeyType s)
+	NodeID<i+1> get_id_up(NodeID<i> nid, KeyType s)
 	{
-		return get_recurse<i,1>::apply(this, &s, nid);
+		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t i, size_t j>
-	auto get_id_down(NodeID<i> nid, const std::array<KeyType,j>& s)
+	NodeID<i-j> get_id_down(NodeID<i> nid, const std::array<KeyType,j>& s)
 	{
-		return get_down_recurse<i,j>::apply(this, s.data(), nid);
+		return get_down_recurse<i,j>::apply(this, s.data(), nid.ptr);
 	}
 
 	template <size_t i>
-	auto get_id_down(NodeID<i> nid, KeyType s)
+	NodeID<i-1> get_id_down(NodeID<i> nid, KeyType s)
 	{
-		return get_down_recurse<i,1>::apply(this, &s, nid);
+		return get_down_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	/**
@@ -397,13 +420,13 @@ public:
 	template <size_t i>
 	NodeData<i+1>& get(NodeID<i> nid, KeyType s)
 	{
-		return get_recurse<i,1>::apply(this, &s, nid)->_data;
+		return get_recurse<i,1>::apply(this, &s, nid.ptr)->_data;
 	}
 
 	template <size_t i>
 	NodeData<i>& get(NodeID<i> nid)
 	{
-		return nid->_data;
+		return nid.ptr->_data;
 	}
 
 	template <size_t i>
@@ -415,7 +438,7 @@ public:
 	template <size_t i>
 	const NodeData<i>& get(NodeID<i> nid) const
 	{
-		return nid->_data;
+		return nid.ptr->_data;
 	}
 
 
@@ -453,7 +476,7 @@ public:
 	template <size_t k, class Inserter>
 	void get_cover(NodeID<k> id, Inserter pos)
 	{
-		for(auto curr : id->_up)
+		for(auto curr : id.ptr->_up)
 		{
 			pos++ = curr.first;
 		}
@@ -471,13 +494,13 @@ public:
 	template <size_t k>
 	EdgeData<k>& get_edge_up(NodeID<k> nid, KeyType a)
 	{
-		return nid->_up[a]->_edge_data[a];
+		return nid.ptr->_up[a]->_edge_data[a];
 	}
 
 	template <size_t k>
 	EdgeData<k-1>& get_edge_down(NodeID<k> nid, KeyType a)
 	{
-		return nid->_edge_data[a];
+		return nid.ptr->_edge_data[a];
 	}
 
 
@@ -534,12 +557,20 @@ public:
 		return util::make_range(data_begin, data_end);
 	}
 
-	template <size_t n>
-	size_t remove(const KeyType (&s)[n])
+	template <std::size_t k>
+	size_t remove(const KeyType (&s)[k])
 	{
-		Node<n>* root = get_recurse<0,n>::apply(this, s, _root);
+		Node<k>* root = get_recurse<0,k>::apply(this, s, _root);
 		size_t count = 0;
-		return remove_recurse<n,0>::apply(this, &root, &root + 1, count);
+		return remove_recurse<k,0>::apply(this, &root, &root + 1, count);
+	}
+
+	template <std::size_t k>
+	void print_nodes(){
+		std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
+		for(auto id : this->get_level_id<k>()){
+		    std::cout << *id.ptr << std::endl;
+		} 
 	}
 
 private:
@@ -766,7 +797,7 @@ private:
 		++(level_count[level]);
 	    
 	    bool ret = std::get<level>(levels).insert(
-	    		std::pair<size_t,NodeID<level>>(node_count-1, p)).second; // node_count-1 to match the id's correctly
+	    		std::pair<size_t,NodePtr<level>>(node_count-1, p)).second; // node_count-1 to match the id's correctly
         // sanity check to make sure there aren't duplicate keys... 
         if (ret==false) {
             std::cout << "Error: Node '" << node_count << "' already existed with value " << *p << std::endl;
@@ -812,11 +843,11 @@ private:
 		delete p;
 	}
 
-	Node<0>* _root;
+	NodePtr<0> _root;
 	size_t node_count;
 	std::array<size_t,numLevels> level_count;
-	using NodeIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, NodeID>::type;
-	typename util::type_map<NodeIDLevel, detail::map>::type levels;
+	using NodePtrLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, NodePtr>::type;
+	typename util::type_map<NodePtrLevel, detail::map>::type levels;
 };
 
 template <typename KeyType, typename... Ts>
@@ -841,10 +872,10 @@ void neighbors(Complex &F, typename Complex::template NodeID<level> nid, InsertI
 	}
 }
 
-template <class Complex, class Node, class InsertIter>
-void neighbors(Complex& F, Node* nid, InsertIter iter)
+template <class Complex, class NodeID, class InsertIter>
+void neighbors(Complex& F, NodeID nid, InsertIter iter)
 {
-	neighbors<Complex, Node::level, InsertIter>(F,nid,iter);
+	neighbors<Complex, NodeID::level, InsertIter>(F,nid,iter);
 }
 
 template <class Complex, std::size_t level, class InsertIter>

@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
 
     Vertex v = x.get<1>({7});
     std::cout << "Node<7>=" << v << std::endl;
-    print_nodes<0>(x);
-    print_nodes<1>(x);
-    print_nodes<2>(x);
-    print_nodes<3>(x);
+    x.print_nodes<0>();
+    x.print_nodes<1>();
+    x.print_nodes<2>();
+    x.print_nodes<3>();
     std::cout<<std::endl;
 
     writeOFF("test.off", x);
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     std::cout << "Try to get neighbors" << std::endl;
     
     for(auto nodeID : x.get_level_id<1>()){
-        std::cout << *nodeID << std::endl;
+        std::cout << nodeID << std::endl;
         auto w = x.get_cover<1>(nodeID);
         for(int i=0; i < w.size(); i++)
             std::cout << w[i] << std::endl;
@@ -49,10 +49,10 @@ int main(int argc, char *argv[])
     v = x.get<1>({7});
     std::cout << "Node<7>=" << v << std::endl;
 
-    print_nodes<0>(x);
-    print_nodes<1>(x);
-    print_nodes<2>(x);
-    print_nodes<3>(x);
+    x.print_nodes<0>();
+    x.print_nodes<1>();
+    x.print_nodes<2>();
+    x.print_nodes<3>();
 
     std::cout << "EOF" << std::endl;
 }

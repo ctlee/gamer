@@ -89,19 +89,3 @@ void print_vertices(const SurfaceMesh& mesh);
  * @param[in]  mesh  The mesh
  */
 void print_faces(const SurfaceMesh& mesh);
-
-/**
- * @brief      Print the nodes in the data structure. For debugging purposes only.
- *
- * @param[in]  mesh  The mesh
- *
- * @tparam     k     The level to print
- */
-template <std::size_t k>
-void print_nodes(const SurfaceMesh& mesh){
-    std::cout << "level<" << k << ">.size()=" << mesh.size<k>() << std::endl; 
-    
-    for(auto& id : mesh.get_level_id<k>()){
-        std::cout << *id << std::endl;
-    } 
-}
