@@ -12,8 +12,8 @@
  */
 struct FaceProperties
 {
-    int  m;   /**< @brief Marker */
-    bool sel; /**< @brief selection flag */
+    int  marker;   /**< @brief Marker */
+    bool selected; /**< @brief selection flag */
 };
 
 /**
@@ -82,12 +82,26 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
  */
 void print_vertices(const SurfaceMesh& mesh);
 
+
+/**
+ * @brief      Convenience function to print the faces
+ *
+ * @param[in]  mesh  The mesh
+ */
+void print_faces(const SurfaceMesh& mesh);
+
+/**
+ * @brief      Print the nodes in the data structure. For debugging purposes only.
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @tparam     k     The level to print
+ */
 template <std::size_t k>
 void print_nodes(const SurfaceMesh& mesh){
     std::cout << "level<" << k << ">.size()=" << mesh.size<k>() << std::endl; 
     
-    auto ids = mesh.get_level_id<k>();
-    for(auto& id : ids){
+    for(auto& id : mesh.get_level_id<k>()){
         std::cout << *id << std::endl;
     } 
 }

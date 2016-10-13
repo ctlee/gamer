@@ -183,15 +183,15 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     // Get the vertex data directly 
     // TODO: this actually has to print out the vertices in order of the index...
     for(auto& vertex : mesh.get_level<1>()){
-        fout    << vertex[0] 
-                << vertex[1] 
-                << vertex[2] 
+        fout    << vertex[0] << " "
+                << vertex[1] << " " 
+                << vertex[2] << " " 
                 << "\n";
     }
 
     // Get the face nodes
-    for(auto faceNode : mesh.get_level_id<3>()){
-        auto w = mesh.get_name(faceNode);
+    for(auto faceNodeID : mesh.get_level_id<3>()){
+        auto w = mesh.get_name(faceNodeID);
         fout << "3 " << w[0] << " " << w[1] << " " << w[2] << "\n";
     }
     fout.close();

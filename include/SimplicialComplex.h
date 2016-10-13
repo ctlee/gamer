@@ -209,17 +209,17 @@ namespace detail {
 	 * These are iterator adapters. The use of boost libraries is indicated.
 	 */
 	template <typename Iter, typename Data>
-	struct node_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
+	struct node_id_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
 	public:
 		using super = std::iterator<std::bidirectional_iterator_tag, Data>;
-		node_iterator() {}
-		node_iterator(Iter j) : i(j) {}
-		node_iterator& operator++() { ++i; return *this; }
-		node_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
-		node_iterator& operator--() { --i; return *this; }
-		node_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
-		bool operator==(node_iterator j) const { return i == j.i; }
-		bool operator!=(node_iterator j) const { return !(*this == j); }
+		node_id_iterator() {}
+		node_id_iterator(Iter j) : i(j) {}
+		node_id_iterator& operator++() { ++i; return *this; }
+		node_id_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
+		node_id_iterator& operator--() { --i; return *this; }
+		node_id_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
+		bool operator==(node_id_iterator j) const { return i == j.i; }
+		bool operator!=(node_id_iterator j) const { return !(*this == j); }
 		typename super::reference operator*() { return i->second; }
         typename super::pointer operator->() { return i->second; }
 	protected:
@@ -227,7 +227,7 @@ namespace detail {
 	};
 
 	template <typename Iter, typename Data>
-	inline node_iterator<Iter,Data> make_node_iterator(Iter j) { return node_iterator<Iter,Data>(j); }
+	inline node_id_iterator<Iter,Data> make_node_id_iterator(Iter j) { return node_id_iterator<Iter,Data>(j); }
 
 	template <typename Iter, typename Data>
 	struct node_data_iterator : public std::iterator<std::bidirectional_iterator_tag, Data> {
@@ -364,13 +364,13 @@ public:
 	}
 
 	/**
-	 * @brief      Get the node data by node key
+	 * @brief      Get data by name
 	 *
-	 * @param[in]  s     An array of keys
+	 * @param[in]  s     Array holding the name
 	 *
 	 * @tparam     n     The level of simplicial complex
 	 *
-	 * @return     The associate
+	 * @return     The associated data
 	 */
 	template <size_t n>
 	NodeData<n>& get(const KeyType (&s)[n])
@@ -378,11 +378,21 @@ public:
 		return get_recurse<0,n>::apply(this, s, _root)->_data;
 	}
 
+	/**
+	 * @brief      Get data by name
+	 *
+	 * @param[in]  s     Array holding the name
+	 *
+	 * @tparam     n     The level of simplicial complex
+	 *
+	 * @return     The associated data
+	 */
 	template <size_t n>
 	const NodeData<n>& get(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root)->_data;
 	}
+
 
 	template <size_t i>
 	NodeData<i+1>& get(NodeID<i> nid, KeyType s)
@@ -396,6 +406,19 @@ public:
 		return nid->_data;
 	}
 
+	template <size_t i>
+	const NodeData<i+1>& get(NodeID<i> nid, KeyType s) const
+	{
+		return get_recurse<i,1>::apply(this, &s, nid)->_data;
+	}
+
+	template <size_t i>
+	const NodeData<i>& get(NodeID<i> nid) const
+	{
+		return nid->_data;
+	}
+
+
 	NodeData<0>& get()
 	{
 		return _root->_data;
@@ -404,6 +427,27 @@ public:
 	const NodeData<0>& get() const
 	{
 		return _root->_data;
+	}
+
+	/**
+	 * @brief      Get the NodeID by name
+	 *
+	 * @param[in]  s     Array holding the name
+	 *
+	 * @tparam     n     The level of simplicial complex
+	 *
+	 * @return     ID of the node of interest
+	 */
+	template <size_t n>
+	NodeID<n>& get_id(const KeyType (&s)[n])
+	{
+		return get_recurse<0,n>::apply(this, s, _root);
+	}
+
+	template <size_t n>
+	const NodeID<n>& get_id(const KeyType (&s)[n]) const
+	{
+		return get_recurse<0,n>::apply(this, s, _root);
 	}
 
 	template <size_t k, class Inserter>
@@ -455,8 +499,8 @@ public:
 	{
 		auto begin = std::get<k>(levels).begin();
 		auto end = std::get<k>(levels).end();
-		auto data_begin = detail::make_node_iterator<decltype(begin),NodeID<k>>(begin);
-		auto data_end = detail::make_node_iterator<decltype(end),NodeID<k>>(end);
+		auto data_begin = detail::make_node_id_iterator<decltype(begin),NodeID<k>>(begin);
+		auto data_end = detail::make_node_id_iterator<decltype(end),NodeID<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
@@ -465,8 +509,8 @@ public:
 	{
 		auto begin = std::get<k>(levels).cbegin();
 		auto end = std::get<k>(levels).cend();
-		auto data_begin = detail::make_node_iterator<decltype(begin), const NodeID<k>>(begin);
-		auto data_end = detail::make_node_iterator<decltype(end), const NodeID<k>>(end);
+		auto data_begin = detail::make_node_id_iterator<decltype(begin), const NodeID<k>>(begin);
+		auto data_end = detail::make_node_id_iterator<decltype(end), const NodeID<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
