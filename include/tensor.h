@@ -273,7 +273,7 @@ tensor<ElemType,D,N> Sym(const tensor<ElemType,D,N>& A)
 	std::array<std::size_t, N> sigma;
 	for(std::size_t i = 0; i < N; ++i)
 	{
-		std::cout << " : " << i << std::endl;
+		//std::cout << " : " << i << std::endl;
 		sigma[i] = i;
 	}
 
@@ -327,7 +327,7 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 	std::array<std::size_t, N> sigma;
 	for(std::size_t i = 0; i < N; ++i)
 	{
-		std::cout << " : " << i << std::endl;
+		//std::cout << " : " << i << std::endl;
 		sigma[i] = i;
 	}
 
@@ -410,7 +410,7 @@ tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<Ele
 	ElemType num = detail::factorial<N+M>::value;
 	ElemType den = detail::factorial<N>::value * detail::factorial<M>::value;
 	rval *= num / den;
-	std::cout << " ~ " << N << " " << M << " " << num << " " << den << std::endl;
+	//std::cout << " ~ " << N << " " << M << " " << num << " " << den << std::endl;
 	return rval;
 }
 

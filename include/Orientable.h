@@ -97,7 +97,7 @@ std::tuple<int, bool, bool> compute_orientation(Complex& F)
 
 					if(w.size() == 1)
 					{
-						std::cout << curr << ":" << w[0] << " ~ Boundary" << std::endl;
+						//std::cout << curr << ":" << w[0] << " ~ Boundary" << std::endl;
 					}
 					else if(w.size() == 2)
 					{

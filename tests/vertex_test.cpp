@@ -33,6 +33,9 @@ TEST(VertexTest,TestConstructor)
    
     Vertex v5 = Vertex(v2);
     EXPECT_EQ(v2, v5);
+
+    v3.selected = false;
+    EXPECT_EQ(v0,v3);
 }
 
 TEST(VertexTest,MathOperations)
