@@ -1,11 +1,12 @@
 #pragma once
 
+#include <iostream>
+#include <string>
+#include <utility>
 #include "util.h"
 #include "SimplicialComplex.h"
 #include "Orientable.h"
 #include "Vertex.h"
-#include <string>
-#include <iostream>
 
 /**
  * @brief      Properties that Faces should have
@@ -65,7 +66,7 @@ using SurfaceMesh = simplicial_complex<complex_traits>;
  *
  * @return     { description_of_the_return_value }
  */
-SurfaceMesh* readOFF(const std::string& filename);
+std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
 
 /**
  * @brief      Writes off.
@@ -89,3 +90,6 @@ void print_vertices(const SurfaceMesh& mesh);
  * @param[in]  mesh  The mesh
  */
 void print_faces(const SurfaceMesh& mesh);
+
+void generateHistogram(const SurfaceMesh& mesh);
+bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);

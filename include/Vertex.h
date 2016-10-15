@@ -4,12 +4,15 @@
 #include <sstream>
 #include "tensor.h"
 
+
+using Vector = tensor<double,3,1>;
+
 /**
  * @brief      Vertex class
  */
 struct Vertex
 {
-    tensor<double,3,1> position;    /**< @brief a 3 tensor for x, y, z */
+    Vector position;    /**< @brief a 3 tensor for x, y, z */
     int marker = 0;                 /**< @brief Boundary marking ID */
     bool selected = false;          /**< @brief Selection flag */
     
@@ -57,6 +60,9 @@ struct Vertex
      */
     Vertex(const Vertex&& x) : position(std::move(x.position)), marker(std::move(x.marker)), selected(std::move(x.selected)) {}
 
+    operator Vector() const {
+        return position;
+    }
 
     /**
      * @brief      Operator<< overload
@@ -127,11 +133,11 @@ struct Vertex
     }
    
     /**
-     * @brief      Comparison operator 
+     * @brief      Equivalence operator
      *
      * @param[in]  rhs   The right hand side
      *
-     * @return     True if equal
+     * @return     True if all values are equal
      */
     bool operator==(const Vertex& rhs) const{
         Vertex temp(rhs); 
@@ -153,30 +159,28 @@ struct Vertex
     }
 
     /**
-     * @brief      Add two vertices
+     * @brief      Add a vector to the vertex
      *
      * @param[in]  rhs   The right hand side
      *
      * @return     Vertex with sum of positions
      */
-    Vertex& operator+=(const Vertex& rhs){
+    Vertex& operator+=(const Vector& rhs){
         // retains the marker of the lhs 
-        position += rhs.position;
-        selected = selected || rhs.selected; 
+        position += rhs;
         return *this;
     }
     
     /**
-     * @brief      Subtracts two vertices
+     * @brief      Subtracts a vector from a vertex
      *
      * @param[in]  rhs   The right hand side
      *
      * @return     Vertex with difference of positions
      */
-    Vertex& operator-=(const Vertex& rhs){
+    Vertex& operator-=(const Vector& rhs){
         // retains the marker of the lhs
-        position -= rhs.position;
-        selected = selected || rhs.selected;
+        position -= rhs;
         return *this;
     }
     
@@ -205,7 +209,12 @@ struct Vertex
     }
 };
 
-Vertex operator+(const Vertex& A, const Vertex& B);
-Vertex operator-(const Vertex& A, const Vertex& B);
+Vertex operator+(const Vertex& A, const Vector& B);
+Vertex operator-(const Vertex& A, const Vector& B);
+Vector operator-(const Vertex& A, const Vertex& B);
 Vertex operator*(double x, const Vertex& A);
 Vertex operator/(const Vertex& A, double x);
+double distance(const Vertex& A, const Vertex& B);
+double angle(const Vertex& A, const Vertex& B, const Vertex& C);
+
+double magnitude(const Vector& A);

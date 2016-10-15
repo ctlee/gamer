@@ -1,3 +1,6 @@
+#include <array>
+#include <algorithm>
+#include <cmath>
 #include "SurfaceMesh.h"
 
 void print_vertices(const SurfaceMesh& mesh){
@@ -19,4 +22,35 @@ void print_faces(const SurfaceMesh& mesh){
 					<< ", selected=" << data.selected
 					<< ")";
 	}
+}
+
+
+void generateHistogram(const SurfaceMesh& mesh){
+  	std::array<double,18> histogram;
+
+  	for(auto face : mesh.get_level_id<3>()) {
+  		auto vertexIDs = mesh.get_name(face);
+  		// Unpack the ID's for convenience	
+  		Vertex a = mesh.get<1>({vertexIDs[0]}); 
+  		Vertex b = mesh.get<1>({vertexIDs[1]}); 
+  		Vertex c = mesh.get<1>({vertexIDs[2]});
+
+  		auto binAngle = [&](double angle) -> int{
+  			return std::floor(angle/10);
+  		};
+  		histogram[binAngle(angle(a,b,c))]++;
+  		histogram[binAngle(angle(b,a,c))]++;
+  		histogram[binAngle(angle(c,a,b))]++;
+  		
+  	} 
+  	const int factor = mesh.size<3>()*3;
+  	std::for_each(histogram.begin(), histogram.end(), [factor](double& n){return 100.0*n/factor;});
+
+  	for (int x=0; x< 18; x++)
+  		std::cout << histogram[x] << " ";
+  	std::cout << std::endl << std::endl;
+}
+
+bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
+	return false;
 }

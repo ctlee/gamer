@@ -10,6 +10,32 @@
 
 int main(int argc, char *argv[])
 {
+    if(argc != 2)
+    {
+        std::cerr << "Wrong arguments passed" << std::endl;
+        return -1;
+    }
+    std::cout << "Begin reading Mesh..." << std::endl;
+    auto result = readOFF(argv[1]);
+
+    if(result.second == false){
+        std::cout << "Something bad happened...";
+        exit(1);
+    }
+    auto mesh = result.first;
+    
+    std::cout << "Generating Histogram..." << std::endl;
+    generateHistogram(*mesh);
+
+    /*
+    tensor<double,3,2> test = tensor<double,3,2>();
+    test[{2,0}] = 1;
+
+    std::cout << test[{2,0}] << std::endl;
+    std::cout << test << std::endl;
+    */
+
+    /*    
     SurfaceMesh x = SurfaceMesh();
     x.insert<1>({1}, Vertex(1,2,3));
     x.insert<1>({2}, Vertex(3,4,5));
@@ -53,6 +79,7 @@ int main(int argc, char *argv[])
     x.print_nodes<1>();
     x.print_nodes<2>();
     x.print_nodes<3>();
+    */
 
     std::cout << "EOF" << std::endl;
 }

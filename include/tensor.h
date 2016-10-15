@@ -141,6 +141,24 @@ public:
 	}
 */
 
+	friend std::ostream& operator<<(std::ostream& output, const tensor& t){
+		output  << "Tensor(";
+		bool first = true;
+		for(auto curr = t.index_begin(); curr != t.index_end(); ++curr){
+			if(first) {output << "{"; first = false;}
+			else output << "; {";
+			
+			bool first2 = true;
+			for(auto x : (*curr)){
+				if(first2) {output << x; first2 = false;}
+				else output << "," << x;
+			}
+			output << "}:" << t[*curr];
+		}
+		output << ")";
+		return output;
+	}
+
 	template <typename... Ts>
 	const _ElemType& get(Ts&&... index) const
 	{
@@ -428,6 +446,18 @@ ElemType dot(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 	return rval / scale;
 }
 
+/**
+ * @brief      Inner product
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 ElemType operator|(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {

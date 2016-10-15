@@ -16,59 +16,123 @@ int get_marker(float r, float g, float b)
     return round(r * 10) * 121 + round(g * 10) * 11 + round(b * 10);
 }
 
-
-SurfaceMesh* readOFF(const std::string filename)
+//http://www.geomview.org/docs/html/OFF.html
+std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
 {
-	auto F = new SurfaceMesh();
-    int n, m;
-    int a, b, c;
-    float x, y, z, color_r, color_g, color_b, color_a;
-    unsigned int          v_n, t_n, e_n;
-    char character;
-    std::string  line;
-    bool         has_marker = false;
-    const char* input_name = filename.c_str();
-
-
-    std::fstream fin(filename);
-    if (!fin.is_open())
+    std::ifstream fin(filename);
+    if(!fin.is_open())
     {
-        std::cerr << "Read error. File \'" << input_name << "\' could not be read." << std::endl;
-        return nullptr;
+        std::cerr << "Read Error: File '" << filename << "' could not be read." << std::endl;
+        return std::make_pair(nullptr, false);
+    }
+  
+    std::string line;
+    // Parse the first line:
+    // [ST][C][N][4][n]OFF  # Header keyword
+    // we only read OFF's in 3 space... simplicial_complex only does triangles
+    getline(fin, line);  
+    std::cout << line << std::endl;
+    if (!line.compare("OFF\n")){
+        std::cerr << "File Format Error: File '" << filename << "' does not look like a valid OFF file" << std::endl;
+        return std::make_pair(nullptr, false);
     }
 
-    while (getline(fin, line))
-    {
-        if ((line[0] == 'O') && (line[1] == 'F') && (line[2] == 'F'))
-        {
+    int dimension = 3;
+
+    // Lambda function to split the string
+    auto split = [](const std::string& str, char delim = ' ') -> std::vector<std::string>{
+        std::vector<std::string> result;
+        auto begin = str.begin();
+        do{
+            auto end = begin;
+            while(*end != delim && end != str.end())
+                end++;
+            if(end != begin) 
+                result.push_back(std::string(begin,end));
+            begin = end;
+        } while (begin++ != str.end());  
+        return result;
+    };
+
+    std::vector<std::string> arr; 
+    // Allow some comments denoted by #...
+    while(getline(fin,line)){
+        if (line.find("#") == 0) {
+            continue;
+        }
+        arr = split(line, '#');
+        if(arr[0].length() != 0) // Assume that comments are over
             break;
+    }
+    
+    // Parse the second line:
+    // NVertices  NFaces  NEdges
+    arr = split(arr[0]);
+    int numVertices = std::stoi(arr[0]);
+    std::cout << "#Vertices: " << numVertices << std::endl;
+
+    int numFaces = std::stoi(arr[1]);
+    std::cout << "#Faces: " << numFaces << std::endl;
+
+    int numEdges = std::stoi(arr[2]);
+    std::cout << "#Edges: " << numEdges << std::endl;
+
+    // NOTE:: Assume there are no more comments...
+
+    // Instantiate mesh!
+    auto mesh = new SurfaceMesh();
+    // Parse the vertices
+    /*
+     x[0]  y[0]  z[0]   
+        # Vertices, possibly with normals,
+        # colors, and/or texture coordinates, in that order,
+        # if the prefixes N, C, ST
+        # are present.
+        # If 4OFF, each vertex has 4 components,
+        # including a final homogeneous component.
+        # If nOFF, each vertex has Ndim components.
+        # If 4nOFF, each vertex has Ndim+1 components.
+    */
+    for(int i=0; i < numVertices; i++){
+        getline(fin, line);
+        std::cout << line << std::endl;
+        arr = split(line, ' ');
+        if(arr.size() < dimension){
+            std::cerr << "Parse Error: Vertex line has fewer dimensions than expected (" << dimension << ")" << std::endl;
+            delete mesh;
+            return std::make_pair(nullptr, false);
         }
+        double x = std::stod(arr[0]);
+        double y = std::stod(arr[1]);
+        double z = std::stod(arr[2]);
+        mesh->insert<1>({i},Vertex(x,y,z));
     }
 
-    if (!getline(fin, line) || scanf(line.c_str(), "%d %d %d\n", &v_n, &t_n, &e_n) != 3)
-    {
-
-        std::cerr << "Read error. Expected 3 integer number for the number of vertices and simplices." << std::endl;
-        return NULL;
-    }
-
-    std::cout << "   vertices: " << v_n << " --- simplices: " << t_n << std::endl;
-
-    // Read vertex coordinates
-    for (n = 0; n < v_n; n++) // surfmesh->num_vertices; n++) {
-    {
-        if (!getline(fin, line) || scanf(line.c_str(), "%f %f %f\n", &x, &y, &z) != 3)
-        {
-            std::cerr << "Read error. Expected 3 floats for the coordinates of vertex:" << n << std::endl;
-            return NULL;
+    // Parse Faces
+    /*
+        # Faces
+        # Nv = # vertices on this face
+        # v[0] ... v[Nv-1]: vertex indices
+        #       in range 0..NVertices-1
+    */
+    for(int i=0; i < numFaces; i++){
+        getline(fin, line);
+        std::cout << line << std::endl;
+        arr = split(line, ' ');
+        if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
+            std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
+            delete mesh;
+            return std::make_pair(nullptr, false);
         }
-
-        //        surfmesh->vertex.push_back(FLTVECT(x,y,z));
-
-        Vertex v{x,y,z};  
-        F->insert<1>({n}, v);
+        auto v0 = std::stoi(arr[1]);
+        auto v1 = std::stoi(arr[2]);
+        auto v2 = std::stoi(arr[3]);
+        mesh->insert<3>({v0,v1,v2});
     }
+    fin.close();
+    return std::make_pair(mesh, true);
 
+/*    
     // Read the number of vertices per simplex from the first line of simplices
     getline(fin, line);
     n = scanf(line.c_str(), "%d", &m);
@@ -157,10 +221,7 @@ SurfaceMesh* readOFF(const std::string filename)
         }
 
     }
-
-    fin.close();
-
-    return F;
+*/
 }
 
 void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
