@@ -26,7 +26,13 @@ int main(int argc, char *argv[])
     
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
+    print_vertices(*mesh); 
 
+    scale(*mesh,1,100,1);
+    print_vertices(*mesh); 
+    generateHistogram(*mesh);
+
+    writeOFF("test.off", *mesh);
     /*
     tensor<double,3,2> test = tensor<double,3,2>();
     test[{2,0}] = 1;

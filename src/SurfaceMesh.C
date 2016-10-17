@@ -54,6 +54,37 @@ void generateHistogram(const SurfaceMesh& mesh){
   	std::cout << std::endl << std::endl;
 }
 
+void translate(SurfaceMesh& mesh, Vector v){
+    for(auto& vertex : mesh.get_level<1>())
+        vertex += v;
+}
+
+void translate(SurfaceMesh& mesh, double dx, double dy, double dz){ 
+    Vector v = Vector();
+    v[0] = dx; v[1] = dy; v[2] = dz;
+    translate(mesh, v);
+}
+
+void scale(SurfaceMesh& mesh, Vector v){
+    for (auto& vertex : mesh.get_level<1>()){
+        vertex[0] *= v[0];
+        vertex[1] *= v[1];
+        vertex[2] *= v[2];
+    }
+}
+
+void scale(SurfaceMesh& mesh, double sx, double sy, double sz){
+    Vector v = Vector();
+    v[0] = sx; v[1] = sy; v[2] = sz;
+    scale(mesh, v);
+}
+
+void scale(SurfaceMesh& mesh, double s){
+    Vector v = Vector();
+    v[0] = s; v[1] = s; v[2] = s;
+    scale(mesh, v);
+}
+
 bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
 	return false;
 }
