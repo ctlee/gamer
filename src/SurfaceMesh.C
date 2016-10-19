@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <vector>
 #include "SurfaceMesh.h"
 
 void print_vertices(const SurfaceMesh& mesh){
@@ -54,6 +55,104 @@ void generateHistogram(const SurfaceMesh& mesh){
   	std::cout << std::endl << std::endl;
 }
 
+void translate(SurfaceMesh& mesh, Vector v){
+    for(auto& vertex : mesh.get_level<1>())
+        vertex += v;
+}
+
+void translate(SurfaceMesh& mesh, double dx, double dy, double dz){ 
+    Vector v = Vector();
+    v[0] = dx; v[1] = dy; v[2] = dz;
+    translate(mesh, v);
+}
+
+void scale(SurfaceMesh& mesh, Vector v){
+    for (auto& vertex : mesh.get_level<1>()){
+        vertex[0] *= v[0];
+        vertex[1] *= v[1];
+        vertex[2] *= v[2];
+    }
+}
+
+void scale(SurfaceMesh& mesh, double sx, double sy, double sz){
+    Vector v = Vector();
+    v[0] = sx; v[1] = sy; v[2] = sz;
+    scale(mesh, v);
+}
+
+void scale(SurfaceMesh& mesh, double s){
+    Vector v = Vector();
+    v[0] = s; v[1] = s; v[2] = s;
+    scale(mesh, v);
+}
+
 bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
 	return false;
+}
+
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges){
+    // Assuming that the mesh is manifold
+    auto name = mesh.get_name(edgeID);
+    std::pair<Vertex, Vertex> shared;    
+    shared.first = mesh.get({name[0]});
+    shared.second = mesh.get({name[1]});
+
+    std::pair<Vertex, Vertex> notShared;    
+    auto up = mesh.get_cover(edgeID);
+    if (up.size() > 2){
+        //std::cerr << "This edge participates in more than 2 faces. Returning..." << std::endl;
+        return;
+    }
+    else if (up.size() < 2){
+        //std::cerr << "This edge participates in fewer than 2 faces. Returning..." << std::endl;
+        return;
+    }
+    notShared.first = mesh.get({up[0]});
+    notShared.second = mesh.get({up[1]});
+
+    // Add check to see if notShared.first and second are connected.
+    if(mesh.exists({up[0], up[1]})){
+        //std::cerr << "Found a tetrahedron cannot edge flip." << std::endl;
+        return;
+    }
+
+    auto getMinAngle = [](const Vertex& a, const Vertex& b, const Vertex& c){
+        double minAngle = 999; // dummy for now
+        double tmp;
+        std::vector<Vertex> triangle = {a,b,c};
+        for(int i=0; i < 3; i++){
+            std::rotate(triangle.begin(),triangle.begin()+i,triangle.end()) ;
+            auto it=triangle.begin();
+            tmp = angle(*it, *(it+1), *(it+2));
+            if(tmp < minAngle) minAngle = tmp;
+        }
+        return minAngle;
+    };
+
+    // Check if we're on a ridge first
+    if(preserveRidges){
+
+    }
+
+    // Go through all angle combinations
+    double tmp;
+    double minAngle = getMinAngle(shared.first, shared.second, notShared.first);
+    tmp = getMinAngle(shared.first, shared.second, notShared.second);
+    if (tmp < minAngle) minAngle = tmp;
+
+    double minAngleFlip = getMinAngle(notShared.first, notShared.second, shared.first);
+    tmp = getMinAngle(notShared.first, notShared.second, shared.second);
+    if (tmp < minAngleFlip) minAngleFlip = tmp;
+
+    if (minAngleFlip > minAngle){
+        mesh.remove<2>({name[0],name[1]});
+        mesh.insert<3>({name[0], up[0], up[1]});
+        mesh.insert<3>({name[1], up[0], up[1]});
+    }
+}
+
+int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID){
+    std::vector<SurfaceMesh::NodeID<1>> vertices;
+    neighbors(mesh, nodeID, std::back_inserter(vertices));
+    return vertices.size(); 
 }

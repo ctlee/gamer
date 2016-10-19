@@ -43,7 +43,7 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     // Assume the first line must end with 'OFF\n'
     if(!line.find("OFF", line.size()-4)){
         std::cerr << "File Format Error: File '" << filename << "' does not look like a valid OFF file." << std::endl;
-        std::cerr << "Expected 'OFF' at end of line, found: '" << line << "'" << std::endl;
+        std::cerr << "Expected 'OFF' at end of line, found: '" << line << "'." << std::endl;
         return std::make_pair(nullptr, false);
     }
 
@@ -164,18 +164,34 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
             delete mesh;
             return std::make_pair(nullptr, false);
         }
-
-        auto v0 = std::stoi(arr[1]);
-        auto v1 = std::stoi(arr[2]);
-        auto v2 = std::stoi(arr[3]);
-        mesh->insert<3>({v0,v1,v2});
+        else if(arr.size() == dimension+1){
+            auto v0 = std::stoi(arr[1]);
+            auto v1 = std::stoi(arr[2]);
+            auto v2 = std::stoi(arr[3]);
+            mesh->insert<3>({v0,v1,v2});
+        }
+        else if(arr.size() == dimension+5){
+            auto v0 = std::stoi(arr[1]);
+            auto v1 = std::stoi(arr[2]);
+            auto v2 = std::stoi(arr[3]);
+            // parse for marker/color data
+            auto r = std::stod(arr[4]);
+            auto g = std::stod(arr[5]);
+            auto b = std::stod(arr[6]);
+            //auto k = std::stod(arr[7]);
+            mesh->insert<3>({v0,v1,v2},Face(Orientable{0}, FaceProperties{get_marker(r,g,b),0}));
+        }
+        else {
+            std::cerr << "Parse Error: Couldn't interpret face: '" << line << "'." << std::endl;
+            delete mesh;
+            return std::make_pair(nullptr, false);
+        }
     }
     fin.close();
     return std::make_pair(mesh, true);
 }
 
 void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
-
     std::ofstream fout(filename);
     if(!fout.is_open())
     {
@@ -188,7 +204,10 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
     int numVertices = mesh.size<1>();
     int numFaces = mesh.size<3>();
-    fout << numVertices << numFaces << numVertices + numFaces - 2 << "\n"; 
+    int numEdges = mesh.size<2>();
+    fout    << numVertices << " " 
+            << numFaces << " "
+            << numEdges << "\n"; 
 
     fout.precision(10); 
     // Get the vertex data directly 

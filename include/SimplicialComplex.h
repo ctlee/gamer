@@ -298,8 +298,8 @@ public:
 		friend bool operator<(NodeID lhs, NodeID rhs)  { return lhs.ptr < rhs.ptr; }
 		friend bool operator>(NodeID lhs, NodeID rhs)  { return lhs.ptr > rhs.ptr; }
 
-		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
-
+		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
+		//friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
 	private:
 		NodePtr<k> ptr;
 	};
@@ -893,4 +893,10 @@ void neighbors_up(Complex &F, typename Complex::template NodeID<level> nid, Inse
 			}
 		}
 	}
+}
+
+template <class Complex, class NodeID, class InsertIter>
+void neighbors_up(Complex& F, NodeID nid, InsertIter iter)
+{
+	neighbors_up<Complex, NodeID::level, InsertIter>(F,nid,iter);
 }

@@ -27,6 +27,20 @@ int main(int argc, char *argv[])
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
 
+    std::cout << "Flipping edges...";
+    auto edges = mesh->get_level_id<2>(); 
+    for(auto it=edges.begin(); it != edges.end(); ){
+        //auto edgeID : mesh->get_level_id<2>()){
+        auto next = std::next(it);
+        edgeFlip(*mesh, *it, true);
+        it = next;
+        std::cout << "Done " << *it << std::endl;
+    }
+
+    writeOFF("test.off", *mesh);
+
+    //print_vertices(*mesh); 
+    //writeOFF("test.off", *mesh);
     /*
     tensor<double,3,2> test = tensor<double,3,2>();
     test[{2,0}] = 1;

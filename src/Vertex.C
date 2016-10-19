@@ -38,19 +38,25 @@ double distance(const Vertex& A, const Vertex& B){
     return magnitude(A - B);
 }
 
+/**
+ * @brief     Compute the angle betweeen three vertices. 
+ *
+ * @param[in]  A     Vertex A
+ * @param[in]  B     Vertex B is in the middle
+ * @param[in]  C     Vertex C
+ *
+ * @return     The angle in degrees
+ */
 double angle(const Vertex& A, const Vertex& B, const Vertex& C){
     Vector AB = A-B;
-    Vector AC = A-C;
-    Vector BC = B-C;
-
-    double AB2 = AB|AB;
-    double AC2 = AC|AC;
-    double BC2 = BC|BC;
-
-    if( AB2 == 0 || BC2 == 0){
+    Vector CB = C-B;
+    double lenAB = magnitude(AB); 
+    double lenCB = magnitude(CB);
+    if (lenAB == 0 || lenCB == 0){
         std::cerr << "Some length == 0, can't compute angle. Exiting..." << std::endl;
         exit(1);
-    }       
-    
-    return std::acos(0.5*(AB2+BC2-AC2)/std::sqrt(AB2*BC2)) * 180 / M_PI;
+    } 
+    AB /= lenAB;
+    CB /= lenCB;
+    return std::acos(AB|CB)*180/M_PI;
 }

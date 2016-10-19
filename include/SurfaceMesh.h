@@ -90,6 +90,12 @@ void print_vertices(const SurfaceMesh& mesh);
  * @param[in]  mesh  The mesh
  */
 void print_faces(const SurfaceMesh& mesh);
-
+void translate(SurfaceMesh& mesh, Vector v);
+void translate(SurfaceMesh& mesh, double dx, double dy, double dz);
+void scale(SurfaceMesh& mesh, Vector v);
+void scale(SurfaceMesh& mesh, double sx, double sy, double sz);
+void scale(SurfaceMesh& mesh, double s);
 void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges);
+int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID);
