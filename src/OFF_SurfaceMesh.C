@@ -205,7 +205,9 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     int numVertices = mesh.size<1>();
     int numFaces = mesh.size<3>();
     int numEdges = mesh.size<2>();
-    fout << numVertices << numFaces << numEdges << "\n"; 
+    fout    << numVertices << " " 
+            << numFaces << " "
+            << numEdges << "\n"; 
 
     fout.precision(10); 
     // Get the vertex data directly 
