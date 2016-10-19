@@ -471,3 +471,13 @@ ElemType operator|(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 	double scale = detail::factorial<N>::value;
 	return rval / scale;
 }
+
+template <typename ElemType>
+tensor<ElemType,3,1> cross(const tensor<ElemType,3,1>& x, const tensor<ElemType,3,1>& y)
+{
+	tensor<ElemType,3,1> rval;
+	rval[0] = x[1]*y[2] - y[1]*x[2];
+	rval[1] = x[2]*y[0] - y[2]*x[0];
+	rval[2] = x[0]*y[1] - y[0]*x[1];
+	return rval;
+}

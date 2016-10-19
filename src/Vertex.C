@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "vertex.h"
+#include "Vertex.h"
 
 Vertex operator+(const Vertex& A, const Vector& B){
     Vertex rval(A);
