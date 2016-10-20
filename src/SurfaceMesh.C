@@ -112,7 +112,7 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
 
     // Add check to see if notShared.first and second are connected.
     if(mesh.exists({up[0], up[1]})){
-        //std::cerr << "Found a tetrahedron cannot edge flip." << std::endl;
+        std::cerr << "Found a tetrahedron cannot edge flip." << std::endl;
         return;
     }
 
@@ -131,7 +131,13 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
 
     // Check if we're on a ridge first
     if(preserveRidges){
-
+        auto a = cross(shared.first-shared.second, shared.first-notShared.first);
+        auto b = cross(shared.first-notShared.second, shared.first-shared.second);
+        auto val = angle(a,b);
+        if (val > 60){
+            std::cerr << "Found a ridge, won't flip." << std::endl;
+            return;
+        }
     }
 
     // Go through all angle combinations

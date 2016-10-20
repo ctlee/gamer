@@ -98,4 +98,6 @@ void scale(SurfaceMesh& mesh, double s);
 void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges);
-int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID);
+int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
+Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);

@@ -27,14 +27,13 @@ int main(int argc, char *argv[])
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
 
-    std::cout << "Flipping edges...";
+    std::cout << "Flipping edges..." << std::endl;
     auto edges = mesh->get_level_id<2>(); 
     for(auto it=edges.begin(); it != edges.end(); ){
         //auto edgeID : mesh->get_level_id<2>()){
         auto next = std::next(it);
         edgeFlip(*mesh, *it, true);
         it = next;
-        std::cout << "Done " << *it << std::endl;
     }
 
     writeOFF("test.off", *mesh);

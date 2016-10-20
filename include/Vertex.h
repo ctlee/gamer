@@ -216,4 +216,5 @@ Vertex operator*(double x, const Vertex& A);
 Vertex operator/(const Vertex& A, double x);
 double distance(const Vertex& A, const Vertex& B);
 double angle(const Vertex& A, const Vertex& B, const Vertex& C);
+double angle(const Vector& AB, const Vector& CB);
 double magnitude(const Vector& A);

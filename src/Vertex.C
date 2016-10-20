@@ -50,13 +50,19 @@ double distance(const Vertex& A, const Vertex& B){
 double angle(const Vertex& A, const Vertex& B, const Vertex& C){
     Vector AB = A-B;
     Vector CB = C-B;
-    double lenAB = magnitude(AB); 
-    double lenCB = magnitude(CB);
+    return angle(AB,CB);
+}
+
+double angle(const Vector& AB, const Vector& CB){
+    auto ab = AB;
+    auto cb = CB;
+    double lenAB = magnitude(ab); 
+    double lenCB = magnitude(cb);
     if (lenAB == 0 || lenCB == 0){
         std::cerr << "Some length == 0, can't compute angle. Exiting..." << std::endl;
         exit(1);
     } 
-    AB /= lenAB;
-    CB /= lenCB;
-    return std::acos(AB|CB)*180/M_PI;
+    ab /= lenAB;
+    cb /= lenCB;
+    return std::acos(ab|cb)*180/M_PI;
 }
