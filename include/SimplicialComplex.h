@@ -298,8 +298,10 @@ public:
 		friend bool operator<(NodeID lhs, NodeID rhs)  { return lhs.ptr < rhs.ptr; }
 		friend bool operator>(NodeID lhs, NodeID rhs)  { return lhs.ptr > rhs.ptr; }
 
+		auto operator*() { return ptr->_data; }
+
 		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
-		//friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
+
 	private:
 		NodePtr<k> ptr;
 	};
@@ -502,6 +504,31 @@ public:
 		return std::move(rval);
 	}
 
+	template <size_t k>
+	std::set<NodeID<k+1>> up(const std::set<NodeID<k>>& nodes)
+	{
+		std::set<NodeID<k+1>> rval;
+		for(auto nid : nodes)
+		{
+			for(auto p : nid.ptr->_up)
+			{
+				rval.insert(NodeID<k+1>(p.second));
+			}
+		}
+		return rval;
+	}
+
+	template <size_t k>
+	std::set<NodeID<k+1>> up(NodeID<k> nid)
+	{
+		std::set<NodeID<k+1>> rval;
+		for(auto p : nid.ptr->_up)
+		{
+			rval.insert(NodeID<k+1>(p.second));
+		}
+		return rval;
+	}
+
 	// Edge
 	template <size_t k>
 	EdgeData<k>& get_edge_up(NodeID<k> nid, KeyType a)
@@ -577,6 +604,7 @@ public:
 		return remove_recurse<k,0>::apply(this, &root, &root + 1, count);
 	}
 
+	/*
 	template <std::size_t k>
 	void print_nodes(){
 		std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
@@ -584,6 +612,7 @@ public:
 		    std::cout << *id.ptr << std::endl;
 		} 
 	}
+	*/
 
 private:
 	/**
