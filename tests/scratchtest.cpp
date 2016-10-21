@@ -27,6 +27,11 @@ int main(int argc, char *argv[])
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
 
+    auto node = mesh->get({6});
+
+    //getNormal(*mesh, node);
+
+    /*
     std::cout << "Flipping edges..." << std::endl;
     auto edges = mesh->get_level_id<2>(); 
     for(auto it=edges.begin(); it != edges.end(); ){
@@ -35,8 +40,8 @@ int main(int argc, char *argv[])
         edgeFlip(*mesh, *it, true);
         it = next;
     }
-
-    writeOFF("test.off", *mesh);
+    */
+    //writeOFF("test.off", *mesh);
 
     //print_vertices(*mesh); 
     //writeOFF("test.off", *mesh);

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <map>
 #include <vector>
 #include "SurfaceMesh.h"
 
@@ -161,4 +162,22 @@ int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID){
     std::vector<SurfaceMesh::NodeID<1>> vertices;
     neighbors(mesh, nodeID, std::back_inserter(vertices));
     return vertices.size(); 
+}
+
+Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
+    auto name = mesh.get_name(faceID);
+    auto a = mesh.get({name[0]});
+    auto b = mesh.get({name[1]});
+    auto c = mesh.get({name[2]});
+    return cross(a-b, c-b);
+}
+
+Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    // find all incident triangles
+    auto edges = mesh.up(vertexID);
+    auto faces = mesh.up(edges);
+    std::cout << vertexID << std::endl;
+    for(auto f : faces) {
+        std::cout << "   " << f << std::endl;
+    }
 }

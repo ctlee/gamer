@@ -464,25 +464,25 @@ public:
 	 * @return     ID of the node of interest
 	 */
 	template <size_t n>
-	NodeID<n>& get_id(const KeyType (&s)[n])
+	NodeID<n> get_id(const KeyType (&s)[n])
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
 
 	template <size_t i>
-	NodeID<i+1>& get_id(NodeID<i> nid, KeyType s)
+	NodeID<i+1> get_id(NodeID<i> nid, KeyType s)
 	{
 		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t n>
-	const NodeID<n>& get_id(const KeyType (&s)[n]) const
+	const NodeID<n> get_id(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
 
 	template <size_t i>
-	const NodeID<i+1>& get_id(NodeID<i> nid, KeyType s) const
+	const NodeID<i+1> get_id(NodeID<i> nid, KeyType s) const
 	{
 		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
