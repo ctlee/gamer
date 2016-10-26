@@ -6,6 +6,21 @@
 #include <vector>
 #include "SurfaceMesh.h"
 
+void print(const SurfaceMesh & mesh){
+    std::cout << "Level: 1" << std::endl;
+    for(auto node : mesh.get_level_id<1>()){
+        std::cout << "    " << node << std::endl;
+    }
+    std::cout << "Level: 2" << std::endl;
+    for(auto node : mesh.get_level_id<2>()){
+        std::cout << "    " << node << std::endl;
+    }
+    std::cout << "Level: 3" << std::endl;
+    for(auto node : mesh.get_level_id<3>()){
+        std::cout << "    " << node << std::endl;
+    }
+}
+
 void print_vertices(const SurfaceMesh& mesh){
     for(auto x : mesh.get_level<1>()) {
         std::cout << x << ", ";
@@ -26,7 +41,6 @@ void print_faces(const SurfaceMesh& mesh){
 					<< ")";
 	}
 }
-
 
 void generateHistogram(const SurfaceMesh& mesh){
     std::array<double,18> histogram;
@@ -176,8 +190,9 @@ Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     // find all incident triangles
     auto edges = mesh.up(vertexID);
     auto faces = mesh.up(edges);
-    std::cout << vertexID << std::endl;
+    Vector normal; 
     for(auto f : faces) {
-        std::cout << "   " << f << std::endl;
+        normal += getNormal(mesh, f);
     }
+    return normal / (double) faces.size();
 }

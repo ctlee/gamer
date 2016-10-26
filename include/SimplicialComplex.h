@@ -6,6 +6,8 @@
 #include <array>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <ostream>
 #include <utility>
 #include "util.h"
 
@@ -613,8 +615,72 @@ public:
 		} 
 	}
 	*/
+	void genGraph(const std::string& filename){
+	    std::ofstream fout(filename);
+	    if(!fout.is_open())
+	    {
+	        std::cerr   << "File '" << filename 
+	                    << "' could not be writen to." << std::endl;
+	        exit(1); 
+	    }
+	    fout 	<< "digraph {\n"
+	    		<< "splines=line;\n"
+	    		<< "dpi=300;\n";
+		std::set<Node<0>*> root{_root};
+		writeGraph<0,0>::apply(fout, root);
+	    
+	    fout << "}\n";
+		fout.close();    	
+	}
 
 private:
+	template <size_t k, size_t foo>	
+	struct writeGraph{
+	    template <typename T>
+	    static void apply(std::ofstream& fout, T nodes){
+			std::set<Node<k+1>*> next;
+			// for each node of interest...
+			for(auto node : nodes)
+			{
+				auto up = node->_up;
+				for(auto j = up.begin(); j != up.end(); ++j)
+				{
+					auto orient = j->second->_edge_data[j->first].orientation;
+					if (orient == 1)
+						fout <<	"	" << node->_node << " -> " << j->second->_node 
+							 << "[label=\"" << j->first << "\"]\n";
+					else 
+						fout <<	"	" << j->second->_node << " -> " << node->_node
+							 << "[label=\"" << j->first << "\"]\n";
+					next.insert(j->second);
+				}
+			}
+			
+			fout 	<< "subgraph cluster_" << k << " {\n"
+					<< "label=\"Level " << k << "\"\n";
+			for (auto j : nodes){
+				fout << j->_node << ";";
+			}
+			fout 	<< "\n}\n";
+			writeGraph<k+1,foo>::apply(fout, next);
+		}	
+	};
+	
+	template <size_t foo>
+	struct writeGraph<numLevels-1,foo>
+	{
+		template <typename T>
+		static void apply(std::ofstream & fout, T nodes)
+		{
+			fout 	<< "subgraph cluster_" << numLevels-1 << " {\n"
+					<< "label=\"Level " << numLevels-1 << "\"\n";
+			for (auto node : nodes){
+				fout << node->_node << ";";
+			}
+			fout 	<< "\n}\n";
+		}
+	};
+
 	/**
 	 * Recursively deletes dependent nodes.
 	 *
