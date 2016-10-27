@@ -75,7 +75,6 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
  * @param[in]  mesh      The mesh
  */
 void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
-void writeGraph(const std::string& filename, const SurfaceMesh& mesh);
 void print(const SurfaceMesh& mesh);
 void print_vertices(const SurfaceMesh& mesh);
 void print_faces(const SurfaceMesh& mesh);

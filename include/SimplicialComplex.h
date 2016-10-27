@@ -624,7 +624,6 @@ public:
 	        exit(1); 
 	    }
 	    fout 	<< "digraph {\n"
-	    		<< "splines=line;\n"
 	    		<< "dpi=300;\n";
 		std::set<Node<0>*> root{_root};
 		writeGraph<0,0>::apply(fout, root);

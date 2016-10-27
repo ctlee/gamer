@@ -24,13 +24,27 @@ int main(int argc, char *argv[])
     }
     auto mesh = result.first;
     
+
+    init_orientation(*mesh);
+    clear_orientation(*mesh);
+    auto orient = compute_orientation(*mesh);
+
+    std::cout << "Connected Components: " << std::get<0>(orient) << std::endl;
+    std::cout << "Orientable: " << std::get<1>(orient) << std::endl;
+    std::cout << "Psuedo-manifold: " << std::get<2>(orient) << std::endl;
+
+    print(*mesh);
+    mesh->genGraph("test.dot");
+
+    /*
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
 
-    auto node = mesh->get({6});
-
-    //getNormal(*mesh, node);
-
+    for (auto node : mesh->get_level_id<1>()){
+        auto normal = getNormal(*mesh, node);
+        std::cout << "Normal: " << normal << std::endl;
+    }
+    */
     /*
     std::cout << "Flipping edges..." << std::endl;
     auto edges = mesh->get_level_id<2>(); 
