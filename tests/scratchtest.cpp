@@ -33,18 +33,16 @@ int main(int argc, char *argv[])
     std::cout << "Orientable: " << std::get<1>(orient) << std::endl;
     std::cout << "Psuedo-manifold: " << std::get<2>(orient) << std::endl;
 
-    print(*mesh);
+    //print(*mesh);
     mesh->genGraph("test.dot");
 
-    /*
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
 
     for (auto node : mesh->get_level_id<1>()){
-        auto normal = getNormal(*mesh, node);
-        std::cout << "Normal: " << normal << std::endl;
+       getTangent(*mesh, node);
     }
-    */
+
     /*
     std::cout << "Flipping edges..." << std::endl;
     auto edges = mesh->get_level_id<2>(); 

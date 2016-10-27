@@ -89,3 +89,4 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
 int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
 Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+void getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);

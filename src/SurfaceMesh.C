@@ -180,19 +180,45 @@ int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID){
 
 Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
     auto name = mesh.get_name(faceID);
-    auto a = *mesh.get_node_up({name[0]});
-    auto b = *mesh.get_node_up({name[1]});
-    auto c = *mesh.get_node_up({name[2]});
-    return cross(a-b, c-b);
+    // Get the nodeIDs
+    auto A = mesh.get_node_up({name[0]});
+    auto B = mesh.get_node_up({name[1]});
+    auto C = mesh.get_node_up({name[2]});
+    // Get the vertices
+    auto vA = *A;
+    auto vB = *B;
+    auto vC = *C;
+
+    return cross(vA-vB, vA-vC);
 }
 
 Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     // find all incident triangles
     auto edges = mesh.up(vertexID);
     auto faces = mesh.up(edges);
-    Vector normal; 
+
+    Vector normal;
     for(auto f : faces) {
         normal += getNormal(mesh, f);
     }
     return normal / (double) faces.size();
+}
+
+void getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    auto ids = mesh.get_cover(vertexID);
+    std::vector<Vector> vectors;
+    std::vector<double> orients;
+    for(auto id : ids){
+        auto v = mesh.get_node_up({id});
+        vectors.push_back(*v - *vertexID);
+        auto edge = mesh.get_edge_up(vertexID, id);
+        orients.push_back(edge.orientation); 
+    }
+
+    Vector tangent = vectors[0]*orients[0];
+    for(auto i = 1; i < vectors.size(); i++)
+        tangent = cross(tangent, vectors[i]*orients[i]);
+    tangent = tangent/magnitude(tangent);
+    std::cout << *vertexID<< std::endl;
+    std::cout << tangent << std::endl; 
 }
