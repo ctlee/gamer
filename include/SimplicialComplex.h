@@ -298,14 +298,19 @@ public:
 		friend bool operator<(NodeID lhs, NodeID rhs)  { return lhs.ptr < rhs.ptr; }
 		friend bool operator>(NodeID lhs, NodeID rhs)  { return lhs.ptr > rhs.ptr; }
 
-		auto operator*() { return ptr->_data; }
+		explicit operator std::size_t () const { return static_cast<std::size_t>(ptr); }
+
+		auto const&& operator*() const { return ptr->_data; }
+		auto&& operator*() { return ptr->_data; }
+
+		auto const&& data() const { return ptr->_data; }
+		auto&& data() { return ptr->_data; }
 
 		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
 
 	private:
 		NodePtr<k> ptr;
 	};
-
 
 
 	simplicial_complex()
@@ -359,31 +364,31 @@ public:
 
 	// Node
 	template <size_t n>
-	NodeID<n> get_id_up(const std::array<KeyType,n>& s)
+	NodeID<n> get_node_up(const KeyType (&s)[n]) const
 	{
-		return get_recurse<0,n>::apply(this, s.data(), _root);
+		return get_recurse<0,n>::apply(this, s, _root);
 	}
 
 	template <size_t i, size_t j>
-	NodeID<i+j> get_id_up(NodeID<i> nid, const std::array<KeyType,j>& s)
+	NodeID<i+j> get_node_up(NodeID<i> nid, const KeyType (&s)[j]) const
 	{
-		return get_recurse<i,j>::apply(this, s.data(), nid);
+		return get_recurse<i,j>::apply(this, s, nid);
 	}
 
 	template <size_t i>
-	NodeID<i+1> get_id_up(NodeID<i> nid, KeyType s)
+	NodeID<i+1> get_node_up(NodeID<i> nid, KeyType s) const
 	{
 		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t i, size_t j>
-	NodeID<i-j> get_id_down(NodeID<i> nid, const std::array<KeyType,j>& s)
+	NodeID<i-j> get_node_down(NodeID<i> nid, const KeyType (&s)[j]) const
 	{
-		return get_down_recurse<i,j>::apply(this, s.data(), nid.ptr);
+		return get_down_recurse<i,j>::apply(this, s, nid.ptr);
 	}
 
 	template <size_t i>
-	NodeID<i-1> get_id_down(NodeID<i> nid, KeyType s)
+	NodeID<i-1> get_node_down(NodeID<i> nid, KeyType s) const
 	{
 		return get_down_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
@@ -396,14 +401,13 @@ public:
 	 * @tparam     n     The level of simplicial complex
 	 *
 	 * @return     The associated data
-	 */
+	 *
 	template <size_t n>
 	NodeData<n>& get(const KeyType (&s)[n])
 	{
 		return get_recurse<0,n>::apply(this, s, _root)->_data;
 	}
 
-	/**
 	 * @brief      Get data by name
 	 *
 	 * @param[in]  s     Array holding the name
@@ -411,13 +415,12 @@ public:
 	 * @tparam     n     The level of simplicial complex
 	 *
 	 * @return     The associated data
-	 */
+	 *
 	template <size_t n>
 	const NodeData<n>& get(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root)->_data;
 	}
-
 
 	template <size_t i>
 	NodeData<i+1>& get(NodeID<i> nid, KeyType s)
@@ -442,18 +445,17 @@ public:
 	{
 		return nid.ptr->_data;
 	}
+	*/
 
-
-	NodeData<0>& get()
+	NodeID<0> get_node_up() const
 	{
-		return _root->_data;
+		return _root;
 	}
 
-	const NodeData<0>& get() const
+	NodeID<0> get_node_down() const
 	{
-		return _root->_data;
+		return _root;
 	}
-
 	/**
 	 * @brief      Get the NodeID by name
 	 *
@@ -462,7 +464,7 @@ public:
 	 * @tparam     n     The level of simplicial complex
 	 *
 	 * @return     ID of the node of interest
-	 */
+
 	template <size_t n>
 	NodeID<n>& get_id(const KeyType (&s)[n])
 	{
@@ -474,7 +476,7 @@ public:
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
-
+*/
 	template <size_t k, class Inserter>
 	void get_cover(NodeID<k> id, Inserter pos)
 	{
@@ -889,10 +891,10 @@ void neighbors(Complex &F, typename Complex::template NodeID<level> nid, InsertI
 {
 	for (auto a : F.get_name(nid))
 	{
-		auto id = F.get_id_down(nid,a);
+		auto id = F.get_node_down(nid,a);
 		for(auto b : F.get_cover(id))
 		{
-			auto nbor = F.get_id_up(id,b);
+			auto nbor = F.get_node_up(id,b);
 			if(nbor != nid)
 			{
 				*iter++ = nbor;
@@ -912,10 +914,10 @@ void neighbors_up(Complex &F, typename Complex::template NodeID<level> nid, Inse
 {
 	for (auto a : F.get_cover(nid))
 	{
-		auto id = F.get_id_up(nid,a);
+		auto id = F.get_node_up(nid,a);
 		for(auto b : F.get_name(id))
 		{
-			auto nbor = F.get_id_down(id,b);
+			auto nbor = F.get_node_down(id,b);
 			if(nbor != nid)
 			{
 				*iter++ = nbor;

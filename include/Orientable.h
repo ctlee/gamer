@@ -104,8 +104,8 @@ std::tuple<int, bool, bool> compute_orientation(Complex& F)
 						auto& edge0 = F.get_edge_up(curr, w[0]);
 						auto& edge1 = F.get_edge_up(curr, w[1]);
 
-						auto& node0 = F.get(curr, w[0]);
-						auto& node1 = F.get(curr, w[1]);
+						auto& node0 = *F.get_node_up(curr, w[0]);
+						auto& node1 = *F.get_node_up(curr, w[1]);
 
 						if(node0.orientation == 0)
 						{

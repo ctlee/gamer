@@ -40,6 +40,6 @@ TEST(TensorTest,MathOperations){
         std::cout << ": " << uu.get(*curr,*curr) << std::endl;
     }
 
-    //std::cout << std::sqrt(dot(w,w)) << std::endl;
+    //std::cout << std::sqrt(w|w) << std::endl;
     */
 }

@@ -15,7 +15,7 @@ void print_vertices(const SurfaceMesh& mesh){
 void print_faces(const SurfaceMesh& mesh){
 	for(auto x : mesh.get_level_id<3>()) {
 		auto name = mesh.get_name(x);
-		auto data = mesh.get(x);
+		auto data = x.data();
 
 		std::cout 	<< "Face(id1=" 	<< name[0]
 					<< ", id2=" 	<< name[1]
@@ -34,9 +34,9 @@ void generateHistogram(const SurfaceMesh& mesh){
   	for(auto face : mesh.get_level_id<3>()) {
   		auto vertexIDs = mesh.get_name(face);
   		// Unpack the ID's for convenience	
-  		Vertex a = mesh.get<1>({vertexIDs[0]}); 
-  		Vertex b = mesh.get<1>({vertexIDs[1]}); 
-  		Vertex c = mesh.get<1>({vertexIDs[2]});
+  		Vertex a = *mesh.get_node_up<1>({vertexIDs[0]});
+  		Vertex b = *mesh.get_node_up<1>({vertexIDs[1]});
+  		Vertex c = *mesh.get_node_up<1>({vertexIDs[2]});
 
   		auto binAngle = [&](double angle) -> int{
   			return std::floor(angle/10);
@@ -94,8 +94,8 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
     // Assuming that the mesh is manifold
     auto name = mesh.get_name(edgeID);
     std::pair<Vertex, Vertex> shared;    
-    shared.first = mesh.get({name[0]});
-    shared.second = mesh.get({name[1]});
+    shared.first = *mesh.get_node_up<1>({name[0]});
+    shared.second = *mesh.get_node_up<1>({name[1]});
 
     std::pair<Vertex, Vertex> notShared;    
     auto up = mesh.get_cover(edgeID);
@@ -107,11 +107,11 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
         //std::cerr << "This edge participates in fewer than 2 faces. Returning..." << std::endl;
         return;
     }
-    notShared.first = mesh.get({up[0]});
-    notShared.second = mesh.get({up[1]});
+    notShared.first  = *mesh.get_node_up<1>({up[0]});
+    notShared.second = *mesh.get_node_up<1>({up[1]});
 
     // Add check to see if notShared.first and second are connected.
-    if(mesh.exists({up[0], up[1]})){
+    if(mesh.exists<2>({up[0], up[1]})){
         std::cerr << "Found a tetrahedron cannot edge flip." << std::endl;
         return;
     }

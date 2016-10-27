@@ -19,6 +19,7 @@
 
 int main(int argc, char* argv[])
 {
+	return 0;
 	if(argc != 3)
 	{
 		std::cerr << "Wrong arguments passed" << std::endl;
