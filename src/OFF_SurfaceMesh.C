@@ -79,12 +79,16 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     }
   
     // Lambda function to split the string
-    auto split = [](const std::string& str, char delim = ' ') -> std::vector<std::string>{
+    auto split = [](const std::string& cstr, std::vector<char> delim = {' ','\t'}) -> std::vector<std::string>{
+        std::string str = cstr;
+        for (auto i=1; i< delim.size(); i++){
+            std::replace(str.begin(), str.end(),delim[i], delim[0]);
+        }
         std::vector<std::string> result;
         auto begin = str.begin();
         do{
             auto end = begin;
-            while(*end != delim && end != str.end())
+            while(*end != delim[0] && end != str.end())
                 end++;
             if(end != begin) 
                 result.push_back(std::string(begin,end));
@@ -99,7 +103,7 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
         if (line.find("#") == 0) {
             continue;
         }
-        arr = split(line, '#');
+        arr = split(line, {'#'});
         if(arr[0].length() != 0) // Assume that comments are over
             break;
     }
@@ -136,7 +140,7 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     for(int i=0; i < numVertices; i++){
         getline(fin, line);
         //std::cout << line << std::endl;
-        arr = split(line, ' ');
+        arr = split(line);
         if(arr.size() < dimension){
             std::cerr << "Parse Error: Vertex line has fewer dimensions than expected (" << dimension << ")" << std::endl;
             delete mesh;
@@ -157,8 +161,9 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     */
     for(int i=0; i < numFaces; i++){
         getline(fin, line);
-        //std::cout << line << std::endl;
-        arr = split(line, ' ');
+        arr = split(line);
+        for (int i =0; i < arr.size(); i++)
+            std::cout << arr[i] << std::endl;
         if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
             std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
             delete mesh;
