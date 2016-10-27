@@ -71,8 +71,8 @@ std::tuple<int, bool, bool> compute_orientation(Complex& F)
 {
 	constexpr std::size_t k = Complex::topLevel - 1;
 
-	std::queue<typename Complex::template NodeID<2>> frontier;
-	std::set<typename Complex::template NodeID<2>> visited;
+	std::queue<typename Complex::template NodeID<k>> frontier;
+	std::set<typename Complex::template NodeID<k>> visited;
 	int connected_components = 0;
 	bool orientable = true;
 	bool psuedo_manifold = true;
@@ -86,7 +86,7 @@ std::tuple<int, bool, bool> compute_orientation(Complex& F)
 
 			while(!frontier.empty())
 			{
-				typename Complex::template NodeID<2> curr = frontier.front();
+				typename Complex::template NodeID<k> curr = frontier.front();
 //				if(!F.get(curr))
 				if(visited.find(curr) == visited.end())
 				{
@@ -147,7 +147,7 @@ std::tuple<int, bool, bool> compute_orientation(Complex& F)
 						}
 
 						std::vector<typename Complex::template NodeID<2>> tmp;
-						neighbors_up<Complex, 2, decltype(std::back_inserter(tmp))>(F, curr, std::back_inserter(tmp));
+						neighbors_up<Complex, k, decltype(std::back_inserter(tmp))>(F, curr, std::back_inserter(tmp));
 						for(auto nid : tmp)
 						{
 							frontier.push(nid);
