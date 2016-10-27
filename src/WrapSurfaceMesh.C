@@ -17,6 +17,27 @@ WSM::~WrappedSurfaceMesh(){
     delete mesh;
 }
 
+void WSM::insertVertex(int n, double x, double y, double z){
+    SurfaceMesh* mesh = (SurfaceMesh*) this->ptr_mesh; 
+    Vertex v = Vertex(x,y,z);
+    mesh->insert({n},v);
+}
+
+void WSM::insertFace(int a, int b, int c){
+    SurfaceMesh* mesh = (SurfaceMesh*) this->ptr_mesh; 
+    mesh->insert({a,b,c});
+}
+
+void WSM::removeVertex(int n){
+    SurfaceMesh* mesh = (SurfaceMesh*) this->ptr_mesh; 
+    mesh->remove({n});
+}
+
+void WSM::removeFace(int a, int b, int c){
+    SurfaceMesh* mesh = (SurfaceMesh*) this->ptr_mesh; 
+    mesh->remove({a,b,c});
+}
+
 void WSM::writeOFF(const std::string filename){
     SurfaceMesh* mesh = (SurfaceMesh*) this->ptr_mesh; 
     ::writeOFF(filename, *mesh);
