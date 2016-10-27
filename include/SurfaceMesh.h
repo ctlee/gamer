@@ -75,20 +75,8 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
  * @param[in]  mesh      The mesh
  */
 void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
-
-/**
- * @brief      Convenience function to print the vertices
- *
- * @param[in]  mesh  The mesh
- */
+void print(const SurfaceMesh& mesh);
 void print_vertices(const SurfaceMesh& mesh);
-
-
-/**
- * @brief      Convenience function to print the faces
- *
- * @param[in]  mesh  The mesh
- */
 void print_faces(const SurfaceMesh& mesh);
 void translate(SurfaceMesh& mesh, Vector v);
 void translate(SurfaceMesh& mesh, double dx, double dy, double dz);

@@ -6,6 +6,8 @@
 #include <array>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <ostream>
 #include <utility>
 #include "util.h"
 
@@ -466,17 +468,31 @@ public:
 	 * @return     ID of the node of interest
 
 	template <size_t n>
-	NodeID<n>& get_id(const KeyType (&s)[n])
+	NodeID<n> get_id(const KeyType (&s)[n])
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
 
+	template <size_t i>
+	NodeID<i+1> get_id(NodeID<i> nid, KeyType s)
+	{
+		return get_recurse<i,1>::apply(this, &s, nid.ptr);
+	}
+
 	template <size_t n>
-	const NodeID<n>& get_id(const KeyType (&s)[n]) const
+	const NodeID<n> get_id(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
 */
+
+	template <size_t i>
+	const NodeID<i+1> get_id(NodeID<i> nid, KeyType s) const
+	{
+		return get_recurse<i,1>::apply(this, &s, nid.ptr);
+	}
+
+
 	template <size_t k, class Inserter>
 	void get_cover(NodeID<k> id, Inserter pos)
 	{
@@ -603,8 +619,71 @@ public:
 		} 
 	}
 	*/
+	void genGraph(const std::string& filename){
+	    std::ofstream fout(filename);
+	    if(!fout.is_open())
+	    {
+	        std::cerr   << "File '" << filename 
+	                    << "' could not be writen to." << std::endl;
+	        exit(1); 
+	    }
+	    fout 	<< "digraph {\n"
+	    		<< "dpi=300;\n";
+		std::set<Node<0>*> root{_root};
+		writeGraph<0,0>::apply(fout, root);
+	    
+	    fout << "}\n";
+		fout.close();    	
+	}
 
 private:
+	template <size_t k, size_t foo>	
+	struct writeGraph{
+	    template <typename T>
+	    static void apply(std::ofstream& fout, T nodes){
+			std::set<Node<k+1>*> next;
+			// for each node of interest...
+			for(auto node : nodes)
+			{
+				auto up = node->_up;
+				for(auto j = up.begin(); j != up.end(); ++j)
+				{
+					auto orient = j->second->_edge_data[j->first].orientation;
+					if (orient == 1)
+						fout <<	"	" << node->_node << " -> " << j->second->_node 
+							 << "[label=\"" << j->first << "\"]\n";
+					else 
+						fout <<	"	" << j->second->_node << " -> " << node->_node
+							 << "[label=\"" << j->first << "\"]\n";
+					next.insert(j->second);
+				}
+			}
+			
+			fout 	<< "subgraph cluster_" << k << " {\n"
+					<< "label=\"Level " << k << "\"\n";
+			for (auto j : nodes){
+				fout << j->_node << ";";
+			}
+			fout 	<< "\n}\n";
+			writeGraph<k+1,foo>::apply(fout, next);
+		}	
+	};
+	
+	template <size_t foo>
+	struct writeGraph<numLevels-1,foo>
+	{
+		template <typename T>
+		static void apply(std::ofstream & fout, T nodes)
+		{
+			fout 	<< "subgraph cluster_" << numLevels-1 << " {\n"
+					<< "label=\"Level " << numLevels-1 << "\"\n";
+			for (auto node : nodes){
+				fout << node->_node << ";";
+			}
+			fout 	<< "\n}\n";
+		}
+	};
+
 	/**
 	 * Recursively deletes dependent nodes.
 	 *

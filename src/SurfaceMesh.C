@@ -2,8 +2,24 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <map>
 #include <vector>
 #include "SurfaceMesh.h"
+
+void print(const SurfaceMesh & mesh){
+    std::cout << "Level: 1" << std::endl;
+    for(auto node : mesh.get_level_id<1>()){
+        std::cout << "    " << node << std::endl;
+    }
+    std::cout << "Level: 2" << std::endl;
+    for(auto node : mesh.get_level_id<2>()){
+        std::cout << "    " << node << std::endl;
+    }
+    std::cout << "Level: 3" << std::endl;
+    for(auto node : mesh.get_level_id<3>()){
+        std::cout << "    " << node << std::endl;
+    }
+}
 
 void print_vertices(const SurfaceMesh& mesh){
     for(auto x : mesh.get_level<1>()) {
@@ -25,7 +41,6 @@ void print_faces(const SurfaceMesh& mesh){
 					<< ")";
 	}
 }
-
 
 void generateHistogram(const SurfaceMesh& mesh){
     std::array<double,18> histogram;
@@ -161,4 +176,23 @@ int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID){
     std::vector<SurfaceMesh::NodeID<1>> vertices;
     neighbors(mesh, nodeID, std::back_inserter(vertices));
     return vertices.size(); 
+}
+
+Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
+    auto name = mesh.get_name(faceID);
+    auto a = *mesh.get_node_up({name[0]});
+    auto b = *mesh.get_node_up({name[1]});
+    auto c = *mesh.get_node_up({name[2]});
+    return cross(a-b, c-b);
+}
+
+Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    // find all incident triangles
+    auto edges = mesh.up(vertexID);
+    auto faces = mesh.up(edges);
+    Vector normal; 
+    for(auto f : faces) {
+        normal += getNormal(mesh, f);
+    }
+    return normal / (double) faces.size();
 }
