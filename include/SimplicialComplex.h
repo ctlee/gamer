@@ -323,7 +323,7 @@ public:
 		EdgeID(NodePtr<k> p, KeyType e) : ptr(p), edge(e) {}
 		EdgeID(const EdgeID& rhs) : ptr(rhs.ptr), edge(rhs.edge) {}
 
-		EdgeID& operator=(const EdgeID& rhs) { ptr = rhs.ptr; }
+		EdgeID& operator=(const EdgeID& rhs) { ptr = rhs.ptr; edge = rhs.edge; }
 		friend bool operator==(EdgeID lhs, EdgeID rhs) { return lhs.ptr == rhs.ptr && lhs.edge == rhs.edge; }
 		friend bool operator!=(EdgeID lhs, EdgeID rhs) { return !(lhs == rhs); }
 		friend bool operator<=(EdgeID lhs, EdgeID rhs) { return lhs < rhs || lhs == rhs; }
