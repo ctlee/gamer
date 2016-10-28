@@ -211,7 +211,7 @@ void getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     for(auto id : ids){
         auto v = mesh.get_node_up({id});
         vectors.push_back(*v - *vertexID);
-        auto edge = mesh.get_edge_up(vertexID, id);
+        auto edge = *mesh.get_edge_up(vertexID, id);
         orients.push_back(edge.orientation); 
     }
 

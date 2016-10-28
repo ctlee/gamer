@@ -314,6 +314,39 @@ public:
 		NodePtr<k> ptr;
 	};
 
+	template <std::size_t k>
+	struct EdgeID {
+		friend simplicial_complex<traits>;
+		static constexpr size_t level = k;
+
+		EdgeID() : ptr(nullptr), edge(0) {}
+		EdgeID(NodePtr<k> p, KeyType e) : ptr(p), edge(e) {}
+		EdgeID(const EdgeID& rhs) : ptr(rhs.ptr), edge(rhs.edge) {}
+
+		EdgeID& operator=(const EdgeID& rhs) { ptr = rhs.ptr; }
+		friend bool operator==(EdgeID lhs, EdgeID rhs) { return lhs.ptr == rhs.ptr && lhs.edge == rhs.edge; }
+		friend bool operator!=(EdgeID lhs, EdgeID rhs) { return !(lhs == rhs); }
+		friend bool operator<=(EdgeID lhs, EdgeID rhs) { return lhs < rhs || lhs == rhs; }
+		friend bool operator>=(EdgeID lhs, EdgeID rhs) { return lhs > rhs || lhs == rhs; }
+		friend bool operator<(EdgeID lhs, EdgeID rhs)
+		{
+			return (lhs.ptr < rhs.ptr) || (lhs.ptr == rhs.ptr && lhs.edge < rhs.edge);
+		}
+		friend bool operator>(EdgeID lhs, EdgeID rhs)  { return rhs < lhs; }
+
+//		explicit operator std::size_t () const { return static_cast<std::size_t>(ptr); }
+
+		auto const& operator*() const { return data(); }
+		auto& operator*() { return data(); }
+
+		auto const& data() const { return ptr->_edge_data[edge]; }
+		auto& data() { return ptr->_edge_data[edge]; }
+
+	private:
+		NodePtr<k> ptr;
+		KeyType edge;
+	};
+
 
 	simplicial_complex()
 		: node_count(0)
@@ -537,15 +570,15 @@ public:
 
 	// Edge
 	template <size_t k>
-	EdgeData<k>& get_edge_up(NodeID<k> nid, KeyType a)
+	auto get_edge_up(NodeID<k> nid, KeyType a)
 	{
-		return nid.ptr->_up[a]->_edge_data[a];
+		return EdgeID<k+1>(nid.ptr->_up[a], a);
 	}
 
 	template <size_t k>
-	EdgeData<k-1>& get_edge_down(NodeID<k> nid, KeyType a)
+	auto get_edge_down(NodeID<k> nid, KeyType a)
 	{
-		return nid.ptr->_edge_data[a];
+		return EdgeID<k>(nid.ptr, a);
 	}
 
 

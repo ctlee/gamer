@@ -34,7 +34,7 @@ struct init_orientation_helper<Complex, std::integral_constant<std::size_t, k>>
 						break;
 					}
 				}
-				F.get_edge_up(curr,a).orientation = orient;
+				(*F.get_edge_up(curr,a)).orientation = orient;
 			}
 		}
 
@@ -101,8 +101,8 @@ std::tuple<int, bool, bool> compute_orientation(Complex& F)
 					}
 					else if(w.size() == 2)
 					{
-						auto& edge0 = F.get_edge_up(curr, w[0]);
-						auto& edge1 = F.get_edge_up(curr, w[1]);
+						auto& edge0 = *F.get_edge_up(curr, w[0]);
+						auto& edge1 = *F.get_edge_up(curr, w[1]);
 
 						auto& node0 = *F.get_node_up(curr, w[0]);
 						auto& node1 = *F.get_node_up(curr, w[1]);
