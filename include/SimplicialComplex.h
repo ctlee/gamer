@@ -491,7 +491,8 @@ public:
 	{
 		return _root;
 	}
-	/**
+
+	/*
 	 * @brief      Get the NodeID by name
 	 *
 	 * @param[in]  s     Array holding the name
@@ -499,7 +500,7 @@ public:
 	 * @tparam     n     The level of simplicial complex
 	 *
 	 * @return     ID of the node of interest
-
+	 */
 	template <size_t n>
 	NodeID<n> get_id(const KeyType (&s)[n])
 	{
@@ -517,7 +518,6 @@ public:
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
-*/
 
 	template <size_t i>
 	const NodeID<i+1> get_id(NodeID<i> nid, KeyType s) const

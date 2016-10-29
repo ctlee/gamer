@@ -205,7 +205,40 @@ Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
 }
 
 void getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
-    auto ids = mesh.get_cover(vertexID);
+    auto edgeIDs = mesh.get_cover(vertexID);
+    //auto id0 = mesh.get_name(vertexID)[0];
+    auto v0 = *vertexID;
+
+    // get the two edges up of interest which define the face...
+    for(auto edgeIT=edgeIDs.cbegin(); edgeIT != edgeIDs.cend(); ++edgeIT){
+        auto otherIT = edgeIT+1;
+        if (otherIT == edgeIDs.cend()) 
+            otherIT = edgeIDs.cbegin();
+        // get the external ID's of edges up to face...
+        auto id1 = *edgeIT;
+        auto id2 = *otherIT;
+        // Vertices
+        auto v1 = *mesh.get_id({id1});
+        auto v2 = *mesh.get_id({id2});
+        // get vectors...
+        auto v10 = v1-v0;
+        auto v20 = v2-v0;
+
+        auto n1 = mesh.get_node_up(vertexID, id1);
+        auto n2 = mesh.get_node_up(vertexID, id2);
+        std::cout << *edgeIT << " " << *otherIT << std::endl; 
+
+        auto o1 = (double) mesh.get_edge_up(vertexID, id1).data().orientation;
+        auto o2 = (double) mesh.get_edge_up(n1, id2).data().orientation;
+        auto o3 = (double) mesh.get_edge_up(vertexID, id2).data().orientation;
+        auto o4 = (double) mesh.get_edge_up(n2, id1).data().orientation;
+
+        auto result = (v10*o1) * (v20*o2) + (v20*o3) * (v10*o4);
+        std::cout << result << std::endl;
+    }
+    std::cout << "End of loop to face...\n";
+
+    /*     
     std::vector<Vector> vectors;
     std::vector<double> orients;
     for(auto id : ids){
@@ -221,4 +254,5 @@ void getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     tangent = tangent/magnitude(tangent);
     std::cout << *vertexID<< std::endl;
     std::cout << tangent << std::endl; 
+    */
 }
