@@ -162,8 +162,6 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     for(int i=0; i < numFaces; i++){
         getline(fin, line);
         arr = split(line);
-        for (int i =0; i < arr.size(); i++)
-            std::cout << arr[i] << std::endl;
         if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
             std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
             delete mesh;
