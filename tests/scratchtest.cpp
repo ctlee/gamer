@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 int main(int argc, char *argv[])
 {
@@ -39,10 +40,26 @@ int main(int argc, char *argv[])
     std::cout << "Generating Histogram..." << std::endl;
     generateHistogram(*mesh);
 
-    for (auto node : mesh->get_level_id<1>()){
+    auto range = mesh->get_level_id<1>();
+    auto nd = --range.end();
+    int name = mesh->size<1>()-1;
+    for (auto node : range){
         auto T = getTangent(*mesh, node);
+        T = T/std::sqrt(T|T);
+        std::cout << *node << std::endl;
         std::cout << T << std::endl;
+        auto v = *node;
+        for(int i = 0; i < 3; i++){
+            auto q = v + Vertex(T.get(0,i), T.get(1,i), T.get(2,i));
+            std::cout << q << std::endl;
+            mesh->insert<1>({name+i+1}, q);
+        }
+        mesh->insert<3>({name+1, name+2, name+3});
+        name += 3;
+        if (node == *nd) break;
     }
+
+    writeOFF("test.off", *mesh); 
 
     /*
     std::cout << "Flipping edges..." << std::endl;

@@ -62,7 +62,7 @@ using SurfaceMesh = simplicial_complex<complex_traits>;
 template <std::size_t dimension>
 auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr)
 {
-    return 1.0;
+    return (*curr).orientation;
 }
 
 template <std::size_t level, std::size_t dimension>

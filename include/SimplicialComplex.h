@@ -544,7 +544,7 @@ public:
 	}
 
 	template <size_t k>
-	std::set<NodeID<k+1>> up(const std::set<NodeID<k>>& nodes)
+	std::set<NodeID<k+1>> up(const std::set<NodeID<k>>& nodes) const
 	{
 		std::set<NodeID<k+1>> rval;
 		for(auto nid : nodes)
@@ -558,12 +558,37 @@ public:
 	}
 
 	template <size_t k>
-	std::set<NodeID<k+1>> up(NodeID<k> nid)
+	std::set<NodeID<k+1>> up(const NodeID<k> nid) const
 	{
 		std::set<NodeID<k+1>> rval;
 		for(auto p : nid.ptr->_up)
 		{
 			rval.insert(NodeID<k+1>(p.second));
+		}
+		return rval;
+	}
+
+	template <size_t k>
+	std::set<NodeID<k-1>> down(const std::set<NodeID<k>>& nodes) const
+	{
+		std::set<NodeID<k-1>> rval;
+		for(auto nid : nodes)
+		{
+			for(auto p : nid.ptr->_down)
+			{
+				rval.insert(NodeID<k-1>(p.second));
+			}
+		}
+		return rval;
+	}
+
+	template <size_t k>
+	std::set<NodeID<k-1>> down(const NodeID<k> nid) const
+	{
+		std::set<NodeID<k-1>> rval;
+		for(auto p : nid.ptr->_down)
+		{
+			rval.insert(NodeID<k-1>(p.second));
 		}
 		return rval;
 	}
