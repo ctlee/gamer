@@ -1182,6 +1182,7 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
     cy = surfmesh->vertex_attr(c).y;
     cz = surfmesh->vertex_attr(c).z;
 
+    // get the distance from b to a
     bx      -= ax;
     by      -= ay;
     bz      -= az;
@@ -1193,6 +1194,8 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
         by /= distance;
         bz /= distance;
     }
+
+    // get distance from c to a
     cx      -= ax;
     cy      -= ay;
     cz      -= az;

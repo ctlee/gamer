@@ -65,6 +65,7 @@ void generateHistogram(const SurfaceMesh& mesh){
     std::for_each(histogram.begin(), histogram.end(), [&factor](double& n){
             n = 100.0*n/factor;});
 
+    std::cout << "Angle Distribution:" << std::endl;
   	for (int x=0; x< 18; x++)
   		std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)  << std::fixed << histogram[x] << std::endl;
   	std::cout << std::endl << std::endl;
@@ -81,8 +82,6 @@ void generateHistogram(const SurfaceMesh& mesh){
     }
     std::sort(lengths.begin(), lengths.end());
 
-
-
     std::array<double,20> histogramLength;
     double interval = (lengths.back() - lengths.front())/20;
     if(interval <= 0.0000001){ // floating point roundoff prevention
@@ -97,6 +96,8 @@ void generateHistogram(const SurfaceMesh& mesh){
     factor = mesh.size<2>();
     std::for_each(histogram.begin(), histogram.end(), [&factor](double& n){
             n = 100.0*n/factor;});
+
+    std::cout << "Edge Length Distribution:" << std::endl;
     for (int x=0; x < 20; x++)
         std::cout << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)  << std::fixed << histogram[x] << std::endl;
     std::cout << std::endl << std::endl;
@@ -136,6 +137,8 @@ void scale(SurfaceMesh& mesh, double s){
 bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
 	return false;
 }
+
+
 
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges){
     // Assuming that the mesh is manifold
@@ -202,6 +205,20 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
         mesh.insert<3>({name[0], up[0], up[1]});
         mesh.insert<3>({name[1], up[0], up[1]});
     }
+}
+
+void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    // get the neighbors     
+    std::vector<SurfaceMesh::NodeID<1>> vertices;
+    neighbors(mesh, vertexID, std::back_inserter(vertices));
+    // compute the average position 
+    Vector avgPos;
+    for(auto vertex : vertices){
+        avgPos += (*vertex).position;
+    }
+    avgPos /= vertices.size();
+    // Restrict movement along the tangent...
+
 }
 
 int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID){
