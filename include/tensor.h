@@ -413,8 +413,8 @@ tensor<ElemType,D,N> operator*(ScalarType x, const tensor<ElemType,D,N>& A)
 	return rval;
 }
 
-template <typename ElemType, std::size_t D, std::size_t N>
-tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ElemType x)
+template <typename ScalarType, typename ElemType, std::size_t D, std::size_t N>
+tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ScalarType x)
 {
 	auto rval(A);
 	rval /= x;

@@ -59,6 +59,28 @@ using SurfaceMesh_ASC = simplicial_complex<complex_traits>;
 using ASC = simplicial_complex<complex_traits>; // Alias for the lazy
 using SurfaceMesh = simplicial_complex<complex_traits>;
 
+template <std::size_t dimension>
+auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr)
+{
+    return 1.0;
+}
+
+template <std::size_t level, std::size_t dimension>
+auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<level> curr)
+{
+    tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
+    auto cover = mesh.get_cover(curr);
+    for(auto alpha : cover)
+    {
+        auto edge = *mesh.get_edge_up(curr, alpha);
+        const auto& v = (*mesh.get_node_up({alpha})).position;
+        auto next = mesh.get_node_up(curr,alpha);
+        rval += edge.orientation * (v-origin) * getTangentH(mesh, origin, next);
+    }
+
+    return rval/cover.size();
+}
+
 /**
  * @brief      Reads off.
  *
@@ -87,6 +109,4 @@ void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges);
 int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
-Vector getNormal(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-void getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);

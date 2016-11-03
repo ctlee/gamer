@@ -40,7 +40,8 @@ int main(int argc, char *argv[])
     generateHistogram(*mesh);
 
     for (auto node : mesh->get_level_id<1>()){
-       getTangent(*mesh, node);
+        auto T = getTangent(*mesh, node);
+        std::cout << T << std::endl;
     }
 
     /*

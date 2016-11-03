@@ -7,7 +7,6 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <cmath>
 
 
 
@@ -61,7 +60,7 @@ int main(int argc, char *argv[])
     for(auto v : mesh->get_level_id<1>())
     {
         auto T = getTangent_jbm(*mesh, v);
-        std::cout << (T / std::sqrt(T | T)) << std::endl;
+        std::cout << T << std::endl;
         /*
         auto edges = mesh->up(v);
         auto faces = mesh->up(edges);
