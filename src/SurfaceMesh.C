@@ -61,13 +61,46 @@ void generateHistogram(const SurfaceMesh& mesh){
   		histogram[binAngle(angle(c,a,b))]++;
   		
   	} 
-    const int factor = mesh.size<3>()*3;
+    int factor = mesh.size<3>()*3;
     std::for_each(histogram.begin(), histogram.end(), [&factor](double& n){
             n = 100.0*n/factor;});
 
+    std::cout << "Angle Distribution:" << std::endl;
   	for (int x=0; x< 18; x++)
   		std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)  << std::fixed << histogram[x] << std::endl;
   	std::cout << std::endl << std::endl;
+
+    std::cout << "Edge Length Distribution:" << std::endl;
+    std::vector<double> lengths;
+    for(auto edge : mesh.get_level_id<2>()) {
+        auto vertexIDs = mesh.down(edge);
+        auto t1 = *vertexIDs.cbegin();
+        auto t2 = *(++vertexIDs.cbegin());
+        auto v1 = *t1;
+        auto v2 = *t2;
+        double len = magnitude(v2-v1);
+        lengths.push_back(len);
+    }
+    std::sort(lengths.begin(), lengths.end());
+
+    std::array<double,20> histogramLength;
+    double interval = (lengths.back() - lengths.front())/20;
+    if(interval <= 0.0000001){ // floating point roundoff prevention
+        std::cout << lengths.front() << ": " << 100 << std::endl << std::endl;
+        return;
+    }
+
+    for (auto length : lengths){
+        histogramLength[std::floor(length/interval)]++;
+    }
+
+    factor = mesh.size<2>();
+    std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double& n){
+            n = 100.0*n/factor;});
+
+    for (int x=0; x < 20; x++)
+        std::cout << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)  << std::fixed << histogram[x] << std::endl;
+    std::cout << std::endl << std::endl;
 }
 
 void translate(SurfaceMesh& mesh, Vector v){
@@ -105,32 +138,16 @@ bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAn
 	return false;
 }
 
-void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges){
-    // Assuming that the mesh is manifold
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID){
+    // Assuming that the mesh is manifold and edge has been vetted for flipping
     auto name = mesh.get_name(edgeID);
-    std::pair<Vertex, Vertex> shared;    
-    shared.first = *mesh.get_node_up<1>({name[0]});
-    shared.second = *mesh.get_node_up<1>({name[1]});
-
-    std::pair<Vertex, Vertex> notShared;    
     auto up = mesh.get_cover(edgeID);
-    if (up.size() > 2){
-        //std::cerr << "This edge participates in more than 2 faces. Returning..." << std::endl;
-        return;
-    }
-    else if (up.size() < 2){
-        //std::cerr << "This edge participates in fewer than 2 faces. Returning..." << std::endl;
-        return;
-    }
-    notShared.first  = *mesh.get_node_up<1>({up[0]});
-    notShared.second = *mesh.get_node_up<1>({up[1]});
+    mesh.remove<2>({name[0],name[1]});
+    mesh.insert<3>({name[0], up[0], up[1]});
+    mesh.insert<3>({name[1], up[0], up[1]});
+}
 
-    // Add check to see if notShared.first and second are connected.
-    if(mesh.exists<2>({up[0], up[1]})){
-        std::cerr << "Found a tetrahedron cannot edge flip." << std::endl;
-        return;
-    }
-
+std::vector<SurfaceMesh::NodeID<2>> selectFlipEdgesByAngle(SurfaceMesh& mesh, bool preserveRidges){
     auto getMinAngle = [](const Vertex& a, const Vertex& b, const Vertex& c){
         double minAngle = 999; // dummy for now
         double tmp;
@@ -144,32 +161,86 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRid
         return minAngle;
     };
 
-    // Check if we're on a ridge first
-    if(preserveRidges){
-        auto a = cross(shared.first-shared.second, shared.first-notShared.first);
-        auto b = cross(shared.first-notShared.second, shared.first-shared.second);
-        auto val = angle(a,b);
-        if (val > 60){
-            std::cerr << "Found a ridge, won't flip." << std::endl;
-            return;
+    std::vector<SurfaceMesh::NodeID<2>> edgesToFlip;
+    NodeSet<SurfaceMesh::NodeID<2>> ignoredEdges;
+
+    for(auto edgeID : mesh.get_level_id<2>()){
+        if(!ignoredEdges.count(edgeID)){
+            auto name = mesh.get_name(edgeID);
+            std::pair<Vertex, Vertex> shared;    
+            shared.first = *mesh.get_node_up<1>({name[0]});
+            shared.second = *mesh.get_node_up<1>({name[1]});
+
+            std::pair<Vertex, Vertex> notShared;    
+            auto up = mesh.get_cover(edgeID);
+            if (up.size() > 2){
+                //std::cerr << "This edge participates in more than 2 faces. Returning..." << std::endl;
+                ignoredEdges.insert(edgeID);
+                continue;
+            }
+            else if (up.size() < 2){
+                //std::cerr << "This edge participates in fewer than 2 faces. Returning..." << std::endl;
+                ignoredEdges.insert(edgeID);
+                continue;
+            }
+            notShared.first  = *mesh.get_node_up<1>({up[0]});
+            notShared.second = *mesh.get_node_up<1>({up[1]});
+
+            // Add check to see if notShared.first and second are connected.
+            if(mesh.exists<2>({up[0], up[1]})){
+                //std::cerr << "Found a tetrahedron cannot edge flip." << std::endl;
+                ignoredEdges.insert(edgeID);
+                continue;
+            }
+
+            // Check if we're on a ridge first
+            if(preserveRidges){
+                auto a = cross(shared.first-shared.second, shared.first-notShared.first);
+                auto b = cross(shared.first-notShared.second, shared.first-shared.second);
+                auto val = angle(a,b);
+                if (val > 60){
+                    //std::cerr << "Found a ridge, won't flip." << std::endl;
+                    ignoredEdges.insert(edgeID);
+                    continue;
+                }
+            }
+
+            // Go through all angle combinations
+            double tmp;
+            double minAngle = getMinAngle(shared.first, shared.second, notShared.first);
+            tmp = getMinAngle(shared.first, shared.second, notShared.second);
+            if (tmp < minAngle) minAngle = tmp;
+
+            double minAngleFlip = getMinAngle(notShared.first, notShared.second, shared.first);
+            tmp = getMinAngle(notShared.first, notShared.second, shared.second);
+            if (tmp < minAngleFlip) minAngleFlip = tmp;
+        
+            if (minAngleFlip > minAngle){
+                edgesToFlip.push_back(edgeID);
+                std::vector<SurfaceMesh::NodeID<2>> neighbors;
+                neighbors_up(mesh, edgeID, std::back_inserter(neighbors));
+                for(auto neighbor : neighbors) {
+                    ignoredEdges.insert(neighbor);
+                }
+            }
         }
+    } 
+
+    return edgesToFlip;
+}
+
+void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    // get the neighbors     
+    std::vector<SurfaceMesh::NodeID<1>> vertices;
+    neighbors(mesh, vertexID, std::back_inserter(vertices));
+    // compute the average position 
+    Vector avgPos;
+    for(auto vertex : vertices){
+        avgPos += (*vertex).position;
     }
+    avgPos /= vertices.size();
+    // Restrict movement along the tangent...
 
-    // Go through all angle combinations
-    double tmp;
-    double minAngle = getMinAngle(shared.first, shared.second, notShared.first);
-    tmp = getMinAngle(shared.first, shared.second, notShared.second);
-    if (tmp < minAngle) minAngle = tmp;
-
-    double minAngleFlip = getMinAngle(notShared.first, notShared.second, shared.first);
-    tmp = getMinAngle(notShared.first, notShared.second, shared.second);
-    if (tmp < minAngleFlip) minAngleFlip = tmp;
-
-    if (minAngleFlip > minAngle){
-        mesh.remove<2>({name[0],name[1]});
-        mesh.insert<3>({name[0], up[0], up[1]});
-        mesh.insert<3>({name[1], up[0], up[1]});
-    }
 }
 
 int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> nodeID){
