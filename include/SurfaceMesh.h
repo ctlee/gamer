@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include "util.h"
 #include "SimplicialComplex.h"
@@ -107,7 +108,9 @@ void scale(SurfaceMesh& mesh, double sx, double sy, double sz);
 void scale(SurfaceMesh& mesh, double s);
 void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
-void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID, bool preserveRidges);
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID);
+std::vector<SurfaceMesh::NodeID<2>> selectFlipEdgesByAngle(SurfaceMesh& mesh, bool preserveRidges);
 void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+

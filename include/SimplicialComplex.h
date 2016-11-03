@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <map>
 #include <set>
 #include <iterator>
@@ -7,7 +8,9 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <functional>
 #include <ostream>
+#include <unordered_set>
 #include <utility>
 #include "util.h"
 
@@ -265,7 +268,6 @@ struct simplicial_complex_traits_default
 };
 
 
-
 template <typename traits>
 class simplicial_complex {
 public:
@@ -281,7 +283,6 @@ public:
 	template <std::size_t k> using NodeData = typename util::type_get<k,NodeDataTypes>::type;
 	template <std::size_t k> using EdgeData = typename util::type_get<k,EdgeDataTypes>::type;
 	template <std::size_t k> using NodePtr = Node<k>*;
-
 
 	template <std::size_t k>
 	struct NodeID {
@@ -300,7 +301,7 @@ public:
 		friend bool operator<(NodeID lhs, NodeID rhs)  { return lhs.ptr < rhs.ptr; }
 		friend bool operator>(NodeID lhs, NodeID rhs)  { return lhs.ptr > rhs.ptr; }
 
-		explicit operator std::size_t () const { return static_cast<std::size_t>(ptr); }
+		explicit operator std::uintptr_t () const { return reinterpret_cast<std::uintptr_t>(ptr); }
 
 		auto const&& operator*() const { return ptr->_data; }
 		auto&& operator*() { return ptr->_data; }
@@ -313,6 +314,7 @@ public:
 	private:
 		NodePtr<k> ptr;
 	};
+
 
 	template <std::size_t k>
 	struct EdgeID {
@@ -1068,3 +1070,13 @@ void neighbors_up(Complex& F, NodeID nid, InsertIter iter)
 {
 	neighbors_up<Complex, NodeID::level, InsertIter>(F,nid,iter);
 }
+
+template <typename NodeID>
+struct hashNodeID{
+   size_t operator()(const NodeID nid) const
+   {
+       return std::hash<std::uintptr_t>()(static_cast<uintptr_t>(nid));
+   }
+};
+
+template <typename T> using NodeSet = std::unordered_set<T,hashNodeID<T>>;
