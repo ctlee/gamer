@@ -109,8 +109,11 @@ void scale(SurfaceMesh& mesh, double s);
 void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID);
-std::vector<SurfaceMesh::NodeID<2>> selectFlipEdgesByAngle(SurfaceMesh& mesh, bool preserveRidges);
+std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool preserveRidges, 
+        const std::function<bool(SurfaceMesh&, SurfaceMesh::NodeID<2>&)> &checkFlip);
+bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
+bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
 void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-int getValence(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 
