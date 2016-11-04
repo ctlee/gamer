@@ -37,14 +37,27 @@ int main(int argc, char *argv[])
     //print(*mesh);
     mesh->genGraph("test.dot");
 
-    std::cout << "Generating Histogram..." << std::endl;
-    generateHistogram(*mesh);
+    //std::cout << "Generating Histogram..." << std::endl;
+    //generateHistogram(*mesh);
 
-    auto edges = selectFlipEdgesByAngle(*mesh, true);
+    for(int i=0; i < 2; i++){
+        auto edges = selectFlipEdges(*mesh, false, checkFlipAngle);
+        //auto edges = selectFlipEdges(*mesh, false, checkFlipValence);
 
-    for (auto edge : edges){
-        edgeFlip(*mesh, edge);
+        std::cout << "Flipping " << edges.size() << " edges..." << std::endl;
+        for (auto edge : edges){
+            edgeFlip(*mesh, edge);
+        }
     }
+    // for(int i=0; i < 1; i++){
+    //     //auto edges = selectFlipEdges(*mesh, false, checkFlipAngle);
+    //     auto edges = selectFlipEdges(*mesh, false, checkFlipValence);
+
+    //     std::cout << "Flipping " << edges.size() << " edges..." << std::endl;
+    //     for (auto edge : edges){
+    //         edgeFlip(*mesh, edge);
+    //     }
+    // }
 
     // Fishy code to draw the tangent planes...
     // auto range = mesh->get_level_id<1>();
@@ -65,6 +78,14 @@ int main(int argc, char *argv[])
     //     name += 3;
     //     if (node == *nd) break;
     // }
-    writeOFF("test.off", *mesh);
+
+    //generateHistogram(*mesh);
+    //mesh->genGraph("test.dot");
+    clear_orientation(*mesh);
+    orient =  compute_orientation(*mesh);
+    std::cout << "Connected Components: " << std::get<0>(orient) << std::endl;
+    std::cout << "Orientable: " << std::get<1>(orient) << std::endl;
+    std::cout << "Psuedo-manifold: " << std::get<2>(orient) << std::endl;
+    writeOFF("../data/test.off", *mesh);
     std::cout << "EOF" << std::endl;
 }

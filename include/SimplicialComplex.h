@@ -293,7 +293,7 @@ public:
 		NodeID(NodePtr<k> p) : ptr(p) {}
 		NodeID(const NodeID& rhs) : ptr(rhs.ptr) {}
 
-		NodeID& operator=(const NodeID& rhs) { ptr = rhs.ptr; }
+		NodeID& operator=(const NodeID& rhs) { ptr = rhs.ptr; return *this;}
 		friend bool operator==(NodeID lhs, NodeID rhs) { return lhs.ptr == rhs.ptr; }
 		friend bool operator!=(NodeID lhs, NodeID rhs) { return lhs.ptr != rhs.ptr; }
 		friend bool operator<=(NodeID lhs, NodeID rhs) { return lhs.ptr <= rhs.ptr; }
@@ -325,7 +325,7 @@ public:
 		EdgeID(NodePtr<k> p, KeyType e) : ptr(p), edge(e) {}
 		EdgeID(const EdgeID& rhs) : ptr(rhs.ptr), edge(rhs.edge) {}
 
-		EdgeID& operator=(const EdgeID& rhs) { ptr = rhs.ptr; edge = rhs.edge; }
+		EdgeID& operator=(const EdgeID& rhs) { ptr = rhs.ptr; edge = rhs.edge; return *this;}
 		friend bool operator==(EdgeID lhs, EdgeID rhs) { return lhs.ptr == rhs.ptr && lhs.edge == rhs.edge; }
 		friend bool operator!=(EdgeID lhs, EdgeID rhs) { return !(lhs == rhs); }
 		friend bool operator<=(EdgeID lhs, EdgeID rhs) { return lhs < rhs || lhs == rhs; }
@@ -527,9 +527,8 @@ public:
 		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
-
 	template <size_t k, class Inserter>
-	void get_cover(NodeID<k> id, Inserter pos)
+	void get_cover(const NodeID<k> id, Inserter pos) const
 	{
 		for(auto curr : id.ptr->_up)
 		{
@@ -538,7 +537,7 @@ public:
 	}
 
 	template <size_t k>
-	auto get_cover(NodeID<k> id)
+	auto get_cover(const NodeID<k> id) const
 	{
 		std::vector<KeyType> rval;
 		get_cover(id, std::back_inserter(rval));
