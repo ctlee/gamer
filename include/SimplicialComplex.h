@@ -275,8 +275,8 @@ public:
 	using NodeDataTypes = typename traits::NodeTypes;
 	using EdgeDataTypes = typename traits::EdgeTypes;
 	using type_this = simplicial_complex<traits>;
-	static const auto numLevels = NodeDataTypes::size;
-	static const auto topLevel = numLevels-1;
+	static constexpr auto numLevels = NodeDataTypes::size;
+	static constexpr auto topLevel = numLevels-1;
 	using LevelIndex = typename std::make_index_sequence<numLevels>;
 
 	template <std::size_t k> using Node = detail::asc_Node<KeyType,k,topLevel,NodeDataTypes,EdgeDataTypes>;
@@ -286,6 +286,7 @@ public:
 
 	template <std::size_t k>
 	struct NodeID {
+		using complex = simplicial_complex<traits>;
 		friend simplicial_complex<traits>;
 		static constexpr size_t level = k;
 
@@ -318,6 +319,7 @@ public:
 
 	template <std::size_t k>
 	struct EdgeID {
+		using complex = simplicial_complex<traits>;
 		friend simplicial_complex<traits>;
 		static constexpr size_t level = k;
 
