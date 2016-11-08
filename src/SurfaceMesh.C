@@ -219,9 +219,9 @@ std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool pres
             auto f2 = (shared.first - notShared.second)^(shared.second - notShared.second);
             auto f3 = (notShared.first - shared.first)^(notShared.second - shared.first);
             auto f4 = (notShared.first - shared.second)^(notShared.second - shared.second);
-            auto area = std::sqrt(f1|f1) + std::sqrt(f2|f2);
-            auto areaFlip = std::sqrt(f3|f3) + std::sqrt(f4|f4);
-            if(areaFlip/area >= 1.5){ // TODO: this is an arbitrary area ratio... 
+            auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2),2);
+            auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4),2);
+            if(areaFlip/area > 1.01){ // TODO: this is an arbitrary area ratio... 
                 //std::cerr << "Suspect flipping will create fold."  << std::endl;
                 continue;
             }
