@@ -25,9 +25,6 @@ int main(int argc, char *argv[])
     }
     auto mesh = result.first;
     
-
-    init_orientation(*mesh);
-    clear_orientation(*mesh);
     auto orient = compute_orientation(*mesh);
 
     std::cout << "Connected Components: " << std::get<0>(orient) << std::endl;
@@ -40,14 +37,15 @@ int main(int argc, char *argv[])
     //std::cout << "Generating Histogram..." << std::endl;
     //generateHistogram(*mesh);
 
-    for(int i=0; i < 1; i++){
-        auto edges = selectFlipEdges(*mesh, false, checkFlipAngle);
+    for(int i=0; i < 5; i++){
+        auto edges = selectFlipEdges(*mesh, true, checkFlipAngle);
         //auto edges = selectFlipEdges(*mesh, false, checkFlipValence);
 
         std::cout << "Flipping " << edges.size() << " edges..." << std::endl;
         for (auto edge : edges){
             edgeFlip(*mesh, edge);
         }
+        compute_orientation(*mesh);
     }
     // for(int i=0; i < 1; i++){
     //     //auto edges = selectFlipEdges(*mesh, false, checkFlipAngle);
@@ -81,8 +79,6 @@ int main(int argc, char *argv[])
 
     //generateHistogram(*mesh);
     //mesh->genGraph("test.dot");
-    init_orientation(*mesh);
-    clear_orientation(*mesh);
     orient =  compute_orientation(*mesh);
     std::cout << "Connected Components: " << std::get<0>(orient) << std::endl;
     std::cout << "Orientable: " << std::get<1>(orient) << std::endl;

@@ -25,8 +25,6 @@ int main(int argc, char *argv[])
     }
     auto mesh = result.first;
 
-    init_orientation(*mesh);
-    clear_orientation(*mesh);
     compute_orientation(*mesh);
     
     for(auto v : mesh->get_level_id<1>())

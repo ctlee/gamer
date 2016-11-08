@@ -46,8 +46,6 @@ TEST(SurfaceMeshTest, TestStructure){
 	auto node4Data = *mesh.get_node_up<1>({4});
 	EXPECT_EQ(node4Data, v4);
 
-	init_orientation(mesh);
-	clear_orientation(mesh);
 	auto result = compute_orientation(mesh);
 
 	EXPECT_EQ(true, std::get<1>(result));

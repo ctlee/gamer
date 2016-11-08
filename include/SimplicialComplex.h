@@ -407,82 +407,28 @@ public:
 	}
 
 	template <size_t i, size_t j>
-	NodeID<i+j> get_node_up(NodeID<i> nid, const KeyType (&s)[j]) const
+	NodeID<i+j> get_node_up(const NodeID<i> nid, const KeyType (&s)[j]) const
 	{
 		return get_recurse<i,j>::apply(this, s, nid);
 	}
 
 	template <size_t i>
-	NodeID<i+1> get_node_up(NodeID<i> nid, KeyType s) const
+	NodeID<i+1> get_node_up(const NodeID<i> nid, const KeyType s) const
 	{
 		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t i, size_t j>
-	NodeID<i-j> get_node_down(NodeID<i> nid, const KeyType (&s)[j]) const
+	NodeID<i-j> get_node_down(const NodeID<i> nid, const KeyType (&s)[j]) const
 	{
 		return get_down_recurse<i,j>::apply(this, s, nid.ptr);
 	}
 
 	template <size_t i>
-	NodeID<i-1> get_node_down(NodeID<i> nid, KeyType s) const
+	NodeID<i-1> get_node_down(const NodeID<i> nid, const KeyType s) const
 	{
 		return get_down_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
-
-	/**
-	 * @brief      Get data by name
-	 *
-	 * @param[in]  s     Array holding the name
-	 *
-	 * @tparam     n     The level of simplicial complex
-	 *
-	 * @return     The associated data
-	 *
-	template <size_t n>
-	NodeData<n>& get(const KeyType (&s)[n])
-	{
-		return get_recurse<0,n>::apply(this, s, _root)->_data;
-	}
-
-	 * @brief      Get data by name
-	 *
-	 * @param[in]  s     Array holding the name
-	 *
-	 * @tparam     n     The level of simplicial complex
-	 *
-	 * @return     The associated data
-	 *
-	template <size_t n>
-	const NodeData<n>& get(const KeyType (&s)[n]) const
-	{
-		return get_recurse<0,n>::apply(this, s, _root)->_data;
-	}
-
-	template <size_t i>
-	NodeData<i+1>& get(NodeID<i> nid, KeyType s)
-	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr)->_data;
-	}
-
-	template <size_t i>
-	NodeData<i>& get(NodeID<i> nid)
-	{
-		return nid.ptr->_data;
-	}
-
-	template <size_t i>
-	const NodeData<i+1>& get(NodeID<i> nid, KeyType s) const
-	{
-		return get_recurse<i,1>::apply(this, &s, nid)->_data;
-	}
-
-	template <size_t i>
-	const NodeData<i>& get(NodeID<i> nid) const
-	{
-		return nid.ptr->_data;
-	}
-	*/
 
 	NodeID<0> get_node_up() const
 	{
@@ -492,39 +438,6 @@ public:
 	NodeID<0> get_node_down() const
 	{
 		return _root;
-	}
-
-	/*
-	 * @brief      Get the NodeID by name
-	 *
-	 * @param[in]  s     Array holding the name
-	 *
-	 * @tparam     n     The level of simplicial complex
-	 *
-	 * @return     ID of the node of interest
-	 */
-	template <size_t n>
-	NodeID<n> get_id(const KeyType (&s)[n])
-	{
-		return get_recurse<0,n>::apply(this, s, _root);
-	}
-
-	template <size_t i>
-	NodeID<i+1> get_id(NodeID<i> nid, KeyType s)
-	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr);
-	}
-
-	template <size_t n>
-	const NodeID<n> get_id(const KeyType (&s)[n]) const
-	{
-		return get_recurse<0,n>::apply(this, s, _root);
-	}
-
-	template <size_t i>
-	const NodeID<i+1> get_id(NodeID<i> nid, KeyType s) const
-	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t k, class Inserter>

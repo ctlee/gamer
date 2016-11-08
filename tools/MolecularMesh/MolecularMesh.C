@@ -35,11 +35,10 @@
 // parameters for mesh smoothing, refinement, and coarsening
 
 /** @brief Maximal number of nodes allowed */
-#define MeshSizeUpperLimit  5000 
+#define MeshSizeUpperLimit   80001
 
 /** @brief Minimal number of nodes allowed */
-//#define MeshSizeLowerLimit   10000
-#define MeshSizeLowerLimit   1
+#define MeshSizeLowerLimit   10000
 
 /** @brief Number of iterations in mesh quality improvement */
 #define ITER_NUM             15
@@ -88,59 +87,54 @@ void SmoothMolecularSurface(SurfaceMeshOld  *surfmesh,
             /* Mesh-coarsening based on surface curvature */
             printf("\nbegin assigning active sites ....\n");
             surfmesh->assignActiveSites(sphere_list, num_spheres, sphere_markers);
-            
-            printf("Before coarsening: Nodes = %d,  Faces = %d\n\n",
-                   surfmesh->numVertices(),
-                   surfmesh->numFaces());
-
             printf("\nbegin mesh coarsening ....\n");
-            stop = surfmesh->coarse(CoarsenRate, 10, 1, 0.5);
+            stop = surfmesh->coarse(CoarsenRate, 1, 1, 0.5);
 
             printf("After coarsening: Nodes = %d,  Faces = %d\n\n",
                    surfmesh->numVertices(),
                    surfmesh->numFaces());
 
-            // /* Feature-preserving quality improvement */
-            // m = 1;
+            /* Feature-preserving quality improvement */
+            m = 1;
 
-            // while (1)
-            // {
-            //     smoothed = surfmesh->smooth(20, 140, 1, true);
+            while (1)
+            {
+                smoothed = surfmesh->smooth(20, 140, 1, true);
 
-            //     if (smoothed)
-            //     {
-            //         break;
-            //     }
+                if (smoothed)
+                {
+                    break;
+                }
 
-            //     m++;
+                m++;
 
-            //     if (((surfmesh->numVertices() > MeshSizeUpperLimit) &&
-            //          (m > ITER_NUM)) ||
-            //         ((surfmesh->numVertices() <= MeshSizeUpperLimit) &&
-            //          (m > 2 * ITER_NUM)))
-            //     {
-            //         break;
-            //     }
-            // }
-            // m = 1;
-            // printf("\nbegin surface diffusion ....\n");
-            // surfmesh->normalSmooth();
+                if (((surfmesh->numVertices() > MeshSizeUpperLimit) &&
+                     (m > ITER_NUM)) ||
+                    ((surfmesh->numVertices() <= MeshSizeUpperLimit) &&
+                     (m > 2 * ITER_NUM)))
+                {
+                    break;
+                }
+            }
+            m = 1;
+            printf("\nbegin surface diffusion ....\n");
+            surfmesh->normalSmooth();
         }
 
-        // else if (surfmesh->numVertices() < MeshSizeLowerLimit)
-        // {
-        //     surfmesh->refine();
+        else if (surfmesh->numVertices() < MeshSizeLowerLimit)
+        {
+            surfmesh->refine();
 
-        //     printf("After Refinement: Nodes = %d, Faces = %d\n",
-        //            surfmesh->numVertices(),
-        //            surfmesh->numFaces());
-        //     surfmesh->smooth(10, 150, ITER_NUM, true);
+            printf("After Refinement: Nodes = %d, Faces = %d\n",
+                   surfmesh->numVertices(),
+                   surfmesh->numFaces());
+            surfmesh->smooth(10, 150, ITER_NUM, true);
 
-        //     if (surfmesh->numVertices() >= MeshSizeLowerLimit)
-        //     {
-        //         break;
-        //     }
-        // }
+            if (surfmesh->numVertices() >= MeshSizeLowerLimit)
+            {
+                break;
+            }
+        }
 
         // nothing to be done...
         else
@@ -390,7 +384,6 @@ int MolecularMesh_CALL(char active_flag, char molsurf, char *input_name,
     // SurfaceMeshOld_writeOFF(surfmesh_inner, filename);
     surfmesh_inner->writeOFF(filename);
 
-    return 0;
     // Compute and Output all tetrahedra meshes into .m format
     printf("begin all tetrahedra generating ... \n");
     (void)time(&t1);
