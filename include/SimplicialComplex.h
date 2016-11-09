@@ -937,6 +937,57 @@ private:
 template <typename KeyType, typename... Ts>
 using AbstractSimplicialComplex = simplicial_complex<simplicial_complex_traits_default<KeyType,Ts...>>;
 
+// Breadth first search
+template <typename Visitor, typename Complex, typename K>
+struct Visit_UpBFS {};
+
+template <typename Visitor, typename Complex, std::size_t k>
+struct Visit_UpBFS<Visitor, Complex, std::integral_constant<std::size_t,k>>
+{
+    static constexpr auto level = k;
+    using CurrNodeID = typename Complex::template NodeID<level>;
+    using NextNodeID = typename Complex::template NodeID<level+1>;
+
+    template <typename Iterator>
+    static void apply(Visitor& v, const Complex& F, Iterator begin, Iterator end)
+    {
+        std::set<NextNodeID> next;
+        std::vector<typename Complex::KeyType> cover;
+
+        for(auto curr = begin; curr != end; ++curr)
+        {
+            v.visit(F, *curr);
+
+            F.get_cover(*curr, std::back_inserter(cover));
+            for(auto a : cover)
+            {
+                NextNodeID id = F.get_node_up(*curr,a);
+                next.insert(id);
+            }
+            cover.clear();
+        }
+
+        Visit_UpBFS<Visitor,Complex,std::integral_constant<std::size_t,level+1>>::apply(v, F, next.begin(), next.end());
+    }
+};
+
+template <typename Visitor, typename Complex>
+struct Visit_UpBFS<Visitor, Complex, std::integral_constant<std::size_t, Complex::topLevel>>
+{
+    static constexpr auto level = Complex::topLevel;
+    using CurrNodeID = typename Complex::template NodeID<level>;
+
+    template <typename Iterator>
+    static void apply(Visitor& v, const Complex& F, Iterator begin, Iterator end)
+    {
+        std::vector<typename Complex::KeyType> cover;
+
+        for(auto curr = begin; curr != end; ++curr)
+        {
+            v.visit(F, *curr);
+        }
+    }
+};
 
 
 template <class Complex, std::size_t level, class InsertIter>

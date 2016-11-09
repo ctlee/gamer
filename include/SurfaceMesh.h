@@ -125,14 +125,10 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
  * @param[in]  mesh      The mesh
  */
 void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
+void renumber(SurfaceMesh& mesh);
+
 void print(const SurfaceMesh& mesh);
-void print_vertices(const SurfaceMesh& mesh);
-void print_faces(const SurfaceMesh& mesh);
-void translate(SurfaceMesh& mesh, Vector v);
-void translate(SurfaceMesh& mesh, double dx, double dy, double dz);
-void scale(SurfaceMesh& mesh, Vector v);
-void scale(SurfaceMesh& mesh, double sx, double sy , double sz);
-void scale(SurfaceMesh& mesh, double s);
+
 void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID);
@@ -145,4 +141,11 @@ int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
 Vector getNormalFromTangent(const tensor<double,3,2> tangent);
+
+// These exist for the a potential python interface
+void translate(SurfaceMesh& mesh, Vector v);
+void translate(SurfaceMesh& mesh, double dx, double dy, double dz);
+void scale(SurfaceMesh& mesh, Vector v);
+void scale(SurfaceMesh& mesh, double sx, double sy , double sz);
+void scale(SurfaceMesh& mesh, double s);
 
