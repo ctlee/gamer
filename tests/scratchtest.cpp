@@ -31,22 +31,21 @@ int main(int argc, char *argv[])
     std::cout << "Orientable: " << std::get<1>(orient) << std::endl;
     std::cout << "Psuedo-manifold: " << std::get<2>(orient) << std::endl;
 
-    //print(*mesh);
-    mesh->genGraph("test.dot");
-
-    //std::cout << "Generating Histogram..." << std::endl;
-    //generateHistogram(*mesh);
-
     for(int i=0; i < 5; i++){
-        auto edges = selectFlipEdges(*mesh, true, checkFlipAngle);
-        //auto edges = selectFlipEdges(*mesh, false, checkFlipValence);
-
-        std::cout << "Flipping " << edges.size() << " edges..." << std::endl;
-        for (auto edge : edges){
-            edgeFlip(*mesh, edge);
+        for(auto vertexID : mesh->get_level_id<1>()) {
+            angleMeshImprove(*mesh, vertexID);
         }
-        compute_orientation(*mesh);
     }
+    // for(int i=0; i < 5; i++){
+    //     auto edges = selectFlipEdges(*mesh, true, checkFlipAngle);
+    //     //auto edges = selectFlipEdges(*mesh, false, checkFlipValence);
+
+    //     std::cout << "Flipping " << edges.size() << " edges..." << std::endl;
+    //     for (auto edge : edges){
+    //         edgeFlip(*mesh, edge);
+    //     }
+    //     compute_orientation(*mesh);
+    // }
     // for(int i=0; i < 1; i++){
     //     //auto edges = selectFlipEdges(*mesh, false, checkFlipAngle);
     //     auto edges = selectFlipEdges(*mesh, false, checkFlipValence);

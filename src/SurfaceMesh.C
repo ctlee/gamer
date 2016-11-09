@@ -323,15 +323,23 @@ bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edg
 void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     // get the neighbors     
     std::vector<SurfaceMesh::NodeID<1>> vertices;
-    neighbors(mesh, vertexID, std::back_inserter(vertices));
+    neighbors_up(mesh, vertexID, std::back_inserter(vertices));
     // compute the average position 
     Vector avgPos;
     for(auto vertex : vertices){
         avgPos += (*vertex).position;
     }
     avgPos /= vertices.size();
+    
+    auto disp = avgPos - (*vertexID).position;
     // Restrict movement along the tangent...
-
+    // A||B = Bx(AxB/|B|)/|B|
+    // A_|_B = A.B*B/|B|^2
+    auto norm = getNormalFromTangent(getTangent(mesh, vertexID));
+    auto magNorm = magnitude(norm);
+    auto parallel = cross(norm,cross(disp,norm/magNorm)/magNorm);
+    //auto perp = (disp|norm) * norm/std::pow(magnitude(norm),2);
+    (*vertexID).position = (*vertexID).position + parallel;
 }
 
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
