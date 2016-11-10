@@ -351,7 +351,6 @@ public:
 		KeyType edge;
 	};
 
-
 	simplicial_complex()
 		: node_count(0)
 	{
@@ -584,15 +583,6 @@ public:
 		return remove_recurse<k,0>::apply(this, &root, &root + 1, count);
 	}
 
-	/*
-	template <std::size_t k>
-	void print_nodes(){
-		std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
-		for(auto id : this->get_level_id<k>()){
-		    std::cout << *id.ptr << std::endl;
-		} 
-	}
-	*/
 	void genGraph(const std::string& filename){
 	    std::ofstream fout(filename);
 	    if(!fout.is_open())
@@ -610,7 +600,70 @@ public:
 		fout.close();    	
 	}
 
+	void renumber(){
+		auto it = std::get<1>(levels).end();
+
+		for(int i=0; i < this->size<1>(); i++)
+		{
+			auto nodeID = this->get_node_up({i});
+			if(nodeID == nullptr)
+			{
+				--it;
+				auto name = (*it->second->_down.begin()).first;
+				std::set<Node<1>*> node{it->second};
+				renumber_recurse<1,0>::apply(node, name, i);
+			}
+		}
+	}
+
+
 private:
+	template <size_t k, size_t foo>	
+	struct renumber_recurse
+	{
+	    template <typename T>
+	    static void apply(T nodes, KeyType from, KeyType to)
+	    {
+			std::set<Node<k+1>*> next;
+			// for each node of interest...
+			for(auto node : nodes)
+			{
+				auto& down = node->_down;
+				auto parent = down[from];
+				down.erase(from);
+				down[to] = parent;
+
+				auto& pUP = parent->_up;
+				pUP.erase(from);
+				pUP[to] = node;
+
+				auto up = node->_up;
+				for(auto j = up.begin(); j != up.end(); ++j)
+				{
+					next.insert(j->second);
+				}
+			}
+			renumber_recurse<k+1,foo>::apply(next, from, to);
+		}	
+	};
+	
+	template <size_t foo>
+	struct renumber_recurse<numLevels-1,foo>
+	{
+		template <typename T>
+		static void apply(T nodes, KeyType from, KeyType to)
+		{
+			for(auto node : nodes)	
+			{		
+				auto& down = node->_down;
+				auto parent = down[from];
+				down.erase(from);
+				down[to] = parent;
+			}
+		}
+	};
+
+
 	template <size_t k, size_t foo>	
 	struct writeGraph{
 	    template <typename T>
