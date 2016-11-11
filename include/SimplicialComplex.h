@@ -343,8 +343,13 @@ public:
 		auto const& operator*() const { return data(); }
 		auto& operator*() { return data(); }
 
+		KeyType key() const { return edge; }
+
 		auto const& data() const { return ptr->_edge_data[edge]; }
 		auto& data() { return ptr->_edge_data[edge]; }
+
+		NodeID<k>   up() const { return ptr; }
+		NodeID<k-1> down() const { return NodeID<k-1>(ptr->_down[edge]); }
 
 	private:
 		NodePtr<k> ptr;
@@ -609,6 +614,17 @@ public:
 		return EdgeID<k>(nid.ptr, a);
 	}
 
+	template <size_t k>
+	auto get_edge_up(NodeID<k> nid, KeyType a) const
+	{
+		return EdgeID<k+1>(nid.ptr->_up[a], a);
+	}
+
+	template <size_t k>
+	auto get_edge_down(NodeID<k> nid, KeyType a) const
+	{
+		return EdgeID<k>(nid.ptr, a);
+	}
 
 	template <size_t k>
 	bool exists(const KeyType (&s)[k]) const
