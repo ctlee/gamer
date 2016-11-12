@@ -49,26 +49,18 @@ struct init_orientation_helper<Complex, std::integral_constant<std::size_t, Comp
 };
 
 template <typename Complex>
-void init_orientation(Complex& F)
+std::tuple<int, bool, bool> compute_orientation(Complex& F)
 {
+	// init orientation
 	init_orientation_helper<Complex,std::integral_constant<std::size_t,0>>::f(F);
-}
 
-template <typename Complex>
-void clear_orientation(Complex& F)
-{
-	constexpr std::size_t k = Complex::topLevel;
-
-	for(auto& curr : F.template get_level<k>())
+	// clear orientation
+	for(auto& curr : F.template get_level<Complex::topLevel>())
 	{
 		curr.orientation = 0;
 	}
-}
 
-
-template <typename Complex>
-std::tuple<int, bool, bool> compute_orientation(Complex& F)
-{
+	// compute orientation
 	constexpr std::size_t k = Complex::topLevel - 1;
 
 	std::queue<typename Complex::template NodeID<k>> frontier;

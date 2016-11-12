@@ -481,3 +481,4 @@ tensor<ElemType,3,1> cross(const tensor<ElemType,3,1>& x, const tensor<ElemType,
 	rval[2] = x[0]*y[1] - y[0]*x[1];
 	return rval;
 }
+

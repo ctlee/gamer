@@ -863,8 +863,6 @@ std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> SurfaceMeshOld::marchingCube(int x
 
     std::cout << pF->size<1>() << std::endl;
 
-    init_orientation(*pF);
-    clear_orientation(*pF);
     compute_orientation(*pF);
 
     free(vertex);

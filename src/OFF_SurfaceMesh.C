@@ -39,9 +39,9 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     // Parse the first line:
     // [ST][C][N][4][n]OFF  # Header keyword
     // we only read OFF's in 3 space... simplicial_complex only does triangles
-    getline(fin, line);  
+    getline(fin, line);
     // Assume the first line must end with 'OFF\n'
-    if(!line.find("OFF", line.size()-4)){
+    if(!(line.find("OFF", line.size()-4) == std::string::npos)){
         std::cerr << "File Format Error: File '" << filename << "' does not look like a valid OFF file." << std::endl;
         std::cerr << "Expected 'OFF' at end of line, found: '" << line << "'." << std::endl;
         return std::make_pair(nullptr, false);

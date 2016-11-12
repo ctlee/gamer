@@ -310,7 +310,8 @@ public:
 		auto const&& data() const { return ptr->_data; }
 		auto&& data() { return ptr->_data; }
 
-		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
+//		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
+		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
 
 	private:
 		NodePtr<k> ptr;
@@ -355,7 +356,6 @@ public:
 		NodePtr<k> ptr;
 		KeyType edge;
 	};
-
 
 	simplicial_complex()
 		: node_count(0)
@@ -414,82 +414,28 @@ public:
 	}
 
 	template <size_t i, size_t j>
-	NodeID<i+j> get_node_up(NodeID<i> nid, const KeyType (&s)[j]) const
+	NodeID<i+j> get_node_up(const NodeID<i> nid, const KeyType (&s)[j]) const
 	{
 		return get_recurse<i,j>::apply(this, s, nid);
 	}
 
 	template <size_t i>
-	NodeID<i+1> get_node_up(NodeID<i> nid, KeyType s) const
+	NodeID<i+1> get_node_up(const NodeID<i> nid, const KeyType s) const
 	{
 		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t i, size_t j>
-	NodeID<i-j> get_node_down(NodeID<i> nid, const KeyType (&s)[j]) const
+	NodeID<i-j> get_node_down(const NodeID<i> nid, const KeyType (&s)[j]) const
 	{
 		return get_down_recurse<i,j>::apply(this, s, nid.ptr);
 	}
 
 	template <size_t i>
-	NodeID<i-1> get_node_down(NodeID<i> nid, KeyType s) const
+	NodeID<i-1> get_node_down(const NodeID<i> nid, const KeyType s) const
 	{
 		return get_down_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
-
-	/**
-	 * @brief      Get data by name
-	 *
-	 * @param[in]  s     Array holding the name
-	 *
-	 * @tparam     n     The level of simplicial complex
-	 *
-	 * @return     The associated data
-	 *
-	template <size_t n>
-	NodeData<n>& get(const KeyType (&s)[n])
-	{
-		return get_recurse<0,n>::apply(this, s, _root)->_data;
-	}
-
-	 * @brief      Get data by name
-	 *
-	 * @param[in]  s     Array holding the name
-	 *
-	 * @tparam     n     The level of simplicial complex
-	 *
-	 * @return     The associated data
-	 *
-	template <size_t n>
-	const NodeData<n>& get(const KeyType (&s)[n]) const
-	{
-		return get_recurse<0,n>::apply(this, s, _root)->_data;
-	}
-
-	template <size_t i>
-	NodeData<i+1>& get(NodeID<i> nid, KeyType s)
-	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr)->_data;
-	}
-
-	template <size_t i>
-	NodeData<i>& get(NodeID<i> nid)
-	{
-		return nid.ptr->_data;
-	}
-
-	template <size_t i>
-	const NodeData<i+1>& get(NodeID<i> nid, KeyType s) const
-	{
-		return get_recurse<i,1>::apply(this, &s, nid)->_data;
-	}
-
-	template <size_t i>
-	const NodeData<i>& get(NodeID<i> nid) const
-	{
-		return nid.ptr->_data;
-	}
-	*/
 
 	NodeID<0> get_node_up() const
 	{
@@ -499,39 +445,6 @@ public:
 	NodeID<0> get_node_down() const
 	{
 		return _root;
-	}
-
-	/*
-	 * @brief      Get the NodeID by name
-	 *
-	 * @param[in]  s     Array holding the name
-	 *
-	 * @tparam     n     The level of simplicial complex
-	 *
-	 * @return     ID of the node of interest
-	 */
-	template <size_t n>
-	NodeID<n> get_id(const KeyType (&s)[n])
-	{
-		return get_recurse<0,n>::apply(this, s, _root);
-	}
-
-	template <size_t i>
-	NodeID<i+1> get_id(NodeID<i> nid, KeyType s)
-	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr);
-	}
-
-	template <size_t n>
-	const NodeID<n> get_id(const KeyType (&s)[n]) const
-	{
-		return get_recurse<0,n>::apply(this, s, _root);
-	}
-
-	template <size_t i>
-	const NodeID<i+1> get_id(NodeID<i> nid, KeyType s) const
-	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
 	template <size_t k, class Inserter>
@@ -687,15 +600,55 @@ public:
 		return remove_recurse<k,0>::apply(this, &root, &root + 1, count);
 	}
 
-	/*
-	template <std::size_t k>
-	void print_nodes(){
-		std::cout << "level<" << k << ">.size()=" << this->size<k>() << std::endl; 
-		for(auto id : this->get_level_id<k>()){
-		    std::cout << *id.ptr << std::endl;
-		} 
+	template <std::size_t L, std::size_t R>
+	bool leq(NodeID<L> lhs, NodeID<R> rhs)
+	{
+		auto name_lhs = get_name(lhs);
+		auto name_rhs = get_name(rhs);
+
+		std::size_t i = 0;
+		for(std::size_t j = 0; i < L && j < R; ++j)
+		{
+			if(name_lhs[i] == name_rhs[j])
+			{
+				++i;
+			}
+		}
+
+		return (i == L);
 	}
-	*/
+
+	template <std::size_t L, std::size_t R>
+	bool eq(NodeID<L> lhs, NodeID<R> rhs)
+	{
+		return false;
+	}
+
+	template <std::size_t k>
+	bool eq(NodeID<k> lhs, NodeID<k> rhs)
+	{
+		auto name_lhs = get_name(lhs);
+		auto name_rhs = get_name(rhs);
+
+		for(std::size_t i = 0; i < k; ++i)
+		{
+			if(name_lhs[i] != name_rhs[i])
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	template <std::size_t L, std::size_t R>
+	bool lt(NodeID<L> lhs, NodeID<R> rhs)
+	{
+		return L < R && leq(lhs,rhs);
+	}
+
+
+
 	void genGraph(const std::string& filename){
 	    std::ofstream fout(filename);
 	    if(!fout.is_open())
@@ -713,7 +666,70 @@ public:
 		fout.close();    	
 	}
 
+	void renumber(){
+		auto it = std::get<1>(levels).end();
+
+		for(int i=0; i < this->size<1>(); i++)
+		{
+			auto nodeID = this->get_node_up({i});
+			if(nodeID == nullptr)
+			{
+				--it;
+				auto name = (*it->second->_down.begin()).first;
+				std::set<Node<1>*> node{it->second};
+				renumber_recurse<1,0>::apply(node, name, i);
+			}
+		}
+	}
+
+
 private:
+	template <size_t k, size_t foo>	
+	struct renumber_recurse
+	{
+	    template <typename T>
+	    static void apply(T nodes, KeyType from, KeyType to)
+	    {
+			std::set<Node<k+1>*> next;
+			// for each node of interest...
+			for(auto node : nodes)
+			{
+				auto& down = node->_down;
+				auto parent = down[from];
+				down.erase(from);
+				down[to] = parent;
+
+				auto& pUP = parent->_up;
+				pUP.erase(from);
+				pUP[to] = node;
+
+				auto up = node->_up;
+				for(auto j = up.begin(); j != up.end(); ++j)
+				{
+					next.insert(j->second);
+				}
+			}
+			renumber_recurse<k+1,foo>::apply(next, from, to);
+		}	
+	};
+	
+	template <size_t foo>
+	struct renumber_recurse<numLevels-1,foo>
+	{
+		template <typename T>
+		static void apply(T nodes, KeyType from, KeyType to)
+		{
+			for(auto node : nodes)	
+			{		
+				auto& down = node->_down;
+				auto parent = down[from];
+				down.erase(from);
+				down[to] = parent;
+			}
+		}
+	};
+
+
 	template <size_t k, size_t foo>	
 	struct writeGraph{
 	    template <typename T>
@@ -1039,7 +1055,6 @@ private:
 
 template <typename KeyType, typename... Ts>
 using AbstractSimplicialComplex = simplicial_complex<simplicial_complex_traits_default<KeyType,Ts...>>;
-
 
 
 template <class Complex, std::size_t level, class InsertIter>
