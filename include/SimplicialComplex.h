@@ -601,7 +601,7 @@ public:
 	}
 
 	template <std::size_t L, std::size_t R>
-	bool leq(NodeID<L> lhs, NodeID<R> rhs)
+	bool leq(NodeID<L> lhs, NodeID<R> rhs) const
 	{
 		auto name_lhs = get_name(lhs);
 		auto name_rhs = get_name(rhs);
@@ -619,13 +619,13 @@ public:
 	}
 
 	template <std::size_t L, std::size_t R>
-	bool eq(NodeID<L> lhs, NodeID<R> rhs)
+	bool eq(NodeID<L> lhs, NodeID<R> rhs) const
 	{
 		return false;
 	}
 
 	template <std::size_t k>
-	bool eq(NodeID<k> lhs, NodeID<k> rhs)
+	bool eq(NodeID<k> lhs, NodeID<k> rhs) const
 	{
 		auto name_lhs = get_name(lhs);
 		auto name_rhs = get_name(rhs);
@@ -642,7 +642,7 @@ public:
 	}
 
 	template <std::size_t L, std::size_t R>
-	bool lt(NodeID<L> lhs, NodeID<R> rhs)
+	bool lt(NodeID<L> lhs, NodeID<R> rhs) const
 	{
 		return L < R && leq(lhs,rhs);
 	}

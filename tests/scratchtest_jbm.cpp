@@ -111,28 +111,144 @@ struct PrintVisitor
 };
 
 template <typename Complex>
-PrintVisitor<Complex> make_print_visitor(const Complex& F)
+auto make_print_visitor(const Complex& F)
 {
     return PrintVisitor<Complex>();
 }
 
+
+namespace jbm
+{
+    template <class T> using set = std::set<T>;
+    template <typename Complex>
+    struct SimplexSet
+    {
+        template <std::size_t j>
+        using Simplex = typename Complex::template NodeID<j>;
+        using LevelIndex = typename std::make_index_sequence<Complex::numLevels>;
+        using NodeIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, Simplex>::type;
+        using type = typename util::type_map<NodeIDLevel, jbm::set>::type;
+    };
+}
 
 template <typename Complex>
 struct TestAVisitor
 {
+    using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+
+    TestAVisitor(SimplexSet* p) : pLevels(p) {}
+
     template <std::size_t level>
     bool visit(const Complex& F, typename Complex::template NodeID<level> s)
     {
-        std::cout << F.get_name(s) << std::endl;
-        return true;
+        if(std::get<level>(*pLevels).find(s) == std::get<level>(*pLevels).end())
+        {
+            std::get<level>(*pLevels).insert(s);
+            std::cout << F.get_name(s) << std::endl;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
+
+private:
+    SimplexSet* pLevels;
 };
 
+
+
 template <typename Complex>
-PrintVisitor<Complex> make_testA_visitor(const Complex& F)
+struct TestBVisitor
 {
-    return PrintVisitor<Complex>();
-}
+    using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+
+    TestBVisitor(SimplexSet* p) : pLevels(p) {}
+
+    template <std::size_t level>
+    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    {
+        return true;
+    }
+
+    bool visit(const Complex& F, typename Complex::template NodeID<1> s)
+    {
+        visit_node_up(TestAVisitor<Complex>(pLevels), F, s);
+        return false;
+    }
+
+private:
+    SimplexSet* pLevels;
+};
+
+
+template <typename Complex>
+struct GrabVisitor
+{
+    using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+
+    GrabVisitor(SimplexSet* p) : pLevels(p) {}
+
+    template <std::size_t level>
+    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    {
+        if(std::get<level>(*pLevels).find(s) != std::get<level>(*pLevels).end())
+        {
+            std::get<level>(*pLevels).erase(s);
+            std::cout << F.get_name(s) << std::endl;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+private:
+    SimplexSet* pLevels;
+};
+
+
+
+template <typename Complex>
+struct InnerVisitor
+{
+    using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+
+    InnerVisitor(SimplexSet* p) : pLevels(p) {}
+
+    template <std::size_t level>
+    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    {
+//        std::cout << "Inner: " << F.get_name(s) << std::endl;
+        visit_node_down(GrabVisitor<Complex>(pLevels), F, s);
+        return true;
+    }
+
+private:
+    SimplexSet* pLevels;
+};
+
+
+template <typename Complex>
+struct MainVisitor
+{
+    using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+
+    MainVisitor(SimplexSet* p) : pLevels(p) {}
+
+    template <std::size_t level>
+    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    {
+        std::cout << "MAIN: " << F.get_name(s) << std::endl;
+        visit_node_up(InnerVisitor<Complex>(pLevels), F, s);
+        return true;
+    }
+
+private:
+    SimplexSet* pLevels;
+};
 
 
 
@@ -158,7 +274,11 @@ int main(int argc, char *argv[])
     {
         auto s = *(++++mesh->get_level_id<3>().begin());
 
-        visit_node_down(make_print_visitor(*mesh), *mesh, s);
+        typename jbm::SimplexSet<SurfaceMesh>::type levels;
+        visit_node_down(TestBVisitor<SurfaceMesh>(&levels), *mesh, s);
+        std::cout << " - - - - - - - - " << std::endl;
+        visit_node_down(MainVisitor<SurfaceMesh>(&levels), *mesh, s);
+//        visit_node_down(make_testB_visitor(mesh->get_node_up<1>({1})), *mesh, s);
 //        edge_up(make_print_edge_visitor(*mesh), *mesh, mesh->get_edge_up(mesh->get_node_up(),1));
         /*
         auto edges = mesh->up(v);
