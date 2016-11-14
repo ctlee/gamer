@@ -21,10 +21,6 @@ void print(const SurfaceMesh & mesh){
     }
 }
 
-void renumber(SurfaceMesh& mesh){
-    
-}
-
 void generateHistogram(const SurfaceMesh& mesh){
     // compute angle distribution
     std::array<double,18> histogram;
