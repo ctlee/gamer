@@ -194,7 +194,7 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     return std::make_pair(mesh, true);
 }
 
-void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
+void writeOFF(const std::string& filename, SurfaceMesh& mesh){
     std::ofstream fout(filename);
     if(!fout.is_open())
     {
@@ -202,6 +202,8 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
                     << "' could not be writen to." << std::endl;
         exit(1); 
     }
+
+    mesh.renumber();
 
     fout << "OFF" << std::endl;
 

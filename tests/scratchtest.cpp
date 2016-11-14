@@ -24,15 +24,26 @@ int main(int argc, char *argv[])
         exit(1);
     }
     auto mesh = result.first;
-    mesh->remove({0});
+    auto nid = *(++++mesh->get_level_id<1>().begin());
+    std::cout << *nid << std::endl << std::endl;
+    
+    std::set<SurfaceMesh::NodeID<1>> nodes;
 
-    mesh->insert({4}, Vertex(0,0,2));
-    mesh->insert({1,4,3});
-    mesh->insert({2,4,1});
-    mesh->insert({3,4,2});
+    neighbors_up(*mesh, nid, std::inserter(nodes, nodes.begin()));
+    auto next = nodes;
+    for(auto node : next){
+        neighbors_up(*mesh, node, std::inserter(nodes, nodes.begin()));
+    }
+    for(auto node : nodes){
+        std::cout << *node << std::endl;
+    }
+    
+    std::cout << std::endl << std::endl;
+    auto nodes2 = neighbors_up(*mesh, nid, 3);
 
-
-    mesh->renumber();
-    writeOFF("../data/test.off", *mesh);
+    for(auto node : nodes2){
+        std::cout << *node << std::endl;
+    }
+    // writeOFF("../data/test.off", *mesh);
     std::cout << "EOF" << std::endl;
 }

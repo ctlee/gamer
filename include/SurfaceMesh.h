@@ -124,7 +124,7 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
  */
-void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
+void writeOFF(const std::string& filename, SurfaceMesh& mesh);
 void renumber(SurfaceMesh& mesh);
 
 void print(const SurfaceMesh& mesh);
