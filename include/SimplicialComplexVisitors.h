@@ -48,8 +48,6 @@ struct BFS_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::size_t,
     template <typename Iterator>
     static void apply(Visitor& v, const Complex& F, Iterator begin, Iterator end)
     {
-        std::vector<typename Complex::KeyType> cover;
-
         for(auto curr = begin; curr != end; ++curr)
         {
             v.visit(F, *curr);

@@ -132,6 +132,8 @@ auto make_print_visitor(const Complex& F)
 namespace jbm
 {
     template <class T> using set = std::set<T>;
+    template <class T> using vector = std::vector<T>;
+
     template <typename Complex>
     struct SimplexSet
     {
@@ -140,6 +142,30 @@ namespace jbm
         using LevelIndex = typename std::make_index_sequence<Complex::numLevels>;
         using NodeIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, Simplex>::type;
         using type = typename util::type_map<NodeIDLevel, jbm::set>::type;
+    };
+
+    template <typename Complex>
+    struct SimplexDataSet
+    {
+        using KeyType = typename Complex::KeyType;
+
+        template <std::size_t k, typename T>
+        struct DataType
+        {
+            using type = std::pair<std::array<KeyType,k>, T>;
+        };
+
+        template <std::size_t k>
+        struct DataType<k, void>
+        {
+            using type = std::array<KeyType,k>;
+        };
+
+        template <std::size_t j>
+        using DataSet = typename DataType<j, typename Complex::template NodeData<j>>::type;
+        using LevelIndex = typename std::make_index_sequence<Complex::numLevels>;
+        using NodeIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, DataSet>::type;
+        using type = typename util::type_map<NodeIDLevel, jbm::vector>::type;
     };
 }
 
@@ -200,7 +226,7 @@ struct GrabVisitor
 {
     using SimplexSet = typename jbm::SimplexSet<Complex>::type;
 
-    GrabVisitor(SimplexSet* p) : pLevels(p) {}
+    GrabVisitor(SimplexSet* p, SimplexSet* grab) : pLevels(p), pGrab(grab) {}
 
     template <std::size_t level>
     bool visit(const Complex& F, typename Complex::template NodeID<level> s)
@@ -208,6 +234,7 @@ struct GrabVisitor
         if(std::get<level>(*pLevels).find(s) != std::get<level>(*pLevels).end())
         {
             std::get<level>(*pLevels).erase(s);
+            std::get<level>(*pGrab).insert(s);
 //            std::cout << F.get_name(s) << std::endl;
             return true;
         }
@@ -219,40 +246,53 @@ struct GrabVisitor
 
 private:
     SimplexSet* pLevels;
+    SimplexSet* pGrab;
 };
 
 
 
-template <typename Complex, std::size_t level>
+
+template <typename Complex, std::size_t BaseLevel, template <typename> class Callback>
 struct InnerVisitor
 {
     using SimplexSet = typename jbm::SimplexSet<Complex>::type;
-    using Simplex = typename Complex::template NodeID<level>;
+    using Simplex = typename Complex::template NodeID<BaseLevel>;
     using KeyType = typename Complex::KeyType;
 
-    InnerVisitor(SimplexSet* p, Simplex s) : pLevels(p), simplex(s), new_point(-1) {}
+    InnerVisitor(SimplexSet* p, Simplex s, KeyType np, Callback<Complex>* c) : pLevels(p), simplex(s), new_point(np), callback(c) {}
 
-    template <std::size_t k>
-    bool visit(const Complex& F, typename Complex::template NodeID<k> s)
+    template <std::size_t OldLevel>
+    bool visit(const Complex& F, typename Complex::template NodeID<OldLevel> s)
     {
-        if(std::get<k>(*pLevels).find(s) != std::get<k>(*pLevels).end())
+        constexpr std::size_t NewLevel = OldLevel - BaseLevel + 1;
+
+        if(std::get<OldLevel>(*pLevels).find(s) != std::get<OldLevel>(*pLevels).end())
         {
-            std::set<KeyType> new_name;
-            for(auto a : F.get_name(s))
+            auto old_name = F.get_name(s);
+            auto base_name = F.get_name(simplex);
+            std::array<KeyType,NewLevel> new_name;
+
+            std::size_t i = 0; // new_name
+            std::size_t j = 0; // old_name
+            std::size_t k = 0; // base_name
+
+            new_name[i++] = new_point;
+
+            while(i < NewLevel)
             {
-                new_name.insert(a);
+                if(base_name[k] == old_name[j])
+                {
+                    ++j; ++k;
+                }
+                else
+                {
+                    new_name[i++] = old_name[j++];
+                }
             }
-            for(auto a : F.get_name(simplex))
-            {
-                new_name.erase(a);
-            }
-            new_name.insert(new_point);
-            // This print out gives me a list of all the changes which need to occur.
-            // And the subsequent visitor gets all the simplices which will merge into new_name.
-            // However, these changes cannot be applied in the order they are generated here.
-            // These changes must be stored and executed later.
-            std::cout << "Inner: " << F.get_name(s) << " --> " << new_name << std::endl;
-            visit_node_down(GrabVisitor<Complex>(pLevels), F, s);
+
+            SimplexSet grab;
+            visit_node_down(GrabVisitor<Complex>(pLevels,&grab), F, s);
+            (*callback)(F, old_name, new_name, grab);
         }
         return true;
     }
@@ -261,28 +301,125 @@ private:
     SimplexSet* pLevels;
     Simplex     simplex;
     KeyType     new_point;
+    Callback<Complex>* callback;
 };
 
 
-template <typename Complex>
+template <typename Complex, template <typename> class Callback>
 struct MainVisitor
 {
     using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+    using KeyType = typename Complex::KeyType;
 
-    MainVisitor(SimplexSet* p) : pLevels(p) {}
+    MainVisitor(SimplexSet* p, Callback<Complex>* c, KeyType np) : pLevels(p), callback(c), new_point(np) {}
 
     template <std::size_t level>
     bool visit(const Complex& F, typename Complex::template NodeID<level> s)
     {
 //        std::cout << "MAIN: " << F.get_name(s) << std::endl;
-        visit_node_up(InnerVisitor<Complex,level>(pLevels,s), F, s);
+        visit_node_up(InnerVisitor<Complex,level,Callback>(pLevels,s,new_point,callback), F, s);
         return true;
     }
 
 private:
     SimplexSet* pLevels;
+    Callback<Complex>* callback;
+    KeyType     new_point;
 };
 
+
+template <typename Complex>
+struct Callback
+{
+    using SimplexSet = typename jbm::SimplexSet<Complex>::type;
+    template <std::size_t level> using Type = typename Complex::template NodeData<level>;
+    using KeyType = typename Complex::KeyType;
+
+    template <std::size_t OldLevel, std::size_t NewLevel>
+    void operator()(const Complex& F, const std::array<KeyType,OldLevel>& old_name,
+                                           const std::array<KeyType,NewLevel>& new_name,
+                                           const SimplexSet& merged)
+    {
+        std::cout << "Inner: " << old_name << " --> " << new_name << std::endl;
+    }
+
+    template <std::size_t OldLevel>
+    void operator()(const Complex& F,
+        const std::array<KeyType,OldLevel>& old_name,
+                                           const std::array<KeyType,1>& new_name,
+                                           const SimplexSet& merged)
+    {
+        Vertex center;
+        std::size_t cnt = 0;
+        for(auto v : std::get<1>(merged))
+        {
+            center = center + (*v);
+            ++cnt;
+        }
+        center = center / (double)(cnt);
+        std::cout << "1nner: " << old_name << " --> " << new_name << " : " << center << std::endl;
+
+        std::get<1>(data).push_back(std::make_pair(new_name, center));
+    }
+
+    template <std::size_t OldLevel>
+    void operator()(const Complex& F, const std::array<KeyType,OldLevel>& old_name,
+                                           const std::array<KeyType,3>& new_name,
+                                           const SimplexSet& merged)
+    {
+        std::cout << "3nner: " << old_name << " --> " << new_name << " : " << std::get<3>(merged).size() << std::endl;
+        std::get<3>(data).push_back(std::make_pair(new_name,Face()));
+    }
+
+    typename jbm::SimplexDataSet<Complex>::type data;
+};
+
+
+template <typename Complex, typename NodeDataType, typename T>
+struct PerformInsertion {};
+
+template <typename Complex, typename NodeDataType, std::size_t level>
+struct PerformInsertion<Complex, NodeDataType, std::integral_constant<std::size_t,level>>
+{
+    static void apply(Complex& F, typename jbm::SimplexDataSet<Complex>::type& data)
+    {
+        for(auto curr : std::get<level>(data))
+        {
+//            std::cout << curr.first << " " << curr.second << std::endl;
+            F.template insert<level>(curr.first, curr.second);
+        }
+        PerformInsertion<Complex,typename Complex::template NodeData<level+1>,std::integral_constant<std::size_t,level+1>>::apply(F,data);
+    }
+};
+
+template <typename Complex, std::size_t level>
+struct PerformInsertion<Complex, void, std::integral_constant<std::size_t,level>>
+{
+    static void apply(Complex& F, typename jbm::SimplexDataSet<Complex>::type& data)
+    {
+        std::cout << level << std::endl;
+        for(auto curr : std::get<level>(data))
+        {
+//            std::cout << curr << std::endl;
+            F.template insert<level>(curr);
+        }
+        PerformInsertion<Complex,typename Complex::template NodeData<level+1>,std::integral_constant<std::size_t,level+1>>::apply(F,data);
+    }
+};
+
+template <typename Complex, typename NodeDataType>
+struct PerformInsertion<Complex, NodeDataType, std::integral_constant<std::size_t,Complex::topLevel>>
+{
+    static void apply(Complex& F, typename jbm::SimplexDataSet<Complex>::type& data)
+    {
+        std::cout << Complex::topLevel << std::endl;
+        for(auto curr : std::get<Complex::topLevel>(data))
+        {
+//            std::cout << curr.first << std::endl;
+            F.template insert<Complex::topLevel>(curr.first, curr.second);
+        }
+    }
+};
 
 
 int main(int argc, char *argv[])
@@ -304,12 +441,15 @@ int main(int argc, char *argv[])
 
     compute_orientation(*mesh);
     
+    std::vector<Callback<SurfaceMesh>> callbacks;
+    int np = -1;
     for(auto s : mesh->get_level_id<2>())
     {
+        Callback<SurfaceMesh> clbk;
         std::cout << mesh->get_name(s) << std::endl;
         typename jbm::SimplexSet<SurfaceMesh>::type levels;
         visit_node_down(TestBVisitor<SurfaceMesh>(&levels), *mesh, s);
-        visit_node_down(MainVisitor<SurfaceMesh>(&levels), *mesh, s);
+        visit_node_down(MainVisitor<SurfaceMesh,Callback>(&levels,&clbk,np), *mesh, s);
 //        visit_node_down(make_testB_visitor(mesh->get_node_up<1>({1})), *mesh, s);
 //        edge_up(make_print_edge_visitor(*mesh), *mesh, mesh->get_edge_up(mesh->get_node_up(),1));
         /*
@@ -322,5 +462,15 @@ int main(int argc, char *argv[])
             std::cout << "    " << f << std::endl;
         }
         */
+        callbacks.push_back(clbk);
+        --np;
     }
+
+    for(auto curr : callbacks)
+    {
+        PerformInsertion<SurfaceMesh,Vertex,std::integral_constant<std::size_t,1>>::apply(*mesh, curr.data);
+    }
+
+    mesh->renumber();
+    writeOFF("awesome.off", *mesh);
 }

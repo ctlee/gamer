@@ -387,6 +387,19 @@ public:
 	}
 
 	template <size_t n>
+	void insert(const std::array<KeyType,n>& s)
+	{
+		insert_for<0,n,false>::apply(this, _root, s.data());
+	}
+
+	template <size_t n>
+	void insert(const std::array<KeyType,n>& s, const NodeData<n>& data)
+	{
+		Node<n>* rval = insert_for<0,n,true>::apply(this, _root, s.data());
+		rval->_data = data;
+	}
+
+	template <size_t n>
 	std::array<KeyType,n> get_name(NodeID<n> id) const
 	{
 		std::array<KeyType,n> s;
