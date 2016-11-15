@@ -159,7 +159,7 @@ struct LocalStructureTensorVisitor
         auto tan = getTangent(F, s);
         auto norm = getNormalFromTangent(tan);
         lst += norm*norm;
-        std::cout << norm*norm << " " << lst << std::endl; 
+        //std::cout << norm*norm << " " << lst << std::endl; 
         return true;
     }
 };

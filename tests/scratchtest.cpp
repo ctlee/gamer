@@ -84,7 +84,7 @@ struct Neighbors_Up_Node<Visitor, Complex, std::integral_constant<std::size_t, k
 };
 
 template <std::size_t rings, typename Visitor, typename NodeID>
-void visit_neighbors_up(Visitor v, const typename NodeID::complex& F, NodeID s)
+void visit_neighbors_up(Visitor& v, const typename NodeID::complex& F, NodeID s)
 {
     std::set<NodeID> nodes{s};
     Neighbors_Up_Node<Visitor, typename NodeID::complex, 
@@ -128,10 +128,9 @@ int main(int argc, char *argv[])
     auto mesh = result.first;
     compute_orientation(*mesh);
 
-
     for(auto nid : mesh->get_level_id<1>()){
         auto v = LocalStructureTensorVisitor();
-        visit_neighbors_up<2>(v, *mesh, nid);
+        visit_neighbors_up<1>(v, *mesh, nid);
         std::cout << *nid << " " << v.lst << std::endl;
     }
     
