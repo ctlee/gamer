@@ -83,14 +83,15 @@ struct Neighbors_Up_Node<Visitor, Complex, std::integral_constant<std::size_t, k
     }
 };
 
-template <typename Visitor, typename NodeID>
+template <std::size_t rings, typename Visitor, typename NodeID>
 void visit_neighbors_up(Visitor v, const typename NodeID::complex& F, NodeID s)
 {
     std::set<NodeID> nodes{s};
     Neighbors_Up_Node<Visitor, typename NodeID::complex, 
             std::integral_constant<std::size_t,NodeID::level>, 
-            std::integral_constant<std::size_t, 1>>::apply(v,F,nodes,&s,&s+1);
+            std::integral_constant<std::size_t, rings>>::apply(v,F,nodes,&s,&s+1);
 }
+
 
 template <typename Complex>
 struct PrintVisitor
@@ -130,7 +131,7 @@ int main(int argc, char *argv[])
     auto nid = *(++++mesh->get_level_id<1>().begin());
     std::cout << *nid << std::endl << std::endl;
 
-    visit_neighbors_up(make_print_visitor(*mesh), *mesh, nid);
+    visit_neighbors_up<2>(make_print_visitor(*mesh), *mesh, nid);
     // std::set<SurfaceMesh::NodeID<1>> nodes;
 
     // neighbors_up(*mesh, nid, std::inserter(nodes, nodes.begin()));
