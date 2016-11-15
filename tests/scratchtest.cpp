@@ -44,7 +44,6 @@ auto make_print_visitor(const Complex& F)
     return PrintVisitor<Complex>();
 }
 
-
 int main(int argc, char *argv[])
 {
     if(argc != 2)
@@ -64,9 +63,16 @@ int main(int argc, char *argv[])
 
     for(auto nid : mesh->get_level_id<3>()){
         //auto v = LocalStructureTensorVisitor();
-        auto v = make_print_visitor(*mesh);
-        visit_neighbors_down<1>(v, *mesh, nid);
+        // auto v = make_print_visitor(*mesh);
+        // visit_neighbors_down<1>(v, *mesh, nid);
+        visit_neighbors_down<1>(make_print_visitor(*mesh), *mesh, nid);
         //std::cout << *nid << " " << v.lst << std::endl;
+    }
+
+   for(auto nid : mesh->get_level_id<1>()){
+        auto v = LocalStructureTensorVisitor();
+        visit_neighbors_up<1>(v, *mesh, nid);
+        std::cout << *nid << " " << v.lst << std::endl;
     }
     
     //std::set<SurfaceMesh::NodeID<1>> nodes;
