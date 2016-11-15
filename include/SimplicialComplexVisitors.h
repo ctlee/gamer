@@ -99,8 +99,6 @@ struct BFS_Down_Node<Visitor, Traits, Complex, std::integral_constant<std::size_
     template <typename Iterator>
     static void apply(Visitor& v, const Complex& F, Iterator begin, Iterator end)
     {
-        std::vector<typename Complex::KeyType> cover;
-
         for(auto curr = begin; curr != end; ++curr)
         {
             v.visit(F, *curr);
@@ -158,8 +156,6 @@ struct BFS_Edge<Visitor, Traits, Complex, std::integral_constant<std::size_t, Co
     template <typename Iterator>
     static void apply(Visitor& v, const Complex& F, Iterator begin, Iterator end)
     {
-        std::vector<typename Complex::KeyType> cover;
-
         for(auto curr = begin; curr != end; ++curr)
         {
             v.visit(F, *curr);
