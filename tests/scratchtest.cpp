@@ -27,25 +27,23 @@ std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
     return out;
 }
 
-template <typename Visitor, typename Traits, typename Complex, typename K, typename R>
+template <typename Visitor, typename Complex, typename K, typename R>
 struct Neighbors_Up_Node {};
 
 
-template <typename Visitor, typename Traits, typename Complex, std::size_t k, std::size_t ring>
-struct Neighbors_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::size_t, k>, std::integral_constant<std::size_t, ring>>
+template <typename Visitor, typename Complex, std::size_t k, std::size_t ring>
+struct Neighbors_Up_Node<Visitor, Complex, std::integral_constant<std::size_t, k>, std::integral_constant<std::size_t, ring>>
 {
     static constexpr auto level = k;
     using NodeID = typename Complex::template NodeID<level>;
-    
-    template <typename T> using Container = typename Traits::template Container<T>;
 
-    using Neighbors_Up_Node_Next = Neighbors_Up_Node<Visitor,Traits,Complex,
+    using Neighbors_Up_Node_Next = Neighbors_Up_Node<Visitor,Complex,
             std::integral_constant<std::size_t,level>,std::integral_constant<std::size_t,ring-1>>;
 
     template <typename Iterator>
-    static void apply(Visitor& v, const Complex& F, Container<NodeID>& nodes, Iterator begin, Iterator end)
+    static void apply(Visitor& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
     {
-        Container<NodeID> next;
+        std::set<NodeID> next;
 
         for(auto curr = begin; curr != end; ++curr)
         {
@@ -57,8 +55,10 @@ struct Neighbors_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::s
                     for(auto b : F.get_name(id)) 
                     {
                         auto nbor = F.get_node_down(id,b);
-                        nodes.insert(nbor);
-                        next.insert(nbor);
+                        if(nodes.insert(nbor).second)
+                        {
+                            next.insert(nbor);
+                        }
                     }
                 }
             }
@@ -67,16 +67,14 @@ struct Neighbors_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::s
     }
 };
 
-template <typename Visitor, typename Traits, typename Complex, std::size_t k>
-struct Neighbors_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::size_t, k>, std::integral_constant<std::size_t, 0>>
+template <typename Visitor, typename Complex, std::size_t k>
+struct Neighbors_Up_Node<Visitor, Complex, std::integral_constant<std::size_t, k>, std::integral_constant<std::size_t, 0>>
 {
     static constexpr auto level = k;
     using NodeID = typename Complex::template NodeID<level>;
     
-    template <typename T> using Container = typename Traits::template Container<T>;
-
     template <typename Iterator>
-    static void apply(Visitor& v, const Complex& F, Container<NodeID>& nodes, Iterator begin, Iterator end)
+    static void apply(Visitor& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
     {
         for(auto curr = begin; curr != end; ++curr)
         {
@@ -89,7 +87,9 @@ template <typename Visitor, typename NodeID>
 void visit_neighbors_up(Visitor v, const typename NodeID::complex& F, NodeID s)
 {
     std::set<NodeID> nodes{s};
-    Neighbors_Up_Node<Visitor, BFS_NoRepeat_Node_Traits, typename NodeID::complex, std::integral_constant<std::size_t,NodeID::level>, std::integral_constant<std::size_t, 1>>::apply(v,F,nodes,&s,&s+1);
+    Neighbors_Up_Node<Visitor, typename NodeID::complex, 
+            std::integral_constant<std::size_t,NodeID::level>, 
+            std::integral_constant<std::size_t, 1>>::apply(v,F,nodes,&s,&s+1);
 }
 
 template <typename Complex>
