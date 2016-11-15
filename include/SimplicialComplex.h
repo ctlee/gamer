@@ -1117,38 +1117,40 @@ void neighbors_up(Complex& F, NodeID nid, InsertIter iter)
 	neighbors_up<Complex, NodeID::level, InsertIter>(F,nid,iter);
 }
 
-template <class Complex, std::size_t level>
-std::set<typename Complex::template NodeID<level>> neighbors_up(Complex &F, 
-			std::set<typename Complex::template NodeID<level>>& nodes,
-			std::set<typename Complex::template NodeID<level>> next,
-			int ring)
-{
-	if (ring == 0)
-		return nodes;
-	std::set<typename Complex::template NodeID<level>> tmp;
-	for (auto nid : next){
-		for (auto a : F.get_cover(nid))
-		{
-			auto id = F.get_node_up(nid,a);
-			for(auto b : F.get_name(id))
-			{
-				auto nbor = F.get_node_down(id,b);
-				if(nodes.insert(nbor).second){
-					tmp.insert(nbor);
-				}
-			}
-		}
-	}
-	return neighbors_up<Complex, level>(F, nodes, tmp, ring-1);
-}
+/**
+ * Code for returning a set of k-ring neighbors. Currently obseleted by neighbors_up visitor pattern
+ */
+// template <class Complex, std::size_t level>
+// std::set<typename Complex::template NodeID<level>> neighbors_up(Complex &F, 
+// 			std::set<typename Complex::template NodeID<level>>& nodes,
+// 			std::set<typename Complex::template NodeID<level>> next,
+// 			int ring)
+// {
+// 	if (ring == 0)
+// 		return nodes;
+// 	std::set<typename Complex::template NodeID<level>> tmp;
+// 	for (auto nid : next){
+// 		for (auto a : F.get_cover(nid))
+// 		{
+// 			auto id = F.get_node_up(nid,a);
+// 			for(auto b : F.get_name(id))
+// 			{
+// 				auto nbor = F.get_node_down(id,b);
+// 				if(nodes.insert(nbor).second){
+// 					tmp.insert(nbor);
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return neighbors_up<Complex, level>(F, nodes, tmp, ring-1);
+// }
 
-template <class Complex, class NodeID>
-std::set<NodeID> neighbors_up(Complex& F, NodeID nid, int ring)
-{
-	std::set<NodeID> nodes{nid};
-	return neighbors_up<Complex, NodeID::level>(F,nodes,nodes,ring);
-}
-
+// template <class Complex, class NodeID>
+// std::set<NodeID> neighbors_up(Complex& F, NodeID nid, int ring)
+// {
+// 	std::set<NodeID> nodes{nid};
+// 	return neighbors_up<Complex, NodeID::level>(F,nodes,nodes,ring);
+// }
 
 template <typename NodeID>
 struct hashNodeID{

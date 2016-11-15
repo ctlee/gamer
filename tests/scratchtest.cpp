@@ -27,79 +27,13 @@ std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
     return out;
 }
 
-template <typename Visitor, typename Complex, typename K, typename R>
-struct Neighbors_Up_Node {};
-
-
-template <typename Visitor, typename Complex, std::size_t k, std::size_t ring>
-struct Neighbors_Up_Node<Visitor, Complex, std::integral_constant<std::size_t, k>, std::integral_constant<std::size_t, ring>>
-{
-    static constexpr auto level = k;
-    using NodeID = typename Complex::template NodeID<level>;
-
-    using Neighbors_Up_Node_Next = Neighbors_Up_Node<Visitor,Complex,
-            std::integral_constant<std::size_t,level>,std::integral_constant<std::size_t,ring-1>>;
-
-    template <typename Iterator>
-    static void apply(Visitor& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
-    {
-        std::set<NodeID> next;
-
-        for(auto curr = begin; curr != end; ++curr)
-        {
-            if(v.visit(F, *curr))
-            {
-                for(auto a : F.get_cover(*curr))
-                {
-                    auto id = F.get_node_up(*curr,a);
-                    for(auto b : F.get_name(id)) 
-                    {
-                        auto nbor = F.get_node_down(id,b);
-                        if(nodes.insert(nbor).second)
-                        {
-                            next.insert(nbor);
-                        }
-                    }
-                }
-            }
-        }
-        Neighbors_Up_Node_Next::apply(v, F, nodes, next.begin(), next.end());
-    }
-};
-
-template <typename Visitor, typename Complex, std::size_t k>
-struct Neighbors_Up_Node<Visitor, Complex, std::integral_constant<std::size_t, k>, std::integral_constant<std::size_t, 0>>
-{
-    static constexpr auto level = k;
-    using NodeID = typename Complex::template NodeID<level>;
-    
-    template <typename Iterator>
-    static void apply(Visitor& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
-    {
-        for(auto curr = begin; curr != end; ++curr)
-        {
-            v.visit(F, *curr);
-        }
-    }
-};
-
-template <std::size_t rings, typename Visitor, typename NodeID>
-void visit_neighbors_up(Visitor& v, const typename NodeID::complex& F, NodeID s)
-{
-    std::set<NodeID> nodes{s};
-    Neighbors_Up_Node<Visitor, typename NodeID::complex, 
-            std::integral_constant<std::size_t,NodeID::level>, 
-            std::integral_constant<std::size_t, rings>>::apply(v,F,nodes,&s,&s+1);
-}
-
-
 template <typename Complex>
 struct PrintVisitor
 {
     template <std::size_t level>
     bool visit(const Complex& F, typename Complex::template NodeID<level> s)
     {
-        std::cout << *s << std::endl;
+        std::cout << F.get_name(s) << std::endl;
         return true;
     }
 };
@@ -128,10 +62,11 @@ int main(int argc, char *argv[])
     auto mesh = result.first;
     compute_orientation(*mesh);
 
-    for(auto nid : mesh->get_level_id<1>()){
-        auto v = LocalStructureTensorVisitor();
-        visit_neighbors_up<1>(v, *mesh, nid);
-        std::cout << *nid << " " << v.lst << std::endl;
+    for(auto nid : mesh->get_level_id<3>()){
+        //auto v = LocalStructureTensorVisitor();
+        auto v = make_print_visitor(*mesh);
+        visit_neighbors_down<1>(v, *mesh, nid);
+        //std::cout << *nid << " " << v.lst << std::endl;
     }
     
     //std::set<SurfaceMesh::NodeID<1>> nodes;
