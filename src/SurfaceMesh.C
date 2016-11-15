@@ -327,12 +327,12 @@ int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
     return vertices.size(); 
 }
 
-tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID)
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID)
 {
     return getTangentH(mesh, (*vertexID).position, vertexID);
 }
 
-tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID)
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID)
 {
     auto cover = mesh.get_name(faceID);
     auto vertexID = mesh.get_node_up({cover[0]});

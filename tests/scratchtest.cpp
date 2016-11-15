@@ -126,13 +126,16 @@ int main(int argc, char *argv[])
         exit(1);
     }
     auto mesh = result.first;
+    compute_orientation(*mesh);
 
 
-    auto nid = *(++++mesh->get_level_id<1>().begin());
-    std::cout << *nid << std::endl << std::endl;
-
-    visit_neighbors_up<2>(make_print_visitor(*mesh), *mesh, nid);
-    // std::set<SurfaceMesh::NodeID<1>> nodes;
+    for(auto nid : mesh->get_level_id<1>()){
+        auto v = LocalStructureTensorVisitor();
+        visit_neighbors_up<2>(v, *mesh, nid);
+        std::cout << *nid << " " << v.lst << std::endl;
+    }
+    
+    //std::set<SurfaceMesh::NodeID<1>> nodes;
 
     // neighbors_up(*mesh, nid, std::inserter(nodes, nodes.begin()));
     // auto next = nodes;

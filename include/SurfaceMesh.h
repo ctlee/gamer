@@ -61,13 +61,13 @@ using ASC = simplicial_complex<complex_traits>; // Alias for the lazy
 using SurfaceMesh = simplicial_complex<complex_traits>;
 
 template <std::size_t dimension>
-auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr)
+auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr)
 {
     return (*curr).orientation;
 }
 
 template <std::size_t level, std::size_t dimension>
-auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<level> curr)
+auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<level> curr)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
     auto cover = mesh.get_cover(curr);
@@ -82,17 +82,15 @@ auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
     return rval/cover.size();
 }
 
-
 template <std::size_t dimension>
-auto getTangentF(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
+auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
         SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr, std::set<SurfaceMesh::KeyType>& cover)
 {
     return (*curr).orientation;
 }
 
-
 template <std::size_t level, std::size_t dimension>
-auto getTangentF(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
+auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
         SurfaceMesh::NodeID<level> curr, std::set<SurfaceMesh::KeyType>& cover)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
@@ -107,7 +105,6 @@ auto getTangentF(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin,
     }
     return rval/cover.size();
 }
-
 
 /**
  * @brief      Reads off.
@@ -137,8 +134,8 @@ bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeI
 bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
 void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
-tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-tensor<double,3,2> getTangent(SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
 Vector getNormalFromTangent(const tensor<double,3,2> tangent);
 
 // These exist for the a potential python interface
@@ -147,4 +144,23 @@ void translate(SurfaceMesh& mesh, double dx, double dy, double dz);
 void scale(SurfaceMesh& mesh, Vector v);
 void scale(SurfaceMesh& mesh, double sx, double sy , double sz);
 void scale(SurfaceMesh& mesh, double s);
+
+struct LocalStructureTensorVisitor
+{
+    tensor<double,3,2> lst;
+
+    LocalStructureTensorVisitor(){
+        lst = tensor<double,3,2>();
+    }
+
+    template <std::size_t level> 
+    bool visit(const SurfaceMesh& F, SurfaceMesh::NodeID<level> s)
+    {
+        auto tan = getTangent(F, s);
+        auto norm = getNormalFromTangent(tan);
+        lst += norm*norm;
+        std::cout << norm*norm << " " << lst << std::endl; 
+        return true;
+    }
+};
 
