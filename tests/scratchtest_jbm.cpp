@@ -336,18 +336,19 @@ struct Callback
     using KeyType = typename Complex::KeyType;
 
     template <std::size_t OldLevel, std::size_t NewLevel>
-    void operator()(const Complex& F, const std::array<KeyType,OldLevel>& old_name,
-                                           const std::array<KeyType,NewLevel>& new_name,
-                                           const SimplexSet& merged)
+    void operator()(const Complex& F,
+                    const std::array<KeyType,OldLevel>& old_name,
+                    const std::array<KeyType,NewLevel>& new_name,
+                    const SimplexSet& merged)
     {
         std::cout << "Inner: " << old_name << " --> " << new_name << std::endl;
     }
 
     template <std::size_t OldLevel>
     void operator()(const Complex& F,
-        const std::array<KeyType,OldLevel>& old_name,
-                                           const std::array<KeyType,1>& new_name,
-                                           const SimplexSet& merged)
+                    const std::array<KeyType,OldLevel>& old_name,
+                    const std::array<KeyType,1>& new_name,
+                    const SimplexSet& merged)
     {
         Vertex center;
         std::size_t cnt = 0;
@@ -363,9 +364,10 @@ struct Callback
     }
 
     template <std::size_t OldLevel>
-    void operator()(const Complex& F, const std::array<KeyType,OldLevel>& old_name,
-                                           const std::array<KeyType,3>& new_name,
-                                           const SimplexSet& merged)
+    void operator()(const Complex& F,
+                    const std::array<KeyType,OldLevel>& old_name,
+                    const std::array<KeyType,3>& new_name,
+                    const SimplexSet& merged)
     {
         std::cout << "3nner: " << old_name << " --> " << new_name << " : " << std::get<3>(merged).size() << std::endl;
         std::get<3>(data).push_back(std::make_pair(new_name,Face()));
@@ -421,6 +423,26 @@ struct PerformInsertion<Complex, NodeDataType, std::integral_constant<std::size_
     }
 };
 
+template <typename Complex, std::size_t k>
+struct PerformRemoval
+{
+    static void apply(Complex& F, typename jbm::SimplexSet<Complex>::type& data)
+    {
+        for(auto curr : std::get<k>(data))
+        {
+            std::array<typename Complex::KeyType,k> name(F.get_name(curr));
+            std::cout << "---------|| " << name << " ||---------" << std::endl;
+            F.template remove<k>(curr);
+        }
+        PerformRemoval<Complex,k-1>::apply(F,data);
+    }
+};
+
+template <typename Complex>
+struct PerformRemoval<Complex,0>
+{
+    static void apply(Complex& F, typename jbm::SimplexSet<Complex>::type& data) {}
+};
 
 int main(int argc, char *argv[])
 {
@@ -442,35 +464,69 @@ int main(int argc, char *argv[])
     compute_orientation(*mesh);
     
     std::vector<Callback<SurfaceMesh>> callbacks;
-    int np = -1;
-    for(auto s : mesh->get_level_id<2>())
-    {
-        Callback<SurfaceMesh> clbk;
-        std::cout << mesh->get_name(s) << std::endl;
-        typename jbm::SimplexSet<SurfaceMesh>::type levels;
-        visit_node_down(TestBVisitor<SurfaceMesh>(&levels), *mesh, s);
-        visit_node_down(MainVisitor<SurfaceMesh,Callback>(&levels,&clbk,np), *mesh, s);
-//        visit_node_down(make_testB_visitor(mesh->get_node_up<1>({1})), *mesh, s);
-//        edge_up(make_print_edge_visitor(*mesh), *mesh, mesh->get_edge_up(mesh->get_node_up(),1));
-        /*
-        auto edges = mesh->up(v);
-        auto faces = mesh->up(edges);
+    int np = 100;
+    int i = 0;
+    typename jbm::SimplexSet<SurfaceMesh>::type doomed;
 
-        std::cout << v << std::endl;
-        for(auto f : faces)
+    for(auto s : mesh->get_level_id<3>())
+    {
+        if(i++ == 15)
         {
-            std::cout << "    " << f << std::endl;
+            Callback<SurfaceMesh> clbk;
+            std::cout << mesh->get_name(s) << std::endl;
+            typename jbm::SimplexSet<SurfaceMesh>::type levels;
+            visit_node_down(TestBVisitor<SurfaceMesh>(&levels), *mesh, s);
+            doomed = levels;
+            visit_node_down(MainVisitor<SurfaceMesh,Callback>(&levels,&clbk,np), *mesh, s);
+    //        visit_node_down(make_testB_visitor(mesh->get_node_up<1>({1})), *mesh, s);
+    //        edge_up(make_print_edge_visitor(*mesh), *mesh, mesh->get_edge_up(mesh->get_node_up(),1));
+            /*
+            auto edges = mesh->up(v);
+            auto faces = mesh->up(edges);
+
+            std::cout << v << std::endl;
+            for(auto f : faces)
+            {
+                std::cout << "    " << f << std::endl;
+            }
+            */
+            callbacks.push_back(clbk);
+            ++np;
         }
-        */
-        callbacks.push_back(clbk);
-        --np;
     }
+
+    PerformRemoval<SurfaceMesh,3>::apply(*mesh, doomed);
 
     for(auto curr : callbacks)
     {
         PerformInsertion<SurfaceMesh,Vertex,std::integral_constant<std::size_t,1>>::apply(*mesh, curr.data);
     }
 
-    mesh->renumber();
+    for(auto s : mesh->get_level_id<3>())
+    {
+        std::cout << mesh->get_name(s) << std::endl;
+    }
+
+//    mesh->renumber();
+
+
+    for(auto s : mesh->get_level_id<3>())
+    {
+        std::cout << mesh->get_name(s) << std::endl;
+    }
+
     writeOFF("awesome.off", *mesh);
+
+
+
+
+    std::map<int,int> fn;
+    fn[-1] = 2;
+    fn[-2] = 3;
+    fn[-3] = 5;
+
+    for(auto curr : fn)
+    {
+        std::cout << curr.first << std::endl;
+    }
 }

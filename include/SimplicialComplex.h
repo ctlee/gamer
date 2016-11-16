@@ -613,6 +613,21 @@ public:
 		return remove_recurse<k,0>::apply(this, &root, &root + 1, count);
 	}
 
+	template <std::size_t k>
+	size_t remove(const std::array<KeyType,k>& s)
+	{
+		Node<k>* root = get_recurse<0,k>::apply(this, s.data(), _root);
+		size_t count = 0;
+		return remove_recurse<k,0>::apply(this, &root, &root + 1, count);
+	}
+
+	template <std::size_t k>
+	std::size_t remove(NodeID<k> s)
+	{
+		size_t count = 0;
+		return remove_recurse<k,0>::apply(this, &s.ptr, &s.ptr + 1, count);
+	}
+
 	template <std::size_t L, std::size_t R>
 	bool leq(NodeID<L> lhs, NodeID<R> rhs) const
 	{
@@ -678,25 +693,28 @@ public:
 	    fout << "}\n";
 		fout.close();    	
 	}
-
+/*
 	void renumber(){
 		auto it = std::get<1>(levels).end();
 
-		for(int i=0; i < this->size<1>(); i++)
+		for(int i=0; i < this->size<1>(); ++i)
 		{
 			auto nodeID = this->get_node_up({i});
 			if(nodeID == nullptr)
 			{
 				--it;
 				auto name = (*it->second->_down.begin()).first;
+				if (name <= i){
+					std::cout << "Failure!" << std::endl;
+				}
 				std::set<Node<1>*> node{it->second};
 				renumber_recurse<1,0>::apply(node, name, i);
 			}
 		}
 	}
-
-
+*/
 private:
+/*
 	template <size_t k, size_t foo>	
 	struct renumber_recurse
 	{
@@ -741,7 +759,7 @@ private:
 			}
 		}
 	};
-
+*/
 
 	template <size_t k, size_t foo>	
 	struct writeGraph{
@@ -1024,12 +1042,17 @@ private:
 	template <size_t level>
 	void remove_node(Node<level>* p)
 	{
+		std::cout << ">>> REMOVE --  MID <<<" << std::endl;
+		std::cout << " down" << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
+			std::cout << "  - " << curr->first << std::endl;
 			curr->second->_up.erase(curr->first);
 		}
+		std::cout << " up" << std::endl;
 		for(auto curr = p->_up.begin(); curr != p->_up.end(); ++curr)
 		{
+			std::cout << "  - " << curr->first << std::endl;
 			curr->second->_down.erase(curr->first);
 		}
 		--(level_count[level]);
@@ -1039,8 +1062,11 @@ private:
 
 	void remove_node(Node<0>* p)
 	{
+		std::cout << ">>> REMOVE -- BOTTOM <<<" << std::endl;
+		std::cout << " up" << std::endl;
 		for(auto curr = p->_up.begin(); curr != p->_up.end(); ++curr)
 		{
+			std::cout << "  - " << curr->first << std::endl;
 			curr->second->_down.erase(curr->first);
 		}
 		--(level_count[0]);
@@ -1050,8 +1076,11 @@ private:
 
 	void remove_node(Node<topLevel>* p)
 	{
+		std::cout << ">>> REMOVE -- TOP <<<" << std::endl;
+		std::cout << " down" << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
+			std::cout << curr->first << std::endl;
 			curr->second->_up.erase(curr->first);
 		}
 		--(level_count[topLevel]);

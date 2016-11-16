@@ -203,7 +203,12 @@ void writeOFF(const std::string& filename, SurfaceMesh& mesh){
         exit(1); 
     }
 
-    mesh.renumber();
+    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+    typename SurfaceMesh::KeyType cnt = 0;
+    for(const auto& x : mesh.get_level_id<1>())
+    {
+        sigma[mesh.get_name(x)[0]] = cnt++;
+    }
 
     fout << "OFF" << std::endl;
 
@@ -217,7 +222,7 @@ void writeOFF(const std::string& filename, SurfaceMesh& mesh){
     fout.precision(10); 
     // Get the vertex data directly 
     // TODO: this actually has to print out the vertices in order of the index...
-    for(auto& vertex : mesh.get_level<1>()){
+    for(const auto& vertex : mesh.get_level<1>()){
         fout    << vertex[0] << " "
                 << vertex[1] << " " 
                 << vertex[2] << " " 
@@ -227,7 +232,7 @@ void writeOFF(const std::string& filename, SurfaceMesh& mesh){
     // Get the face nodes
     for(auto faceNodeID : mesh.get_level_id<3>()){
         auto w = mesh.get_name(faceNodeID);
-        fout << "3 " << w[0] << " " << w[1] << " " << w[2] << "\n";
+        fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
     }
     fout.close();
 }
