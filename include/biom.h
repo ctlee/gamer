@@ -36,8 +36,8 @@
 #include <tuple>
 
 #include "gamer_base.h"
-#include <triangle/triangle.h>
-#include <tetgen/tetgen.h>
+#include <libraries/triangle/triangle.h>
+#include <libraries/tetgen/tetgen.h>
 
 #if 0
 # include <stdio.h>     /* One of 15 ISO-C headers -- get via MALOC */

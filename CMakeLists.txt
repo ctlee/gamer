@@ -36,8 +36,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
 
-add_subdirectory(tetgen)
-add_subdirectory(triangle)
+add_subdirectory(libraries)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)

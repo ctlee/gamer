@@ -110,7 +110,7 @@ void sort_connectivity(const std::vector<unsigned int>& conn,
 
 #include "biom.h"
 #include "SurfaceMeshOld.h"
-#include <tetgen/tetgen.h>
+#include <libraries/tetgen/tetgen.h>
 //#include "gamercf.h"
 
 /*

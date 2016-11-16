@@ -31,7 +31,7 @@
 #include "biom.h"
 #include "SurfaceMeshOld.h"
 
-#include "triangle/triangle.h"
+#include "libraries/triangle/triangle.h"
 //#include "gamercf.h"
 
 triangulateio* init_triangulateio()
