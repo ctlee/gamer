@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.6)
 
 project(GAMer VERSION 1.0.0)
 
-
 option(BUILD_STATIC_LIB "Build the static libraries" OFF)
 # BUILD_BLENDER will build static libraries as well
 option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
@@ -13,10 +12,15 @@ if(BUILD_TESTS)
     enable_testing()
 endif(BUILD_TESTS)
 
-# Set the flags for empty build and print all build flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall -Wno-error")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wno-error")
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+  message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt. ")
+endif()
 
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+# Print all build flags
 message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
 message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
 message(STATUS "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
@@ -36,8 +40,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
 
-add_subdirectory(tetgen)
-add_subdirectory(triangle)
+add_subdirectory(libraries)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(include)

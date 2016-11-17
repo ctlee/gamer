@@ -30,7 +30,7 @@
 
 #include "biom.h"
 #include "SurfaceMeshOld.h"
-#include <tetgen/tetgen.h>
+#include <libraries/tetgen/tetgen.h>
 #include <vector>
 #include <tuple>
 

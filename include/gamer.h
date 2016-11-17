@@ -36,8 +36,8 @@
 #define _GAMER_H_
 
 #include "gamer_base.h"
-#include <triangle/triangle.h>
-#include <tetgen/tetgen.h>
+#include <libraries/triangle/triangle.h>
+#include <libraries/tetgen/tetgen.h>
 #include "biom.h"
 #include "SurfaceMeshOld.h"
 #include "PDB2Volume.h"
