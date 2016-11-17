@@ -38,7 +38,7 @@ public:
 	constexpr static std::size_t total_dimension = detail::pow<vector_dimension, index_dimension>::value;
 	using ElemType  = _ElemType;
 	using IndexType = std::array<std::size_t, index_dimension>;
-	using DataType  = std::vector<ElemType>;
+	using DataType  = std::array<ElemType, total_dimension>;
 
 	struct index_iterator : public std::iterator<std::bidirectional_iterator_tag, IndexType>
 	{
@@ -124,16 +124,12 @@ public:
 		resize(_dimensions);
 	}
 */
-	tensor() { resize(); }
+	tensor() {}
 
 	tensor(const tensor& x) : _data(x._data) {}
 
 	tensor(const tensor&& x) : _data(std::move(x._data)) {}
 
-	void resize()
-	{
-		_data.resize(total_dimension);
-	}
 /*
 	const IndexType& size()
 	{
