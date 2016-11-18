@@ -1171,7 +1171,7 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
     FLTVECT tmp;
     float   tx, ty, tz;
 
-
+    // CTL: assume a is the shared vertex between b and c....
     ax = surfmesh->vertex_attr(a).x;
     ay = surfmesh->vertex_attr(a).y;
     az = surfmesh->vertex_attr(a).z;
@@ -1194,6 +1194,7 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
         by /= distance;
         bz /= distance;
     }
+    // CTL: at this point bx = normalized distance from b to a
 
     // get distance from c to a
     cx      -= ax;
@@ -1207,6 +1208,8 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
         cy /= distance;
         cz /= distance;
     }
+    // CTL: cx = normalized distance from c to a
+
     tx       = 0.5 * (cx + bx);
     ty       = 0.5 * (cy + by);
     tz       = 0.5 * (cz + bz);
@@ -1218,6 +1221,8 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
         ty /= distance;
         tz /= distance;
     }
+    // CTL: tx = normalized bisector of ba + ca
+
     xx       = by * cz - bz * cy;
     yy       = bz * cx - bx * cz;
     zz       = bx * cy - by * cx;
@@ -1232,6 +1237,7 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
     bx = xx;
     by = yy;
     bz = zz;
+    // CTL: Compute the cross product and normalize
 
     distance = tx * (x - ax) + ty * (y - ay) + tz * (z - az);
     xx       = distance * tx + ax;

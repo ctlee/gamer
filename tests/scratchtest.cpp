@@ -6,10 +6,13 @@
 #include <iostream>
 #include <string>
 #include <cmath>
-
+#include <libraries/Eigen/Dense>
+#include <libraries/Eigen/Eigenvalues>
 #include "SurfaceMesh.h"
 #include "SimplicialComplexVisitors.h"
 #include "Vertex.h"
+
+
 
 template <typename T, std::size_t k>
 std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
@@ -61,37 +64,25 @@ int main(int argc, char *argv[])
     auto mesh = result.first;
     compute_orientation(*mesh);
 
-    for(auto nid : mesh->get_level_id<3>()){
-        //auto v = LocalStructureTensorVisitor();
-        // auto v = make_print_visitor(*mesh);
-        // visit_neighbors_down<1>(v, *mesh, nid);
-        visit_neighbors_down<1>(make_print_visitor(*mesh), *mesh, nid);
-        //std::cout << *nid << " " << v.lst << std::endl;
+    for(auto nid: mesh->get_level_id<1>())
+    {
+        weightedVertexSmooth(*mesh, nid);
     }
-
-   for(auto nid : mesh->get_level_id<1>()){
-        auto v = LocalStructureTensorVisitor();
-        visit_neighbors_up<1>(v, *mesh, nid);
-        std::cout << *nid << " " << v.lst << std::endl;
-    }
-    
-    //std::set<SurfaceMesh::NodeID<1>> nodes;
-
-    // neighbors_up(*mesh, nid, std::inserter(nodes, nodes.begin()));
-    // auto next = nodes;
-    // for(auto node : next){
-    //     neighbors_up(*mesh, node, std::inserter(nodes, nodes.begin()));
+    // for(auto nid : mesh->get_level_id<3>()){
+    //     //auto v = LocalStructureTensorVisitor();
+    //     // auto v = make_print_visitor(*mesh);
+    //     // visit_neighbors_down<1>(v, *mesh, nid);
+    //     visit_neighbors_down<1>(make_print_visitor(*mesh), *mesh, nid);
+    //     //std::cout << *nid << " " << v.lst << std::endl;
     // }
-    // for(auto node : nodes){
-    //     std::cout << *node << std::endl;
+
+    // for(auto nid : mesh->get_level_id<1>()){
+    //     auto v = LocalStructureTensorVisitor();
+    //     visit_neighbors_up<1>(v, *mesh, nid);
+    //     std::cout << *nid << " " << v.lst << std::endl;
+    //     getEigenvalues(v.lst);
     // }
     
-    // std::cout << std::endl << std::endl;
-    // auto nodes2 = neighbors_up(*mesh, nid, 3);
-
-    // for(auto node : nodes2){
-    //     std::cout << *node << std::endl;
-    // }
-    // writeOFF("../data/test.off", *mesh);
+    writeOFF("../data/test.off", *mesh);
     std::cout << "EOF" << std::endl;
 }

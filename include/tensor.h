@@ -1,12 +1,12 @@
 #pragma once
 
-#include <iostream>
-#include <array>
-#include <vector>
 #include <algorithm>
+#include <array>
 #include <cassert>
-#include "util.h"
+#include <iostream>
 #include <utility>
+#include <vector>
+#include "util.h"
 
 namespace detail {
 	template <std::size_t k>
@@ -29,7 +29,6 @@ namespace detail {
 		constexpr static std::size_t value = 1;
 	};
 }
-
 template <typename _ElemType, std::size_t _vector_dimension, std::size_t _index_dimension>
 class tensor {
 public:
@@ -124,7 +123,12 @@ public:
 		resize(_dimensions);
 	}
 */
-	tensor() {}
+	tensor() { _data.fill(0); }
+
+	tensor(const ElemType (&s)[total_dimension]) 
+	{ 
+		std::copy(std::begin(s), std::end(s), std::begin(_data)); 
+	}
 
 	tensor(const tensor& x) : _data(x._data) {}
 
@@ -249,6 +253,11 @@ public:
 			a /= x;
 		}
 		return *this;
+	}
+
+	auto data()
+	{
+		return _data.data();
 	}
 
 	index_iterator index_begin() { return index_iterator(0); }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <libraries/Eigen/Dense>
+#include <libraries/Eigen/Eigenvalues>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -8,7 +10,6 @@
 #include "SimplicialComplex.h"
 #include "Orientable.h"
 #include "Vertex.h"
-
 /**
  * @brief      Properties that Faces should have
  */
@@ -132,8 +133,12 @@ std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool pres
         const std::function<bool(SurfaceMesh&, SurfaceMesh::NodeID<2>&)> &checkFlip);
 bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
 bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
-void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+
+void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
+
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
 Vector getNormalFromTangent(const tensor<double,3,2> tangent);
@@ -164,3 +169,4 @@ struct LocalStructureTensorVisitor
     }
 };
 
+Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat);

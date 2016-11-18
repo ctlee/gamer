@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <libraries/Eigen/Dense>
+#include <libraries/Eigen/Eigenvalues>
 #include <map>
 #include <vector>
 #include "SurfaceMesh.h"
@@ -205,7 +207,6 @@ std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool pres
                 continue;
             }
 
-
             if (checkFlip(mesh, edgeID)){
                 edgesToFlip.push_back(edgeID);
                 std::vector<SurfaceMesh::NodeID<2>> neighbors;
@@ -299,7 +300,8 @@ bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edg
     return false;
 }
 
-void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+// Angle Mesh improvement by projecting barycenter on tangent plane...
+void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     // get the neighbors     
     std::vector<SurfaceMesh::NodeID<1>> vertices;
     neighbors_up(mesh, vertexID, std::back_inserter(vertices));
@@ -311,14 +313,80 @@ void angleMeshImprove(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     avgPos /= vertices.size();
     
     auto disp = avgPos - (*vertexID).position;
-    // Restrict movement along the tangent...
+    // Project onto tangent plane
     // A||B = Bx(AxB/|B|)/|B|
     // A_|_B = A.B*B/|B|^2
     auto norm = getNormalFromTangent(getTangent(mesh, vertexID));
-    auto magNorm = magnitude(norm);
-    auto parallel = cross(norm,cross(disp,norm/magNorm)/magNorm);
-    //auto perp = (disp|norm) * norm/std::pow(magnitude(norm),2);
+    norm /= std::sqrt(norm|norm); // normalize
+    auto perpProj = norm*norm; // tensor product
+    
+    Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+    
+    // Compute perpendicular component 
+    // Vector perp;
+    // Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+    // Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+    // perp_e = perpProj_e*disp_e;
+
+    // Compute the parallel component
+    Vector parallel;
+    tensor<double,3,2> identity{{1,0,0,0,1,0,0,0,1}};
+    auto llproj = identity-perpProj; // perpendicular projector
+    Eigen::Map<Eigen::Matrix3d> llproj_e(llproj.data());
+    Eigen::Map<Eigen::Vector3d> parallel_e(parallel.data());
+    parallel_e = llproj_e*disp_e;
+
     (*vertexID).position = (*vertexID).position + parallel;
+}
+
+void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    auto centerName = mesh.get_name(vertexID)[0]; 
+    auto center = *vertexID; // get the vertex data
+
+    double sumWeights = 0;
+    Vector newPos;
+
+    for(auto edge : mesh.up(vertexID)){
+        // Get the vertex connected by edge
+        auto edgeName = mesh.get_name(edge);
+        auto shared = *mesh.get_node_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+
+        // Get the vertices connected to adjacent edge
+        auto up = mesh.get_cover(edge);
+        auto prev = *mesh.get_node_up({up[0]});
+        auto next = *mesh.get_node_up({up[1]}); 
+        
+        auto pS = prev - shared;
+        auto nS = next - shared;
+        auto bisector = (pS + nS)/2;
+        bisector /= std::sqrt(bisector|bisector);
+        auto tanNorm = getNormalFromTangent(pS^nS);
+
+        // Get the perpendicular plane made up of plane normal of bisector
+        auto perpPlane = tanNorm^bisector;
+        perpPlane /= std::sqrt(perpPlane|perpPlane);
+        auto perpNorm = getNormalFromTangent(perpPlane);
+
+        auto perpProj = perpNorm*perpNorm; // tensor product
+      
+        auto disp = center - shared;
+        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+        
+        // Compute perpendicular component 
+        Vector perp;
+        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+        perp_e = perpProj_e*disp_e;
+
+        pS /= std::sqrt(pS|pS);
+        nS /= std::sqrt(nS|nS);
+        auto alpha = (pS|nS) + 1;
+        sumWeights += alpha;
+        newPos += alpha*(center + perp);
+    }
+    newPos /= sumWeights;
+    std::cout << center.position << " " << newPos << std::endl;
+    center.position = newPos;
 }
 
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
@@ -351,4 +419,13 @@ Vector getNormalFromTangent(const tensor<double,3,2> tangent){
     // xp[1] = tangent.get(2,0);
     // xp[2] = tangent.get(1,0);
     return xp;
+}
+
+Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat)
+{
+    Eigen::Map<Eigen::Matrix3d> emat(mat.data());
+    // TODO: How much optimization can we get from having a persistent eigensolver?
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(emat);
+    if (eigensolver.info() != Eigen::Success) abort();
+    return eigensolver;
 }
