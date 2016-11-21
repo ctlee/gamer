@@ -1240,14 +1240,18 @@ FLTVECT GetPositionSurfaceOnly(float x, float y, float z, int a, int b, int c, S
     // CTL: Compute the cross product and normalize
 
     distance = tx * (x - ax) + ty * (y - ay) + tz * (z - az);
+    // bisector * (previous position - shared)
     xx       = distance * tx + ax;
     yy       = distance * ty + ay;
     zz       = distance * tz + az;
+    // distance along bisector + shared position = parallel...
 
     distance = bx * (x - xx) + by * (y - yy) + bz * (z - zz);
+    // plane normal * (previous position - result)
     tmp.x    = distance * bx + xx;
     tmp.y    = distance * by + yy;
     tmp.z    = distance * bz + zz;
+    // distance along nromal + result = perp...
 
     return tmp;
 }
