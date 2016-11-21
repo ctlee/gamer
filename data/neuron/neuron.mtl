@@ -1,0 +1,5507 @@
+# WaveFront *.mtl file (generated from an IMOD model by imod2obj)
+
+
+
+#MATERIAL FOR OBJECT 1:
+newmtl obj1_Plasma_Membrane
+Ka 0.4 0.4 0.4
+Kd 1 1 1
+Ks 0.498039 0.498039 0.498039
+Ns 15.6863
+d 0.6
+Tr 0.6
+
+
+#MATERIAL FOR OBJECT 2:
+newmtl obj2_Primary_Cilium
+Ka 0.4 0.4 0.4
+Kd 1 1 1
+Ks 0.498039 0.498039 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 3:
+newmtl obj3_Nucleus
+Ka 0.4 0.4 0
+Kd 1 1 0
+Ks 0.498039 0.498039 0
+Ns 15.6863
+d 0.6
+Tr 0.6
+
+
+#MATERIAL FOR OBJECT 4:
+newmtl obj4_Nucleolus
+Ka 0 0 0.4
+Kd 0 0 1
+Ks 0 0 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 5:
+newmtl obj5_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 6:
+newmtl obj6_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 7:
+newmtl obj7_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 8:
+newmtl obj8_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 9:
+newmtl obj9_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 10:
+newmtl obj10_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 11:
+newmtl obj11_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 12:
+newmtl obj12_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 13:
+newmtl obj13_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 14:
+newmtl obj14_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 15:
+newmtl obj15_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 16:
+newmtl obj16_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 17:
+newmtl obj17_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 18:
+newmtl obj18_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 19:
+newmtl obj19_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 20:
+newmtl obj20_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 21:
+newmtl obj21_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 22:
+newmtl obj22_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 23:
+newmtl obj23_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 24:
+newmtl obj24_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 25:
+newmtl obj25_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 26:
+newmtl obj26_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 27:
+newmtl obj27_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 28:
+newmtl obj28_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 29:
+newmtl obj29_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 30:
+newmtl obj30_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 31:
+newmtl obj31_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 32:
+newmtl obj32_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 33:
+newmtl obj33_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 34:
+newmtl obj34_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 35:
+newmtl obj35_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 36:
+newmtl obj36_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 37:
+newmtl obj37_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 38:
+newmtl obj38_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 39:
+newmtl obj39_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 40:
+newmtl obj40_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 41:
+newmtl obj41_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 42:
+newmtl obj42_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 43:
+newmtl obj43_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 44:
+newmtl obj44_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 45:
+newmtl obj45_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 46:
+newmtl obj46_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 47:
+newmtl obj47_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 48:
+newmtl obj48_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 49:
+newmtl obj49_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 50:
+newmtl obj50_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 51:
+newmtl obj51_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 52:
+newmtl obj52_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 53:
+newmtl obj53_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 54:
+newmtl obj54_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 55:
+newmtl obj55_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 56:
+newmtl obj56_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 57:
+newmtl obj57_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 58:
+newmtl obj58_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 59:
+newmtl obj59_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 60:
+newmtl obj60_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 61:
+newmtl obj61_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 62:
+newmtl obj62_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 63:
+newmtl obj63_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 64:
+newmtl obj64_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 65:
+newmtl obj65_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 66:
+newmtl obj66_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 67:
+newmtl obj67_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 68:
+newmtl obj68_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 69:
+newmtl obj69_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 70:
+newmtl obj70_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 71:
+newmtl obj71_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 72:
+newmtl obj72_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 73:
+newmtl obj73_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 74:
+newmtl obj74_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 75:
+newmtl obj75_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 76:
+newmtl obj76_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 77:
+newmtl obj77_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 78:
+newmtl obj78_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 79:
+newmtl obj79_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 80:
+newmtl obj80_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 81:
+newmtl obj81_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 82:
+newmtl obj82_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 83:
+newmtl obj83_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 84:
+newmtl obj84_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 85:
+newmtl obj85_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 86:
+newmtl obj86_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 87:
+newmtl obj87_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 88:
+newmtl obj88_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 89:
+newmtl obj89_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 90:
+newmtl obj90_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 91:
+newmtl obj91_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 92:
+newmtl obj92_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 93:
+newmtl obj93_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 94:
+newmtl obj94_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 95:
+newmtl obj95_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 96:
+newmtl obj96_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 97:
+newmtl obj97_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 98:
+newmtl obj98_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 99:
+newmtl obj99_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 100:
+newmtl obj100_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 101:
+newmtl obj101_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 102:
+newmtl obj102_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 103:
+newmtl obj103_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 104:
+newmtl obj104_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 105:
+newmtl obj105_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 106:
+newmtl obj106_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 107:
+newmtl obj107_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 108:
+newmtl obj108_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 109:
+newmtl obj109_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 110:
+newmtl obj110_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 111:
+newmtl obj111_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 112:
+newmtl obj112_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 113:
+newmtl obj113_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 114:
+newmtl obj114_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 115:
+newmtl obj115_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 116:
+newmtl obj116_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 117:
+newmtl obj117_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 118:
+newmtl obj118_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 119:
+newmtl obj119_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 120:
+newmtl obj120_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 121:
+newmtl obj121_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 122:
+newmtl obj122_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 123:
+newmtl obj123_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 124:
+newmtl obj124_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 125:
+newmtl obj125_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 126:
+newmtl obj126_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 127:
+newmtl obj127_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 128:
+newmtl obj128_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 129:
+newmtl obj129_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 130:
+newmtl obj130_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 131:
+newmtl obj131_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 132:
+newmtl obj132_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 133:
+newmtl obj133_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 134:
+newmtl obj134_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 135:
+newmtl obj135_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 136:
+newmtl obj136_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 137:
+newmtl obj137_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 138:
+newmtl obj138_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 139:
+newmtl obj139_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 140:
+newmtl obj140_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 141:
+newmtl obj141_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 142:
+newmtl obj142_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 143:
+newmtl obj143_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 144:
+newmtl obj144_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 145:
+newmtl obj145_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 146:
+newmtl obj146_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 147:
+newmtl obj147_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 148:
+newmtl obj148_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 149:
+newmtl obj149_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 150:
+newmtl obj150_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 151:
+newmtl obj151_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 152:
+newmtl obj152_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 153:
+newmtl obj153_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 154:
+newmtl obj154_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 155:
+newmtl obj155_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 156:
+newmtl obj156_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 157:
+newmtl obj157_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 158:
+newmtl obj158_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 159:
+newmtl obj159_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 160:
+newmtl obj160_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 161:
+newmtl obj161_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 162:
+newmtl obj162_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 163:
+newmtl obj163_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 164:
+newmtl obj164_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 165:
+newmtl obj165_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 166:
+newmtl obj166_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 167:
+newmtl obj167_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 168:
+newmtl obj168_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 169:
+newmtl obj169_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 170:
+newmtl obj170_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 171:
+newmtl obj171_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 172:
+newmtl obj172_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 173:
+newmtl obj173_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 174:
+newmtl obj174_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 175:
+newmtl obj175_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 176:
+newmtl obj176_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 177:
+newmtl obj177_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 178:
+newmtl obj178_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 179:
+newmtl obj179_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 180:
+newmtl obj180_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 181:
+newmtl obj181_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 182:
+newmtl obj182_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 183:
+newmtl obj183_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 184:
+newmtl obj184_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 185:
+newmtl obj185_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 186:
+newmtl obj186_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 187:
+newmtl obj187_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 188:
+newmtl obj188_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 189:
+newmtl obj189_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 190:
+newmtl obj190_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 191:
+newmtl obj191_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 192:
+newmtl obj192_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 193:
+newmtl obj193_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 194:
+newmtl obj194_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 195:
+newmtl obj195_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 196:
+newmtl obj196_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 197:
+newmtl obj197_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 198:
+newmtl obj198_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 199:
+newmtl obj199_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 200:
+newmtl obj200_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 201:
+newmtl obj201_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 202:
+newmtl obj202_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 203:
+newmtl obj203_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 204:
+newmtl obj204_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 205:
+newmtl obj205_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 206:
+newmtl obj206_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 207:
+newmtl obj207_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 208:
+newmtl obj208_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 209:
+newmtl obj209_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 210:
+newmtl obj210_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 211:
+newmtl obj211_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 212:
+newmtl obj212_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 213:
+newmtl obj213_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 214:
+newmtl obj214_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 215:
+newmtl obj215_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 216:
+newmtl obj216_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 217:
+newmtl obj217_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 218:
+newmtl obj218_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 219:
+newmtl obj219_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 220:
+newmtl obj220_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 221:
+newmtl obj221_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 222:
+newmtl obj222_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 223:
+newmtl obj223_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 224:
+newmtl obj224_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 225:
+newmtl obj225_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 226:
+newmtl obj226_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 227:
+newmtl obj227_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 228:
+newmtl obj228_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 229:
+newmtl obj229_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 230:
+newmtl obj230_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 231:
+newmtl obj231_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 232:
+newmtl obj232_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 233:
+newmtl obj233_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 234:
+newmtl obj234_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 235:
+newmtl obj235_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 236:
+newmtl obj236_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 237:
+newmtl obj237_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 238:
+newmtl obj238_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 239:
+newmtl obj239_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 240:
+newmtl obj240_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 241:
+newmtl obj241_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 242:
+newmtl obj242_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 243:
+newmtl obj243_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 244:
+newmtl obj244_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 245:
+newmtl obj245_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 246:
+newmtl obj246_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 247:
+newmtl obj247_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 248:
+newmtl obj248_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 249:
+newmtl obj249_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 250:
+newmtl obj250_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 251:
+newmtl obj251_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 252:
+newmtl obj252_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 253:
+newmtl obj253_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 254:
+newmtl obj254_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 255:
+newmtl obj255_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 256:
+newmtl obj256_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 257:
+newmtl obj257_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 258:
+newmtl obj258_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 259:
+newmtl obj259_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 260:
+newmtl obj260_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 261:
+newmtl obj261_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 262:
+newmtl obj262_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 263:
+newmtl obj263_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 264:
+newmtl obj264_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 265:
+newmtl obj265_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 266:
+newmtl obj266_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 267:
+newmtl obj267_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 268:
+newmtl obj268_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 269:
+newmtl obj269_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 270:
+newmtl obj270_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 271:
+newmtl obj271_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 272:
+newmtl obj272_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 273:
+newmtl obj273_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 274:
+newmtl obj274_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 275:
+newmtl obj275_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 276:
+newmtl obj276_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 277:
+newmtl obj277_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 278:
+newmtl obj278_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 279:
+newmtl obj279_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 280:
+newmtl obj280_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 281:
+newmtl obj281_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 282:
+newmtl obj282_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 283:
+newmtl obj283_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 284:
+newmtl obj284_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 285:
+newmtl obj285_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 286:
+newmtl obj286_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 287:
+newmtl obj287_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 288:
+newmtl obj288_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 289:
+newmtl obj289_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 290:
+newmtl obj290_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 291:
+newmtl obj291_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 292:
+newmtl obj292_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 293:
+newmtl obj293_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 294:
+newmtl obj294_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 295:
+newmtl obj295_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 296:
+newmtl obj296_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 297:
+newmtl obj297_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 298:
+newmtl obj298_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 299:
+newmtl obj299_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 300:
+newmtl obj300_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 301:
+newmtl obj301_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 302:
+newmtl obj302_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 303:
+newmtl obj303_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 304:
+newmtl obj304_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 305:
+newmtl obj305_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 306:
+newmtl obj306_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 307:
+newmtl obj307_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 308:
+newmtl obj308_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 309:
+newmtl obj309_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 310:
+newmtl obj310_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 311:
+newmtl obj311_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 312:
+newmtl obj312_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 313:
+newmtl obj313_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 314:
+newmtl obj314_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 315:
+newmtl obj315_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 316:
+newmtl obj316_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 317:
+newmtl obj317_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 318:
+newmtl obj318_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 319:
+newmtl obj319_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 320:
+newmtl obj320_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 321:
+newmtl obj321_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 322:
+newmtl obj322_Mitochondrion
+Ka 0 0.4 0
+Kd 0 1 0
+Ks 0 0.498039 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 323:
+newmtl obj323_Stigmoid_Body
+Ka 0 0.4 0.4
+Kd 0 1 1
+Ks 0 0.498039 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 324:
+newmtl obj324_Autolysosome
+Ka 0.4 0 0.4
+Kd 1 0 1
+Ks 0.498039 0 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 325:
+newmtl obj325_Autolysosome
+Ka 0.4 0 0.4
+Kd 1 0 1
+Ks 0.498039 0 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 326:
+newmtl obj326_Autolysosome
+Ka 0.4 0 0.4
+Kd 1 0 1
+Ks 0.498039 0 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 327:
+newmtl obj327_Autolysosome
+Ka 0.4 0 0.4
+Kd 1 0 1
+Ks 0.498039 0 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 328:
+newmtl obj328_Autophagosome
+Ka 0.4 0.2 0.4
+Kd 1 0.5 1
+Ks 0.498039 0.24902 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 329:
+newmtl obj329_Autophagosome
+Ka 0.4 0.2 0.4
+Kd 1 0.5 1
+Ks 0.498039 0.24902 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 330:
+newmtl obj330_Autophagosome
+Ka 0.4 0.2 0.4
+Kd 1 0.5 1
+Ks 0.498039 0.24902 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 331:
+newmtl obj331_Autophagosome
+Ka 0.4 0.2 0.4
+Kd 1 0.5 1
+Ks 0.498039 0.24902 0.498039
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 332:
+newmtl obj332_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 333:
+newmtl obj333_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 334:
+newmtl obj334_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 335:
+newmtl obj335_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 336:
+newmtl obj336_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 337:
+newmtl obj337_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 338:
+newmtl obj338_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 339:
+newmtl obj339_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 340:
+newmtl obj340_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 341:
+newmtl obj341_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 342:
+newmtl obj342_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 343:
+newmtl obj343_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 344:
+newmtl obj344_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 345:
+newmtl obj345_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 346:
+newmtl obj346_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 347:
+newmtl obj347_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 348:
+newmtl obj348_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 349:
+newmtl obj349_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 350:
+newmtl obj350_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 351:
+newmtl obj351_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 352:
+newmtl obj352_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 353:
+newmtl obj353_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 354:
+newmtl obj354_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 355:
+newmtl obj355_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 356:
+newmtl obj356_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 357:
+newmtl obj357_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 358:
+newmtl obj358_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 359:
+newmtl obj359_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 360:
+newmtl obj360_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 361:
+newmtl obj361_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 362:
+newmtl obj362_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 363:
+newmtl obj363_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 364:
+newmtl obj364_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 365:
+newmtl obj365_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 366:
+newmtl obj366_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 367:
+newmtl obj367_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 368:
+newmtl obj368_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 369:
+newmtl obj369_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 370:
+newmtl obj370_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 371:
+newmtl obj371_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 372:
+newmtl obj372_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 373:
+newmtl obj373_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 374:
+newmtl obj374_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 375:
+newmtl obj375_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 376:
+newmtl obj376_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 377:
+newmtl obj377_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 378:
+newmtl obj378_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 379:
+newmtl obj379_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 380:
+newmtl obj380_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 381:
+newmtl obj381_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 382:
+newmtl obj382_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 383:
+newmtl obj383_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 384:
+newmtl obj384_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 385:
+newmtl obj385_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 386:
+newmtl obj386_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 387:
+newmtl obj387_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 388:
+newmtl obj388_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 389:
+newmtl obj389_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 390:
+newmtl obj390_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 391:
+newmtl obj391_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 392:
+newmtl obj392_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 393:
+newmtl obj393_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 394:
+newmtl obj394_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 395:
+newmtl obj395_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 396:
+newmtl obj396_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 397:
+newmtl obj397_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 398:
+newmtl obj398_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 399:
+newmtl obj399_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 400:
+newmtl obj400_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 401:
+newmtl obj401_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 402:
+newmtl obj402_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 403:
+newmtl obj403_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 404:
+newmtl obj404_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 405:
+newmtl obj405_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 406:
+newmtl obj406_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 407:
+newmtl obj407_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 408:
+newmtl obj408_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 409:
+newmtl obj409_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 410:
+newmtl obj410_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 411:
+newmtl obj411_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 412:
+newmtl obj412_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 413:
+newmtl obj413_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 414:
+newmtl obj414_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 415:
+newmtl obj415_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 416:
+newmtl obj416_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 417:
+newmtl obj417_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 418:
+newmtl obj418_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 419:
+newmtl obj419_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 420:
+newmtl obj420_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 421:
+newmtl obj421_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 422:
+newmtl obj422_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 423:
+newmtl obj423_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 424:
+newmtl obj424_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 425:
+newmtl obj425_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 426:
+newmtl obj426_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 427:
+newmtl obj427_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 428:
+newmtl obj428_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 429:
+newmtl obj429_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 430:
+newmtl obj430_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 431:
+newmtl obj431_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 432:
+newmtl obj432_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 433:
+newmtl obj433_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 434:
+newmtl obj434_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 435:
+newmtl obj435_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 436:
+newmtl obj436_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 437:
+newmtl obj437_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 438:
+newmtl obj438_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 439:
+newmtl obj439_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 440:
+newmtl obj440_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 441:
+newmtl obj441_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 442:
+newmtl obj442_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 443:
+newmtl obj443_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 444:
+newmtl obj444_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 445:
+newmtl obj445_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 446:
+newmtl obj446_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 447:
+newmtl obj447_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 448:
+newmtl obj448_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 449:
+newmtl obj449_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 450:
+newmtl obj450_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 451:
+newmtl obj451_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 452:
+newmtl obj452_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 453:
+newmtl obj453_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 454:
+newmtl obj454_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 455:
+newmtl obj455_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 456:
+newmtl obj456_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 457:
+newmtl obj457_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 458:
+newmtl obj458_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 459:
+newmtl obj459_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 460:
+newmtl obj460_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 461:
+newmtl obj461_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 462:
+newmtl obj462_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 463:
+newmtl obj463_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 464:
+newmtl obj464_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 465:
+newmtl obj465_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 466:
+newmtl obj466_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 467:
+newmtl obj467_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 468:
+newmtl obj468_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 469:
+newmtl obj469_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 470:
+newmtl obj470_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 471:
+newmtl obj471_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 472:
+newmtl obj472_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 473:
+newmtl obj473_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 474:
+newmtl obj474_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 475:
+newmtl obj475_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 476:
+newmtl obj476_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 477:
+newmtl obj477_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 478:
+newmtl obj478_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 479:
+newmtl obj479_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 480:
+newmtl obj480_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 481:
+newmtl obj481_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 482:
+newmtl obj482_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 483:
+newmtl obj483_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 484:
+newmtl obj484_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 485:
+newmtl obj485_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 486:
+newmtl obj486_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 487:
+newmtl obj487_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 488:
+newmtl obj488_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 489:
+newmtl obj489_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 490:
+newmtl obj490_Lysosome
+Ka 0.4 0 0
+Kd 1 0 0
+Ks 0.498039 0 0
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 491:
+newmtl obj491_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 492:
+newmtl obj492_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 493:
+newmtl obj493_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 494:
+newmtl obj494_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 495:
+newmtl obj495_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 496:
+newmtl obj496_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 497:
+newmtl obj497_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 498:
+newmtl obj498_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 499:
+newmtl obj499_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 500:
+newmtl obj500_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 501:
+newmtl obj501_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 502:
+newmtl obj502_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 503:
+newmtl obj503_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 504:
+newmtl obj504_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 505:
+newmtl obj505_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 506:
+newmtl obj506_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 507:
+newmtl obj507_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 508:
+newmtl obj508_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 509:
+newmtl obj509_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 510:
+newmtl obj510_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 511:
+newmtl obj511_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 512:
+newmtl obj512_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 513:
+newmtl obj513_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 514:
+newmtl obj514_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 515:
+newmtl obj515_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 516:
+newmtl obj516_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 517:
+newmtl obj517_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 518:
+newmtl obj518_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 519:
+newmtl obj519_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 520:
+newmtl obj520_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 521:
+newmtl obj521_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 522:
+newmtl obj522_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 523:
+newmtl obj523_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 524:
+newmtl obj524_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 525:
+newmtl obj525_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 526:
+newmtl obj526_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 527:
+newmtl obj527_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 528:
+newmtl obj528_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 529:
+newmtl obj529_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 530:
+newmtl obj530_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 531:
+newmtl obj531_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 532:
+newmtl obj532_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 533:
+newmtl obj533_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 534:
+newmtl obj534_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 535:
+newmtl obj535_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 536:
+newmtl obj536_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 537:
+newmtl obj537_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 538:
+newmtl obj538_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 539:
+newmtl obj539_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 540:
+newmtl obj540_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 541:
+newmtl obj541_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 542:
+newmtl obj542_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 543:
+newmtl obj543_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 544:
+newmtl obj544_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 545:
+newmtl obj545_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 546:
+newmtl obj546_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 547:
+newmtl obj547_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 548:
+newmtl obj548_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 549:
+newmtl obj549_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+#MATERIAL FOR OBJECT 550:
+newmtl obj550_Multivesicular_Body
+Ka 0.08 0 0.32
+Kd 0.2 0 0.8
+Ks 0.0996078 0 0.398431
+Ns 15.6863
+d 0
+Tr 0
+
+
+
+# For more info on MTL file format see:
+#  http://en.wikipedia.org/wiki/Material_Template_Library
