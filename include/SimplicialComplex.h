@@ -1042,17 +1042,12 @@ private:
 	template <size_t level>
 	void remove_node(Node<level>* p)
 	{
-		std::cout << ">>> REMOVE --  MID <<<" << std::endl;
-		std::cout << " down" << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
-			std::cout << "  - " << curr->first << std::endl;
 			curr->second->_up.erase(curr->first);
 		}
-		std::cout << " up" << std::endl;
 		for(auto curr = p->_up.begin(); curr != p->_up.end(); ++curr)
 		{
-			std::cout << "  - " << curr->first << std::endl;
 			curr->second->_down.erase(curr->first);
 		}
 		--(level_count[level]);
@@ -1062,11 +1057,8 @@ private:
 
 	void remove_node(Node<0>* p)
 	{
-		std::cout << ">>> REMOVE -- BOTTOM <<<" << std::endl;
-		std::cout << " up" << std::endl;
 		for(auto curr = p->_up.begin(); curr != p->_up.end(); ++curr)
 		{
-			std::cout << "  - " << curr->first << std::endl;
 			curr->second->_down.erase(curr->first);
 		}
 		--(level_count[0]);
@@ -1076,11 +1068,8 @@ private:
 
 	void remove_node(Node<topLevel>* p)
 	{
-		std::cout << ">>> REMOVE -- TOP <<<" << std::endl;
-		std::cout << " down" << std::endl;
 		for(auto curr = p->_down.begin(); curr != p->_down.end(); ++curr)
 		{
-			std::cout << curr->first << std::endl;
 			curr->second->_up.erase(curr->first);
 		}
 		--(level_count[topLevel]);
