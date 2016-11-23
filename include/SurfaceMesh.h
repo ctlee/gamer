@@ -170,3 +170,76 @@ struct LocalStructureTensorVisitor
 };
 
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat);
+
+template <std::size_t rings>
+void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    auto centerName = mesh.get_name(vertexID)[0]; 
+    auto& center = *vertexID; // get the vertex data
+
+    double sumWeights = 0;
+    Vector newPos;
+
+    /**
+     * Compute the following sum to get the new position
+     * \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(alpha_i + 1) x_i
+     */
+    for(auto edge : mesh.up(vertexID)){
+        // Get the vertex connected by edge
+        auto edgeName = mesh.get_name(edge);
+        auto shared = *mesh.get_node_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+
+        // Get the vertices connected to adjacent edge
+        auto up = mesh.get_cover(edge);
+        auto prev = *mesh.get_node_up({up[0]});
+        auto next = *mesh.get_node_up({up[1]}); 
+        
+        auto pS = prev - shared;
+        pS /= std::sqrt(pS|pS);
+        auto nS = next - shared;
+        nS /= std::sqrt(nS|nS);
+        auto bisector = (pS + nS)/2;
+        bisector /= std::sqrt(bisector|bisector);
+
+        // Get a reference vecter to shared which lies on the plane of interest.
+        auto disp = center - shared;
+        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+
+        auto tanNorm = getNormalFromTangent(pS^nS);
+
+        // Get the perpendicular plane made up of plane normal of bisector
+        auto perpPlane = tanNorm^bisector;
+        auto perpNorm = getNormalFromTangent(perpPlane);
+        perpNorm /= std::sqrt(perpNorm|perpNorm);
+        auto perpProj = perpNorm*perpNorm; // tensor product
+      
+        // Compute perpendicular component 
+        Vector perp;
+        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+        perp_e = perpProj_e*disp_e;
+
+        auto alpha = (pS|nS)+1; // keep the dot product positive
+        sumWeights += alpha;
+        newPos += alpha*(center.position - perp);
+    }
+    newPos /= sumWeights;
+    /**
+     * Scale by PCA
+     * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot \vec{e_k})\vec{e_k}
+     */
+    auto v = LocalStructureTensorVisitor();
+    visit_neighbors_up<1>(v, mesh, vertexID); // TODO: how should we set this?
+    auto eigen_result = getEigenvalues(v.lst);
+    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues() << std::endl;
+    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+    //      << "corresponding to these eigenvalues:\n"
+    //      << eigen_result.eigenvectors() << std::endl;
+
+    newPos -= center.position;
+    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+    
+    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array() // dot product
+             / (eigen_result.eigenvalues().array()+1)).matrix();         // elementwise-division
+    newPos_e = eigen_result.eigenvectors()*w; // matrix product
+    center.position += newPos;
+}

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     auto mesh = result.first;
     compute_orientation(*mesh);
 
-    for(auto i =0; i < 1; ++i){
+    for(auto i =0; i < 10; ++i){
         for(auto nid: mesh->get_level_id<1>())
         {
             weightedVertexSmooth(*mesh, nid);
