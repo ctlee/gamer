@@ -11,6 +11,7 @@
 #include <functional>
 #include <ostream>
 #include <unordered_set>
+#include <unordered_map>
 #include <utility>
 #include "util.h"
 
@@ -69,7 +70,7 @@ namespace detail {
 	 */
 	template <class KeyType, class DataType>
 	struct asc_EdgeData {
-		std::map<KeyType, DataType> _edge_data;
+		std::unordered_map<KeyType, DataType> _edge_data;
 	};	
 
 	/**
@@ -108,7 +109,7 @@ namespace detail {
 	template <class KeyType, size_t k, size_t N, class NodeDataTypes, class EdgeDataTypes>
 	struct asc_NodeUp {
 		using UpNodeT = asc_Node<KeyType,k+1,N,NodeDataTypes,EdgeDataTypes>;
-		std::map<KeyType, UpNodeT*> _up;	/**< @brief Map of pointers to children */
+		std::unordered_map<KeyType, UpNodeT*> _up;	/**< @brief Map of pointers to children */
 	};
 
 	/**
