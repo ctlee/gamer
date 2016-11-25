@@ -481,7 +481,7 @@ struct PerformRemoval<Complex,0>
 template <typename Complex, typename Simplex, template<typename> class Callback>
 void decimate(Complex& F, Simplex s, Callback<Complex>& clbk)
 {
-    int np = 100;
+    static int np = -1;
     int i = 0;
     typename jbm::SimplexDataSet<SurfaceMesh>::type rv;
     typename jbm::SimplexSet<SurfaceMesh>::type levels;
@@ -492,6 +492,7 @@ void decimate(Complex& F, Simplex s, Callback<Complex>& clbk)
 
     PerformRemoval<SurfaceMesh,3>::apply(F, doomed);
     PerformInsertion<SurfaceMesh,Vertex,std::integral_constant<std::size_t,1>>::apply(F, rv);
+    --np;
 }
 
 int main(int argc, char *argv[])
@@ -518,7 +519,7 @@ int main(int argc, char *argv[])
     std::vector<typename jbm::SimplexDataSet<SurfaceMesh>::type> rvals;
 
     Callback<SurfaceMesh> clbk;
-    for(int i = 0; i < 1; ++i)
+    for(int i = 0; i < 45000; ++i)
     {
         auto s = *(mesh->get_level_id<2>().begin());
         decimate(*mesh, s, clbk);
