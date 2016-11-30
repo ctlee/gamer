@@ -8,6 +8,7 @@
 #include <utility>
 #include "util.h"
 #include "SimplicialComplex.h"
+#include "SimplicialComplexVisitors.h"
 #include "Orientable.h"
 #include "Vertex.h"
 /**
@@ -228,7 +229,7 @@ void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
      * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot \vec{e_k})\vec{e_k}
      */
     auto v = LocalStructureTensorVisitor();
-    visit_neighbors_up<1>(v, mesh, vertexID); // TODO: how should we set this?
+    visit_neighbors_up<rings>(v, mesh, vertexID); // TODO: how should we set this?
     auto eigen_result = getEigenvalues(v.lst);
     // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues() << std::endl;
     // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"

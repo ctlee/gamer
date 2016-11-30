@@ -52,59 +52,59 @@ void generateHistogram(const SurfaceMesh& mesh){
   		std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)  << std::fixed << histogram[x] << std::endl;
   	std::cout << std::endl << std::endl;
 
-    // compute the edge length distribution
-    std::cout << "Edge Length Distribution:" << std::endl;
-    std::vector<double> lengths;
-    for(auto edge : mesh.get_level_id<2>()) {
-        auto vertexIDs = mesh.down(edge);
-        auto t1 = *vertexIDs.cbegin();
-        auto t2 = *(++vertexIDs.cbegin());
-        auto v1 = *t1;
-        auto v2 = *t2;
-        double len = magnitude(v2-v1);
-        lengths.push_back(len);
-    }
-    std::sort(lengths.begin(), lengths.end());
+    // // compute the edge length distribution
+    // std::cout << "Edge Length Distribution:" << std::endl;
+    // std::vector<double> lengths;
+    // for(auto edge : mesh.get_level_id<2>()) {
+    //     auto vertexIDs = mesh.down(edge);
+    //     auto t1 = *vertexIDs.cbegin();
+    //     auto t2 = *(++vertexIDs.cbegin());
+    //     auto v1 = *t1;
+    //     auto v2 = *t2;
+    //     double len = magnitude(v2-v1);
+    //     lengths.push_back(len);
+    // }
+    // std::sort(lengths.begin(), lengths.end());
 
-    std::array<double,20> histogramLength;
-    histogramLength.fill(0);
-    double interval = (lengths.back() - lengths.front())/20;
-    double low = lengths.front();
+    // std::array<double,20> histogramLength;
+    // histogramLength.fill(0);
+    // double interval = (lengths.back() - lengths.front())/20;
+    // double low = lengths.front();
 
-    if(interval <= 0.0000001){ // floating point roundoff prevention
-        std::cout << lengths.front() << ": " << 100 << std::endl << std::endl;
-    }
-    else {
-        for (auto length : lengths){
-            histogramLength[std::floor((length-low)/interval)]++;
-        }
+    // if(interval <= 0.0000001){ // floating point roundoff prevention
+    //     std::cout << lengths.front() << ": " << 100 << std::endl << std::endl;
+    // }
+    // else {
+    //     for (auto length : lengths){
+    //         histogramLength[std::floor((length-low)/interval)]++;
+    //     }
 
-        factor = mesh.size<2>();
-        std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double& n){
-                n = 100.0*n/factor;});
+    //     factor = mesh.size<2>();
+    //     std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double& n){
+    //             n = 100.0*n/factor;});
 
-        for (int x=0; x < 20; x++)
-            std::cout   << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)  
-                        << std::fixed << histogramLength[x] << std::endl;
-        std::cout << std::endl << std::endl;
-    }
+    //     for (int x=0; x < 20; x++)
+    //         std::cout   << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)  
+    //                     << std::fixed << histogramLength[x] << std::endl;
+    //     std::cout << std::endl << std::endl;
+    // }
 
-    // Compute the valence distribution
-    std::array<double, 20> histogramValence;
-    histogramValence.fill(0);
+    // // Compute the valence distribution
+    // std::array<double, 20> histogramValence;
+    // histogramValence.fill(0);
 
-    for (auto vertexID : mesh.get_level_id<1>()){
-        // TODO bounds checking here...
-        histogramValence[getValence(mesh, vertexID)]++;
-    }
+    // for (auto vertexID : mesh.get_level_id<1>()){
+    //     // TODO bounds checking here...
+    //     histogramValence[getValence(mesh, vertexID)]++;
+    // }
 
-    factor = mesh.size<1>();
-    // std::for_each(histogramValence.begin(), histogramValence.end(), [&factor](double& n){
-    //         n = 100.0*n/factor;});
-    std::cout << "Valence distribution:" << std::endl;    
-    for (int x=0; x < 20; x++)
-        std::cout << x << ": " << histogramValence[x] << std::endl;
-    std::cout << std::endl << std::endl;
+    // factor = mesh.size<1>();
+    // // std::for_each(histogramValence.begin(), histogramValence.end(), [&factor](double& n){
+    // //         n = 100.0*n/factor;});
+    // std::cout << "Valence distribution:" << std::endl;    
+    // for (int x=0; x < 20; x++)
+    //     std::cout << x << ": " << histogramValence[x] << std::endl;
+    // std::cout << std::endl << std::endl;
 }
 
 void translate(SurfaceMesh& mesh, Vector v){

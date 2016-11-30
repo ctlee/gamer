@@ -6,6 +6,8 @@
 
 # Ignore the build directory 
 build/
+release/
+debug/
 
 # C++ gitignore
 # Prerequisites

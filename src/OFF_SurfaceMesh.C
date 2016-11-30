@@ -232,7 +232,14 @@ void writeOFF(const std::string& filename, SurfaceMesh& mesh){
     // Get the face nodes
     for(auto faceNodeID : mesh.get_level_id<3>()){
         auto w = mesh.get_name(faceNodeID);
-        fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
+
+        if ((*faceNodeID).orientation == 1){
+            fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[0]] << "\n";
+        }
+        else {
+            fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
+
+        }
     }
     fout.close();
 }
