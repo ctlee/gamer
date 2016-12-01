@@ -1,3 +1,5 @@
+#pragma once
+
 #include <set>
 #include <vector>
 #include <iostream>

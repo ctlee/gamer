@@ -63,28 +63,17 @@ int main(int argc, char *argv[])
     }
     auto mesh = result.first;
     compute_orientation(*mesh);
+    generateHistogram(*mesh);
 
-    for(auto i =0; i < 1; ++i){
-        for(auto nid: mesh->get_level_id<1>())
+    for(auto i = 0; i < 10; ++i){
+        for(auto nid : mesh->get_level_id<1>())
         {
-            weightedVertexSmooth(*mesh, nid);
+            weightedVertexSmooth<3>(*mesh, nid);
         }
     }
-    // for(auto nid : mesh->get_level_id<3>()){
-    //     //auto v = LocalStructureTensorVisitor();
-    //     // auto v = make_print_visitor(*mesh);
-    //     // visit_neighbors_down<1>(v, *mesh, nid);
-    //     visit_neighbors_down<1>(make_print_visitor(*mesh), *mesh, nid);
-    //     //std::cout << *nid << " " << v.lst << std::endl;
-    // }
-
-    // for(auto nid : mesh->get_level_id<1>()){
-    //     auto v = LocalStructureTensorVisitor();
-    //     visit_neighbors_up<1>(v, *mesh, nid);
-    //     std::cout << *nid << " " << v.lst << std::endl;
-    //     getEigenvalues(v.lst);
-    // }
     
+    generateHistogram(*mesh);
+    compute_orientation(*mesh);
     writeOFF("../data/test.off", *mesh);
     std::cout << "EOF" << std::endl;
 }
