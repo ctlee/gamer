@@ -6,7 +6,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
-
+#include "SimplicialComplex.h"
 
 template <typename Visitor, typename Traits, typename Complex, typename K>
 struct BFS_Up_Node {};
@@ -178,9 +178,9 @@ struct Neighbors_Up_Node
     using Neighbors_Up_Node_Next = Neighbors_Up_Node<Visitor,Complex,level,ring-1>;
 
     template <typename Iterator>
-    static void apply(Visitor&& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
+    static void apply(Visitor&& v, const Complex& F, NodeSet<NodeID>& nodes, Iterator begin, Iterator end)
     {
-        std::set<NodeID> next;
+        NodeSet<NodeID> next;
 
         for(auto curr = begin; curr != end; ++curr)
         {
@@ -212,7 +212,7 @@ struct Neighbors_Up_Node<Visitor, Complex, k, 0>
     using NodeID = typename Complex::template NodeID<level>;
     
     template <typename Iterator>
-    static void apply(Visitor&& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
+    static void apply(Visitor&& v, const Complex& F, NodeSet<NodeID>& nodes, Iterator begin, Iterator end)
     {
         for(auto curr = begin; curr != end; ++curr)
         {
@@ -233,9 +233,9 @@ struct Neighbors_Down_Node
             level,ring-1>;
 
     template <typename Iterator>
-    static void apply(Visitor&& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
+    static void apply(Visitor&& v, const Complex& F, NodeSet<NodeID>& nodes, Iterator begin, Iterator end)
     {
-        std::set<NodeID> next;
+        NodeSet<NodeID> next;
 
         for(auto curr = begin; curr != end; ++curr)
         {
@@ -267,7 +267,7 @@ struct Neighbors_Down_Node<Visitor, Complex, k, 0>
     using NodeID = typename Complex::template NodeID<level>;
     
     template <typename Iterator>
-    static void apply(Visitor&& v, const Complex& F, std::set<NodeID>& nodes, Iterator begin, Iterator end)
+    static void apply(Visitor&& v, const Complex& F, NodeSet<NodeID>& nodes, Iterator begin, Iterator end)
     {
         for(auto curr = begin; curr != end; ++curr)
         {
@@ -282,12 +282,12 @@ template <typename T> using AllowRepeat = std::vector<T>;
 
 struct BFS_NoRepeat_Node_Traits
 {
-    template <typename T> using Container = std::set<T>;
+    template <typename T> using Container = NodeSet<T>;
 };
 
 struct BFS_NoRepeat_Edge_Traits
 {
-    template <typename T> using Container = std::set<T>;
+    template <typename T> using Container = NodeSet<T>;
 //    template <typename Complex, typename NodeID> auto node_next(Complex F, NodeID s);
 };
 
@@ -312,13 +312,13 @@ void edge_up(Visitor&& v, const typename EdgeID::complex& F, EdgeID s)
 template <std::size_t rings, typename Visitor, typename NodeID>
 void visit_neighbors_up(Visitor&& v, const typename NodeID::complex& F, NodeID s)
 {
-    std::set<NodeID> nodes{s};
+    NodeSet<NodeID> nodes{s};
     Neighbors_Up_Node<Visitor,typename NodeID::complex,NodeID::level,rings>::apply(std::forward<Visitor>(v),F,nodes,&s,&s+1);
 }
 
 template <std::size_t rings, typename Visitor, typename NodeID>
 void visit_neighbors_down(Visitor&& v, const typename NodeID::complex& F, NodeID s)
 {
-    std::set<NodeID> nodes{s};
+    NodeSet<NodeID> nodes{s};
     Neighbors_Down_Node<Visitor,typename NodeID::complex,NodeID::level,rings>::apply(std::forward<Visitor>(v),F,nodes,&s,&s+1);
 }
