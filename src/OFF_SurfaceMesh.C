@@ -233,12 +233,17 @@ void writeOFF(const std::string& filename, SurfaceMesh& mesh){
     for(auto faceNodeID : mesh.get_level_id<3>()){
         auto w = mesh.get_name(faceNodeID);
 
-        if ((*faceNodeID).orientation == 1){
+        auto orientation = (*faceNodeID).orientation;
+        if (orientation == 1){
             fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[0]] << "\n";
         }
-        else {
+        else if(orientation == -1){
             fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
 
+        }
+        else{
+            std::cerr << "Orientation undefined..." << std::endl;
+            fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
     }
     fout.close();

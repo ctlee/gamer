@@ -130,19 +130,22 @@ void print(const SurfaceMesh& mesh);
 void generateHistogram(const SurfaceMesh& mesh);
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID);
-std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool preserveRidges, 
-        const std::function<bool(SurfaceMesh&, SurfaceMesh::NodeID<2>&)> &checkFlip);
+std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
+        std::function<bool(const SurfaceMesh&, SurfaceMesh::NodeID<2>&)> &checkFlip);
 bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
 bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
 
 void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
 
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
 Vector getNormalFromTangent(const tensor<double,3,2> tangent);
+
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
 
 // These exist for the a potential python interface
 void translate(SurfaceMesh& mesh, Vector v);
@@ -162,10 +165,10 @@ struct LocalStructureTensorVisitor
     template <std::size_t level> 
     bool visit(const SurfaceMesh& F, SurfaceMesh::NodeID<level> s)
     {
-        auto tan = getTangent(F, s);
-        auto norm = getNormalFromTangent(tan);
+        // auto tan = getTangent(F, s);
+        // auto norm = getNormalFromTangent(tan);
+        auto norm = getNormal(F,s);
         lst += norm*norm;
-        //std::cout << norm*norm << " " << lst << std::endl; 
         return true;
     }
 };

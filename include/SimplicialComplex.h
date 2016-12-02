@@ -311,7 +311,7 @@ public:
 		auto const&& data() const { return ptr->_data; }
 		auto&& data() { return ptr->_data; }
 
-//		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
+		//friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
 		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
 
 	private:

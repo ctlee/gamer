@@ -8,6 +8,7 @@
 #include <vector>
 #include "SimplicialComplexVisitors.h"
 #include "SurfaceMesh.h"
+#include "Vertex.h"
 
 void print(const SurfaceMesh & mesh){
     std::cout << "Level: 1" << std::endl;
@@ -139,6 +140,7 @@ void scale(SurfaceMesh& mesh, double s){
 }
 
 bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
+    // TODO: implement this...
 	return false;
 }
 
@@ -151,8 +153,8 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID){
     mesh.insert<3>({name[1], up[0], up[1]});
 }
 
-std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool preserveRidges, 
-        const std::function<bool(SurfaceMesh&,SurfaceMesh::NodeID<2>&)> &checkFlip){
+std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
+        std::function<bool(const SurfaceMesh&,SurfaceMesh::NodeID<2>&)> &checkFlip){
 
     std::vector<SurfaceMesh::NodeID<2>> edgesToFlip;
     NodeSet<SurfaceMesh::NodeID<2>> ignoredEdges;
@@ -186,10 +188,12 @@ std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(SurfaceMesh& mesh, bool pres
             
             // Check if we're on a ridge
             if(preserveRidges){
-                auto t1 = getTangent(mesh, mesh.get_node_up(edgeID, up[0]));
-                auto a = getNormalFromTangent(t1);                
-                auto t2 = getTangent(mesh, mesh.get_node_up(edgeID, up[1]));
-                auto b = getNormalFromTangent(t2);
+                // auto t1 = getTangent(mesh, mesh.get_node_up(edgeID, up[0]));
+                // auto a = getNormalFromTangent(t1);                
+                // auto t2 = getTangent(mesh, mesh.get_node_up(edgeID, up[1]));
+                // auto b = getNormalFromTangent(t2);
+                auto a = getNormal(mesh, mesh.get_node_up(edgeID, up[0]));
+                auto b = getNormal(mesh, mesh.get_node_up(edgeID, up[1]));
                 auto val = angle(a,b);
                 if (val > 60){
                     continue;
@@ -317,7 +321,8 @@ void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     // Project onto tangent plane
     // A||B = Bx(AxB/|B|)/|B|
     // A_|_B = A.B*B/|B|^2
-    auto norm = getNormalFromTangent(getTangent(mesh, vertexID));
+    //auto norm = getNormalFromTangent(getTangent(mesh, vertexID));
+    auto norm = getNormal(mesh, vertexID);
     norm /= std::sqrt(norm|norm); // normalize
     auto perpProj = norm*norm; // tensor product
     
@@ -338,6 +343,14 @@ void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     parallel_e = llproj_e*disp_e;
 
     (*vertexID).position = (*vertexID).position + parallel;
+}
+
+void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    // For incident triangle compute the rotation angle
+    auto incidentFaces = mesh.up(mesh.up(vertexID));
+    for(auto faceID : incidentFaces){
+        //std::cout << mesh.get_name(faceID) << std::endl;
+    }
 }
 
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
@@ -370,6 +383,36 @@ Vector getNormalFromTangent(const tensor<double,3,2> tangent){
     // xp[1] = -tangent.get(2,0);
     // xp[2] = tangent.get(1,0);
     return xp;
+}
+
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+    Vector norm;
+    auto faces = mesh.up(mesh.up(vertexID));
+    for(auto faceID : faces){
+        norm += getNormal(mesh, faceID);
+    }
+    norm /= faces.size();
+    return norm;
+}
+
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
+    Vector norm;
+    auto name = mesh.get_name(faceID);
+    std::array<Vertex, 3> vs;
+    for(int i = 0; i < 3; ++i){
+        vs[i] = *mesh.get_node_up({name[i]});
+    }
+
+    if((*faceID).orientation == 1){
+        norm = cross(vs[2]-vs[1], vs[0]-vs[1]);
+    }
+    else if((*faceID).orientation == -1){
+        norm = cross(vs[0]-vs[1], vs[2]-vs[1]);
+    }
+    else {
+        std::cerr << "Orientation undefined..." << std::endl;
+    }
+    return norm;
 }
 
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat)
