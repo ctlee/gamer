@@ -208,11 +208,13 @@ void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
         auto disp = center - shared;
         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
-        auto tanNorm = getNormalFromTangent(pS^nS);
+        //auto tanNorm = getNormalFromTangent(pS^nS);
+        auto tanNorm = cross(pS, nS);
 
         // Get the perpendicular plane made up of plane normal of bisector
-        auto perpPlane = tanNorm^bisector;
-        auto perpNorm = getNormalFromTangent(perpPlane);
+        //auto perpPlane = tanNorm^bisector;
+        //auto perpNorm = getNormalFromTangent(perpPlane);
+        auto perpNorm = cross(tanNorm, bisector);
         perpNorm /= std::sqrt(perpNorm|perpNorm);
         auto perpProj = perpNorm*perpNorm; // tensor product
       
