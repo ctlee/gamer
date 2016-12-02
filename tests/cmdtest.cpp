@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <array>
 #include <cstdlib>
+#include <sys/time.h>
 
 template <typename _T, int _d>
 struct BTreeNode
@@ -182,15 +183,18 @@ Pointer<Node> rebalance(Pointer<Node> head, int i)
 			Pointer<Node> left  = head->next[i-1];
 			Pointer<Node> right = head->next[i];
 
-			right->next[right->k + 1] = right->next[right->k];
+			if(right->next[0] != nullptr)
+				right->next[right->k + 1] = right->next[right->k];
 			for(int j = right->k; j > 0; --j)
 			{
 				std::cout << "  : " << right->data[j-1] << std::endl;
 				right->data[j] = right->data[j-1];
-				right->next[j] = right->next[j-1];
+				if(left->next[0] != nullptr)
+					right->next[j] = right->next[j-1];
 			}
 			right->data[0] = head->data[i-1];
-			right->next[0] = left->next[left->k];
+			if(left->next[0] != nullptr)
+				right->next[0] = left->next[left->k];
 			++(right->k);
 
 			head->data[i-1] = left->data[left->k-1];
@@ -206,7 +210,8 @@ Pointer<Node> rebalance(Pointer<Node> head, int i)
 
 			left->data[left->k] = head->data[i];
 			++(left->k);
-			left->next[left->k] = right->next[0];
+			if(left->next[0] != nullptr)
+				left->next[left->k] = right->next[0];
 
 			head->data[i] = right->data[0];
 			for(int j = 0; j < right->k - 1; ++j)
@@ -228,10 +233,12 @@ Pointer<Node> rebalance(Pointer<Node> head, int i)
 				for(int j = 0; j < right->k; ++j)
 				{
 					left->data[left->k] = right->data[j];
-					left->next[left->k] = right->next[j];
+					if(left->next[0] != nullptr)
+						left->next[left->k] = right->next[j];
 					++(left->k);
 				}
-				left->next[left->k] = right->next[right->k];
+				if(left->next[0] != nullptr)
+					left->next[left->k] = right->next[right->k];
 
 				delete right;
 
@@ -253,10 +260,12 @@ Pointer<Node> rebalance(Pointer<Node> head, int i)
 				for(int j = 0; j < right->k; ++j)
 				{
 					left->data[left->k] = right->data[j];
-					left->next[left->k] = right->next[j];
+					if(left->next[0] != nullptr)
+						left->next[left->k] = right->next[j];
 					++(left->k);
 				}
-				left->next[left->k] = right->next[right->k];
+				if(left->next[0] != nullptr)
+					left->next[left->k] = right->next[right->k];
 
 				delete right;
 				--(head->k);
@@ -265,16 +274,22 @@ Pointer<Node> rebalance(Pointer<Node> head, int i)
 		}
 	}
 
+//	std::cout << 
+/*
 	if(head->k == 0)
 	{
 		Pointer<Node> rval = head->next[0];
+		std::cout << "Delete 3" << std::endl;
 		delete head;
+		std::cout << "Delete 3" << std::endl;
 		return rval;
 	}
 	else
 	{
 		return head;
 	}
+*/
+	return head;
 }
 
 template <typename Node>
@@ -293,7 +308,7 @@ void get_replacement(Pointer<Node> head, Data<Node>& key)
 }
 
 template <typename Node>
-Pointer<Node> remove(Pointer<Node> head, Data<Node> data)
+Pointer<Node> remove_H(Pointer<Node> head, Data<Node> data)
 {
 	if(head->next[0] == nullptr)
 	{
@@ -317,7 +332,7 @@ Pointer<Node> remove(Pointer<Node> head, Data<Node> data)
 		{
 			if(data < head->data[i])
 			{
-				remove<Node>(head->next[i], data);
+				remove_H<Node>(head->next[i], data);
 				return rebalance<Node>(head, i);
 			}
 			else if(data == head->data[i])
@@ -326,8 +341,27 @@ Pointer<Node> remove(Pointer<Node> head, Data<Node> data)
 				return rebalance<Node>(head, i);
 			}
 		}
-		remove<Node>(head->next[head->k], data);
+		remove_H<Node>(head->next[head->k], data);
 		return rebalance<Node>(head, head->k);
+	}
+}
+
+template <typename Node>
+Pointer<Node> remove(Pointer<Node> head, Data<Node> data)
+{
+	head = remove_H<Node>(head, data);
+
+	if(head->k == 0)
+	{
+		Pointer<Node> rval = head->next[0];
+		std::cout << "Delete 3" << std::endl;
+		delete head;
+		std::cout << "Delete 3" << std::endl;
+		return rval;
+	}
+	else
+	{
+		return head;
 	}
 }
 
@@ -374,7 +408,7 @@ bool operator>(const Interval<T>& x, const Interval<T>& y)
 	return x.lower() >= y.upper();
 }
 
-using BT = BTreeNode<int,2>;
+using BT = BTreeNode<int,1>;
 
 int main(int argc, char *argv[])
 {
@@ -396,69 +430,30 @@ int main(int argc, char *argv[])
 	}
 	std::cout << std::endl;
 
+   timespec ts{0,0};
+   clock_settime(CLOCK_THREAD_CPUTIME_ID, &ts);
+
 	Pointer<BT> head = nullptr;
-	for(int i = 0; i < 10; ++i)
+	for(int i = 0; i < 30000000; ++i)
 	{
-		auto add = std::rand() % 100;
+		auto add = std::rand();
 		head = insert<BT>(head, add);
-		std::cout << add << " : " << *head << std::endl;
 	}
 
-	head = remove<BT>(head, 49);
-	std::cout << *head << std::endl;
+   clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts); // Works on Linux
 
-	head = remove<BT>(head, 23);
-	std::cout << *head << std::endl;
+   std::cout << (ts.tv_sec * 10e9 + ts.tv_nsec)/10e9 << std::endl;
 
-	head = remove<BT>(head, 58);
-	std::cout << *head << std::endl;
+	int subtr[] = {49, 23, 58, 72, 44, 30, 78, 73, 87, 40, 29, 40, 42, 12, 92, 27, 9, 3, 7, 3, 9, 57, 33, 35, 16, 99, 78, 65, 60};
 
-	head = remove<BT>(head, 72);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 44);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 30);
-	std::cout << *head << std::endl;
-
-	for(int i = 0; i < 10; ++i)
+	for(int x : subtr)
 	{
-		auto add = std::rand() % 100;
-		head = insert<BT>(head, add);
-		std::cout << add << " : " << *head << std::endl;
+		head = remove<BT>(head, x);
+//		std::cout << x << " - " << *head << std::endl;
 	}
 
-	head = remove<BT>(head, 78);
-	std::cout << *head << std::endl;
+//	std::cout << *head << std::endl;
 
-	head = remove<BT>(head, 73);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 87);
-	std::cout << *head << std::endl;
-/*
-	head = remove<BT>(head, 40);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 29);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 40);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 42);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 12);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 92);
-	std::cout << *head << std::endl;
-
-	head = remove<BT>(head, 40);
-	std::cout << *head << std::endl;
-*/
 /*
 	Data<BT> x;
 	std::cout << " 1: ";
