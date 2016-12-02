@@ -1,6 +1,6 @@
 #include "SimplicialComplex.h"
 #include "Vertex.h"
-#include "Util.h"
+#include "util.h"
 #include "Orientable.h"
 #include "WrapSimplicialComplex.h"
 
