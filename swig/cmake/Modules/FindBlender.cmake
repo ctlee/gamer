@@ -48,7 +48,7 @@ elseif(WIN32)
 endif()
 
 # If we haven't found the exe, do a cmake search
-if(${BLENDER_EXECUTABLE} STREQUAL "")
+if("${BLENDER_EXECUTABLE}" STREQUAL "")
     find_program(blender_exe
             blender)
     if(blender_exe)

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
-find_package(swig REQUIRED)
+find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 # First find the python interpreter
@@ -22,7 +22,7 @@ if(NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
     message(FATAL_ERROR "Python interpreter and libs versions do not match")
 endif()
 
-find_package(blender REQUIRED)
+find_package(Blender REQUIRED)
 
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
