@@ -37,14 +37,18 @@ int main(int argc, char *argv[])
     // }
 
     compute_orientation(*mesh);
+    std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
+    auto tmp = getVolume(*mesh);
+    std::cout << "Volume: " << tmp << std::endl;
+
     // generateHistogram(*mesh);
 
-    for(auto i = 0; i < 10; ++i){
-        for(auto nid : mesh->get_level_id<1>())
-        {
-            weightedVertexSmooth<3>(*mesh, nid);
-        }
-    }
+    // for(auto i = 0; i < 10; ++i){
+    //     for(auto nid : mesh->get_level_id<1>())
+    //     {
+    //         weightedVertexSmooth<3>(*mesh, nid);
+    //     }
+    // }
     
     // generateHistogram(*mesh);
     // compute_orientation(*mesh);

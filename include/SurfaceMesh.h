@@ -108,26 +108,16 @@ auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     return rval/cover.size();
 }
 
-/**
- * @brief      Reads off.
- *
- * @param[in]  filename  The filename
- *
- * @return     { description_of_the_return_value }
- */
 std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
-
-/**
- * @brief      Writes off.
- *
- * @param[in]  filename  The filename
- * @param[in]  mesh      The mesh
- */
 void writeOFF(const std::string& filename, SurfaceMesh& mesh);
 
 void print(const SurfaceMesh& mesh);
-
 void generateHistogram(const SurfaceMesh& mesh);
+int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
+double getArea(const SurfaceMesh& mesh);
+double getArea(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
+double getVolume(const SurfaceMesh& mesh);
+
 bool smoothMesh(const SurfaceMesh& mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges);
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID);
 std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
@@ -138,7 +128,7 @@ bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edg
 void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 
-int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
+
 
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
