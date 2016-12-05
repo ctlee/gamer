@@ -19,8 +19,8 @@ TEST(VertexTest,TestConstructor)
     EXPECT_EQ(0, v0[1]);
     EXPECT_EQ(0, v0[2]);
     EXPECT_EQ(0, v0.marker);
-    EXPECT_EQ(false, v0.selected);
-    EXPECT_EQ(true, v3.selected);
+    EXPECT_TRUE(false == v0.selected);
+    EXPECT_TRUE(true == v3.selected);
     
     EXPECT_EQ(v1, v0);
     
