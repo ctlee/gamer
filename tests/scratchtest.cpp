@@ -28,18 +28,22 @@ int main(int argc, char *argv[])
     }
     auto mesh = result.first;
    
-    // compute_orientation(*mesh);
-    // for(auto i = 0; i < 1; ++i){
-    //     for(auto nid : mesh->get_level_id<1>())
-    //     {
-    //         normalSmooth(*mesh, nid);
-    //     }
-    // }
-
     compute_orientation(*mesh);
+
     std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
-    auto tmp = getVolume(*mesh);
-    std::cout << "Volume: " << tmp << std::endl;
+    std::cout << "Volume: " << getVolume(*mesh) << std::endl;
+
+    for(auto i = 0; i < 1; ++i){
+        for(auto nid : mesh->get_level_id<1>())
+        {
+            normalSmooth(*mesh, nid);
+        }
+    }
+
+    std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
+    std::cout << "Volume: " << getVolume(*mesh) << std::endl;
+
+    // compute_orientation(*mesh);
 
     // generateHistogram(*mesh);
 
@@ -53,6 +57,6 @@ int main(int argc, char *argv[])
     // generateHistogram(*mesh);
     // compute_orientation(*mesh);
 
-    // writeOFF("../data/test.off", *mesh);
+    writeOFF("../data/test.off", *mesh);
     std::cout << "EOF" << std::endl;
 }

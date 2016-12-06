@@ -2336,6 +2336,7 @@ void NormalSmooth(SurfaceMeshOld *surfmesh, int n)
             dy += length * normal.y;
             dz += length * normal.z;
         }
+        // dxyz = sum of dot(normal, gx) CTL
 
         length = sqrt(dx * dx + dy * dy + dz * dz);
 

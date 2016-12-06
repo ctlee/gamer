@@ -186,11 +186,6 @@ void scale(SurfaceMesh& mesh, double s){
     scale(mesh, v);
 }
 
-bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
-    // TODO: implement this...
-	return false;
-}
-
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID){
     // Assuming that the mesh is manifold and edge has been vetted for flipping
     auto name = mesh.get_name(edgeID);
@@ -392,12 +387,61 @@ void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     (*vertexID).position = (*vertexID).position + parallel;
 }
 
+/**
+ * @brief      Perona-Malik normal based smoothing algorithm 
+ *
+ * @param      mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ */
 void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
-    // For incident triangle compute the rotation angle
+    auto name = mesh.get_name(vertexID)[0];
+    double areaSum = 0;
+
+    auto p = (*vertexID).position;
+    Eigen::Vector4d pos_e;
+    pos_e << p[0], p[1], p[2], 1;
+    Eigen::Vector4d newPos_e;
+    newPos_e << 0, 0, 0, 0;
+    
+    // For each incident face get the average normal
     auto incidentFaces = mesh.up(mesh.up(vertexID));
     for(auto faceID : incidentFaces){
-        //std::cout << mesh.get_name(faceID) << std::endl;
+        auto norm = getNormal(mesh, faceID);
+        norm /= std::sqrt(norm|norm);
+       
+        // get the incident incident faces 
+        std::vector<SurfaceMesh::NodeID<3>> faces;
+        neighbors(mesh, faceID, std::back_inserter(faces));
+        Vector avgNorm;
+        for(auto face : faces){
+            auto inorm = getNormal(mesh, face);
+            avgNorm += inorm; 
+        }
+        avgNorm /= 3;
+        avgNorm /= std::sqrt(avgNorm|avgNorm);
+
+        // Angle between normals in radians
+        double angle = std::acos(norm|avgNorm);
+
+        auto edge = mesh.get_node_down(faceID, name);
+        auto edgeName = mesh.get_name(edge);
+        auto a = *mesh.get_node_up({edgeName[0]});
+        auto b = *mesh.get_node_up({edgeName[1]});
+        auto ab = a-b;
+        ab /= std::sqrt(ab|ab);
+
+        Vector rotAxis= (*faceID).orientation * ab; // The orientation of this matters...
+
+        // build the transformation
+        Eigen::Map<Eigen::Vector3d> rotAxis_e(rotAxis.data());
+        Eigen::Map<Eigen::Vector3d> center_e(b.position.data());
+
+        Eigen::Affine3d A = Eigen::Translation3d(center_e) * Eigen::AngleAxisd(angle, rotAxis_e) * Eigen::Translation3d(-center_e);
+        newPos_e += A*pos_e;
     }
+    newPos_e /= incidentFaces.size();
+
+    (*vertexID).position = Vertex({newPos_e[0], newPos_e[1], newPos_e[2]});
 }
 
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
