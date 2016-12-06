@@ -402,44 +402,52 @@ void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     pos_e << p[0], p[1], p[2], 1;
     Eigen::Vector4d newPos_e;
     newPos_e << 0, 0, 0, 0;
-    
+
     // For each incident face get the average normal
     auto incidentFaces = mesh.up(mesh.up(vertexID));
     for(auto faceID : incidentFaces){
-        auto norm = getNormal(mesh, faceID);
-        norm /= std::sqrt(norm|norm);
+        // Get the area of incident face
+        double area = getArea(mesh, faceID);
+        areaSum += area;
+
+        auto normal = getNormal(mesh, faceID);
+        normal /= std::sqrt(normal|normal);
        
         // get the incident incident faces 
         std::vector<SurfaceMesh::NodeID<3>> faces;
         neighbors(mesh, faceID, std::back_inserter(faces));
         Vector avgNorm;
+
         for(auto face : faces){
             auto inorm = getNormal(mesh, face);
             avgNorm += inorm; 
         }
-        avgNorm /= 3;
-        avgNorm /= std::sqrt(avgNorm|avgNorm);
+        avgNorm /= 3;   // each triangle has 3 incident faces
+        avgNorm /= std::sqrt(avgNorm|avgNorm);  // get unit normal
 
-        // Angle between normals in radians
-        double angle = std::acos(norm|avgNorm);
-
+        // Compute the edge (axis) to rotate about.
         auto edge = mesh.get_node_down(faceID, name);
         auto edgeName = mesh.get_name(edge);
         auto a = *mesh.get_node_up({edgeName[0]});
         auto b = *mesh.get_node_up({edgeName[1]});
         auto ab = a-b;
-        ab /= std::sqrt(ab|ab);
+        ab /= std::sqrt(ab|ab); // Eigen AngleAxis requires unit vector
 
-        Vector rotAxis= (*faceID).orientation * ab; // The orientation of this matters...
+
+        // Angle between normals in radians. This is the angle to rotate the normal by.
+        double angle = std::copysign(std::acos(normal|avgNorm), dot(cross(normal, avgNorm), ab));
+        //Vector rotAxis = (*faceID).orientation * ab; // We don't need this because the angle is relative.
+        Vector rotAxis = ab; 
 
         // build the transformation
         Eigen::Map<Eigen::Vector3d> rotAxis_e(rotAxis.data());
         Eigen::Map<Eigen::Vector3d> center_e(b.position.data());
-
         Eigen::Affine3d A = Eigen::Translation3d(center_e) * Eigen::AngleAxisd(angle, rotAxis_e) * Eigen::Translation3d(-center_e);
-        newPos_e += A*pos_e;
+       
+        // Weight the new position by the area of the current face 
+        newPos_e += area*(A*pos_e);
     }
-    newPos_e /= incidentFaces.size();
+    newPos_e /= areaSum; // weighted by area
 
     (*vertexID).position = Vertex({newPos_e[0], newPos_e[1], newPos_e[2]});
 }

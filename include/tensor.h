@@ -477,6 +477,16 @@ ElemType operator|(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 	return rval / scale;
 }
 
+template <typename ElemType, std::size_t D, std::size_t N>
+double norm(const tensor<ElemType,D,N>& A){
+	return std::sqrt(A|A);
+}
+
+template <typename ElemType, std::size_t D, std::size_t N>
+double norm_sq(const tensor<ElemType,D,N>& A){
+	return A|A;
+}
+
 template <typename ElemType>
 tensor<ElemType,3,1> cross(const tensor<ElemType,3,1>& x, const tensor<ElemType,3,1>& y)
 {
@@ -486,4 +496,3 @@ tensor<ElemType,3,1> cross(const tensor<ElemType,3,1>& x, const tensor<ElemType,
 	rval[2] = x[0]*y[1] - y[0]*x[1];
 	return rval;
 }
-
