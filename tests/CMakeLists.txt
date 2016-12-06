@@ -55,3 +55,11 @@ target_link_libraries(scratchtest gamershared)
 add_executable(scratchtest_jbm scratchtest_jbm.cpp)
 set_target_properties(scratchtest_jbm PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(scratchtest_jbm gamershared)
+
+add_executable(cmdtest cmdtest.cpp)
+set_target_properties(cmdtest PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(cmdtest gamershared)
+
+add_executable(cmdtest2 cmdtest2.cpp)
+set_target_properties(cmdtest2 PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(cmdtest2 gamershared)
