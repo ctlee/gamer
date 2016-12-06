@@ -53,59 +53,106 @@ void generateHistogram(const SurfaceMesh& mesh){
   		std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)  << std::fixed << histogram[x] << std::endl;
   	std::cout << std::endl << std::endl;
 
-    // // compute the edge length distribution
-    // std::cout << "Edge Length Distribution:" << std::endl;
-    // std::vector<double> lengths;
-    // for(auto edge : mesh.get_level_id<2>()) {
-    //     auto vertexIDs = mesh.down(edge);
-    //     auto t1 = *vertexIDs.cbegin();
-    //     auto t2 = *(++vertexIDs.cbegin());
-    //     auto v1 = *t1;
-    //     auto v2 = *t2;
-    //     double len = magnitude(v2-v1);
-    //     lengths.push_back(len);
-    // }
-    // std::sort(lengths.begin(), lengths.end());
+    // compute the edge length distribution
+    std::cout << "Edge Length Distribution:" << std::endl;
+    std::vector<double> lengths;
+    for(auto edge : mesh.get_level_id<2>()) {
+        auto vertexIDs = mesh.down(edge);
+        auto t1 = *vertexIDs.cbegin();
+        auto t2 = *(++vertexIDs.cbegin());
+        auto v1 = *t1;
+        auto v2 = *t2;
+        double len = magnitude(v2-v1);
+        lengths.push_back(len);
+    }
+    std::sort(lengths.begin(), lengths.end());
 
-    // std::array<double,20> histogramLength;
-    // histogramLength.fill(0);
-    // double interval = (lengths.back() - lengths.front())/20;
-    // double low = lengths.front();
+    std::array<double,20> histogramLength;
+    histogramLength.fill(0);
+    double interval = (lengths.back() - lengths.front())/20;
+    double low = lengths.front();
 
-    // if(interval <= 0.0000001){ // floating point roundoff prevention
-    //     std::cout << lengths.front() << ": " << 100 << std::endl << std::endl;
-    // }
-    // else {
-    //     for (auto length : lengths){
-    //         histogramLength[std::floor((length-low)/interval)]++;
-    //     }
+    if(interval <= 0.0000001){ // floating point roundoff prevention
+        std::cout << lengths.front() << ": " << 100 << std::endl << std::endl;
+    }
+    else {
+        for (auto length : lengths){
+            histogramLength[std::floor((length-low)/interval)]++;
+        }
 
-    //     factor = mesh.size<2>();
-    //     std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double& n){
-    //             n = 100.0*n/factor;});
+        factor = mesh.size<2>();
+        std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double& n){
+                n = 100.0*n/factor;});
 
-    //     for (int x=0; x < 20; x++)
-    //         std::cout   << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)  
-    //                     << std::fixed << histogramLength[x] << std::endl;
-    //     std::cout << std::endl << std::endl;
-    // }
+        for (int x=0; x < 20; x++)
+            std::cout   << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)  
+                        << std::fixed << histogramLength[x] << std::endl;
+        std::cout << std::endl << std::endl;
+    }
 
-    // // Compute the valence distribution
-    // std::array<double, 20> histogramValence;
-    // histogramValence.fill(0);
+    // Compute the valence distribution
+    std::array<double, 20> histogramValence;
+    histogramValence.fill(0);
 
-    // for (auto vertexID : mesh.get_level_id<1>()){
-    //     // TODO bounds checking here...
-    //     histogramValence[getValence(mesh, vertexID)]++;
-    // }
+    for (auto vertexID : mesh.get_level_id<1>()){
+        // TODO bounds checking here...
+        histogramValence[getValence(mesh, vertexID)]++;
+    }
 
-    // factor = mesh.size<1>();
-    // // std::for_each(histogramValence.begin(), histogramValence.end(), [&factor](double& n){
-    // //         n = 100.0*n/factor;});
-    // std::cout << "Valence distribution:" << std::endl;    
-    // for (int x=0; x < 20; x++)
-    //     std::cout << x << ": " << histogramValence[x] << std::endl;
-    // std::cout << std::endl << std::endl;
+    factor = mesh.size<1>();
+    // std::for_each(histogramValence.begin(), histogramValence.end(), [&factor](double& n){
+    //         n = 100.0*n/factor;});
+    std::cout << "Valence distribution:" << std::endl;    
+    for (int x=0; x < 20; x++)
+        std::cout << x << ": " << histogramValence[x] << std::endl;
+    std::cout << std::endl << std::endl;
+}
+
+double getArea(const SurfaceMesh& mesh){
+    double area;
+    for(auto faceID : mesh.get_level_id<3>())
+        area += getArea(mesh, faceID);
+    return area;
+}
+
+double getArea(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
+    auto name = mesh.get_name(faceID);
+    auto a = *mesh.get_node_up({name[0]});
+    auto b = *mesh.get_node_up({name[1]});
+    auto c = *mesh.get_node_up({name[2]});
+    auto wedge = (b-a)^(b-c);
+    return std::sqrt(wedge|wedge)/2;
+}
+
+/**
+ *http://research.microsoft.com/en-us/um/people/chazhang/publications/icip01_ChaZhang.pdf
+ */
+double getVolume(const SurfaceMesh& mesh){
+    double volume = 0;
+    for(auto faceID : mesh.get_level_id<3>()){
+        auto name = mesh.get_name(faceID);
+        auto a = (*mesh.get_node_up({name[0]})).position;
+        auto b = (*mesh.get_node_up({name[1]})).position;
+        auto c = (*mesh.get_node_up({name[2]})).position;
+
+        Vector norm;
+        double tmp;
+        if((*faceID).orientation == 1){
+            // a->b->c
+            norm = cross(b, c);
+            tmp = dot(a, norm);
+        }
+        else if((*faceID).orientation == -1){
+            // c->b->a
+            norm = cross(b, a);
+            tmp = dot(c, norm);
+        }
+        else{
+            std::cerr << "Orientation undefined..." << std::endl;
+        }
+        volume += tmp/6.0;
+    }
+    return std::abs(volume);
 }
 
 void translate(SurfaceMesh& mesh, Vector v){
@@ -137,11 +184,6 @@ void scale(SurfaceMesh& mesh, double s){
     Vector v = Vector();
     v[0] = s; v[1] = s; v[2] = s;
     scale(mesh, v);
-}
-
-bool smoothMesh(const SurfaceMesh &mesh, std::size_t minAngle, std::size_t maxAngle, std::size_t maxIter, bool preserveRidges){
-    // TODO: implement this...
-	return false;
 }
 
 void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID){
@@ -345,12 +387,61 @@ void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     (*vertexID).position = (*vertexID).position + parallel;
 }
 
+/**
+ * @brief      Perona-Malik normal based smoothing algorithm 
+ *
+ * @param      mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ */
 void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
-    // For incident triangle compute the rotation angle
+    auto name = mesh.get_name(vertexID)[0];
+    double areaSum = 0;
+
+    auto p = (*vertexID).position;
+    Eigen::Vector4d pos_e;
+    pos_e << p[0], p[1], p[2], 1;
+    Eigen::Vector4d newPos_e;
+    newPos_e << 0, 0, 0, 0;
+    
+    // For each incident face get the average normal
     auto incidentFaces = mesh.up(mesh.up(vertexID));
     for(auto faceID : incidentFaces){
-        //std::cout << mesh.get_name(faceID) << std::endl;
+        auto norm = getNormal(mesh, faceID);
+        norm /= std::sqrt(norm|norm);
+       
+        // get the incident incident faces 
+        std::vector<SurfaceMesh::NodeID<3>> faces;
+        neighbors(mesh, faceID, std::back_inserter(faces));
+        Vector avgNorm;
+        for(auto face : faces){
+            auto inorm = getNormal(mesh, face);
+            avgNorm += inorm; 
+        }
+        avgNorm /= 3;
+        avgNorm /= std::sqrt(avgNorm|avgNorm);
+
+        // Angle between normals in radians
+        double angle = std::acos(norm|avgNorm);
+
+        auto edge = mesh.get_node_down(faceID, name);
+        auto edgeName = mesh.get_name(edge);
+        auto a = *mesh.get_node_up({edgeName[0]});
+        auto b = *mesh.get_node_up({edgeName[1]});
+        auto ab = a-b;
+        ab /= std::sqrt(ab|ab);
+
+        Vector rotAxis= (*faceID).orientation * ab; // The orientation of this matters...
+
+        // build the transformation
+        Eigen::Map<Eigen::Vector3d> rotAxis_e(rotAxis.data());
+        Eigen::Map<Eigen::Vector3d> center_e(b.position.data());
+
+        Eigen::Affine3d A = Eigen::Translation3d(center_e) * Eigen::AngleAxisd(angle, rotAxis_e) * Eigen::Translation3d(-center_e);
+        newPos_e += A*pos_e;
     }
+    newPos_e /= incidentFaces.size();
+
+    (*vertexID).position = Vertex({newPos_e[0], newPos_e[1], newPos_e[2]});
 }
 
 int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
@@ -398,20 +489,37 @@ Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
 Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
     Vector norm;
     auto name = mesh.get_name(faceID);
-    std::array<Vertex, 3> vs;
-    for(int i = 0; i < 3; ++i){
-        vs[i] = *mesh.get_node_up({name[i]});
-    }
+    // TODO profile this...
+    // writing out explicitly may be faster than using a std::array
+    auto a = *mesh.get_node_up({name[0]});
+    auto b = *mesh.get_node_up({name[1]});
+    auto c = *mesh.get_node_up({name[2]});
 
     if((*faceID).orientation == 1){
-        norm = cross(vs[2]-vs[1], vs[0]-vs[1]);
+        norm = cross(c-b, a-b);
     }
     else if((*faceID).orientation == -1){
-        norm = cross(vs[0]-vs[1], vs[2]-vs[1]);
+        norm = cross(a-b, c-b);
     }
     else {
         std::cerr << "Orientation undefined..." << std::endl;
     }
+
+
+    // std::array<Vertex, 3> vs;
+    // for(int i = 0; i < 3; ++i){
+    //     vs[i] = *mesh.get_node_up({name[i]});
+    // }
+
+    // if((*faceID).orientation == 1){
+    //     norm = cross(vs[2]-vs[1], vs[0]-vs[1]);
+    // }
+    // else if((*faceID).orientation == -1){
+    //     norm = cross(vs[0]-vs[1], vs[2]-vs[1]);
+    // }
+    // else {
+    //     std::cerr << "Orientation undefined..." << std::endl;
+    // }
     return norm;
 }
 

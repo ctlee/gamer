@@ -28,27 +28,35 @@ int main(int argc, char *argv[])
     }
     auto mesh = result.first;
    
-    // compute_orientation(*mesh);
-    // for(auto i = 0; i < 1; ++i){
-    //     for(auto nid : mesh->get_level_id<1>())
-    //     {
-    //         normalSmooth(*mesh, nid);
-    //     }
-    // }
-
     compute_orientation(*mesh);
-    // generateHistogram(*mesh);
 
-    for(auto i = 0; i < 10; ++i){
+    std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
+    std::cout << "Volume: " << getVolume(*mesh) << std::endl;
+
+    for(auto i = 0; i < 1; ++i){
         for(auto nid : mesh->get_level_id<1>())
         {
-            weightedVertexSmooth<3>(*mesh, nid);
+            normalSmooth(*mesh, nid);
         }
     }
+
+    std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
+    std::cout << "Volume: " << getVolume(*mesh) << std::endl;
+
+    // compute_orientation(*mesh);
+
+    // generateHistogram(*mesh);
+
+    // for(auto i = 0; i < 10; ++i){
+    //     for(auto nid : mesh->get_level_id<1>())
+    //     {
+    //         weightedVertexSmooth<3>(*mesh, nid);
+    //     }
+    // }
     
     // generateHistogram(*mesh);
     // compute_orientation(*mesh);
 
-    // writeOFF("../data/test.off", *mesh);
+    writeOFF("../data/test.off", *mesh);
     std::cout << "EOF" << std::endl;
 }
