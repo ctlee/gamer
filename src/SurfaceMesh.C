@@ -42,7 +42,7 @@ void generateHistogram(const SurfaceMesh& mesh){
   		histogram[binAngle(angle(a,b,c))]++;
   		histogram[binAngle(angle(b,a,c))]++;
   		histogram[binAngle(angle(c,a,b))]++;
-  	} 
+  	}
 
     int factor = mesh.size<3>()*3;
     std::for_each(histogram.begin(), histogram.end(), [&factor](double& n){
