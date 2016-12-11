@@ -854,7 +854,7 @@ std::ostream& operator<<(std::ostream& out, const BTreeNode<T,d>* head)
 	return out;
 }
 
-template <typename _T, int _d>
+template <typename _T, int _d = 16>
 class index_tracker
 {
 public:
