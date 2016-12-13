@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "stringutil.h"
 #include "SurfaceMeshOld.h"
 #include "SurfaceMesh.h"
 #include "SimplicialComplexVisitors.h"
@@ -52,14 +53,12 @@ int main(int argc, char *argv[])
         start = std::chrono::system_clock::now();
         // CODE GOES HERE
 
-
-        auto result = readOFF(argv[1]);
-
-        if(result.second == false){
+        auto mesh = readOFF(argv[1]);
+        if(mesh == nullptr){
             std::cout << "Something bad happened...";
             exit(1);
         }
-        auto mesh = result.first;
+
         compute_orientation(*mesh);
 
         for(auto i = 0; i < 1; ++i){
@@ -71,45 +70,9 @@ int main(int argc, char *argv[])
 
         // CODE ENDS
         end = std::chrono::system_clock::now();
-        free(mesh);
         elapsed_seconds += end-start;
     }
     elapsed_seconds /= trials;
     std::cout << "Average time new: " << elapsed_seconds.count() << "s\n";
-
-    // std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
-    // std::cout << "Volume: " << getVolume(*mesh) << std::endl;
-
-    // // for(auto i = 0; i < 10; ++i){
-    // //     for(auto nid : mesh->get_level_id<1>()){
-    // //         weightedVertexSmooth<1>(*mesh, nid);
-    // //     }
-    // // }
-
-    // // writeOFF("../data/vsmooth.off", *mesh);
-    // for(auto i = 0; i < 1; ++i){
-    //     for(auto nid : mesh->get_level_id<1>())
-    //     {
-    //         normalSmooth(*mesh, nid);
-    //     }
-    // }
-
-    // std::cout << "Surface Area: " << getArea(*mesh) << std::endl;
-    // std::cout << "Volume: " << getVolume(*mesh) << std::endl;
-
-    // compute_orientation(*mesh);
-    // generateHistogram(*mesh);
-
-    // for(auto i = 0; i < 10; ++i){
-    //     for(auto nid : mesh->get_level_id<1>())
-    //     {
-    //         weightedVertexSmooth<3>(*mesh, nid);
-    //     }
-    // }
-    
-    // generateHistogram(*mesh);
-    // compute_orientation(*mesh);
-
-    // writeOFF("../data/smoothed.off", *mesh);
     std::cout << "EOF" << std::endl;
 }

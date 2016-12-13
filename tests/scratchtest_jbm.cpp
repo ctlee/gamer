@@ -503,15 +503,12 @@ int main(int argc, char *argv[])
         return -1;
     }
     std::cout << "Begin reading Mesh..." << std::endl;
-    auto result = readOFF(argv[1]);
-
-    if(result.second == false)
-    {
+    auto mesh = readOFF(argv[1]);
+    if(mesh == nullptr){
         std::cout << "Something bad happened...";
         exit(1);
     }
-    auto mesh = result.first;
-
+    
     compute_orientation(*mesh);
     
     int np = 100;

@@ -52,13 +52,32 @@ foreach(dir ${dirs})
 endforeach()
 
 # Change this to not use GLOB
-file(GLOB SOURCES "src/*.C")
+#file(GLOB SOURCES "src/*.C")
+list(APPEND SOURCES 
+    "src/CorrectNormals.C"
+    "src/GemMesh.C"
+    "src/GenerateSphereMesh.C"
+    "src/MarchingCube.C"
+    "src/OFF_SurfaceMesh.C"
+    "src/PDB2Mesh.C"
+    "src/PDB2Volume.C"
+    "src/ReadLattice.C"
+    "src/ReadWriteMesh.C"
+    "src/RegionGrowing.C"
+    "src/SurfaceMesh.C"
+    "src/SurfaceMeshOld.C"
+    "src/SurfExtract.C"
+    "src/SurfRefine.C"
+    "src/SurfSmooth.C"
+    "src/Triangulate.C"
+    "src/Vertex.C"
+    "src/WrapSimplicialComplex.C"
+    "src/WrapSurfaceMesh.C"
+)
 
 add_library(gamershared SHARED ${SOURCES})
 
 message(STATUS "SOURCES: ${SOURCES}")
-
-
 
 set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(gamershared tetshared trishared)
