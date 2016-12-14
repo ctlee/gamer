@@ -6,6 +6,7 @@
 #include <ostream>
 #include <regex>
 #include <cmath>
+#include <vector>
 
 /**
  * @brief      Converts the color from float(0-1) to a marker value
@@ -37,6 +38,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
     if(!fin.is_open())
     {
         std::cerr << "Read Error: File '" << filename << "' could not be read." << std::endl;
+        mesh.reset();
         return mesh;
     }
 
@@ -49,6 +51,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
     if(!(line.find("OFF", line.size()-4) == std::string::npos)){
         std::cerr << "File Format Error: File '" << filename << "' does not look like a valid OFF file." << std::endl;
         std::cerr << "Expected 'OFF' at end of line, found: '" << line << "'." << std::endl;
+        mesh.reset();
         return mesh;
     }
 
@@ -146,6 +149,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         arr = split(line);
         if(arr.size() < dimension){
             std::cerr << "Parse Error: Vertex line has fewer dimensions than expected (" << dimension << ")" << std::endl;
+            mesh.reset();
             return mesh;
         }
         double x = std::stod(arr[0]);
@@ -166,6 +170,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         arr = split(line);
         if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
             std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
+            mesh.reset();
             return mesh;
         }
         else if(arr.size() == dimension+1){
@@ -187,6 +192,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         }
         else {
             std::cerr << "Parse Error: Couldn't interpret face: '" << line << "'." << std::endl;
+            mesh.reset();
             return mesh;
         }
     }

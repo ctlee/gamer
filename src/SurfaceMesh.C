@@ -10,18 +10,36 @@
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 
+template <typename T, std::size_t k>
+std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
+{
+    out << "[";
+    for(int i = 0; i + 1 < k; ++i)
+    {
+        out << A[i] << " ";
+    }
+    if(k > 0)
+    {
+        out << A[k-1];
+    }
+    out << "]";
+    return out;
+}
+
 void print(const SurfaceMesh & mesh){
     std::cout << "Level: 1" << std::endl;
     for(auto node : mesh.get_level_id<1>()){
-        std::cout << "    " << node << std::endl;
+        std::cout << "    " << *node << std::endl;
     }
     std::cout << "Level: 2" << std::endl;
     for(auto node : mesh.get_level_id<2>()){
-        std::cout << "    " << node << std::endl;
+        auto name = mesh.get_name(node);
+        std::cout << "    " << name << std::endl;
     }
     std::cout << "Level: 3" << std::endl;
     for(auto node : mesh.get_level_id<3>()){
-        std::cout << "    " << node << std::endl;
+        auto name = mesh.get_name(node);
+        std::cout << "    " << name << std::endl;
     }
 }
 

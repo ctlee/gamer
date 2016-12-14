@@ -59,6 +59,7 @@ list(APPEND SOURCES
     "src/GenerateSphereMesh.C"
     "src/MarchingCube.C"
     "src/OFF_SurfaceMesh.C"
+    "src/OBJ_SurfaceMesh.C"
     "src/PDB2Mesh.C"
     "src/PDB2Volume.C"
     "src/ReadLattice.C"
