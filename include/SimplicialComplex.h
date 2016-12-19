@@ -269,21 +269,26 @@ struct simplicial_complex_traits_default
 };
 
 
+/**
+ * @brief      Class for simplicial complex.
+ *
+ * @tparam     traits  { description }
+ */
 template <typename traits>
 class simplicial_complex {
 public:
-	using KeyType = typename traits::KeyType;
-	using NodeDataTypes = typename traits::NodeTypes;
-	using EdgeDataTypes = typename traits::EdgeTypes;
-	using type_this = simplicial_complex<traits>;
+	using KeyType                   = typename traits::KeyType;
+	using NodeDataTypes             = typename traits::NodeTypes;
+	using EdgeDataTypes             = typename traits::EdgeTypes;
+	using type_this                 = simplicial_complex<traits>;
 	static constexpr auto numLevels = NodeDataTypes::size;
-	static constexpr auto topLevel = numLevels-1;
-	using LevelIndex = typename std::make_index_sequence<numLevels>;
+	static constexpr auto topLevel  = numLevels-1;
+	using LevelIndex                = typename std::make_index_sequence<numLevels>;
 
-	template <std::size_t k> using Node = detail::asc_Node<KeyType,k,topLevel,NodeDataTypes,EdgeDataTypes>;
+	template <std::size_t k> using Node     = detail::asc_Node<KeyType,k,topLevel,NodeDataTypes,EdgeDataTypes>;
 	template <std::size_t k> using NodeData = typename util::type_get<k,NodeDataTypes>::type;
 	template <std::size_t k> using EdgeData = typename util::type_get<k,EdgeDataTypes>::type;
-	template <std::size_t k> using NodePtr = Node<k>*;
+	template <std::size_t k> using NodePtr  = Node<k>*;
 
 	template <std::size_t k>
 	struct NodeID {
@@ -358,6 +363,9 @@ public:
 		KeyType edge;
 	};
 
+	/**
+	 * @brief      Default constructor
+	 */
 	simplicial_complex()
 		: node_count(0)
 	{
@@ -368,18 +376,36 @@ public:
 		}
 	}
 
+	/**
+	 * @brief      Destroys the object.
+	 */
 	~simplicial_complex()
 	{
 		size_t count;
 		remove_recurse<0,0>::apply(this, &_root, &_root + 1, count);
 	}
 
+	/**
+	 * @brief      Insert the simplex named 's', and all sub-simplices, into the complex.
+	 *
+	 * @param[in]  s     The simplex to be inserted.
+	 *
+	 * @tparam     n     Size of simplex 's'.
+	 */
 	template <size_t n>
 	void insert(const KeyType (&s)[n])
 	{
 		insert_for<0,n,false>::apply(this, _root, s);
 	}
 
+	/**
+	 * @brief      Insert the simplex named 's', and all sub-simplices, into the complex. 'data' is stored in the complex at 's'.
+	 *
+	 * @param[in]  s     The simplex to be inserted.
+	 * @param[in]  data  The data to be stored at the simplex 's'.
+	 *
+	 * @tparam     n     Size of simplex 's'.
+	 */
 	template <size_t n>
 	void insert(const KeyType (&s)[n], const NodeData<n>& data)
 	{
@@ -387,12 +413,27 @@ public:
 		rval->_data = data;
 	}
 
+	/**
+	 * @brief      Insert the simplex named 's', and all sub-simplices, into the complex.
+	 *
+	 * @param[in]  s     The simplex to be inserted.
+	 *
+	 * @tparam     n     Size of simplex 's'.
+	 */
 	template <size_t n>
 	void insert(const std::array<KeyType,n>& s)
 	{
 		insert_for<0,n,false>::apply(this, _root, s.data());
 	}
 
+	/**
+	 * @brief      Insert the simplex named 's', and all sub-simplices, into the complex. 'data' is stored in the complex at 's'.
+	 *
+	 * @param[in]  s     The simplex to be inserted.
+	 * @param[in]  data  The data to be stored at the simplex 's'.
+	 *
+	 * @tparam     n     Size of simplex 's'.
+	 */
 	template <size_t n>
 	void insert(const std::array<KeyType,n>& s, const NodeData<n>& data)
 	{
@@ -400,6 +441,33 @@ public:
 		rval->_data = data;
 	}
 
+	/**
+	 * @brief      Gets the name of the simplex referenced by 'id'.
+	 *
+	 * @param[in]  id      The identifier of a simplex.
+	 * @param[in]  fn      Function will be called with characters of 'name'.
+	 *
+	 * @tparam     n       Size of the simplex referenced by 'id'.
+	 * @tparam     Lambda  Type which supports operator(KeyType).
+	 */
+	template <size_t n, typename Lambda>
+	void get_name(NodeID<n> id, Lambda fn) const
+	{
+		for(auto curr : id.ptr->_down)
+		{
+			fn(curr.first);
+		}
+	}
+
+	/**
+	 * @brief      Gets the name of the simplex referenced by 'id'.
+	 *
+	 * @param[in]  id      The identifier of a simplex.
+	 *
+	 * @tparam     n       Size of the simplex referenced by 'id'.
+	 *
+	 * @return     The name.
+	 */
 	template <size_t n>
 	std::array<KeyType,n> get_name(NodeID<n> id) const
 	{
@@ -414,31 +482,78 @@ public:
 		return s;
 	}
 
+	/**
+	 * @brief      Gets the name of the simplex referenced by 'id'. This is a special case which handles the empty set simplex.
+	 *
+	 * @param[in]  id    The identifier
+	 *
+	 * @return     The name.
+	 */
 	std::array<KeyType,0> get_name(NodeID<0> id) const
 	{
 		std::array<KeyType,0> name;
 		return name;
 	}
 
-	// Node
+	/**
+	 * @brief      Gets the simplex identifier which has the name 's'.
+	 *
+	 * @param[in]  s     Name of the simplex to find.
+	 *
+	 * @tparam     n     Size of simplex s.
+	 *
+	 * @return     The node up.
+	 */
 	template <size_t n>
 	NodeID<n> get_node_up(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
 
+	/**
+	 * @brief      Get the simplex identifier which has the name 's' relative to the simplex 'id'.
+	 *
+	 * @param[in]  id   The identifier of a simplex.
+	 * @param[in]  s    The relative name of the desired simplex.
+	 *
+	 * @tparam     i    The size of simplex 'id'.
+	 * @tparam     j    The length of the name 's'.
+	 *
+	 * @return     The node up.
+	 */
 	template <size_t i, size_t j>
-	NodeID<i+j> get_node_up(const NodeID<i> nid, const KeyType (&s)[j]) const
+	NodeID<i+j> get_node_up(const NodeID<i> id, const KeyType (&s)[j]) const
 	{
-		return get_recurse<i,j>::apply(this, s, nid);
+		return get_recurse<i,j>::apply(this, s, id);
 	}
 
+	/**
+	 * @brief      Convenience version of get_node_up when the name 's' consists of a single character.
+	 *
+	 * @param[in]  nid   The identifier of a simplex.
+	 * @param[in]  s     The relative single character name of the desired simplex.
+	 *
+	 * @tparam     i     The size of simplex 'id'.
+	 *
+	 * @return     The node up.
+	 */
 	template <size_t i>
-	NodeID<i+1> get_node_up(const NodeID<i> nid, const KeyType s) const
+	NodeID<i+1> get_node_up(const NodeID<i> id, const KeyType s) const
 	{
-		return get_recurse<i,1>::apply(this, &s, nid.ptr);
+		return get_recurse<i,1>::apply(this, &s, id.ptr);
 	}
 
+	/**
+	 * @brief      Get the simplex 
+	 *
+	 * @param[in]  nid   The nid
+	 * @param[in]  s     { parameter_description }
+	 *
+	 * @tparam     i     { description }
+	 * @tparam     j     { description }
+	 *
+	 * @return     The node down.
+	 */
 	template <size_t i, size_t j>
 	NodeID<i-j> get_node_down(const NodeID<i> nid, const KeyType (&s)[j]) const
 	{
@@ -462,11 +577,20 @@ public:
 	}
 
 	template <size_t k, class Inserter>
-	void get_cover(const NodeID<k> id, Inserter pos) const
+	void get_cover_insert(const NodeID<k> id, Inserter pos) const
 	{
 		for(auto curr : id.ptr->_up)
 		{
-			pos++ = curr.first;
+			*pos++ = curr.first;
+		}
+	}
+
+	template <size_t k, class Lambda>
+	void get_cover(const NodeID<k> id, Lambda fn) const
+	{
+		for(auto curr : id.ptr->_up)
+		{
+			fn(curr.first);
 		}
 	}
 
@@ -474,7 +598,7 @@ public:
 	auto get_cover(const NodeID<k> id) const
 	{
 		std::vector<KeyType> rval;
-		get_cover(id, std::back_inserter(rval));
+		get_cover_insert(id, std::back_inserter(rval));
 		return std::move(rval);
 	}
 
@@ -678,7 +802,8 @@ public:
 
 
 
-	void genGraph(const std::string& filename){
+	void genGraph(const std::string& filename)
+	{
 	    std::ofstream fout(filename);
 	    if(!fout.is_open())
 	    {
@@ -697,7 +822,8 @@ public:
 
 private:
 	template <size_t k, size_t foo>	
-	struct writeGraph{
+	struct writeGraph
+	{
 	    template <typename T>
 	    static void apply(std::ofstream& fout, T nodes){
 			std::set<Node<k+1>*> next;

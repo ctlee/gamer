@@ -30,11 +30,11 @@ struct BFS_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::size_t,
         {
             if(v.visit(F, *curr))
             {
-                for(auto a : F.get_cover(*curr))
+                F.get_cover(*curr, [&](typename Complex::KeyType a)
                 {
                     auto id = F.get_node_up(*curr,a);
                     next.insert(id);
-                }
+                });
             }
         }
 
@@ -82,11 +82,11 @@ struct BFS_Down_Node<Visitor, Traits, Complex, std::integral_constant<std::size_
         {
             v.visit(F, *curr);
 
-            for(auto a : F.get_name(*curr))
+            F.get_name(*curr, [&](typename Complex::KeyType a)
             {
                 auto id = F.get_node_down(*curr,a);
                 next.insert(id);
-            }
+            });
         }
 
         BFS_Down_Node_Next::apply(std::forward<Visitor>(v), F, next.begin(), next.end());
@@ -165,9 +165,6 @@ struct BFS_Edge<Visitor, Traits, Complex, std::integral_constant<std::size_t, Co
         }
     }
 };
-
-
-
 
 template <typename Visitor, typename Complex, std::size_t k, std::size_t ring>
 struct Neighbors_Up_Node
