@@ -285,11 +285,20 @@ public:
 	static constexpr auto topLevel  = numLevels-1;
 	using LevelIndex                = typename std::make_index_sequence<numLevels>;
 
+private:
 	template <std::size_t k> using Node     = detail::asc_Node<KeyType,k,topLevel,NodeDataTypes,EdgeDataTypes>;
-	template <std::size_t k> using NodeData = typename util::type_get<k,NodeDataTypes>::type;
-	template <std::size_t k> using EdgeData = typename util::type_get<k,EdgeDataTypes>::type;
 	template <std::size_t k> using NodePtr  = Node<k>*;
 
+public:
+	template <std::size_t k> using NodeData = typename util::type_get<k,NodeDataTypes>::type;
+	template <std::size_t k> using EdgeData = typename util::type_get<k,EdgeDataTypes>::type;
+
+	friend struct SimplexID;
+	/**
+	 * @brief      SimplexID is an external reference to a simplex of the complex.
+	 *
+	 * @tparam     k     Size of the simplex.
+	 */
 	template <std::size_t k>
 	struct SimplexID {
 		using complex = simplicial_complex<traits>;
@@ -324,6 +333,12 @@ public:
 	};
 
 
+	friend struct EdgeID;
+	/**
+	 * @brief      External reference to an edge or a connection within the complex.
+	 *
+	 * @tparam     k     The edge connects a simplex of size k-1 to a simplex of size k.
+	 */
 	template <std::size_t k>
 	struct EdgeID {
 		using complex = simplicial_complex<traits>;
