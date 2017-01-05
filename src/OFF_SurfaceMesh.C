@@ -2,9 +2,11 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <ostream>
 #include <regex>
 #include <cmath>
+#include <vector>
 
 /**
  * @brief      Converts the color from float(0-1) to a marker value
@@ -26,13 +28,18 @@ int get_marker(float r, float g, float b)
 }
 
 //http://www.geomview.org/docs/html/OFF.html
-std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
+std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
 {
+    // Instantiate mesh!
+    //auto mesh = new SurfaceMesh();
+    std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+
     std::ifstream fin(filename);
     if(!fin.is_open())
     {
         std::cerr << "Read Error: File '" << filename << "' could not be read." << std::endl;
-        return std::make_pair(nullptr, false);
+        mesh.reset();
+        return mesh;
     }
 
     std::string line;
@@ -44,7 +51,8 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
     if(!(line.find("OFF", line.size()-4) == std::string::npos)){
         std::cerr << "File Format Error: File '" << filename << "' does not look like a valid OFF file." << std::endl;
         std::cerr << "Expected 'OFF' at end of line, found: '" << line << "'." << std::endl;
-        return std::make_pair(nullptr, false);
+        mesh.reset();
+        return mesh;
     }
 
     // Have the support for reading in various things. Currently we are ignoring them though...
@@ -123,8 +131,6 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
 
     // NOTE:: Assume there are no more comments...
 
-    // Instantiate mesh!
-    auto mesh = new SurfaceMesh();
     // Parse the vertices
     /*
      x[0]  y[0]  z[0]   
@@ -143,8 +149,8 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
         arr = split(line);
         if(arr.size() < dimension){
             std::cerr << "Parse Error: Vertex line has fewer dimensions than expected (" << dimension << ")" << std::endl;
-            delete mesh;
-            return std::make_pair(nullptr, false);
+            mesh.reset();
+            return mesh;
         }
         double x = std::stod(arr[0]);
         double y = std::stod(arr[1]);
@@ -164,8 +170,8 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
         arr = split(line);
         if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
             std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
-            delete mesh;
-            return std::make_pair(nullptr, false);
+            mesh.reset();
+            return mesh;
         }
         else if(arr.size() == dimension+1){
             auto v0 = std::stoi(arr[1]);
@@ -186,15 +192,15 @@ std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename)
         }
         else {
             std::cerr << "Parse Error: Couldn't interpret face: '" << line << "'." << std::endl;
-            delete mesh;
-            return std::make_pair(nullptr, false);
+            mesh.reset();
+            return mesh;
         }
     }
     fin.close();
-    return std::make_pair(mesh, true);
+    return mesh;
 }
 
-void writeOFF(const std::string& filename, SurfaceMesh& mesh){
+void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     std::ofstream fout(filename);
     if(!fout.is_open())
     {

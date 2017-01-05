@@ -3,6 +3,7 @@
 #include <iostream>
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -108,8 +109,16 @@ auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     return rval/cover.size();
 }
 
-std::pair<SurfaceMesh*, bool> readOFF(const std::string& filename);
-void writeOFF(const std::string& filename, SurfaceMesh& mesh);
+/**
+ * READERS AND WRITERS
+ */
+// Geomview OFF
+std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename);
+void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
+
+// Wavefront OBJ
+std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename);
+void writeOBJ(const std::string& filename, const SurfaceMesh& mesh);
 
 void print(const SurfaceMesh& mesh);
 void generateHistogram(const SurfaceMesh& mesh);

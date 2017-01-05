@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "WrapSurfaceMesh.h"
 #include "SurfaceMesh.h"
 #include "Vertex.h"
@@ -52,15 +53,20 @@ std::string WSM::as_string() const{
     return out;
 }
 
-
-
 WrappedSurfaceMesh& loadOFF(const std::string& filename){
-    std::pair<SurfaceMesh*, bool> result = readOFF(filename);
-     if(result.second == false){
+    // std::pair<SurfaceMesh*, bool> result = readOFF(filename);
+    //  if(result.second == false){
+    //     std::cout << "Something bad happened...";
+    //     exit(1);
+    // }
+
+    auto mesh = readOFF(filename);
+    if(mesh == nullptr){
         std::cout << "Something bad happened...";
         exit(1);
     }
-    WrappedSurfaceMesh* ptr  = new WrappedSurfaceMesh(result.first);
+
+    WrappedSurfaceMesh* ptr  = new WrappedSurfaceMesh(mesh.release());
     return *ptr;
 }
 
