@@ -497,6 +497,7 @@ Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
 Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
     Vector norm;
     auto name = mesh.get_name(faceID);
+
     // TODO profile this...
     // writing out explicitly may be faster than using a std::array
     auto a = *mesh.get_node_up({name[0]});
