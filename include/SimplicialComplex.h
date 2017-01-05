@@ -510,6 +510,7 @@ public:
 		return name;
 	}
 
+
 	/**
 	 * @brief      Gets the simplex identifier which has the name 's'.
 	 *
@@ -520,7 +521,7 @@ public:
 	 * @return     The node up.
 	 */
 	template <size_t n>
-	SimplexID<n> get_node_up(const KeyType (&s)[n]) const
+	SimplexID<n> get_simplex_up(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
@@ -537,13 +538,13 @@ public:
 	 * @return     The node up.
 	 */
 	template <size_t i, size_t j>
-	SimplexID<i+j> get_node_up(const SimplexID<i> id, const KeyType (&s)[j]) const
+	SimplexID<i+j> get_simplex_up(const SimplexID<i> id, const KeyType (&s)[j]) const
 	{
 		return get_recurse<i,j>::apply(this, s, id);
 	}
 
 	/**
-	 * @brief      Convenience version of get_node_up when the name 's' consists of a single character.
+	 * @brief      Convenience version of get_simplex_up when the name 's' consists of a single character.
 	 *
 	 * @param[in]  nid   The identifier of a simplex.
 	 * @param[in]  s     The relative single character name of the desired simplex.
@@ -553,10 +554,21 @@ public:
 	 * @return     The node up.
 	 */
 	template <size_t i>
-	SimplexID<i+1> get_node_up(const SimplexID<i> id, const KeyType s) const
+	SimplexID<i+1> get_simplex_up(const SimplexID<i> id, const KeyType s) const
 	{
 		return get_recurse<i,1>::apply(this, &s, id.ptr);
 	}
+
+	/**
+	 * @brief      Get the root simplex.
+	 * 
+	 * @return     The root simplex.
+	 */
+	SimplexID<0> get_simplex_up() const
+	{
+		return _root;
+	}
+
 
 	/**
 	 * @brief      Get the sub-simplex of the simplex 'id' which does not have 's' in the name.
@@ -570,13 +582,13 @@ public:
 	 * @return     The node down.
 	 */
 	template <size_t i, size_t j>
-	SimplexID<i-j> get_node_down(const SimplexID<i> id, const KeyType (&s)[j]) const
+	SimplexID<i-j> get_simplex_down(const SimplexID<i> id, const KeyType (&s)[j]) const
 	{
 		return get_down_recurse<i,j>::apply(this, s, id.ptr);
 	}
 
 	/**
-	 * @brief      Convenience version of get_node_down when the name 's' consists of a single character.
+	 * @brief      Convenience version of get_simplex_down when the name 's' consists of a single character.
 	 *
 	 * @param[in]  id   The identifier of a simplex.
 	 * @param[in]  s    The relative single character name of the desired simplex.
@@ -586,19 +598,9 @@ public:
 	 * @return     The node down.
 	 */
 	template <size_t i>
-	SimplexID<i-1> get_node_down(const SimplexID<i> nid, const KeyType s) const
+	SimplexID<i-1> get_simplex_down(const SimplexID<i> nid, const KeyType s) const
 	{
 		return get_down_recurse<i,1>::apply(this, &s, nid.ptr);
-	}
-
-	/**
-	 * @brief      Get the root simplex.
-	 * 
-	 * @return     The root simplex.
-	 */
-	SimplexID<0> get_node_up() const
-	{
-		return _root;
 	}
 
 	/**
@@ -606,7 +608,7 @@ public:
 	 *
 	 * @return     The root simplex.
 	 */
-	SimplexID<0> get_node_down() const
+	SimplexID<0> get_simplex_down() const
 	{
 		return _root;
 	}
@@ -1189,10 +1191,10 @@ void neighbors(Complex &F, typename Complex::template SimplexID<level> nid, Inse
 {
 	for (auto a : F.get_name(nid))
 	{
-		auto id = F.get_node_down(nid,a);
+		auto id = F.get_simplex_down(nid,a);
 		for(auto b : F.get_cover(id))
 		{
-			auto nbor = F.get_node_up(id,b);
+			auto nbor = F.get_simplex_up(id,b);
 			if(nbor != nid)
 			{
 				*iter++ = nbor;
@@ -1213,10 +1215,10 @@ void neighbors_up(Complex &F, typename Complex::template SimplexID<level> nid, I
 {
 	for (auto a : F.get_cover(nid))
 	{
-		auto id = F.get_node_up(nid,a);
+		auto id = F.get_simplex_up(nid,a);
 		for(auto b : F.get_name(id))
 		{
-			auto nbor = F.get_node_down(id,b);
+			auto nbor = F.get_simplex_down(id,b);
 			if(nbor != nid)
 			{
 				*iter++ = nbor;
@@ -1246,10 +1248,10 @@ void neighbors_up(Complex& F, SimplexID nid, InsertIter iter)
 // 	for (auto nid : next){
 // 		for (auto a : F.get_cover(nid))
 // 		{
-// 			auto id = F.get_node_up(nid,a);
+// 			auto id = F.get_simplex_up(nid,a);
 // 			for(auto b : F.get_name(id))
 // 			{
-// 				auto nbor = F.get_node_down(id,b);
+// 				auto nbor = F.get_simplex_down(id,b);
 // 				if(nodes.insert(nbor).second){
 // 					tmp.insert(nbor);
 // 				}

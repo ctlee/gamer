@@ -50,9 +50,9 @@ void generateHistogram(const SurfaceMesh& mesh){
   	for(auto face : mesh.get_level_id<3>()) {
   		auto vertexIDs = mesh.get_name(face);
   		// Unpack the ID's for convenience	
-  		Vertex a = *mesh.get_node_up<1>({vertexIDs[0]});
-  		Vertex b = *mesh.get_node_up<1>({vertexIDs[1]});
-  		Vertex c = *mesh.get_node_up<1>({vertexIDs[2]});
+  		Vertex a = *mesh.get_simplex_up<1>({vertexIDs[0]});
+  		Vertex b = *mesh.get_simplex_up<1>({vertexIDs[1]});
+  		Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
   		auto binAngle = [&](double angle) -> int{
   			return std::floor(angle/10);
@@ -135,9 +135,9 @@ double getArea(const SurfaceMesh& mesh){
 
 double getArea(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID){
     auto name = mesh.get_name(faceID);
-    auto a = *mesh.get_node_up({name[0]});
-    auto b = *mesh.get_node_up({name[1]});
-    auto c = *mesh.get_node_up({name[2]});
+    auto a = *mesh.get_simplex_up({name[0]});
+    auto b = *mesh.get_simplex_up({name[1]});
+    auto c = *mesh.get_simplex_up({name[2]});
     auto wedge = (b-a)^(b-c);
     return std::sqrt(wedge|wedge)/2;
 }
@@ -149,9 +149,9 @@ double getVolume(const SurfaceMesh& mesh){
     double volume = 0;
     for(auto faceID : mesh.get_level_id<3>()){
         auto name = mesh.get_name(faceID);
-        auto a = (*mesh.get_node_up({name[0]})).position;
-        auto b = (*mesh.get_node_up({name[1]})).position;
-        auto c = (*mesh.get_node_up({name[2]})).position;
+        auto a = (*mesh.get_simplex_up({name[0]})).position;
+        auto b = (*mesh.get_simplex_up({name[1]})).position;
+        auto c = (*mesh.get_simplex_up({name[2]})).position;
 
         Vector norm;
         double tmp;
@@ -223,8 +223,8 @@ std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, 
         if(!ignoredEdges.count(edgeID)){
             auto name = mesh.get_name(edgeID);
             std::pair<Vertex, Vertex> shared;    
-            shared.first = *mesh.get_node_up({name[0]});
-            shared.second = *mesh.get_node_up({name[1]});
+            shared.first = *mesh.get_simplex_up({name[0]});
+            shared.second = *mesh.get_simplex_up({name[1]});
 
             std::pair<Vertex, Vertex> notShared;    
             auto up = mesh.get_cover(edgeID);
@@ -237,8 +237,8 @@ std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, 
                 //std::cerr << "This edge participates in fewer than 2 faces. Returning..." << std::endl;
                 continue;
             }
-            notShared.first  = *mesh.get_node_up({up[0]});
-            notShared.second = *mesh.get_node_up({up[1]});
+            notShared.first  = *mesh.get_simplex_up({up[0]});
+            notShared.second = *mesh.get_simplex_up({up[1]});
 
             // Add check to see if notShared.first and second are connected.
             if(mesh.exists<2>({up[0], up[1]})){
@@ -248,12 +248,12 @@ std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, 
             
             // Check if we're on a ridge
             if(preserveRidges){
-                // auto t1 = getTangent(mesh, mesh.get_node_up(edgeID, up[0]));
+                // auto t1 = getTangent(mesh, mesh.get_simplex_up(edgeID, up[0]));
                 // auto a = getNormalFromTangent(t1);                
-                // auto t2 = getTangent(mesh, mesh.get_node_up(edgeID, up[1]));
+                // auto t2 = getTangent(mesh, mesh.get_simplex_up(edgeID, up[1]));
                 // auto b = getNormalFromTangent(t2);
-                auto a = getNormal(mesh, mesh.get_node_up(edgeID, up[0]));
-                auto b = getNormal(mesh, mesh.get_node_up(edgeID, up[1]));
+                auto a = getNormal(mesh, mesh.get_simplex_up(edgeID, up[0]));
+                auto b = getNormal(mesh, mesh.get_simplex_up(edgeID, up[1]));
                 auto val = angle(a,b);
                 if (val > 60){
                     continue;
@@ -307,12 +307,12 @@ bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& ed
 
     auto name = mesh.get_name(edgeID);
     std::pair<Vertex, Vertex> shared;    
-    shared.first = *mesh.get_node_up({name[0]});
-    shared.second = *mesh.get_node_up({name[1]});
+    shared.first = *mesh.get_simplex_up({name[0]});
+    shared.second = *mesh.get_simplex_up({name[1]});
     std::pair<Vertex, Vertex> notShared;    
     auto up = mesh.get_cover(edgeID);
-    notShared.first  = *mesh.get_node_up({up[0]});
-    notShared.second = *mesh.get_node_up({up[1]});
+    notShared.first  = *mesh.get_simplex_up({up[0]});
+    notShared.second = *mesh.get_simplex_up({up[1]});
 
     // Go through all angle combinations
     double tmp;
@@ -332,12 +332,12 @@ bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& ed
 bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID){
     auto name = mesh.get_name(edgeID);
     std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1>> shared;    
-    shared.first = mesh.get_node_up({name[0]});
-    shared.second = mesh.get_node_up({name[1]});
+    shared.first = mesh.get_simplex_up({name[0]});
+    shared.second = mesh.get_simplex_up({name[1]});
     std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1>> notShared;    
     auto up = mesh.get_cover(edgeID);
-    notShared.first  = mesh.get_node_up({up[0]});
-    notShared.second = mesh.get_node_up({up[1]});
+    notShared.first  = mesh.get_simplex_up({up[0]});
+    notShared.second = mesh.get_simplex_up({up[1]});
     std::array<double,20> valence; 
     // assuming there are no boundaries
     // TODO check if it's a boundary...
@@ -444,10 +444,10 @@ void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
         avgNorm /= std::sqrt(avgNorm|avgNorm);  // get unit normal
 
         // Compute the edge (axis) to rotate about.
-        auto edge = mesh.get_node_down(faceID, name);
+        auto edge = mesh.get_simplex_down(faceID, name);
         auto edgeName = mesh.get_name(edge);
-        auto a = *mesh.get_node_up({edgeName[0]});
-        auto b = *mesh.get_node_up({edgeName[1]});
+        auto a = *mesh.get_simplex_up({edgeName[0]});
+        auto b = *mesh.get_simplex_up({edgeName[1]});
         auto ab = a-b;
         ab /= std::sqrt(ab|ab); // Eigen AngleAxis requires unit vector
 
@@ -484,7 +484,7 @@ tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1>
 tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID)
 {
     auto cover = mesh.get_name(faceID);
-    auto vertexID = mesh.get_node_up({cover[0]});
+    auto vertexID = mesh.get_simplex_up({cover[0]});
     std::set<SurfaceMesh::KeyType> next(std::begin(cover)+1, std::end(cover));
     return getTangentF(mesh, (*vertexID).position, vertexID, next);
 }
@@ -518,9 +518,9 @@ Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID){
 
     // TODO profile this...
     // writing out explicitly may be faster than using a std::array
-    auto a = *mesh.get_node_up({name[0]});
-    auto b = *mesh.get_node_up({name[1]});
-    auto c = *mesh.get_node_up({name[2]});
+    auto a = *mesh.get_simplex_up({name[0]});
+    auto b = *mesh.get_simplex_up({name[1]});
+    auto c = *mesh.get_simplex_up({name[2]});
 
     if((*faceID).orientation == 1){
         norm = cross(c-b, a-b);
@@ -535,7 +535,7 @@ Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID){
 
     // std::array<Vertex, 3> vs;
     // for(int i = 0; i < 3; ++i){
-    //     vs[i] = *mesh.get_node_up({name[i]});
+    //     vs[i] = *mesh.get_simplex_up({name[i]});
     // }
 
     // if((*faceID).orientation == 1){

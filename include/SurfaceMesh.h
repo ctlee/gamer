@@ -77,8 +77,8 @@ auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     for(auto alpha : cover)
     {
         auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto& v = (*mesh.get_node_up({alpha})).position;
-        auto next = mesh.get_node_up(curr,alpha);
+        const auto& v = (*mesh.get_simplex_up({alpha})).position;
+        auto next = mesh.get_simplex_up(curr,alpha);
         rval += edge.orientation * (v-origin) * getTangentH(mesh, origin, next);
     }
 
@@ -100,8 +100,8 @@ auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     for(auto alpha : cover)
     {
         auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto& v = (*mesh.get_node_up({alpha})).position;
-        auto next = mesh.get_node_up(curr,alpha); 
+        const auto& v = (*mesh.get_simplex_up({alpha})).position;
+        auto next = mesh.get_simplex_up(curr,alpha); 
         auto coverup = cover;
         coverup.erase(alpha);
         rval += edge.orientation * (v-origin) * getTangentF(mesh, origin, next, coverup);
@@ -185,12 +185,12 @@ void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID)
     for(auto edge : mesh.up(vertexID)){
         // Get the vertex connected by edge
         auto edgeName = mesh.get_name(edge);
-        auto shared = *mesh.get_node_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+        auto shared = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
 
         // Get the vertices connected to adjacent edge
         auto up = mesh.get_cover(edge);
-        auto prev = *mesh.get_node_up({up[0]});
-        auto next = *mesh.get_node_up({up[1]}); 
+        auto prev = *mesh.get_simplex_up({up[0]});
+        auto next = *mesh.get_simplex_up({up[1]}); 
         
         auto pS = prev - shared;
         pS /= std::sqrt(pS|pS);

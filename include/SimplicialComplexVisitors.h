@@ -32,7 +32,7 @@ struct BFS_Up_Node<Visitor, Traits, Complex, std::integral_constant<std::size_t,
             {
                 F.get_cover(*curr, [&](typename Complex::KeyType a)
                 {
-                    auto id = F.get_node_up(*curr,a);
+                    auto id = F.get_simplex_up(*curr,a);
                     next.insert(id);
                 });
             }
@@ -84,7 +84,7 @@ struct BFS_Down_Node<Visitor, Traits, Complex, std::integral_constant<std::size_
 
             F.get_name(*curr, [&](typename Complex::KeyType a)
             {
-                auto id = F.get_node_down(*curr,a);
+                auto id = F.get_simplex_down(*curr,a);
                 next.insert(id);
             });
         }
@@ -185,10 +185,10 @@ struct Neighbors_Up_Node
             {
                 for(auto a : F.get_cover(*curr))
                 {
-                    auto id = F.get_node_up(*curr,a);
+                    auto id = F.get_simplex_up(*curr,a);
                     for(auto b : F.get_name(id)) 
                     {
-                        auto nbor = F.get_node_down(id,b);
+                        auto nbor = F.get_simplex_down(id,b);
                         if(nodes.insert(nbor).second)
                         {
                             next.insert(nbor);
@@ -240,10 +240,10 @@ struct Neighbors_Down_Node
             {
                 for(auto a : F.get_name(*curr))
                 {
-                    auto id = F.get_node_down(*curr,a);
+                    auto id = F.get_simplex_down(*curr,a);
                     for(auto b : F.get_cover(id)) 
                     {
-                        auto nbor = F.get_node_up(id,b);
+                        auto nbor = F.get_simplex_up(id,b);
                         if(nodes.insert(nbor).second)
                         {
                             next.insert(nbor);

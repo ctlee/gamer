@@ -34,16 +34,16 @@ TEST(SurfaceMeshTest, TestStructure){
 	EXPECT_EQ(6, mesh.size<2>());
 	EXPECT_EQ(3, mesh.size<3>());
 
-	auto node1Data = *mesh.get_node_up<1>({1});
+	auto node1Data = *mesh.get_simplex_up<1>({1});
 	EXPECT_EQ(node1Data, v1);
 
-	auto node2Data = *mesh.get_node_up<1>({2});
+	auto node2Data = *mesh.get_simplex_up<1>({2});
 	EXPECT_EQ(node2Data, v2);
 
-	auto node3Data = *mesh.get_node_up<1>({3});
+	auto node3Data = *mesh.get_simplex_up<1>({3});
 	EXPECT_EQ(node3Data, v3);
 
-	auto node4Data = *mesh.get_node_up<1>({4});
+	auto node4Data = *mesh.get_simplex_up<1>({4});
 	EXPECT_EQ(node4Data, v4);
 
 	auto result = compute_orientation(mesh);
