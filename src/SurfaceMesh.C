@@ -133,7 +133,7 @@ double getArea(const SurfaceMesh& mesh){
     return area;
 }
 
-double getArea(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
+double getArea(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID){
     auto name = mesh.get_name(faceID);
     auto a = *mesh.get_node_up({name[0]});
     auto b = *mesh.get_node_up({name[1]});
@@ -204,7 +204,7 @@ void scale(SurfaceMesh& mesh, double s){
     scale(mesh, v);
 }
 
-void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID){
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::SimplexID<2> edgeID){
     // Assuming that the mesh is manifold and edge has been vetted for flipping
     auto name = mesh.get_name(edgeID);
     auto up = mesh.get_cover(edgeID);
@@ -213,11 +213,11 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID){
     mesh.insert<3>({name[1], up[0], up[1]});
 }
 
-std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
-        std::function<bool(const SurfaceMesh&,SurfaceMesh::NodeID<2>&)> &checkFlip){
+std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
+        std::function<bool(const SurfaceMesh&,SurfaceMesh::SimplexID<2>&)> &checkFlip){
 
-    std::vector<SurfaceMesh::NodeID<2>> edgesToFlip;
-    NodeSet<SurfaceMesh::NodeID<2>> ignoredEdges;
+    std::vector<SurfaceMesh::SimplexID<2>> edgesToFlip;
+    NodeSet<SurfaceMesh::SimplexID<2>> ignoredEdges;
 
     for(auto edgeID : mesh.get_level_id<2>()){
         if(!ignoredEdges.count(edgeID)){
@@ -274,8 +274,8 @@ std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, boo
 
             if (checkFlip(mesh, edgeID)){
                 edgesToFlip.push_back(edgeID);
-                std::vector<SurfaceMesh::NodeID<2>> neighbors;
-                std::vector<SurfaceMesh::NodeID<2>> neighborsAway;
+                std::vector<SurfaceMesh::SimplexID<2>> neighbors;
+                std::vector<SurfaceMesh::SimplexID<2>> neighborsAway;
                 neighbors_up(mesh, edgeID, std::back_inserter(neighbors));
                 for(auto neighbor : neighbors) {
                     ignoredEdges.insert(neighbor);
@@ -291,7 +291,7 @@ std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, boo
     return edgesToFlip;
 }
 
-bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID){
+bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID){
     auto getMinAngle = [](const Vertex& a, const Vertex& b, const Vertex& c){
         double minAngle = 999; // dummy for now
         double tmp;
@@ -329,12 +329,12 @@ bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeI
     return false;
 }
 
-bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID){
+bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID){
     auto name = mesh.get_name(edgeID);
-    std::pair<SurfaceMesh::NodeID<1>, SurfaceMesh::NodeID<1>> shared;    
+    std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1>> shared;    
     shared.first = mesh.get_node_up({name[0]});
     shared.second = mesh.get_node_up({name[1]});
-    std::pair<SurfaceMesh::NodeID<1>, SurfaceMesh::NodeID<1>> notShared;    
+    std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1>> notShared;    
     auto up = mesh.get_cover(edgeID);
     notShared.first  = mesh.get_node_up({up[0]});
     notShared.second = mesh.get_node_up({up[1]});
@@ -366,9 +366,9 @@ bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edg
 }
 
 // Angle Mesh improvement by projecting barycenter on tangent plane...
-void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
     // get the neighbors     
-    std::vector<SurfaceMesh::NodeID<1>> vertices;
+    std::vector<SurfaceMesh::SimplexID<1>> vertices;
     neighbors_up(mesh, vertexID, std::back_inserter(vertices));
     // compute the average position 
     Vector avgPos;
@@ -411,7 +411,7 @@ void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
  * @param      mesh      The mesh
  * @param[in]  vertexID  The vertex id
  */
-void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
     auto name = mesh.get_name(vertexID)[0];
     double areaSum = 0;
 
@@ -432,7 +432,7 @@ void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
         normal /= std::sqrt(normal|normal);
        
         // get the incident incident faces 
-        std::vector<SurfaceMesh::NodeID<3>> faces;
+        std::vector<SurfaceMesh::SimplexID<3>> faces;
         neighbors(mesh, faceID, std::back_inserter(faces));
         Vector avgNorm;
 
@@ -470,18 +470,18 @@ void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     (*vertexID).position = Vertex({newPos_e[0], newPos_e[1], newPos_e[2]});
 }
 
-int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> nodeID){
-    std::vector<SurfaceMesh::NodeID<1>> vertices;
-    neighbors_up(mesh, nodeID, std::back_inserter(vertices));
+int getValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> SimplexID){
+    std::vector<SurfaceMesh::SimplexID<1>> vertices;
+    neighbors_up(mesh, SimplexID, std::back_inserter(vertices));
     return vertices.size(); 
 }
 
-tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID)
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID)
 {
     return getTangentH(mesh, (*vertexID).position, vertexID);
 }
 
-tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID)
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID)
 {
     auto cover = mesh.get_name(faceID);
     auto vertexID = mesh.get_node_up({cover[0]});
@@ -502,7 +502,7 @@ Vector getNormalFromTangent(const tensor<double,3,2> tangent){
     return xp;
 }
 
-Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
     Vector norm;
     auto faces = mesh.up(mesh.up(vertexID));
     for(auto faceID : faces){
@@ -512,7 +512,7 @@ Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
     return norm;
 }
 
-Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID){
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID){
     Vector norm;
     auto name = mesh.get_name(faceID);
 

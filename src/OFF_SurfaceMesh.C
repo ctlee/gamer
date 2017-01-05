@@ -248,7 +248,7 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
         }
         else{
-            std::cerr << "Orientation undefined..." << std::endl;
+            std::cerr << "~~Orientation undefined..." << std::endl;
             fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
     }

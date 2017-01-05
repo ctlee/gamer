@@ -291,22 +291,22 @@ public:
 	template <std::size_t k> using NodePtr  = Node<k>*;
 
 	template <std::size_t k>
-	struct NodeID {
+	struct SimplexID {
 		using complex = simplicial_complex<traits>;
 		friend simplicial_complex<traits>;
 		static constexpr size_t level = k;
 
-		NodeID() : ptr(nullptr) {}
-		NodeID(NodePtr<k> p) : ptr(p) {}
-		NodeID(const NodeID& rhs) : ptr(rhs.ptr) {}
+		SimplexID() : ptr(nullptr) {}
+		SimplexID(NodePtr<k> p) : ptr(p) {}
+		SimplexID(const SimplexID& rhs) : ptr(rhs.ptr) {}
 
-		NodeID& operator=(const NodeID& rhs) { ptr = rhs.ptr; return *this;}
-		friend bool operator==(NodeID lhs, NodeID rhs) { return lhs.ptr == rhs.ptr; }
-		friend bool operator!=(NodeID lhs, NodeID rhs) { return lhs.ptr != rhs.ptr; }
-		friend bool operator<=(NodeID lhs, NodeID rhs) { return lhs.ptr <= rhs.ptr; }
-		friend bool operator>=(NodeID lhs, NodeID rhs) { return lhs.ptr >= rhs.ptr; }
-		friend bool operator<(NodeID lhs, NodeID rhs)  { return lhs.ptr < rhs.ptr; }
-		friend bool operator>(NodeID lhs, NodeID rhs)  { return lhs.ptr > rhs.ptr; }
+		SimplexID& operator=(const SimplexID& rhs) { ptr = rhs.ptr; return *this;}
+		friend bool operator==(SimplexID lhs, SimplexID rhs) { return lhs.ptr == rhs.ptr; }
+		friend bool operator!=(SimplexID lhs, SimplexID rhs) { return lhs.ptr != rhs.ptr; }
+		friend bool operator<=(SimplexID lhs, SimplexID rhs) { return lhs.ptr <= rhs.ptr; }
+		friend bool operator>=(SimplexID lhs, SimplexID rhs) { return lhs.ptr >= rhs.ptr; }
+		friend bool operator<(SimplexID lhs, SimplexID rhs)  { return lhs.ptr < rhs.ptr; }
+		friend bool operator>(SimplexID lhs, SimplexID rhs)  { return lhs.ptr > rhs.ptr; }
 
 		explicit operator std::uintptr_t () const { return reinterpret_cast<std::uintptr_t>(ptr); }
 
@@ -316,8 +316,8 @@ public:
 		auto const&& data() const { return ptr->_data; }
 		auto&& data() { return ptr->_data; }
 
-		//friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << *nid.ptr; return out; }
-		friend std::ostream& operator<<(std::ostream& out, const NodeID& nid) { out << nid.ptr; return out; }
+		//friend std::ostream& operator<<(std::ostream& out, const SimplexID& nid) { out << *nid.ptr; return out; }
+		friend std::ostream& operator<<(std::ostream& out, const SimplexID& nid) { out << nid.ptr; return out; }
 
 	private:
 		NodePtr<k> ptr;
@@ -355,8 +355,8 @@ public:
 		auto const& data() const { return ptr->_edge_data[edge]; }
 		auto& data() { return ptr->_edge_data[edge]; }
 
-		NodeID<k>   up() const { return ptr; }
-		NodeID<k-1> down() const { return NodeID<k-1>(ptr->_down[edge]); }
+		SimplexID<k>   up() const { return ptr; }
+		SimplexID<k-1> down() const { return SimplexID<k-1>(ptr->_down[edge]); }
 
 	private:
 		NodePtr<k> ptr;
@@ -451,7 +451,7 @@ public:
 	 * @tparam     Lambda  Type which supports operator(KeyType).
 	 */
 	template <size_t n, typename Lambda>
-	void get_name(NodeID<n> id, Lambda fn) const
+	void get_name(SimplexID<n> id, Lambda fn) const
 	{
 		for(auto curr : id.ptr->_down)
 		{
@@ -469,7 +469,7 @@ public:
 	 * @return     The name.
 	 */
 	template <size_t n>
-	std::array<KeyType,n> get_name(NodeID<n> id) const
+	std::array<KeyType,n> get_name(SimplexID<n> id) const
 	{
 		std::array<KeyType,n> s;
 
@@ -489,7 +489,7 @@ public:
 	 *
 	 * @return     The name.
 	 */
-	std::array<KeyType,0> get_name(NodeID<0> id) const
+	std::array<KeyType,0> get_name(SimplexID<0> id) const
 	{
 		std::array<KeyType,0> name;
 		return name;
@@ -505,7 +505,7 @@ public:
 	 * @return     The node up.
 	 */
 	template <size_t n>
-	NodeID<n> get_node_up(const KeyType (&s)[n]) const
+	SimplexID<n> get_node_up(const KeyType (&s)[n]) const
 	{
 		return get_recurse<0,n>::apply(this, s, _root);
 	}
@@ -522,7 +522,7 @@ public:
 	 * @return     The node up.
 	 */
 	template <size_t i, size_t j>
-	NodeID<i+j> get_node_up(const NodeID<i> id, const KeyType (&s)[j]) const
+	SimplexID<i+j> get_node_up(const SimplexID<i> id, const KeyType (&s)[j]) const
 	{
 		return get_recurse<i,j>::apply(this, s, id);
 	}
@@ -538,46 +538,66 @@ public:
 	 * @return     The node up.
 	 */
 	template <size_t i>
-	NodeID<i+1> get_node_up(const NodeID<i> id, const KeyType s) const
+	SimplexID<i+1> get_node_up(const SimplexID<i> id, const KeyType s) const
 	{
 		return get_recurse<i,1>::apply(this, &s, id.ptr);
 	}
 
 	/**
-	 * @brief      Get the simplex 
+	 * @brief      Get the sub-simplex of the simplex 'id' which does not have 's' in the name.
 	 *
-	 * @param[in]  nid   The nid
-	 * @param[in]  s     { parameter_description }
+	 * @param[in]  id    The identifier of a simplex.
+	 * @param[in]  s     The relative name of the desired simplex.
 	 *
-	 * @tparam     i     { description }
-	 * @tparam     j     { description }
+	 * @tparam     i     The size of simplex 'id'.
+	 * @tparam     j     The length of the name 's'
 	 *
 	 * @return     The node down.
 	 */
 	template <size_t i, size_t j>
-	NodeID<i-j> get_node_down(const NodeID<i> nid, const KeyType (&s)[j]) const
+	SimplexID<i-j> get_node_down(const SimplexID<i> id, const KeyType (&s)[j]) const
 	{
-		return get_down_recurse<i,j>::apply(this, s, nid.ptr);
+		return get_down_recurse<i,j>::apply(this, s, id.ptr);
 	}
 
+	/**
+	 * @brief      Convenience version of get_node_down when the name 's' consists of a single character.
+	 *
+	 * @param[in]  id   The identifier of a simplex.
+	 * @param[in]  s    The relative single character name of the desired simplex.
+	 *
+	 * @tparam     i    The size of simplex 'id'.
+	 *
+	 * @return     The node down.
+	 */
 	template <size_t i>
-	NodeID<i-1> get_node_down(const NodeID<i> nid, const KeyType s) const
+	SimplexID<i-1> get_node_down(const SimplexID<i> nid, const KeyType s) const
 	{
 		return get_down_recurse<i,1>::apply(this, &s, nid.ptr);
 	}
 
-	NodeID<0> get_node_up() const
+	/**
+	 * @brief      Get the root simplex.
+	 * 
+	 * @return     The root simplex.
+	 */
+	SimplexID<0> get_node_up() const
 	{
 		return _root;
 	}
 
-	NodeID<0> get_node_down() const
+	/**
+	 * @brief      Get the root simplex.
+	 *
+	 * @return     The root simplex.
+	 */
+	SimplexID<0> get_node_down() const
 	{
 		return _root;
 	}
 
 	template <size_t k, class Inserter>
-	void get_cover_insert(const NodeID<k> id, Inserter pos) const
+	void get_cover_insert(const SimplexID<k> id, Inserter pos) const
 	{
 		for(auto curr : id.ptr->_up)
 		{
@@ -586,7 +606,7 @@ public:
 	}
 
 	template <size_t k, class Lambda>
-	void get_cover(const NodeID<k> id, Lambda fn) const
+	void get_cover(const SimplexID<k> id, Lambda fn) const
 	{
 		for(auto curr : id.ptr->_up)
 		{
@@ -595,7 +615,7 @@ public:
 	}
 
 	template <size_t k>
-	auto get_cover(const NodeID<k> id) const
+	auto get_cover(const SimplexID<k> id) const
 	{
 		std::vector<KeyType> rval;
 		get_cover_insert(id, std::back_inserter(rval));
@@ -603,76 +623,76 @@ public:
 	}
 
 	template <size_t k>
-	std::set<NodeID<k+1>> up(const std::set<NodeID<k>>& nodes) const
+	std::set<SimplexID<k+1>> up(const std::set<SimplexID<k>>& nodes) const
 	{
-		std::set<NodeID<k+1>> rval;
+		std::set<SimplexID<k+1>> rval;
 		for(auto nid : nodes)
 		{
 			for(auto p : nid.ptr->_up)
 			{
-				rval.insert(NodeID<k+1>(p.second));
+				rval.insert(SimplexID<k+1>(p.second));
 			}
 		}
 		return rval;
 	}
 
 	template <size_t k>
-	std::set<NodeID<k+1>> up(const NodeID<k> nid) const
+	std::set<SimplexID<k+1>> up(const SimplexID<k> nid) const
 	{
-		std::set<NodeID<k+1>> rval;
+		std::set<SimplexID<k+1>> rval;
 		for(auto p : nid.ptr->_up)
 		{
-			rval.insert(NodeID<k+1>(p.second));
+			rval.insert(SimplexID<k+1>(p.second));
 		}
 		return rval;
 	}
 
 	template <size_t k>
-	std::set<NodeID<k-1>> down(const std::set<NodeID<k>>& nodes) const
+	std::set<SimplexID<k-1>> down(const std::set<SimplexID<k>>& nodes) const
 	{
-		std::set<NodeID<k-1>> rval;
+		std::set<SimplexID<k-1>> rval;
 		for(auto nid : nodes)
 		{
 			for(auto p : nid.ptr->_down)
 			{
-				rval.insert(NodeID<k-1>(p.second));
+				rval.insert(SimplexID<k-1>(p.second));
 			}
 		}
 		return rval;
 	}
 
 	template <size_t k>
-	std::set<NodeID<k-1>> down(const NodeID<k> nid) const
+	std::set<SimplexID<k-1>> down(const SimplexID<k> nid) const
 	{
-		std::set<NodeID<k-1>> rval;
+		std::set<SimplexID<k-1>> rval;
 		for(auto p : nid.ptr->_down)
 		{
-			rval.insert(NodeID<k-1>(p.second));
+			rval.insert(SimplexID<k-1>(p.second));
 		}
 		return rval;
 	}
 
 	// Edge
 	template <size_t k>
-	auto get_edge_up(NodeID<k> nid, KeyType a)
+	auto get_edge_up(SimplexID<k> nid, KeyType a)
 	{
 		return EdgeID<k+1>(nid.ptr->_up[a], a);
 	}
 
 	template <size_t k>
-	auto get_edge_down(NodeID<k> nid, KeyType a)
+	auto get_edge_down(SimplexID<k> nid, KeyType a)
 	{
 		return EdgeID<k>(nid.ptr, a);
 	}
 
 	template <size_t k>
-	auto get_edge_up(NodeID<k> nid, KeyType a) const
+	auto get_edge_up(SimplexID<k> nid, KeyType a) const
 	{
 		return EdgeID<k+1>(nid.ptr->_up[a], a);
 	}
 
 	template <size_t k>
-	auto get_edge_down(NodeID<k> nid, KeyType a) const
+	auto get_edge_down(SimplexID<k> nid, KeyType a) const
 	{
 		return EdgeID<k>(nid.ptr, a);
 	}
@@ -695,8 +715,8 @@ public:
 	{
 		auto begin = std::get<k>(levels).begin();
 		auto end = std::get<k>(levels).end();
-		auto data_begin = detail::make_node_id_iterator<decltype(begin),NodeID<k>>(begin);
-		auto data_end = detail::make_node_id_iterator<decltype(end),NodeID<k>>(end);
+		auto data_begin = detail::make_node_id_iterator<decltype(begin),SimplexID<k>>(begin);
+		auto data_end = detail::make_node_id_iterator<decltype(end),SimplexID<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
@@ -705,8 +725,8 @@ public:
 	{
 		auto begin = std::get<k>(levels).cbegin();
 		auto end = std::get<k>(levels).cend();
-		auto data_begin = detail::make_node_id_iterator<decltype(begin), const NodeID<k>>(begin);
-		auto data_end = detail::make_node_id_iterator<decltype(end), const NodeID<k>>(end);
+		auto data_begin = detail::make_node_id_iterator<decltype(begin), const SimplexID<k>>(begin);
+		auto data_end = detail::make_node_id_iterator<decltype(end), const SimplexID<k>>(end);
 		return util::make_range(data_begin, data_end);
 	}
 
@@ -747,14 +767,14 @@ public:
 	}
 
 	template <std::size_t k>
-	std::size_t remove(NodeID<k> s)
+	std::size_t remove(SimplexID<k> s)
 	{
 		size_t count = 0;
 		return remove_recurse<k,0>::apply(this, &s.ptr, &s.ptr + 1, count);
 	}
 
 	template <std::size_t L, std::size_t R>
-	bool leq(NodeID<L> lhs, NodeID<R> rhs) const
+	bool leq(SimplexID<L> lhs, SimplexID<R> rhs) const
 	{
 		auto name_lhs = get_name(lhs);
 		auto name_rhs = get_name(rhs);
@@ -772,13 +792,13 @@ public:
 	}
 
 	template <std::size_t L, std::size_t R>
-	bool eq(NodeID<L> lhs, NodeID<R> rhs) const
+	bool eq(SimplexID<L> lhs, SimplexID<R> rhs) const
 	{
 		return false;
 	}
 
 	template <std::size_t k>
-	bool eq(NodeID<k> lhs, NodeID<k> rhs) const
+	bool eq(SimplexID<k> lhs, SimplexID<k> rhs) const
 	{
 		auto name_lhs = get_name(lhs);
 		auto name_rhs = get_name(rhs);
@@ -795,7 +815,7 @@ public:
 	}
 
 	template <std::size_t L, std::size_t R>
-	bool lt(NodeID<L> lhs, NodeID<R> rhs) const
+	bool lt(SimplexID<L> lhs, SimplexID<R> rhs) const
 	{
 		return L < R && leq(lhs,rhs);
 	}
@@ -1150,7 +1170,7 @@ using AbstractSimplicialComplex = simplicial_complex<simplicial_complex_traits_d
 
 
 template <class Complex, std::size_t level, class InsertIter>
-void neighbors(Complex &F, typename Complex::template NodeID<level> nid, InsertIter iter)
+void neighbors(Complex &F, typename Complex::template SimplexID<level> nid, InsertIter iter)
 {
 	for (auto a : F.get_name(nid))
 	{
@@ -1166,15 +1186,15 @@ void neighbors(Complex &F, typename Complex::template NodeID<level> nid, InsertI
 	}
 }
 
-template <class Complex, class NodeID, class InsertIter>
-void neighbors(Complex& F, NodeID nid, InsertIter iter)
+template <class Complex, class SimplexID, class InsertIter>
+void neighbors(Complex& F, SimplexID nid, InsertIter iter)
 {
-	neighbors<Complex, NodeID::level, InsertIter>(F,nid,iter);
+	neighbors<Complex, SimplexID::level, InsertIter>(F,nid,iter);
 }
 
 
 template <class Complex, std::size_t level, class InsertIter>
-void neighbors_up(Complex &F, typename Complex::template NodeID<level> nid, InsertIter iter)
+void neighbors_up(Complex &F, typename Complex::template SimplexID<level> nid, InsertIter iter)
 {
 	for (auto a : F.get_cover(nid))
 	{
@@ -1190,24 +1210,24 @@ void neighbors_up(Complex &F, typename Complex::template NodeID<level> nid, Inse
 	}
 }
 
-template <class Complex, class NodeID, class InsertIter>
-void neighbors_up(Complex& F, NodeID nid, InsertIter iter)
+template <class Complex, class SimplexID, class InsertIter>
+void neighbors_up(Complex& F, SimplexID nid, InsertIter iter)
 {
-	neighbors_up<Complex, NodeID::level, InsertIter>(F,nid,iter);
+	neighbors_up<Complex, SimplexID::level, InsertIter>(F,nid,iter);
 }
 
 /**
  * Code for returning a set of k-ring neighbors. Currently obseleted by neighbors_up visitor pattern
  */
 // template <class Complex, std::size_t level>
-// std::set<typename Complex::template NodeID<level>> neighbors_up(Complex &F, 
-// 			std::set<typename Complex::template NodeID<level>>& nodes,
-// 			std::set<typename Complex::template NodeID<level>> next,
+// std::set<typename Complex::template SimplexID<level>> neighbors_up(Complex &F, 
+// 			std::set<typename Complex::template SimplexID<level>>& nodes,
+// 			std::set<typename Complex::template SimplexID<level>> next,
 // 			int ring)
 // {
 // 	if (ring == 0)
 // 		return nodes;
-// 	std::set<typename Complex::template NodeID<level>> tmp;
+// 	std::set<typename Complex::template SimplexID<level>> tmp;
 // 	for (auto nid : next){
 // 		for (auto a : F.get_cover(nid))
 // 		{
@@ -1224,19 +1244,19 @@ void neighbors_up(Complex& F, NodeID nid, InsertIter iter)
 // 	return neighbors_up<Complex, level>(F, nodes, tmp, ring-1);
 // }
 
-// template <class Complex, class NodeID>
-// std::set<NodeID> neighbors_up(Complex& F, NodeID nid, int ring)
+// template <class Complex, class SimplexID>
+// std::set<SimplexID> neighbors_up(Complex& F, SimplexID nid, int ring)
 // {
-// 	std::set<NodeID> nodes{nid};
-// 	return neighbors_up<Complex, NodeID::level>(F,nodes,nodes,ring);
+// 	std::set<SimplexID> nodes{nid};
+// 	return neighbors_up<Complex, SimplexID::level>(F,nodes,nodes,ring);
 // }
 
-template <typename NodeID>
-struct hashNodeID{
-   size_t operator()(const NodeID nid) const
+template <typename SimplexID>
+struct hashSimplexID{
+   size_t operator()(const SimplexID nid) const
    {
        return std::hash<std::uintptr_t>()(static_cast<uintptr_t>(nid));
    }
 };
 
-template <typename T> using NodeSet = std::unordered_set<T,hashNodeID<T>>;
+template <typename T> using NodeSet = std::unordered_set<T,hashSimplexID<T>>;

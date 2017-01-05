@@ -15,13 +15,13 @@
 /*
 
 template <std::size_t dimension>
-auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr)
+auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
 {
     return 1.0;
 }
 
 template <std::size_t level, std::size_t dimension>
-auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<level> curr)
+auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<level> curr)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
 
@@ -36,7 +36,7 @@ auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
     return rval;
 }
 
-auto getTangent_jbm(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID)
+auto getTangent_jbm(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID)
 {
     return getTangentH(mesh, (*vertexID).position, vertexID);
 }
@@ -85,8 +85,8 @@ void print_name(const T& name)
     }
 }
 
-template <typename NodeID>
-void grab(const typename NodeID::complex& F, NodeID s)
+template <typename SimplexID>
+void grab(const typename SimplexID::complex& F, SimplexID s)
 {
     std::cout << F.get_name(s) << std::endl;
 }
@@ -115,7 +115,7 @@ template <typename Complex>
 struct PrintVisitor
 {
     template <std::size_t level>
-    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<level> s)
     {
         std::cout << F.get_name(s) << std::endl;
         return true;
@@ -138,10 +138,10 @@ namespace jbm
     struct SimplexSet
     {
         template <std::size_t j>
-        using Simplex = typename Complex::template NodeID<j>;
+        using Simplex = typename Complex::template SimplexID<j>;
         using LevelIndex = typename std::make_index_sequence<Complex::numLevels>;
-        using NodeIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, Simplex>::type;
-        using type = typename util::type_map<NodeIDLevel, NodeSet>::type;
+        using SimplexIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, Simplex>::type;
+        using type = typename util::type_map<SimplexIDLevel, NodeSet>::type;
     };
 
     template <typename Complex>
@@ -164,8 +164,8 @@ namespace jbm
         template <std::size_t j>
         using DataSet = typename DataType<j, typename Complex::template NodeData<j>>::type;
         using LevelIndex = typename std::make_index_sequence<Complex::numLevels>;
-        using NodeIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, DataSet>::type;
-        using type = typename util::type_map<NodeIDLevel, jbm::vector>::type;
+        using SimplexIDLevel = typename util::int_type_map<std::size_t, std::tuple, LevelIndex, DataSet>::type;
+        using type = typename util::type_map<SimplexIDLevel, jbm::vector>::type;
     };
 }
 
@@ -177,7 +177,7 @@ struct GetCompleteNeighborhoodHelper
     GetCompleteNeighborhoodHelper(SimplexSet* p) : pLevels(p) {}
 
     template <std::size_t level>
-    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<level> s)
     {
         if(std::get<level>(*pLevels).find(s) == std::get<level>(*pLevels).end())
         {
@@ -205,12 +205,12 @@ struct GetCompleteNeighborhood
     GetCompleteNeighborhood(SimplexSet* p) : pLevels(p) {}
 
     template <std::size_t level>
-    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<level> s)
     {
         return true;
     }
 
-    bool visit(const Complex& F, typename Complex::template NodeID<1> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<1> s)
     {
         visit_node_up(GetCompleteNeighborhoodHelper<Complex>(pLevels), F, s);
         return false;
@@ -229,7 +229,7 @@ struct GrabVisitor
     GrabVisitor(SimplexSet* p, SimplexSet* grab) : pLevels(p), pGrab(grab) {}
 
     template <std::size_t level>
-    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<level> s)
     {
         if(std::get<level>(*pLevels).find(s) != std::get<level>(*pLevels).end())
         {
@@ -256,7 +256,7 @@ template <typename Complex, std::size_t BaseLevel, template <typename> class Cal
 struct InnerVisitor
 {
     using SimplexSet = typename jbm::SimplexSet<Complex>::type;
-    using Simplex = typename Complex::template NodeID<BaseLevel>;
+    using Simplex = typename Complex::template SimplexID<BaseLevel>;
     using KeyType = typename Complex::KeyType;
     using ReturnValues = typename jbm::SimplexDataSet<Complex>::type;
 
@@ -296,7 +296,7 @@ struct InnerVisitor
         : pLevels(p), simplex(s), new_point(np), callback(c), data(rv) {}
 
     template <std::size_t OldLevel>
-    bool visit(const Complex& F, typename Complex::template NodeID<OldLevel> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<OldLevel> s)
     {
         constexpr std::size_t NewLevel = OldLevel - BaseLevel + 1;
 
@@ -351,7 +351,7 @@ struct MainVisitor
         : pLevels(p), callback(c), new_point(np), data(rv) {}
 
     template <std::size_t level>
-    bool visit(const Complex& F, typename Complex::template NodeID<level> s)
+    bool visit(const Complex& F, typename Complex::template SimplexID<level> s)
     {
 //        std::cout << "MAIN: " << F.get_name(s) << std::endl;
         visit_node_up(InnerVisitor<Complex,level,Callback>(pLevels,s,new_point,data,callback), F, s);

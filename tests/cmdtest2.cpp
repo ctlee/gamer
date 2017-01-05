@@ -2,8 +2,10 @@
 #include <assert.h>
 #include <array>
 #include <vector>
+#include <set>
 #include <cstdlib>
 #include <sys/time.h>
+#include <stack>
 
 template <typename _T, int _d>
 struct BTreeNode
@@ -365,21 +367,6 @@ Pointer<Node> remove(Pointer<Node> head, Data<Node> data)
 	}
 }
 
-template <typename T, int d>
-std::ostream& operator<<(std::ostream& out, const BTreeNode<T,d>& head)
-{
-//	out << "[ ";
-	for(int i = 0; i < head.k; ++i)
-	{
-		if(head.next[0] != nullptr)
-			out << *(head.next[i]);
-		out << head.data[i] << " ";
-	}
-	if(head.next[0] != nullptr)
-		out << *(head.next[head.k]);
-//	out << "]";
-	return out;
-}
 
 template <typename Node>
 Data<Node> check_order(Pointer<Node> head, Data<Node> curr)
@@ -444,6 +431,167 @@ bool operator>(const Interval<T>& x, const Interval<T>& y)
 	return x.lower() >= y.upper();
 }
 
+template <typename Node>
+struct btree_iterator : public std::iterator<std::bidirectional_iterator_tag, Data<Node>> {
+public:
+	using super = std::iterator<std::bidirectional_iterator_tag, Data<Node>>;
+	btree_iterator() {}
+	btree_iterator(const Pointer<Node> head)
+	{
+		push(head);
+	}
+
+	btree_iterator& operator++()
+	{
+		Pointer<Node> head = curr.top().first;
+		int &i = curr.top().second;
+
+		++i;
+		if(head->next[0] != nullptr)
+		{
+			push(head->next[i]);
+		}
+		else if(i == head->k)
+		{
+			pop();
+		}
+/*
+		if(!curr.empty() && curr.top().first->k == curr.top().second)
+		{
+			std::cout << "# " << i << " #" << std::endl;
+		}
+*/
+		return *this;
+	}
+
+	btree_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
+
+	btree_iterator& operator--()
+	{
+		return *this;
+	}
+
+	btree_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
+
+	bool operator==(const btree_iterator& j) const
+	{
+		return curr == j.curr;
+	}
+
+	bool operator!=(const btree_iterator& j) const { return !(*this == j); }
+
+	Data<Node> operator*()
+	{
+		return curr.top().first->data[curr.top().second];
+	}
+
+    typename super::pointer operator->() { return curr.top().first->data[curr.top().second]; }
+
+protected:
+	void push(Pointer<Node> p)
+	{
+		while(p != nullptr)
+		{
+			curr.push(std::make_pair(p,0));
+			p = p->next[0];
+		}
+	}
+
+	void pop()
+	{
+		while(!curr.empty() && curr.top().first->k == curr.top().second)
+		{
+			curr.pop();
+		}
+	}
+
+	std::stack<std::pair<Pointer<Node>,int>> curr;
+};
+
+template <typename Node>
+bool check_order(Pointer<Node> head)
+{
+	Data<Node> last = std::numeric_limits<Data<Node>>::min();
+
+	btree_iterator<Node> curr(head);
+	btree_iterator<Node> end;
+
+	while(curr != end)
+	{
+		if(*curr < last)
+		{
+			return false;
+		}
+		last = *curr;
+		++curr;
+	}
+	return true;
+}
+
+template <typename T, int d>
+std::ostream& operator<<(std::ostream& out, BTreeNode<T,d>* head)
+{
+	if(head != nullptr)
+	{
+		btree_iterator<BTreeNode<T,d>> curr(head);
+		btree_iterator<BTreeNode<T,d>> end;
+
+		while(curr != end)
+		{
+			out << *curr << " ";
+			++curr;
+		}
+	}
+	return out;
+}
+/*
+
+template <typename _T, int _d = 16>
+class btree_set
+{
+public:
+	using Node = BTreeNode<_T, _d>;
+	using T = _T;
+	constexpr static int d = _d;
+
+	btree_set() : head(new Node(Interval<T>(0,std::numeric_limits<T>::max()))) {}
+	~btree_set()
+	{
+		destruct<Node>(head);
+	}
+
+	void insert(T x)
+	{
+		head = insert_scalar<Node>(head, x);
+	}
+
+	Scalar<Node> pop()
+	{
+		auto x = pop_scalar<Node>(head);
+    	return x;
+	}
+
+	void remove(Scalar<Node> x)
+	{
+		remove_scalar<Node>(head, x);
+	}
+
+	bool empty() const
+	{
+		return head == nullptr;
+	}
+
+	friend std::ostream& operator<<(std::ostream& out, const btree_set& x)
+	{
+		out << x.head;
+		return out;
+	}
+
+private:
+	Pointer<Node> head;
+};
+*/
+
 using BT = BTreeNode<int,1>;
 
 int main(int argc, char *argv[])
@@ -466,37 +614,40 @@ int main(int argc, char *argv[])
 	}
 	std::cout << std::endl;
 
-   timespec ts{0,0};
-   clock_settime(CLOCK_THREAD_CPUTIME_ID, &ts);
+	timespec ts{0,0};
+	clock_settime(CLOCK_THREAD_CPUTIME_ID, &ts);
 
 	Pointer<BT> head = nullptr;
+	std::set<int> benchmark;
 	std::vector<int> added_list;
-	constexpr size_t N = 300000;
+	constexpr size_t N = 100;
 	for(int i = 0; i < N; ++i)
 	{
-		int add = std::rand() % 100;
-		head = insert<BT>(head, add);
-		check_order<BT>(head, -1);
+		int add = std::rand() % 1000000;
+		head = insert<BT>(head, i);
+//		benchmark.insert(add);
+//		check_order<BT>(head, -1);
 		added_list.push_back(add);
+		std::cout << head << std::endl;
+//		std::cout << check_order<BT>(head) << std::endl;
 	}
 
-   clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts); // Works on Linux
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts); // Works on Linux
 
-   std::cout << (ts.tv_sec * 10e9 + ts.tv_nsec)/10e9 << std::endl;
-
-	int subtr[] = {49, 23, 58, 72, 44, 30, 78, 73, 87, 40, 29, 40, 42, 12, 92, 27, 9, 3, 7, 3, 9, 57, 33, 35, 16, 99, 78, 65, 60};
+	std::cout << (ts.tv_sec * 10e9 + ts.tv_nsec)/10e9 << std::endl;
 
 	for(int x : added_list)
 	{
-		check_order<BT>(head, -1);
+//		check_order<BT>(head, -1);
 		head = remove<BT>(head, x);
 //		std::cout << x << " - " << *head << std::endl;
-		check_order<BT>(head, -1);
+//		check_order<BT>(head, -1);
+//		benchmark.erase(x);
 	}
 
 	if(head)
 	{
-			std::cout << *head << std::endl;
+			std::cout << head << std::endl;
 	}
 	else
 	{

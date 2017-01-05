@@ -64,13 +64,13 @@ using ASC = simplicial_complex<complex_traits>; // Alias for the lazy
 using SurfaceMesh = simplicial_complex<complex_traits>;
 
 template <std::size_t dimension>
-auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr)
+auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
 {
     return (*curr).orientation;
 }
 
 template <std::size_t level, std::size_t dimension>
-auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::NodeID<level> curr)
+auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<level> curr)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
     auto cover = mesh.get_cover(curr);
@@ -87,14 +87,14 @@ auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
 
 template <std::size_t dimension>
 auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
-        SurfaceMesh::NodeID<SurfaceMesh::topLevel> curr, std::set<SurfaceMesh::KeyType>& cover)
+        SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr, std::set<SurfaceMesh::KeyType>& cover)
 {
     return (*curr).orientation;
 }
 
 template <std::size_t level, std::size_t dimension>
 auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
-        SurfaceMesh::NodeID<level> curr, std::set<SurfaceMesh::KeyType>& cover)
+        SurfaceMesh::SimplexID<level> curr, std::set<SurfaceMesh::KeyType>& cover)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
     for(auto alpha : cover)
@@ -122,25 +122,25 @@ void writeOBJ(const std::string& filename, const SurfaceMesh& mesh);
 
 void print(const SurfaceMesh& mesh);
 void generateHistogram(const SurfaceMesh& mesh);
-int getValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<1> vertexID);
+int getValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID);
 double getArea(const SurfaceMesh& mesh);
-double getArea(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
+double getArea(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
 double getVolume(const SurfaceMesh& mesh);
 
-void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::NodeID<2> edgeID);
-std::vector<SurfaceMesh::NodeID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
-        std::function<bool(const SurfaceMesh&, SurfaceMesh::NodeID<2>&)> &checkFlip);
-bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
-bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::NodeID<2>& edgeID);
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::SimplexID<2> edgeID);
+std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
+        std::function<bool(const SurfaceMesh&, SurfaceMesh::SimplexID<2>&)> &checkFlip);
+bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID);
+bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID);
 
-void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
+void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
+void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
 
-tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
+tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
 Vector getNormalFromTangent(const tensor<double,3,2> tangent);
-Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID);
-Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::NodeID<3> faceID);
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
 
 // These exist for the a potential python interface
 void translate(SurfaceMesh& mesh, Vector v);
@@ -158,7 +158,7 @@ struct LocalStructureTensorVisitor
     }
 
     template <std::size_t level> 
-    bool visit(const SurfaceMesh& F, SurfaceMesh::NodeID<level> s)
+    bool visit(const SurfaceMesh& F, SurfaceMesh::SimplexID<level> s)
     {
         // auto tan = getTangent(F, s);
         // auto norm = getNormalFromTangent(tan);
@@ -171,7 +171,7 @@ struct LocalStructureTensorVisitor
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat);
 
 template <std::size_t rings>
-void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::NodeID<1> vertexID){
+void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
     auto centerName = mesh.get_name(vertexID)[0]; 
     auto& center = *vertexID; // get the vertex data
 
