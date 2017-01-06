@@ -27,6 +27,9 @@ std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
 template <typename T, std::size_t k>
 std::string to_string(const std::array<T,k>& A)
 {
+    if (k==0){
+        return "{root}";
+    }
 	std::string out;
     out += "\"{";
     for(int i = 0; i + 1 < k; ++i)
@@ -39,12 +42,6 @@ std::string to_string(const std::array<T,k>& A)
     }
     out += "}\"";
     return out;
-}
-
-template <typename T>
-std::string to_string(const std::array<T,0>& A)
-{
-	return "\"root\"";
 }
 
 template <typename Complex>
@@ -122,6 +119,8 @@ void writeDOT(const std::string& filename, const Complex& F){
 	}
 
 	fout 	<< "digraph {\n"
+            << "node [shape = record,height = .1]"
+            << "splines=line;\n"
 			<< "dpi=300;\n";
     auto v = GraphVisitor<Complex>(fout);
 	visit_node_up(v, F, F.get_simplex_up());
