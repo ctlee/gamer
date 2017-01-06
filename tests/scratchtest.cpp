@@ -9,13 +9,14 @@
 #include <string>
 #include <vector>
 
+#include "ASCFunctions.h"
 #include "stringutil.h"
 #include "SurfaceMeshOld.h"
 #include "SurfaceMesh.h"
 #include "SimplicialComplexVisitors.h"
 #include "Vertex.h"
 
-int main(int argc, char *argv[])
+int  main(int argc, char *argv[])
 {
     if(argc != 2)
     {
@@ -23,16 +24,16 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-
-    auto mesh = readOBJ(argv[1]);
+    auto mesh = readOFF(argv[1]);
     if(mesh == nullptr){
         std::cout << "Something bad happened...";
         exit(1);
     }
+    std::cout << "Done reading" << std::endl;
     compute_orientation(*mesh);
-    //print(*mesh);
-    writeOBJ("../data/test.obj", *mesh);
-
+    
+    //mesh->genGraph("test.dot");
+    writeDOT("test.dot", *mesh);
 
     // int trials = 10;
     // std::chrono::duration<double> elapsed_seconds;
