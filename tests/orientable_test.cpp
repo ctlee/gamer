@@ -19,16 +19,14 @@
 
 int main(int argc, char* argv[])
 {
-	return 0;
 	if(argc != 3)
 	{
 		std::cerr << "Wrong arguments passed" << std::endl;
 		return -1;
 	}
-	auto pF = OFF_to_SimplicialComplex(argv[1]);
 
-	init_orientation(*pF);
-	clear_orientation(*pF);
+	auto pF = readOFF(argv[1]);
+
 	auto rval = compute_orientation(*pF);
 
 	std::cout << std::get<0>(rval) << " " << std::get<1>(rval) << " " << std::get<2>(rval) << std::endl;
