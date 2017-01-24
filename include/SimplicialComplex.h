@@ -256,6 +256,12 @@ namespace detail {
 } // end namespace
 
 
+/**
+ * @brief      Helper to expand traits for AbstractSimplicialComplex
+ *
+ * @tparam     K     KeyType
+ * @tparam     Ts    Types for each level
+ */
 template <typename K, typename... Ts>
 struct simplicial_complex_traits_default
 {
@@ -272,7 +278,7 @@ struct simplicial_complex_traits_default
 /**
  * @brief      Class for simplicial complex.
  *
- * @tparam     traits  { description }
+ * @tparam     traits  The traits defining the KeyType, NodeTypes and EdgeTypes.
  */
 template <typename traits>
 class simplicial_complex {
@@ -639,13 +645,20 @@ public:
 		return std::move(rval);
 	}
 
+	/**
+	 *  @brief      Get the set of simplices of which the provided simplices are sub-simplices of.
+	 *  
+	 *  @param 		simplices The set of sub-simplices.
+	 *  
+	 *  @return 	Set of simplices which contain all sub-simplices 'simplices'.
+	 */
 	template <size_t k>
-	std::set<SimplexID<k+1>> up(const std::set<SimplexID<k>>& nodes) const
+	std::set<SimplexID<k+1>> up(const std::set<SimplexID<k>>& simplices) const
 	{
 		std::set<SimplexID<k+1>> rval;
-		for(auto nid : nodes)
+		for(auto simplex : simplices)
 		{
-			for(auto p : nid.ptr->_up)
+			for(auto p : simplex.ptr->_up)
 			{
 				rval.insert(SimplexID<k+1>(p.second));
 			}
@@ -653,6 +666,13 @@ public:
 		return rval;
 	}
 
+	/**
+	 *  @brief      Get the set of simplices of which the provided simplex is a sub-simplex.
+	 *  
+	 *  @param 		nid The sub-simplex
+	 *  
+	 *  @return 	Set of simplices which contain all sub-simplices 'nid'.
+	 */
 	template <size_t k>
 	std::set<SimplexID<k+1>> up(const SimplexID<k> nid) const
 	{
@@ -664,6 +684,13 @@ public:
 		return rval;
 	}
 
+	/**
+	 *  @brief      Get the sub-simplices of simplicies 'nodes'.
+	 *  
+	 *  @param 		nodes The set of simplicies.
+	 *  
+	 *  @return 	Sub-simplices of 'nodes'.
+	 */
 	template <size_t k>
 	std::set<SimplexID<k-1>> down(const std::set<SimplexID<k>>& nodes) const
 	{
@@ -678,6 +705,13 @@ public:
 		return rval;
 	}
 
+	/**
+	 *  @brief      Get the sub-simplices of simplex 'nid'.
+	 *  
+	 *  @param 		nid the simplex of interest
+	 *  
+	 *  @return 	Sub-simplices of 'nid'.
+	 */
 	template <size_t k>
 	std::set<SimplexID<k-1>> down(const SimplexID<k> nid) const
 	{
@@ -689,7 +723,17 @@ public:
 		return rval;
 	}
 
-	// Edge
+
+	/**
+	 * @brief      Gets the edge up.
+	 *
+	 * @param[in]  nid   The nid
+	 * @param[in]  a     Key of the edge to get.
+	 *
+	 * @tparam     k     The level of the simplex of interest
+	 *
+	 * @return     The edge up.
+	 */
 	template <size_t k>
 	auto get_edge_up(SimplexID<k> nid, KeyType a)
 	{
@@ -721,6 +765,13 @@ public:
 		return get_recurse<0,k>::apply(this, s, _root) != 0;
 	}
 
+	/**
+	 * @brief      Get the number of simplices of level 'k'.
+	 *
+	 * @tparam     k     The level of interest
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	template <std::size_t k>
 	auto size() const
 	{
@@ -910,9 +961,8 @@ private:
 	 * Recursively deletes dependent nodes.
 	 *
 	 * @tparam     level  { description }
-	 * @tparam     foo    { description }
+	 * @tparam     foo    A junk argument to get the compiler to play nicely
 	 */
-	// The foo argument is necessary to get the compiler to shut up...
 	template <size_t level, size_t foo>
 	struct remove_recurse
 	{

@@ -23,7 +23,6 @@ int  main(int argc, char *argv[])
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
     }
-
     auto mesh = readOFF(argv[1]);
     if(mesh == nullptr){
         std::cout << "Something bad happened...";
@@ -31,7 +30,8 @@ int  main(int argc, char *argv[])
     }
     std::cout << "Done reading" << std::endl;
     compute_orientation(*mesh);
-    
+    auto volume = getVolume(*mesh);
+    std::cout << "Volume: " << volume << std::endl;
     //mesh->genGraph("test.dot");
     writeDOT("test.dot", *mesh);
 

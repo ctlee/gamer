@@ -6,24 +6,16 @@
 #include "SimplicialComplex.h"
 #include "SimplicialComplexVisitors.h"
 
-
-template <typename T, std::size_t k>
-std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
-{
-    out << "{";
-    for(int i = 0; i + 1 < k; ++i)
-    {
-        out << A[i] << ",";
-    }
-    if(k > 0)
-    {
-        out << A[k-1];
-    }
-    out << "}";
-    return out;
-}
-
-
+/**
+ * @brief      Returns a string representation of the vertex subsimplicies of a given simplex
+ *
+ * @param[in]  A     Array containing name of a simplex
+ *
+ * @tparam     T     Type of the array elements
+ * @tparam     k     Number of elements
+ *
+ * @return     String representation of the object.
+ */
 template <typename T, std::size_t k>
 std::string to_string(const std::array<T,k>& A)
 {
@@ -44,6 +36,11 @@ std::string to_string(const std::array<T,k>& A)
     return out;
 }
 
+/**
+ * @brief      Visitor for printing connectivity of the ASC
+ *
+ * @tparam     Complex  Type details of the ASC
+ */
 template <typename Complex>
 struct GraphVisitor
 {
@@ -71,12 +68,44 @@ struct GraphVisitor
     	return true;
     }
 
+    bool visit(const Complex& F, typename Complex::template SimplexID<Complex::topLevel-1> s){
+
+        auto name = to_string(F.get_name(s));
+        auto covers = F.get_cover(s);
+        for(auto cover : covers){
+            auto edge = F.get_edge_up(s, cover);
+            auto nextName = to_string(F.get_name(edge.up()));
+            auto orient = (*edge.up()).orientation;
+            if (orient == 1){
+                nextName = "+ " + nextName;
+            }
+            else{
+                nextName = "- " + nextName;
+            }
+            if((*edge).orientation == 1){
+                fout    << "   " << name << " -> " 
+                        << nextName << std::endl;
+            }
+            else{
+                fout    << "   " << nextName << " -> " 
+                        << name << std::endl;
+            }
+        }
+        return true;
+    }
+
     void visit(const Complex& F, typename Complex::template SimplexID<Complex::topLevel> s){}
 };
 
 template <typename Complex, typename K>
 struct DotHelper {};
 
+/**
+ * @brief      Print out the names of simplices at each level
+ *
+ * @tparam     Complex  Type of the ASC
+ * @tparam     k        Level to traverse
+ */
 template <typename Complex, std::size_t k>
 struct DotHelper<Complex, std::integral_constant<std::size_t, k>>
 {
@@ -92,6 +121,11 @@ struct DotHelper<Complex, std::integral_constant<std::size_t, k>>
     }
 };
 
+/**
+ * @brief      Print out the names of simplices at the top level
+ *
+ * @tparam     Complex  Type of the ASC
+ */
 template <typename Complex>
 struct DotHelper<Complex, std::integral_constant<std::size_t, Complex::topLevel>>
 {
@@ -107,6 +141,14 @@ struct DotHelper<Complex, std::integral_constant<std::size_t, Complex::topLevel>
 };
 
 
+/**
+ * @brief      Writes out the topology of an ASC into the dot format. The resulting dot file can be rendered into an image using tools such as GraphViz. dot -Tpng file.dot > image.png.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  F         ASC of interest
+ *
+ * @tparam     Complex   Type of the ASC
+ */
 template <typename Complex>
 void writeDOT(const std::string& filename, const Complex& F){
 	std::ofstream fout(filename);
