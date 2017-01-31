@@ -416,7 +416,8 @@ public:
 	template <size_t n>
 	void insert(const KeyType (&s)[n])
 	{
-		insert_for<0,n,false>::apply(this, _root, s);
+		insert_full<0,n>::apply(this, _root, s);	
+		//insert_for<0,n,false>::apply(this, _root, s);
 	}
 
 	/**
@@ -430,7 +431,7 @@ public:
 	template <size_t n>
 	void insert(const KeyType (&s)[n], const NodeData<n>& data)
 	{
-		Node<n>* rval = insert_for<0,n,true>::apply(this, _root, s);
+		Node<n>* rval = insert_full<0,n>::apply(this, _root, s);
 		rval->_data = data;
 	}
 
@@ -444,7 +445,7 @@ public:
 	template <size_t n>
 	void insert(const std::array<KeyType,n>& s)
 	{
-		insert_for<0,n,false>::apply(this, _root, s.data());
+		insert_full<0,n>::apply(this, _root, s.data());	
 	}
 
 	/**
@@ -458,7 +459,7 @@ public:
 	template <size_t n>
 	void insert(const std::array<KeyType,n>& s, const NodeData<n>& data)
 	{
-		Node<n>* rval = insert_for<0,n,true>::apply(this, _root, s.data());
+		Node<n>* rval = insert_full<0,n>::apply(this, _root, s.data());
 		rval->_data = data;
 	}
 
@@ -888,75 +889,7 @@ public:
 		return L < R && leq(lhs,rhs);
 	}
 
-
-
-	void genGraph(const std::string& filename)
-	{
-	    std::ofstream fout(filename);
-	    if(!fout.is_open())
-	    {
-	        std::cerr   << "File '" << filename 
-	                    << "' could not be writen to." << std::endl;
-	        exit(1); 
-	    }
-	    fout 	<< "digraph {\n"
-	    		<< "dpi=300;\n";
-		std::set<Node<0>*> root{_root};
-		writeGraph<0,0>::apply(fout, root);
-	    
-	    fout << "}\n";
-		fout.close();    	
-	}
-
 private:
-	template <size_t k, size_t foo>	
-	struct writeGraph
-	{
-	    template <typename T>
-	    static void apply(std::ofstream& fout, T nodes){
-			std::set<Node<k+1>*> next;
-			// for each node of interest...
-			for(auto node : nodes)
-			{
-				auto up = node->_up;
-				for(auto j = up.begin(); j != up.end(); ++j)
-				{
-					auto orient = j->second->_edge_data[j->first].orientation;
-					if (orient == 1)
-						fout <<	"	" << node->_node << " -> " << j->second->_node 
-							 << "[label=\"" << j->first << "\"]\n";
-					else 
-						fout <<	"	" << j->second->_node << " -> " << node->_node
-							 << "[label=\"" << j->first << "\"]\n";
-					next.insert(j->second);
-				}
-			}
-			
-			fout 	<< "subgraph cluster_" << k << " {\n"
-					<< "label=\"Level " << k << "\"\n";
-			for (auto j : nodes){
-				fout << j->_node << ";";
-			}
-			fout 	<< "\n}\n";
-			writeGraph<k+1,foo>::apply(fout, next);
-		}	
-	};
-	
-	template <size_t foo>
-	struct writeGraph<numLevels-1,foo>
-	{
-		template <typename T>
-		static void apply(std::ofstream & fout, T nodes)
-		{
-			fout 	<< "subgraph cluster_" << numLevels-1 << " {\n"
-					<< "label=\"Level " << numLevels-1 << "\"\n";
-			for (auto node : nodes){
-				fout << node->_node << ";";
-			}
-			fout 	<< "\n}\n";
-		}
-	};
-
 	/**
 	 * Recursively deletes dependent nodes.
 	 *
@@ -1058,60 +991,77 @@ private:
 		}
 	};
 
-	template <size_t i>
-	struct  get_down_recurse<i,0>
+	// template <size_t i, size_t step>
+	// struct  get_down_recurse<i,0>
+	// {
+	// 	static Node<i>* apply(const type_this* that, const KeyType* s, Node<i>* root)
+	// 	{
+	// 		return root;
+	// 	}
+	// };
+
+	template <size_t level, size_t n>
+	struct insert_full
 	{
-		static Node<i>* apply(const type_this* that, const KeyType* s, Node<i>* root)
+		static Node<level+n>* apply(type_this* that, Node<level>* root, const KeyType* begin)
 		{
+			//std::cout << "insert_full(level: " << level << ", n:" << n << ")" << std::endl << *root << std::endl;
+			return insert_for<level, n, n>::apply(that, root, begin);
+		}
+	};
+
+	template <size_t level>
+	struct insert_full<level,0>
+	{
+		static Node<level>* apply(type_this* that, Node<level>* root, const KeyType* begin)
+		{
+			//std::cout << "term_insert_full(level: " << level << ", n:" << 0 << ")" << std::endl << *root << std::endl;
 			return root;
 		}
 	};
 
-
-	template <size_t i, size_t n, bool do_insert>
+	template <size_t level, size_t antistep, size_t n>
 	struct insert_for
 	{
-		static Node<i+n>* apply(type_this* that, Node<0>* root, const KeyType* begin)
+		static Node<level+n>* apply(type_this* that, Node<level>* root, const KeyType* begin)
 		{
-			that->extend<0,i,do_insert>(root, begin, *(begin+i));
-			return insert_for<i+1,n-1,do_insert>::apply(that, root, begin);
+			//std::cout << "\tinsert_for<level=" << level << " a=" << antistep << " n=" << n << ">" << std::endl;
+			insert_raw<level, n-antistep>::apply(that, root, begin);
+			return insert_for<level, antistep-1, n>::apply(that, root, begin);
 		}
 	};
 
-	template <size_t i, bool do_insert>
-	struct insert_for<i, 1, do_insert>
+	template <size_t level, size_t n>
+	struct insert_for<level,1,n>
 	{
-		static Node<i+1>* apply(type_this* that, Node<0>* root, const KeyType* begin)
-		{
-			return that->extend<0,i,do_insert>(root, begin, *(begin+i));
+		static Node<level+n>* apply(type_this* that, Node<level>* root, const KeyType* begin){
+			//std::cout << "\tterm_insert_for<level=" << level << ", a=" << 1 << ", n=" << n << ">" << std::endl;
+			return insert_raw<level, n-1>::apply(that, root, begin);
 		}
 	};
 
-	template <size_t level, size_t i, size_t n, bool do_insert>
-	struct extend_for
+	template <size_t level, size_t n>
+	struct insert_raw
 	{
-		static Node<level+i+n+1>* apply(type_this* that, Node<level>* root, const KeyType* begin, int value)
+		static Node<level+n+1>* apply(type_this* that, Node<level>* root, const KeyType* begin)
 		{
-			that->extend<level+1,i,do_insert>(root->_up[*(begin+i)], begin, value);
-			return extend_for<level,i+1,n-1,do_insert>::apply(that, root, begin, value);
-		}
-	};
 
-	template <size_t level, size_t i, bool do_insert>
-	struct extend_for<level,i,1,do_insert>
-	{
-		static Node<level+i+1+1>* apply(type_this* that, Node<level>* root, const KeyType* begin, int value)
-		{
-			return that->extend<level+1,i,do_insert>(root->_up[*(begin+i)], begin, value);
-		}
-	};
+			KeyType v = *(begin+n);
+			//std::cout << "\t\tinsert_raw<level=" << level << ", n=" << n << ", v=" << v << "> " << std::endl << "\t\t" << *root << std::endl << std::endl; 	
+			Node<level+1>* nn;
+			// if root->v doesn't exist then create it
+			auto iter = root->_up.find(v);
+			if(iter == root->_up.end())
+			{
+				nn = that->create_node<level+1>();
 
-	template <size_t level, size_t i, bool do_insert>
-	struct extend_for<level,i,0,do_insert>
-	{
-		static Node<level+i+1>* apply(type_this* that, Node<level>* root, const KeyType* begin, int value)
-		{
-			return root->_up[value];
+				nn->_down[v] = root;
+				root->_up[v] = nn;
+				that->backfill(root, nn, v);
+			}
+			else
+				nn = iter->second;	// otherwise get it
+			return insert_full<level+1,n>::apply(that, nn, begin);
 		}
 	};
 
@@ -1147,29 +1097,6 @@ private:
 	void backfill(Node<0>* root, Node<1>* nn, int value)
 	{
 		return;
-	}
-
-	template <size_t level, size_t n, bool do_insert>
-	Node<level+n+1>* extend(Node<level>* root, const KeyType* begin, int value)
-	{
-		if(root->_up.find(value) == root->_up.end())
-		{
-			Node<level+1>* nn;
-			if(n == 0) // we are inserting the node the user requested.
-			{
-				nn = create_node<level+1>();
-			}
-			else // we are backfilling. The user may or may not want this.
-			{
-				nn = create_node<level+1>();
-			}
-			nn->_down[value] = root;
-			root->_up[value] = nn;
-
-			backfill(root, nn, value);
-		}
-
-		return extend_for<level,0,n,do_insert>::apply(this, root, begin, value);
 	}
 
 	template <size_t level>
