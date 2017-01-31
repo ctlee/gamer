@@ -991,14 +991,14 @@ private:
 		}
 	};
 
-	// template <size_t i, size_t step>
-	// struct  get_down_recurse<i,0>
-	// {
-	// 	static Node<i>* apply(const type_this* that, const KeyType* s, Node<i>* root)
-	// 	{
-	// 		return root;
-	// 	}
-	// };
+	template <size_t i>
+	struct  get_down_recurse<i,0>
+	{
+		static Node<i>* apply(const type_this* that, const KeyType* s, Node<i>* root)
+		{
+			return root;
+		}
+	};
 
 	template <size_t level, size_t n>
 	struct insert_full
