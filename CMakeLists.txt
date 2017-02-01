@@ -72,7 +72,6 @@ list(APPEND SOURCES
     "src/SurfSmooth.C"
     "src/Triangulate.C"
     "src/Vertex.C"
-    "src/WrapSimplicialComplex.C"
     "src/WrapSurfaceMesh.C"
 )
 

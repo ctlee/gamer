@@ -1,16 +1,17 @@
 #pragma once
 
 #include <iostream>
+#include <libraries/casc/include/SimplicialComplex>
+#include <libraries/casc/include/SimplicialComplexVisitors>
+#include <libraries/casc/include/util>
+#include <libraries/casc/include/Orientable>
+
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
 #include <memory>
 #include <string>
 #include <unordered_set>
 #include <utility>
-#include "util.h"
-#include "SimplicialComplex.h"
-#include "SimplicialComplexVisitors.h"
-#include "Orientable.h"
 #include "Vertex.h"
 /**
  * @brief      Properties that Faces should have
