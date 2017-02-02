@@ -4,7 +4,7 @@
 
 #include "SurfaceMesh.h"
 #include "Vertex.h"
-#include "SimplicialComplexVisitors.h"
+//#include "SimplicialComplexVisitors.h"
 #include <vector>
 #include <iostream>
 #include <string>

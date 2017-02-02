@@ -1,10 +1,10 @@
 #pragma once
 
 #include <iostream>
-#include <libraries/casc/include/SimplicialComplex>
-#include <libraries/casc/include/SimplicialComplexVisitors>
-#include <libraries/casc/include/util>
-#include <libraries/casc/include/Orientable>
+#include <libraries/casc/include/SimplicialComplex.h>
+#include <libraries/casc/include/SimplicialComplexVisitors.h>
+#include <libraries/casc/include/util.h>
+#include <libraries/casc/include/Orientable.h>
 
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>

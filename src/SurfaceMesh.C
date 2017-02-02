@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
-#include <libraries/casc/include/SimplicialComplexVisitors>
+#include <libraries/casc/include/SimplicialComplexVisitors.h>
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
 #include <map>
