@@ -63,3 +63,7 @@ target_link_libraries(cmdtest gamershared)
 add_executable(cmdtest2 cmdtest2.cpp)
 set_target_properties(cmdtest2 PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(cmdtest2 gamershared)
+
+add_executable(orientable_test orientable_test.cpp)
+set_target_properties(orientable_test PROPERTIES COMPILE_FLAGS "-std=c++14")
+target_link_libraries(orientable_test gamershared)

@@ -13,9 +13,8 @@
 
 
 /*
-
 template <std::size_t dimension>
-auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
+auto getTangentH(SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexiID<SurfaceMesh::topLevel> curr)
 {
     return 1.0;
 }
@@ -490,7 +489,7 @@ void decimate(Complex& F, Simplex s, Callback<Complex>& clbk)
     typename jbm::SimplexSet<SurfaceMesh>::type doomed = levels;
     visit_node_down(MainVisitor<SurfaceMesh,Callback>(&levels,&clbk,np,&rv), F, s);
 
-    PerformRemoval<SurfaceMesh,3>::apply(F, doomed);
+//    PerformRemoval<SurfaceMesh,3>::apply(F, doomed);
     PerformInsertion<SurfaceMesh,Vertex,std::integral_constant<std::size_t,1>>::apply(F, rv);
     --np;
 }
@@ -516,11 +515,13 @@ int main(int argc, char *argv[])
     std::vector<typename jbm::SimplexDataSet<SurfaceMesh>::type> rvals;
 
     Callback<SurfaceMesh> clbk;
-    for(int i = 0; i < 45000; ++i)
+    for(int i = 0; i < 1; ++i)
     {
         auto s = *(mesh->get_level_id<2>().begin());
         decimate(*mesh, s, clbk);
     }
+
+    compute_orientation(*mesh);
 
     writeOFF("awesome.off", *mesh);
 }
