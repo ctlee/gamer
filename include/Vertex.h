@@ -40,7 +40,7 @@ struct Vertex
      * @param[in]  sel   selection flag
      */
     Vertex(double x, double y, double z, size_t m, bool sel){
-        position[0]= x;
+        position[0] = x;
         position[1] = y;
         position[2] = z;
         marker = m;

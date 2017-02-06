@@ -2,11 +2,12 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <libraries/casc/include/SimplicialComplexVisitors.h>
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
 #include <map>
 #include <vector>
-#include "SimplicialComplexVisitors.h"
+
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 
@@ -159,6 +160,7 @@ double getVolume(const SurfaceMesh& mesh){
             // a->b->c
             norm = cross(b, c);
             tmp = dot(a, norm);
+            
         }
         else if((*faceID).orientation == -1){
             // c->b->a
@@ -168,7 +170,16 @@ double getVolume(const SurfaceMesh& mesh){
         else{
             std::cerr << "Orientation undefined..." << std::endl;
         }
-        volume += tmp/6.0;
+        // Far less efficient way....
+        // norm = getNormalFromTangent(getTangent(mesh, faceID));
+        // auto wedge = a^b^c;
+        // tmp = std::sqrt(wedge|wedge);
+
+        // auto sgn = dot((a+b+c)/3, norm);
+        // if(sgn <= 0) {
+        //     tmp = -1*tmp;
+        // }
+        // volume += tmp/6.0;
     }
     return std::abs(volume);
 }
