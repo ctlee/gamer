@@ -13,7 +13,7 @@
 #include <future>
 #include <experimental/optional>
 #include "SurfaceMesh.h"
-#include "SimplicialComplex.h"
+#include <libraries/casc/include/SimplicialComplex.h>
 #include <cstring>
 
 
