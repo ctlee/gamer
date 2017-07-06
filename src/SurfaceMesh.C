@@ -169,7 +169,9 @@ double getVolume(const SurfaceMesh& mesh){
         }
         else{
             std::cerr << "Orientation undefined..." << std::endl;
+            // TODO: Add in helpful error
         }
+
         // Far less efficient way....
         // norm = getNormalFromTangent(getTangent(mesh, faceID));
         // auto wedge = a^b^c;
@@ -179,7 +181,8 @@ double getVolume(const SurfaceMesh& mesh){
         // if(sgn <= 0) {
         //     tmp = -1*tmp;
         // }
-        // volume += tmp/6.0;
+        
+        volume += tmp/6.0;
     }
     return std::abs(volume);
 }

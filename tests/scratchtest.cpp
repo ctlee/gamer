@@ -7,6 +7,8 @@
 #include <ctime>
 #include <iostream>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "stringutil.h"
@@ -14,42 +16,86 @@
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 
+#include <libraries/casc/include/SimplexSets.h>
+
+namespace test{
+    template <typename Integer, typename IntegerSequence, typename Fn>
+    struct int_for_each_helper {};
+
+    template <class Integer, template <class, Integer...> class InHolder, Integer I, typename Fn>
+    struct int_for_each_helper<Integer, InHolder<Integer, I>, Fn>
+    {
+        static void apply(Fn&& f){
+            static constexpr auto k = I;
+            f.template apply<k>();
+            std::cout << I << std::endl;
+        }
+    };
+
+    template <class Integer, template <class, Integer...> class InHolder, Integer I, Integer... Is, typename Fn>
+    struct int_for_each_helper<Integer, InHolder<Integer, I, Is...>, Fn> 
+    {
+        static void apply(Fn&& f){
+            f.template apply<I>();
+            std::cout << I << std::endl;
+            int_for_each_helper<Integer, InHolder<Integer, Is...>, Fn>::apply(std::forward<Fn>(f));
+        }
+    };
+
+
+
+    template <class Integer, typename IntegerSequence, typename Fn>
+    void int_for_each(Fn&& f){
+            int_for_each_helper<Integer, IntegerSequence, Fn>::apply(std::forward<Fn>(f));
+    }
+
+    struct Foo
+    {
+        template <std::size_t k>
+        void apply(){
+            std::cout << "foo" <<  k << std::endl;
+        }
+    };
+}
+
 int  main(int argc, char *argv[])
 {
-
-    auto mesh = AbstractSimplicialComplex<int,int,int,int,int,int>();
-
-    mesh.insert<3>({0,1,2});
-
-    auto v = mesh.get_simplex_up({0,1,2});
-    if(v != nullptr){
-        for(auto c : mesh.get_name(v)){
-            std::cout << c << " ";
-        }
-        std::cout << std::endl;
+    if(argc != 2)
+    {
+        std::cerr << "Wrong arguments passed" << std::endl;
+        return -1;
     }
-    else{
-        std::cout << "Simplex v doesn't exist" << std::endl;
+    auto mesh = readOFF(argv[1]);
+    if(mesh == nullptr){
+        std::cout << "Something bad happened...";
+        exit(1);
     }
-    // if(argc != 2)
-    // {
-    //     std::cerr << "Wrong arguments passed" << std::endl;
-    //     return -1;
-    // }
-    // auto mesh = readOBJ(argv[1]);
-    // if(mesh == nullptr){
-    //     std::cout << "Something bad happened...";
-    //     exit(1);
-    // }
-    // std::cout << "Done reading" << std::endl;
-    // compute_orientation(*mesh);
-    // auto volume = getVolume(*mesh);
-    
-    // writeOFF("test.off", *mesh);
+    std::cout << "Done reading" << std::endl;
 
-    // std::cout << "Volume: " << volume << std::endl;
-    // //mesh->genGraph("test.dot");
-    // writeDOT("test.dot", *mesh);
+    std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
+
+    compute_orientation(*mesh);
+    double volume = getVolume(*mesh);
+   
+    std::cout << "Volume: " << volume << std::endl;
+
+    using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
+    SimplexSet A;
+    SimplexSet B;
+
+    for(auto nid : mesh->get_level_id<1>())
+    {
+        std::cout << nid << std::endl;
+        A.insert(nid);
+    }
+
+    casc::printSS<SurfaceMesh>(A);
+
+
+
+
+    //SimplexSet C = casc::set_union(A, B);
+    //A.print();
 
     // int trials = 10;
     // std::chrono::duration<double> elapsed_seconds;

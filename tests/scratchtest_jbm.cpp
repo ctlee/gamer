@@ -98,7 +98,7 @@ auto make_print_visitor(const Complex& F)
 template <typename Complex>
 struct Callback
 {
-    using SimplexSet = typename decimation_detail::SimplexSet<Complex>::type;
+    using SimplexSet = typename casc::SimplexSet<Complex>::type;
     template <std::size_t level> using Type = typename Complex::template NodeData<level>;
     using KeyType = typename Complex::KeyType;
 
