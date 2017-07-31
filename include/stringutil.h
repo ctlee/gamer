@@ -5,6 +5,7 @@
 #include <functional>
 #include <string>
 
+// TODO: Do we need this stringutil for gamer?
 namespace stringutil
 {
     inline std::vector<std::string> split(const std::string& cstr, std::vector<char> delim = {' ', '\t'})

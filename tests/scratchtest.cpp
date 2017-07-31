@@ -15,48 +15,79 @@
 #include "SurfaceMeshOld.h"
 #include "SurfaceMesh.h"
 #include "Vertex.h"
+#include "tensor.h"
 
-#include <libraries/casc/include/SimplexSets.h>
+#include <libraries/casc/include/ASCFunctions.h>
+#include <libraries/casc/include/SimplexSet.h>
+#include <libraries/casc/include/SimplexMap.h>
+#include <libraries/casc/include/decimatefixed.h>
+#include <libraries/casc/include/typetraits.h>
 
-namespace test{
-    template <typename Integer, typename IntegerSequence, typename Fn>
-    struct int_for_each_helper {};
-
-    template <class Integer, template <class, Integer...> class InHolder, Integer I, typename Fn>
-    struct int_for_each_helper<Integer, InHolder<Integer, I>, Fn>
+template <typename T, std::size_t k>
+std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
+{
+    out << "[";
+    for(int i = 0; i + 1 < k; ++i)
     {
-        static void apply(Fn&& f){
-            static constexpr auto k = I;
-            f.template apply<k>();
-            std::cout << I << std::endl;
-        }
-    };
-
-    template <class Integer, template <class, Integer...> class InHolder, Integer I, Integer... Is, typename Fn>
-    struct int_for_each_helper<Integer, InHolder<Integer, I, Is...>, Fn> 
+        out << A[i] << " ";
+    }
+    if(k > 0)
     {
-        static void apply(Fn&& f){
-            f.template apply<I>();
-            std::cout << I << std::endl;
-            int_for_each_helper<Integer, InHolder<Integer, Is...>, Fn>::apply(std::forward<Fn>(f));
-        }
-    };
+        out << A[k-1];
+    }
+    out << "]";
+    return out;
+}
 
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const std::set<T>& A)
+{
+    out << "[";
+    for(auto a : A)
+    {
+        std::cout << a << " ";
+    }
+    out << "]";
+    return out;
+}
 
+template <typename Complex>
+struct Callback
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
 
-    template <class Integer, typename IntegerSequence, typename Fn>
-    void int_for_each(Fn&& f){
-            int_for_each_helper<Integer, IntegerSequence, Fn>::apply(std::forward<Fn>(f));
+    template <std::size_t k>
+    void operator()(Complex& F,
+            const std::array<KeyType, k>& new_name,
+            const SimplexSet& merged){
+        std::cout << merged << " -> " << new_name << std::endl;
     }
 
-    struct Foo
-    {
-        template <std::size_t k>
-        void apply(){
-            std::cout << "foo" <<  k << std::endl;
+    Vertex operator()(Complex& F,
+            const std::array<KeyType, 1>& new_name,
+            const SimplexSet& merged){
+        std::cout << merged << " -> " << new_name << std::endl;
+
+        Vertex center;
+        std::size_t cnt = 0;
+        for(auto v : merged.template get<1>())
+        {
+            center = center + (*v);
+            ++cnt;
         }
-    };
-}
+        center = center / (double)(cnt);
+        return center;
+    }
+
+    Face operator()(Complex& F,
+            const std::array<KeyType, 3>& new_name,
+            const SimplexSet& merged){
+        std::cout << merged << " -> " << new_name << std::endl;
+        return Face();
+    }
+};
+
 
 int  main(int argc, char *argv[])
 {
@@ -74,28 +105,87 @@ int  main(int argc, char *argv[])
 
     std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
 
+    //init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
+    //compute_orientation(*mesh);
+    //writeDOT("test.dot", *mesh);
+
+    // print(*mesh);
+
+
+    // auto s = mesh->get_simplex_up({3,4});
+    // decimate(*mesh, s, Callback<SurfaceMesh>());
+    // writeOFF("test.off", *mesh);
+
+
     compute_orientation(*mesh);
     double volume = getVolume(*mesh);
    
     std::cout << "Volume: " << volume << std::endl;
 
-    using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
-    SimplexSet A;
-    SimplexSet B;
+    auto it = mesh->get_level_id<1>().begin();
+    auto nid = *it;
 
-    for(auto nid : mesh->get_level_id<1>())
-    {
-        std::cout << nid << std::endl;
-        A.insert(nid);
-    }
+    std::cout << "GetTangent of: " << nid << std::endl;
 
-    casc::printSS<SurfaceMesh>(A);
+    auto tangent = getTangent(*mesh, nid);
+    std::cout << "Tangent: " << tangent << std::endl;
+
+    auto o = (*mesh->get_simplex_up({0})).position;
+    auto a = (*mesh->get_simplex_up({1})).position - o;
+    auto b = (*mesh->get_simplex_up({2})).position - o;
+    auto c = (*mesh->get_simplex_up({3})).position - o;
+
+    std::cout << ((c^b) + (b^a) + (a^c))/6 << std::endl;
+    std::cout << ((b^c) + (a^b) + (c^a))/6 << std::endl;
 
 
+    // auto res = (-1*b*((c - a)/2) - c*((-1*b+a)/2) -a*((b-c)/2))/3;
+    // //auto res = ((-1*b*c + b*a)/2 + (c*b - c*a)/2 -(a*b - a*c)/2)/3;
+    // //auto res = (-1*b*c/2 + b*a/2 + c*b/2 - c*a/2 -a*b/2 + a*c/2)/3;
+    // //auto res = (-1*b*c/2 + b*a/2 + c*b/2 - c*a/2 -a*b/2 + a*c/2)/3;
+    // std::cout << res << std::endl << std::endl;
 
 
-    //SimplexSet C = casc::set_union(A, B);
-    //A.print();
+    // auto a = tensor<double, 3,1>({1,0,0});
+    // auto b = tensor<double, 3,1>({0,1,0});
+
+    // auto res = a^b;
+
+    // std::cout << (a^b) << std::endl;
+    // std::cout << (a*b) - (b*a) << std::endl;
+    // std::cout << std::sqrt(res|res) << std::endl;
+
+    // using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
+    // SimplexSet S;
+
+    // auto it = mesh->get_level_id<2>().begin();
+
+    // auto nid = *it;
+    // S.insert(nid);
+    // nid = *(++it);
+    // S.insert(nid);
+
+    // SimplexSet dest;
+    // std::cout << "Star of: " << S << std::endl;
+    // getStar(*mesh, S, dest);
+    // std::cout << ">> " << dest << std::endl << std::endl;
+
+    // dest.clear();
+    // std::cout << "Closure of: " << S << std::endl;
+    // getClosure(*mesh, S, dest);
+    // std::cout << ">> " << dest << std::endl << std::endl;
+
+    // dest.clear();
+    // S.clear(); 
+    // S.insert(*(mesh->get_level_id<1>().begin()));
+    // std::cout << "Link of: " << S << std::endl;
+    // getLink(*mesh, S, dest);
+    // std::cout << ">> " << dest << std::endl << std::endl; 
+
+
+    /*
+     * TIMING CODE STARTS HERE
+     */
 
     // int trials = 10;
     // std::chrono::duration<double> elapsed_seconds;

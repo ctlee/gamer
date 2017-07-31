@@ -70,6 +70,18 @@ auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     return (*curr).orientation;
 }
 
+/**
+ * @brief      Vertex tangent by computing the average wedge product of incident faces.
+ *
+ * @param[in]  mesh       The mesh
+ * @param[in]  origin     The origin
+ * @param[in]  curr       The curr
+ *
+ * @tparam     level      { description }
+ * @tparam     dimension  { description }
+ *
+ * @return     The tangent h.
+ */
 template <std::size_t level, std::size_t dimension>
 auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<level> curr)
 {
@@ -78,11 +90,10 @@ auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     for(auto alpha : cover)
     {
         auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto& v = (*mesh.get_simplex_up({alpha})).position;
+        const auto& v = (*mesh.get_simplex_up({alpha})).position; // Position of alpha
         auto next = mesh.get_simplex_up(curr,alpha);
         rval += edge.orientation * (v-origin) * getTangentH(mesh, origin, next);
     }
-
     return rval/cover.size();
 }
 
@@ -93,6 +104,19 @@ auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
     return (*curr).orientation;
 }
 
+/**
+ * @brief      Face tangent
+ *
+ * @param[in]  mesh       The mesh
+ * @param[in]  origin     The origin
+ * @param[in]  curr       The curr
+ * @param      cover      The cover
+ *
+ * @tparam     level      { description }
+ * @tparam     dimension  { description }
+ *
+ * @return     The tangent f.
+ */
 template <std::size_t level, std::size_t dimension>
 auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
         SurfaceMesh::SimplexID<level> curr, std::set<SurfaceMesh::KeyType>& cover)

@@ -27,6 +27,8 @@ std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
     return out;
 }
 
+
+// TODO: refactor this to better global array function
 void print(const SurfaceMesh & mesh){
     std::cout << "Level: 1" << std::endl;
     for(auto node : mesh.get_level_id<1>()){
@@ -227,8 +229,10 @@ void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::SimplexID<2> edgeID){
     mesh.insert<3>({name[1], up[0], up[1]});
 }
 
-std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
-        std::function<bool(const SurfaceMesh&,SurfaceMesh::SimplexID<2>&)> &checkFlip){
+std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, 
+        bool preserveRidges, 
+        std::function<bool(const SurfaceMesh&,
+                SurfaceMesh::SimplexID<2>&)> &checkFlip){
 
     std::vector<SurfaceMesh::SimplexID<2>> edgesToFlip;
     NodeSet<SurfaceMesh::SimplexID<2>> ignoredEdges;

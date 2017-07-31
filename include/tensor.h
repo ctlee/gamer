@@ -347,7 +347,7 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 {
 	tensor<ElemType,D,N> rval;
 
-	std::array<std::size_t, N> sigma;
+	std::array<std::size_t, N> sigma; // Array of indices
 	for(std::size_t i = 0; i < N; ++i)
 	{
 		//std::cout << " : " << i << std::endl;
@@ -364,7 +364,7 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 			}
 			rval[*curr] += sgn(sigma)*(A[index]);
 		}
-	} while(std::next_permutation(sigma.begin(), sigma.end()));
+	} while(std::next_permutation(sigma.begin(), sigma.end())); // permute indices
 
 	rval *= 1.0/detail::factorial<N>::value;
 	return rval;
@@ -426,6 +426,19 @@ tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ScalarType x)
 	return rval;
 }
 
+/**
+ * @brief      Wedge product
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ * @tparam     M         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,M>& B)
 {
@@ -437,6 +450,18 @@ tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<Ele
 	return rval;
 }
 
+/**
+ * @brief      Inner Product
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 ElemType dot(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {
