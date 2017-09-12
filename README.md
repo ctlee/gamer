@@ -9,23 +9,37 @@ is provided in this snapshot.
 Quick Installation
 ------------------
 
+```bash
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_BUILD_TYPE=Release ..
 make all
 make install
+```
 
 Blender
 -------
 A blender plug-in for GAMer is provided in:
 
   gamer/tools/blender
+  
+To build it append to your intial CMake configuration.
+
+```bash
+-DBUILD_BLENDER=ON
+```
 
 In addition to following the instructions in the README file in the 
 blender directory you also need to have a functional PyGAMer installation.
 
 Full Installation
 -----------------
+
+Tests
+-----
+```
+-DBUILD_TESTS=ON
+```
 
 Contact
 -------
