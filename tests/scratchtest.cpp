@@ -20,7 +20,7 @@
 #include <libraries/casc/include/ASCFunctions.h>
 #include <libraries/casc/include/SimplexSet.h>
 #include <libraries/casc/include/SimplexMap.h>
-#include <libraries/casc/include/decimatefixed.h>
+#include <libraries/casc/include/decimate.h>
 #include <libraries/casc/include/typetraits.h>
 
 template <typename T, std::size_t k>
