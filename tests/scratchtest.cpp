@@ -105,38 +105,37 @@ int  main(int argc, char *argv[])
 
     std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
 
-    //init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
-    //compute_orientation(*mesh);
-    //writeDOT("test.dot", *mesh);
-
-    // print(*mesh);
-
-
-    // auto s = mesh->get_simplex_up({3,4});
-    // decimate(*mesh, s, Callback<SurfaceMesh>());
-    // writeOFF("test.off", *mesh);
-
-
+    init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
     compute_orientation(*mesh);
-    double volume = getVolume(*mesh);
+    writeDOT("test.dot", *mesh);
+
+    print(*mesh);
+
+    auto s = mesh->get_simplex_up({3,4});
+    decimate(*mesh, s, Callback<SurfaceMesh>());
+    writeOFF("test.off", *mesh);
+
+
+    // compute_orientation(*mesh);
+    // double volume = getVolume(*mesh);
    
-    std::cout << "Volume: " << volume << std::endl;
+    // std::cout << "Volume: " << volume << std::endl;
 
-    auto it = mesh->get_level_id<1>().begin();
-    auto nid = *it;
+    // auto it = mesh->get_level_id<1>().begin();
+    // auto nid = *it;
 
-    std::cout << "GetTangent of: " << nid << std::endl;
+    // std::cout << "GetTangent of: " << nid << std::endl;
 
-    auto tangent = getTangent(*mesh, nid);
-    std::cout << "Tangent: " << tangent << std::endl;
+    // auto tangent = getTangent(*mesh, nid);
+    // std::cout << "Tangent: " << tangent << std::endl;
 
-    auto o = (*mesh->get_simplex_up({0})).position;
-    auto a = (*mesh->get_simplex_up({1})).position - o;
-    auto b = (*mesh->get_simplex_up({2})).position - o;
-    auto c = (*mesh->get_simplex_up({3})).position - o;
+    // auto o = (*mesh->get_simplex_up({0})).position;
+    // auto a = (*mesh->get_simplex_up({1})).position - o;
+    // auto b = (*mesh->get_simplex_up({2})).position - o;
+    // auto c = (*mesh->get_simplex_up({3})).position - o;
 
-    std::cout << ((c^b) + (b^a) + (a^c))/6 << std::endl;
-    std::cout << ((b^c) + (a^b) + (c^a))/6 << std::endl;
+    // std::cout << ((c^b) + (b^a) + (a^c))/6 << std::endl;
+    // std::cout << ((b^c) + (a^b) + (c^a))/6 << std::endl;
 
 
     // auto res = (-1*b*((c - a)/2) - c*((-1*b+a)/2) -a*((b-c)/2))/3;
