@@ -1,8 +1,32 @@
+/*
+ * ***************************************************************************
+ * This file is part of the GAMer software.
+ * Copyright (C) 2016-2017
+ * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+ *    and Michael Holst
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * ***************************************************************************
+ */
+
 #pragma once
 
 #include <iostream>
 #include <libraries/casc/include/SimplicialComplex.h>
-#include <libraries/casc/include/SimplicialComplexVisitors.h>
+#include <libraries/casc/include/CASCTraversals.h>
 #include <libraries/casc/include/util.h>
 #include <libraries/casc/include/Orientable.h>
 
@@ -13,21 +37,29 @@
 #include <unordered_set>
 #include <utility>
 #include "Vertex.h"
+
 /**
  * @brief      Properties that Faces should have
  */
 struct FaceProperties
 {
     int  marker;   /**< @brief Marker */
-    bool selected; /**< @brief selection flag */
+    bool selected; /**< @brief Selection flag */
 };
 
 /**
  * @brief      Face object
  */
-struct Face : Orientable, FaceProperties
+struct Face : casc::Orientable, FaceProperties
 {
+    /// Default constructor
     Face() {}
+    /**
+     * @brief      Constructor
+     *
+     * @param[in]  orient  Orientable object
+     * @param[in]  prop    Properties of a face
+     */
     Face(Orientable orient, FaceProperties prop)
         : Orientable(orient), FaceProperties(prop)
     {}
@@ -56,13 +88,13 @@ struct complex_traits
 {
     using KeyType = int;                                                    /**< @brief the index type */
     using NodeTypes = util::type_holder<Global,Vertex,void,Face>;           /**< @brief the types of each Node */
-    using EdgeTypes = util::type_holder<Orientable,Orientable,Orientable>;  /**< @brief the types of each Edge */
+    using EdgeTypes = util::type_holder<casc::Orientable,casc::Orientable,casc::Orientable>;  /**< @brief the types of each Edge */
 };
 
 // This alias is for legacy purposes...
-using SurfaceMesh_ASC = simplicial_complex<complex_traits>;
-using ASC = simplicial_complex<complex_traits>; // Alias for the lazy
-using SurfaceMesh = simplicial_complex<complex_traits>;
+using SurfaceMesh_ASC = casc::simplicial_complex<complex_traits>;
+using ASC = casc::simplicial_complex<complex_traits>; // Alias for the lazy
+using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
 template <std::size_t dimension>
 auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
@@ -174,98 +206,98 @@ void scale(SurfaceMesh& mesh, Vector v);
 void scale(SurfaceMesh& mesh, double sx, double sy , double sz);
 void scale(SurfaceMesh& mesh, double s);
 
-struct LocalStructureTensorVisitor
-{
-    tensor<double,3,2> lst;
+// struct LocalStructureTensorVisitor
+// {
+//     tensor<double,3,2> lst;
 
-    LocalStructureTensorVisitor(){
-        lst = tensor<double,3,2>();
-    }
+//     LocalStructureTensorVisitor(){
+//         lst = tensor<double,3,2>();
+//     }
 
-    template <std::size_t level> 
-    bool visit(const SurfaceMesh& F, SurfaceMesh::SimplexID<level> s)
-    {
-        // auto tan = getTangent(F, s);
-        // auto norm = getNormalFromTangent(tan);
-        auto norm = getNormal(F,s);
-        lst += norm*norm;
-        return true;
-    }
-};
+//     template <std::size_t level> 
+//     bool visit(const SurfaceMesh& F, SurfaceMesh::SimplexID<level> s)
+//     {
+//         // auto tan = getTangent(F, s);
+//         // auto norm = getNormalFromTangent(tan);
+//         auto norm = getNormal(F,s);
+//         lst += norm*norm;
+//         return true;
+//     }
+// };
 
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat);
 
-template <std::size_t rings>
-void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
-    auto centerName = mesh.get_name(vertexID)[0]; 
-    auto& center = *vertexID; // get the vertex data
+// template <std::size_t rings>
+// void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
+//     auto centerName = mesh.get_name(vertexID)[0]; 
+//     auto& center = *vertexID; // get the vertex data
 
-    double sumWeights = 0;
-    Vector newPos;
+//     double sumWeights = 0;
+//     Vector newPos;
 
-    /**
-     * Compute the following sum to get the new position
-     * \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(alpha_i + 1) x_i
-     */
-    for(auto edge : mesh.up(vertexID)){
-        // Get the vertex connected by edge
-        auto edgeName = mesh.get_name(edge);
-        auto shared = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+//     /**
+//      * Compute the following sum to get the new position
+//      * \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(alpha_i + 1) x_i
+//      */
+//     for(auto edge : mesh.up(vertexID)){
+//         // Get the vertex connected by edge
+//         auto edgeName = mesh.get_name(edge);
+//         auto shared = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
 
-        // Get the vertices connected to adjacent edge
-        auto up = mesh.get_cover(edge);
-        auto prev = *mesh.get_simplex_up({up[0]});
-        auto next = *mesh.get_simplex_up({up[1]}); 
+//         // Get the vertices connected to adjacent edge
+//         auto up = mesh.get_cover(edge);
+//         auto prev = *mesh.get_simplex_up({up[0]});
+//         auto next = *mesh.get_simplex_up({up[1]}); 
         
-        auto pS = prev - shared;
-        pS /= std::sqrt(pS|pS);
-        auto nS = next - shared;
-        nS /= std::sqrt(nS|nS);
-        auto bisector = (pS + nS)/2;
-        bisector /= std::sqrt(bisector|bisector);
+//         auto pS = prev - shared;
+//         pS /= std::sqrt(pS|pS);
+//         auto nS = next - shared;
+//         nS /= std::sqrt(nS|nS);
+//         auto bisector = (pS + nS)/2;
+//         bisector /= std::sqrt(bisector|bisector);
 
-        // Get a reference vecter to shared which lies on the plane of interest.
-        auto disp = center - shared;
-        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+//         // Get a reference vecter to shared which lies on the plane of interest.
+//         auto disp = center - shared;
+//         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
-        //auto tanNorm = getNormalFromTangent(pS^nS);
-        auto tanNorm = cross(pS, nS);
+//         //auto tanNorm = getNormalFromTangent(pS^nS);
+//         auto tanNorm = cross(pS, nS);
 
-        // Get the perpendicular plane made up of plane normal of bisector
-        //auto perpPlane = tanNorm^bisector;
-        //auto perpNorm = getNormalFromTangent(perpPlane);
-        auto perpNorm = cross(tanNorm, bisector);
-        perpNorm /= std::sqrt(perpNorm|perpNorm);
-        auto perpProj = perpNorm*perpNorm; // tensor product
+//         // Get the perpendicular plane made up of plane normal of bisector
+//         //auto perpPlane = tanNorm^bisector;
+//         //auto perpNorm = getNormalFromTangent(perpPlane);
+//         auto perpNorm = cross(tanNorm, bisector);
+//         perpNorm /= std::sqrt(perpNorm|perpNorm);
+//         auto perpProj = perpNorm*perpNorm; // tensor product
       
-        // Compute perpendicular component 
-        Vector perp;
-        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
-        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
-        perp_e = perpProj_e*disp_e;
+//         // Compute perpendicular component 
+//         Vector perp;
+//         Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+//         Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+//         perp_e = perpProj_e*disp_e;
 
-        auto alpha = (pS|nS)+1; // keep the dot product positive
-        sumWeights += alpha;
-        newPos += alpha*(center.position - perp);
-    }
-    newPos /= sumWeights;
-    /**
-     * Scale by PCA
-     * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot \vec{e_k})\vec{e_k}
-     */
-    auto v = LocalStructureTensorVisitor();
-    visit_neighbors_up<rings>(v, mesh, vertexID); // TODO: how should we set this?
-    auto eigen_result = getEigenvalues(v.lst);
-    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues() << std::endl;
-    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
-    //      << "corresponding to these eigenvalues:\n"
-    //      << eigen_result.eigenvectors() << std::endl;
+//         auto alpha = (pS|nS)+1; // keep the dot product positive
+//         sumWeights += alpha;
+//         newPos += alpha*(center.position - perp);
+//     }
+//     newPos /= sumWeights;
+//     /**
+//      * Scale by PCA
+//      * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot \vec{e_k})\vec{e_k}
+//      */
+//     auto v = LocalStructureTensorVisitor();
+//     casc::visit_neighbors_up<rings>(v, mesh, vertexID); // TODO: how should we set this?
+//     auto eigen_result = getEigenvalues(v.lst);
+//     // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues() << std::endl;
+//     // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+//     //      << "corresponding to these eigenvalues:\n"
+//     //      << eigen_result.eigenvectors() << std::endl;
 
-    newPos -= center.position;
-    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+//     newPos -= center.position;
+//     Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
     
-    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array() // dot product
-             / (eigen_result.eigenvalues().array()+1)).matrix();         // elementwise-division
-    newPos_e = eigen_result.eigenvectors()*w; // matrix product
-    center.position += newPos;
-}
+//     auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array() // dot product
+//              / (eigen_result.eigenvalues().array()+1)).matrix();         // elementwise-division
+//     newPos_e = eigen_result.eigenvectors()*w; // matrix product
+//     center.position += newPos;
+// }

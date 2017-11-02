@@ -17,7 +17,7 @@
 #include "Vertex.h"
 #include "tensor.h"
 
-#include <libraries/casc/include/ASCFunctions.h>
+#include <libraries/casc/include/CASCFunctions.h>
 #include <libraries/casc/include/SimplexSet.h>
 #include <libraries/casc/include/SimplexMap.h>
 #include <libraries/casc/include/decimate.h>
@@ -105,7 +105,7 @@ int  main(int argc, char *argv[])
 
     std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
 
-    init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
+    casc::orientation_detail::init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
     compute_orientation(*mesh);
     writeDOT("test.dot", *mesh);
 

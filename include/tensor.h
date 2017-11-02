@@ -1,6 +1,6 @@
 /*
  * ***************************************************************************
- * This file is part of the Colored Abstract Simplicial Complex library.
+ * This file is part of the GAMer software.
  * Copyright (C) 2016-2017
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
@@ -19,8 +19,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * ****************************************************************************
+ * ***************************************************************************
  */
+
+
+
 
 #pragma once
 
@@ -30,7 +33,88 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-#include <libraries/casc/include/util.h>
+
+// TODO: rename this namespace to something else...
+namespace util
+{
+namespace detail
+{
+template <typename S, std::size_t depth, std::size_t N, typename T>
+void fill_arrayH(std::array<S, N> &arr, S arg)
+{
+    static_assert(depth + 1 == N, "Size of array must match number of input arguments");
+    arr[depth] = arg;
+}
+
+template <typename S, std::size_t depth, std::size_t N, typename T, typename ... Ts>
+void fill_arrayH(std::array<S, N> &arr, S head, Ts... tail)
+{
+    arr[depth] = head;
+    fill_arrayH<S, depth+1, N, Ts...>(arr, tail ...);
+}
+} // end namespace detail
+
+/**
+ * @brief      Fill an array with a list of values.
+ *
+ * @param      arr   Array to fill
+ * @param[in]  args  List of values
+ *
+ * @tparam     S     Typename of array elements
+ * @tparam     N     Number of array elements
+ * @tparam     Ts    Typename of values
+ */
+template <typename S, std::size_t N, typename ... Ts>
+void fill_array(std::array<S, N> &arr, Ts... args)
+{
+    static_assert(sizeof ... (args) == N, "Size of array must match number of input arguments");
+    detail::fill_arrayH<S, 0, N, Ts...>(arr, args ...);
+}
+
+
+namespace detail
+{
+template <typename Fn, typename ... Ts>
+struct flattenH {};
+
+template <typename Fn, typename T, typename ... Ts>
+struct flattenH<Fn, T, Ts...> {
+    template <std::size_t N>
+    static void apply(Fn f, T head, Ts... tail)
+    {
+        f(N, head);
+        flattenH<Fn, Ts...>::template apply<N+1>(f, tail ...);
+    }
+};
+
+template <typename Fn>
+struct flattenH<Fn> {
+    template <std::size_t N>
+    static void apply(Fn f) {}
+};
+
+template <typename Fn, std::size_t K, typename T, typename ... Ts>
+struct flattenH<Fn, std::array<T, K>, Ts...> {
+    template <std::size_t N>
+    static void apply(Fn f, const std::array<T, K> &head, Ts... tail)
+    {
+        for (std::size_t k = 0; k < K; ++k)
+        {
+            f(N+k, head[k]);
+        }
+        flattenH<Fn, Ts...>::template apply<N+K>(f, tail ...);
+    }
+};
+} // end namespace detail
+
+template <typename Fn, typename ... Ts>
+void flatten(Fn f, Ts... args)
+{
+    detail::flattenH<Fn, Ts...>::template apply<0>(f, args ...);
+}
+}
+
+
 
 namespace detail {
 	template <std::size_t k>
@@ -371,7 +455,7 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 {
 	tensor<ElemType,D,N> rval;
 
-	std::array<std::size_t, N> sigma; // Array of indices
+	std::array<std::size_t, N> sigma;
 	for(std::size_t i = 0; i < N; ++i)
 	{
 		//std::cout << " : " << i << std::endl;
@@ -388,7 +472,7 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 			}
 			rval[*curr] += sgn(sigma)*(A[index]);
 		}
-	} while(std::next_permutation(sigma.begin(), sigma.end())); // permute indices
+	} while(std::next_permutation(sigma.begin(), sigma.end()));
 
 	rval *= 1.0/detail::factorial<N>::value;
 	return rval;
@@ -450,19 +534,6 @@ tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ScalarType x)
 	return rval;
 }
 
-/**
- * @brief      Wedge product
- *
- * @param[in]  A         { parameter_description }
- * @param[in]  B         { parameter_description }
- *
- * @tparam     ElemType  { description }
- * @tparam     D         { description }
- * @tparam     N         { description }
- * @tparam     M         { description }
- *
- * @return     { description_of_the_return_value }
- */
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,M>& B)
 {
@@ -474,18 +545,6 @@ tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<Ele
 	return rval;
 }
 
-/**
- * @brief      Inner Product
- *
- * @param[in]  A         { parameter_description }
- * @param[in]  B         { parameter_description }
- *
- * @tparam     ElemType  { description }
- * @tparam     D         { description }
- * @tparam     N         { description }
- *
- * @return     { description_of_the_return_value }
- */
 template <typename ElemType, std::size_t D, std::size_t N>
 ElemType dot(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {

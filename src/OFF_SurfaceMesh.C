@@ -192,7 +192,9 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
             auto g = std::stod(arr[5]);
             auto b = std::stod(arr[6]);
             //auto k = std::stod(arr[7]);
-            mesh->insert<3>({v0,v1,v2},Face(Orientable{0}, FaceProperties{get_marker(r,g,b),0}));
+            mesh->insert<3>({v0,v1,v2},
+                            Face(casc::Orientable{0}, 
+                            FaceProperties{get_marker(r,g,b),0}));
         }
         else {
             std::cerr << "Parse Error: Couldn't interpret face: '" << line << "'." << std::endl;

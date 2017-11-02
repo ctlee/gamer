@@ -1,34 +1,42 @@
+/*
+ * ***************************************************************************
+ * This file is part of the GAMer software.
+ * Copyright (C) 2016-2017
+ * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+ *    and Michael Holst
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * ***************************************************************************
+ */
+
 #include <array>
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
-#include <libraries/casc/include/SimplicialComplexVisitors.h>
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
 #include <map>
 #include <vector>
+
+#include <libraries/casc/include/CASCTraversals.h>
+#include <libraries/casc/include/stringutil.h>
+#include <libraries/Eigen/Dense>
+#include <libraries/Eigen/Eigenvalues>
 
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 
-template <typename T, std::size_t k>
-std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
-{
-    out << "[";
-    for(int i = 0; i + 1 < k; ++i)
-    {
-        out << A[i] << " ";
-    }
-    if(k > 0)
-    {
-        out << A[k-1];
-    }
-    out << "]";
-    return out;
-}
-
-
-// TODO: refactor this to better global array function
 void print(const SurfaceMesh & mesh){
     std::cout << "Level: 1" << std::endl;
     for(auto node : mesh.get_level_id<1>()){
@@ -37,12 +45,12 @@ void print(const SurfaceMesh & mesh){
     std::cout << "Level: 2" << std::endl;
     for(auto node : mesh.get_level_id<2>()){
         auto name = mesh.get_name(node);
-        std::cout << "    " << name << std::endl;
+        std::cout << "    " << casc::to_string(name) << std::endl;
     }
     std::cout << "Level: 3" << std::endl;
     for(auto node : mesh.get_level_id<3>()){
         auto name = mesh.get_name(node);
-        std::cout << "    " << name << std::endl;
+        std::cout << "    " << casc::to_string(name) << std::endl;
     }
 }
 
@@ -235,7 +243,7 @@ std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh,
                 SurfaceMesh::SimplexID<2>&)> &checkFlip){
 
     std::vector<SurfaceMesh::SimplexID<2>> edgesToFlip;
-    NodeSet<SurfaceMesh::SimplexID<2>> ignoredEdges;
+    casc::NodeSet<SurfaceMesh::SimplexID<2>> ignoredEdges;
 
     for(auto edgeID : mesh.get_level_id<2>()){
         if(!ignoredEdges.count(edgeID)){
