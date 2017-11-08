@@ -70,14 +70,22 @@ struct Face : casc::Orientable, FaceProperties
  */
 struct Global
 {
-    bool  closed;                /**< @brief is the surface mesh closed or not */
-    int   _marker;               /**< @brief doman marker, to be used when tetrahedralizing */
-    float volume_constraint;     /**< @brief volume constraint of the tetrahedralized domain */
-    bool  use_volume_constraint; /**< @brief flag that determines if the volume constraint is used */
-    float min[3];                /**< @brief minimal coordinate of nodes */
-    float max[3];                /**< @brief maximal coordinate of nodes */
-    float avglen;                /**< @brief average edge length */
-    bool hole;                   /**< @brief flag that determines if the mesh is a hole or not */
+    /// Is the SurfaceMesh closed or not.
+    bool  closed;
+    /// Domain marker to be used when tetrahedralizing.
+    int   _marker;
+    /// Volume constraint of the tetrahedralized domain.
+    float volume_constraint;
+    /// flag that determines if the volume constraint is used.
+    bool  use_volume_constraint;
+    /// Minimum coordinate of vertices
+    float min[3];
+    /// Max coordinate of vertices
+    float max[3];
+    /// Average edge length
+    float avglen;
+    /// Flag that determines if the mesh has a hole or not
+    bool  hole;
 };
 
 /**
@@ -86,9 +94,12 @@ struct Global
  */
 struct complex_traits
 {
-    using KeyType = int;                                                    /**< @brief the index type */
-    using NodeTypes = util::type_holder<Global,Vertex,void,Face>;           /**< @brief the types of each Node */
-    using EdgeTypes = util::type_holder<casc::Orientable,casc::Orientable,casc::Orientable>;  /**< @brief the types of each Edge */
+    /// The index type
+    using KeyType = int;
+    /// The types of each node
+    using NodeTypes = util::type_holder<Global, Vertex, void, Face>;
+    /// The types of each edge
+    using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable>;
 };
 
 // This alias is for legacy purposes...
@@ -96,14 +107,59 @@ using SurfaceMesh_ASC = casc::simplicial_complex<complex_traits>;
 using ASC = casc::simplicial_complex<complex_traits>; // Alias for the lazy
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
+/**
+ * @brief      Reads in a GeomView OFF file.
+ *
+ * @param[in]  filename  The filename.
+ *
+ * @return     Returns a unique_ptr to the SurfaceMesh.
+ */
+std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
+
+/**
+ * @brief      Write the SurfaceMesh to file in OFF format.
+ *
+ * @param[in]  filename  The filename to write to.
+ * @param[in]  mesh      SurfaceMesh of interest.
+ */
+void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
+
+// Wavefront OBJ
+std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
+void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
+
+void print(const SurfaceMesh &mesh);
+void generateHistogram(const SurfaceMesh &mesh);
+std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh, 
+    int maxMinAngle, int minMaxAngle);
+double getArea(const SurfaceMesh &mesh);
+double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+double getVolume(const SurfaceMesh &mesh);
+int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+
+
+/**
+ * @brief      Terminal case
+ *
+ * @param[in]  mesh       The mesh
+ * @param[in]  origin     The origin
+ * @param[in]  curr       The curr
+ *
+ * @tparam     dimension  { description }
+ *
+ * @return     The tangent h.
+ */
 template <std::size_t dimension>
-auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
+auto getTangentH(const SurfaceMesh &mesh,
+                 const tensor<double, dimension, 1> &origin,
+                 SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
 {
     return (*curr).orientation;
 }
 
 /**
- * @brief      Vertex tangent by computing the average wedge product of incident faces.
+ * @brief      Vertex tangent by computing the average wedge product of incident
+ *             faces.
  *
  * @param[in]  mesh       The mesh
  * @param[in]  origin     The origin
@@ -115,51 +171,72 @@ auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
  * @return     The tangent h.
  */
 template <std::size_t level, std::size_t dimension>
-auto getTangentH(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, SurfaceMesh::SimplexID<level> curr)
+auto getTangentH(const SurfaceMesh &mesh,
+                 const tensor<double, dimension, 1> &origin,
+                 SurfaceMesh::SimplexID<level> curr)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
     auto cover = mesh.get_cover(curr);
-    for(auto alpha : cover)
+    for (auto alpha : cover)
     {
-        auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto& v = (*mesh.get_simplex_up({alpha})).position; // Position of alpha
-        auto next = mesh.get_simplex_up(curr,alpha);
+        auto        edge = *mesh.get_edge_up(curr, alpha);
+        const auto &v = (*mesh.get_simplex_up({alpha})).position;
+        auto        next = mesh.get_simplex_up(curr, alpha);
         rval += edge.orientation * (v-origin) * getTangentH(mesh, origin, next);
     }
     return rval/cover.size();
 }
 
+/**
+ * @brief      Compute the tangent of a face as the sum of wedge products.
+ *
+ * This is the terminal case. The wedge products must be scaled by the
+ *
+ * @param[in]  mesh       SurfaceMesh of interest.
+ * @param[in]  origin     The Vector position of the first vertex.
+ * @param[in]  curr       Current simplex to compute on.
+ * @param      cover      Set of coboundary simplices.
+ *
+ * @tparam     level      Simplex dimension of curr.
+ * @tparam     dimension  Dimension of the embedding.
+ *
+ * @return     Returns a 2-tensor corresponding to the tangent plane.
+ */
 template <std::size_t dimension>
-auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
-        SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr, std::set<SurfaceMesh::KeyType>& cover)
+auto getTangentF(const SurfaceMesh &mesh,
+                 const tensor<double, dimension, 1> &origin,
+                 SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr,
+                 std::set<SurfaceMesh::KeyType> &cover)
 {
     return (*curr).orientation;
 }
 
 /**
- * @brief      Face tangent
+ * @brief      Compute the tangent of a face as the sum of wedge products.
  *
- * @param[in]  mesh       The mesh
- * @param[in]  origin     The origin
- * @param[in]  curr       The curr
- * @param      cover      The cover
+ * @param[in]  mesh       SurfaceMesh of interest.
+ * @param[in]  origin     The Vector position of the first vertex.
+ * @param[in]  curr       Current simplex to compute on.
+ * @param      cover      Set of coboundary simplices.
  *
- * @tparam     level      { description }
- * @tparam     dimension  { description }
+ * @tparam     level      Simplex dimension of curr.
+ * @tparam     dimension  Dimension of the embedding.
  *
- * @return     The tangent f.
+ * @return     Returns a 2-tensor corresponding to the tangent plane.
  */
 template <std::size_t level, std::size_t dimension>
-auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& origin, 
-        SurfaceMesh::SimplexID<level> curr, std::set<SurfaceMesh::KeyType>& cover)
+auto getTangentF(const SurfaceMesh &mesh,
+                 const tensor<double, dimension, 1> &origin,
+                 SurfaceMesh::SimplexID<level> curr,
+                 std::set<SurfaceMesh::KeyType> &cover)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
-    for(auto alpha : cover)
+    for (auto alpha : cover)
     {
-        auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto& v = (*mesh.get_simplex_up({alpha})).position;
-        auto next = mesh.get_simplex_up(curr,alpha); 
-        auto coverup = cover;
+        auto        edge = *mesh.get_edge_up(curr, alpha);
+        const auto &v = (*mesh.get_simplex_up({alpha})).position;
+        auto        next = mesh.get_simplex_up(curr, alpha);
+        auto        coverup = cover;
         coverup.erase(alpha);
         rval += edge.orientation * (v-origin) * getTangentF(mesh, origin, next, coverup);
     }
@@ -167,137 +244,197 @@ auto getTangentF(const SurfaceMesh& mesh, const tensor<double, dimension, 1>& or
 }
 
 /**
- * READERS AND WRITERS
+ * @brief      Comupute the tangent to a vertex.
+ *
+ * The vertex normal is defined as the mean of incident triangle normals as
+ * follows,
+ * \f$ \mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}
+ * n_t\f$.
+ * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of
+ * incident
+ * faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
+ *
+ * @param[in]  mesh      SurfaceMesh of interest.
+ * @param[in]  vertexID  SimplexID of the vertex to get the tangent of.
+ *
+ * @return     Returns a 2-tensor representing the tangent plane.
  */
-// Geomview OFF
-std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename);
-void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
+tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
-// Wavefront OBJ
-std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename);
-void writeOBJ(const std::string& filename, const SurfaceMesh& mesh);
+/**
+ * @brief      Compute the tangent of a face.
+ *
+ * This function gets the tangent by computing the sum of oriented wedge
+ * products.
+ *
+ * @param[in]  mesh    SurfaceMesh of interest.
+ * @param[in]  faceID  SimplexID of the face to get the tangent of.
+ *
+ * @return     Returns a 2-tensor representing the tangent plane.
+ */
+tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
-void print(const SurfaceMesh& mesh);
-void generateHistogram(const SurfaceMesh& mesh);
-int getValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID);
-double getArea(const SurfaceMesh& mesh);
-double getArea(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
-double getVolume(const SurfaceMesh& mesh);
 
-void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::SimplexID<2> edgeID);
-std::vector<SurfaceMesh::SimplexID<2>> selectFlipEdges(const SurfaceMesh& mesh, bool preserveRidges, 
-        std::function<bool(const SurfaceMesh&, SurfaceMesh::SimplexID<2>&)> &checkFlip);
-bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID);
-bool checkFlipValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID);
+/**
+ * @brief      Gets the normal vector from the tangent.
+ *
+ * @param[in]  tangent  2-tensor representing the tangent plane.
+ *
+ * @return     The normal Vector.
+ */
+Vector getNormalFromTangent(const tensor<double, 3, 2> tangent);
 
-void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
-void normalSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
+/**
+ * @brief      Gets the normal of a vertex.
+ *
+ * The vertex normal is defined as the mean of incident triangle normals as
+ * follows,
+ * \f$\mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}n_t\f$.
+ * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of 
+ * incident faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
+ *
+ * @param[in]  mesh      SurfaceMesh of interest.
+ * @param[in]  vertexID  SimplexID of the vertex to get the normal of.
+ *
+ * @return     Returns the Vector normal to the vertex.
+ */
+Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
-tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
-tensor<double,3,2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
-Vector getNormalFromTangent(const tensor<double,3,2> tangent);
-Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
-Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
+/**
+ * @brief      Compute the normal of a face.
+ *
+ * This function computes the normal as the cross product with respect to the
+ * orientation. See also getTangent() and getNormalFromTangent().
+ *
+ * @param[in]  mesh    SurfaceMesh of interest.
+ * @param[in]  faceID  SimplexID of the face to get the tangent of.
+ *
+ * @return     Returns a Vector normal to the face.
+ */
+Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
 // These exist for the a potential python interface
-void translate(SurfaceMesh& mesh, Vector v);
-void translate(SurfaceMesh& mesh, double dx, double dy, double dz);
-void scale(SurfaceMesh& mesh, Vector v);
-void scale(SurfaceMesh& mesh, double sx, double sy , double sz);
-void scale(SurfaceMesh& mesh, double s);
+void translate(SurfaceMesh &mesh, Vector v);
+void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
+void scale(SurfaceMesh &mesh, Vector v);
+void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
+void scale(SurfaceMesh &mesh, double s);
 
-// struct LocalStructureTensorVisitor
-// {
-//     tensor<double,3,2> lst;
+Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat);
 
-//     LocalStructureTensorVisitor(){
-//         lst = tensor<double,3,2>();
-//     }
+/**
+ * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
+ *
+ * @param      mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ *
+ * @tparam     rings     { description }
+ */
+template <std::size_t rings>
+void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+{
+    auto   centerName = mesh.get_name(vertexID)[0];
+    auto  &center = *vertexID; // get the vertex data
 
-//     template <std::size_t level> 
-//     bool visit(const SurfaceMesh& F, SurfaceMesh::SimplexID<level> s)
-//     {
-//         // auto tan = getTangent(F, s);
-//         // auto norm = getNormalFromTangent(tan);
-//         auto norm = getNormal(F,s);
-//         lst += norm*norm;
-//         return true;
-//     }
-// };
+    double sumWeights = 0;
+    Vector newPos;
 
-Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double,3,2> mat);
 
-// template <std::size_t rings>
-// void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID){
-//     auto centerName = mesh.get_name(vertexID)[0]; 
-//     auto& center = *vertexID; // get the vertex data
+    // Compute the following sum to get the new position
+    // \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(\alpha_i
+    // + 1) x_i
 
-//     double sumWeights = 0;
-//     Vector newPos;
+    for (auto edge : mesh.up(vertexID))
+    {
+        // Get the vertex connected by edge
+        auto edgeName = mesh.get_name(edge);
+        auto shared   = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
 
-//     /**
-//      * Compute the following sum to get the new position
-//      * \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(alpha_i + 1) x_i
-//      */
-//     for(auto edge : mesh.up(vertexID)){
-//         // Get the vertex connected by edge
-//         auto edgeName = mesh.get_name(edge);
-//         auto shared = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+        // Get the vertices connected to adjacent edge
+        auto up   = mesh.get_cover(edge);
+        auto prev = *mesh.get_simplex_up({up[0]});
+        auto next = *mesh.get_simplex_up({up[1]});
 
-//         // Get the vertices connected to adjacent edge
-//         auto up = mesh.get_cover(edge);
-//         auto prev = *mesh.get_simplex_up({up[0]});
-//         auto next = *mesh.get_simplex_up({up[1]}); 
-        
-//         auto pS = prev - shared;
-//         pS /= std::sqrt(pS|pS);
-//         auto nS = next - shared;
-//         nS /= std::sqrt(nS|nS);
-//         auto bisector = (pS + nS)/2;
-//         bisector /= std::sqrt(bisector|bisector);
+        auto pS = prev - shared;
+        pS /= std::sqrt(pS|pS);
+        auto nS = next - shared;
+        nS /= std::sqrt(nS|nS);
+        auto bisector = (pS + nS)/2;
+        bisector /= std::sqrt(bisector|bisector);
 
-//         // Get a reference vecter to shared which lies on the plane of interest.
-//         auto disp = center - shared;
-//         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+        // Get a reference vecter to shared which lies on the plane of interest.
+        auto disp = center - shared;
+        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
-//         //auto tanNorm = getNormalFromTangent(pS^nS);
-//         auto tanNorm = cross(pS, nS);
+        //auto tanNorm = getNormalFromTangent(pS^nS);
+        auto tanNorm = cross(pS, nS);
 
-//         // Get the perpendicular plane made up of plane normal of bisector
-//         //auto perpPlane = tanNorm^bisector;
-//         //auto perpNorm = getNormalFromTangent(perpPlane);
-//         auto perpNorm = cross(tanNorm, bisector);
-//         perpNorm /= std::sqrt(perpNorm|perpNorm);
-//         auto perpProj = perpNorm*perpNorm; // tensor product
-      
-//         // Compute perpendicular component 
-//         Vector perp;
-//         Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
-//         Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
-//         perp_e = perpProj_e*disp_e;
+        // Get the perpendicular plane made up of plane normal of bisector
+        //auto perpPlane = tanNorm^bisector;
+        //auto perpNorm = getNormalFromTangent(perpPlane);
+        auto perpNorm = cross(tanNorm, bisector);
+        perpNorm /= std::sqrt(perpNorm|perpNorm);
+        auto perpProj = perpNorm*perpNorm; // tensor product
 
-//         auto alpha = (pS|nS)+1; // keep the dot product positive
-//         sumWeights += alpha;
-//         newPos += alpha*(center.position - perp);
-//     }
-//     newPos /= sumWeights;
-//     /**
-//      * Scale by PCA
-//      * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot \vec{e_k})\vec{e_k}
-//      */
-//     auto v = LocalStructureTensorVisitor();
-//     casc::visit_neighbors_up<rings>(v, mesh, vertexID); // TODO: how should we set this?
-//     auto eigen_result = getEigenvalues(v.lst);
-//     // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues() << std::endl;
-//     // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
-//     //      << "corresponding to these eigenvalues:\n"
-//     //      << eigen_result.eigenvectors() << std::endl;
+        // Compute perpendicular component
+        Vector perp;
+        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+        perp_e = perpProj_e*disp_e;
 
-//     newPos -= center.position;
-//     Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
-    
-//     auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array() // dot product
-//              / (eigen_result.eigenvalues().array()+1)).matrix();         // elementwise-division
-//     newPos_e = eigen_result.eigenvectors()*w; // matrix product
-//     center.position += newPos;
-// }
+        auto alpha = (pS|nS)+1; // keep the dot product positive
+        sumWeights += alpha;
+        newPos += alpha*(center.position - perp);
+    }
+    newPos /= sumWeights;
+    /**
+     * Scale by PCA
+     * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
+     * \vec{e_k})\vec{e_k}
+     */
+
+    // Set of neighbors
+    std::set<SurfaceMesh::SimplexID<1> > nbors;
+    // Get list of neighbors
+    casc::kneighbors_up(mesh, vertexID, 3, nbors);
+    // local structure tensor
+    tensor<double, 3, 2> lst = tensor<double, 3, 2>();
+    for (auto nid : nbors)
+    {
+        auto norm = getNormal(mesh, nid);           // Get Vector normal
+        lst += norm*norm;                           // tensor product
+    }
+    auto eigen_result = getEigenvalues(lst);
+    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues()
+    // << std::endl;
+    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+    //      << "corresponding to these eigenvalues:\n"
+    //      << eigen_result.eigenvectors() << std::endl;
+
+    newPos -= center.position;
+    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+
+    // dot product followed by elementwise-division
+    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array()
+              / (eigen_result.eigenvalues().array()+1)).matrix();
+    newPos_e = eigen_result.eigenvectors()*w; // matrix product
+    center.position += newPos;
+}
+
+/**
+ * @brief      Perform an edge flip operation
+ *
+ * @param      mesh    SurfaceMesh of interest.
+ * @param[in]  edgeID  SimplexID of the edge to flip.
+ */
+void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
+
+std::vector<SurfaceMesh::SimplexID<2> > selectFlipEdges(const SurfaceMesh &mesh, bool preserveRidges,
+                                                        std::function<bool(const SurfaceMesh &, SurfaceMesh::SimplexID<2> &)> &checkFlip);
+bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
+bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
+
+void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+void normalSmooth(SurfaceMesh &mesh);
+void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);

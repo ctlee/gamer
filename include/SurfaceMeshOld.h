@@ -101,15 +101,15 @@ public:
     void        flipNormals();
     //void        releaseData();
     void        correctNormals();
-    void        writeOFF(char *filename);
+    void        writeOFF(char *filename);       // DONE CTL
     void        writePoly(char *filename);
     void        getMinMaxAngles(float *, float *, int *, int *,
-                                int, int);
+                                int, int);      // DONE CTL
     void        eigenvalues();
     void        refine();
     bool        smooth(unsigned int, unsigned int,
                        unsigned int, bool);
-    void        normalSmooth();
+    void        normalSmooth();                 // DONE CTL
     char        coarse(float, float, float, float);
     void        assignActiveSites(ATOM *, unsigned int, unsigned int *);
     ATOM        getCenterRadius(); // this function probably does not belong as an interface function.
