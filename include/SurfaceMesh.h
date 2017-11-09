@@ -274,7 +274,6 @@ tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<
  */
 tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
-
 /**
  * @brief      Gets the normal vector from the tangent.
  *
@@ -320,106 +319,25 @@ void scale(SurfaceMesh &mesh, Vector v);
 void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
 void scale(SurfaceMesh &mesh, double s);
 
+bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int max_iter, bool preserveRidges);
+
+/**
+ * @brief      Compute the eigenvalues of a 3x3 matrix.
+ *
+ * @param[in]  mat   3x3 matrix to compute eigenvalues of.
+ *
+ * @return     Returns an Eigen::SelfAdjointEigenSolver containing the results
+ */
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat);
 
 /**
  * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
  *
- * @param      mesh      The mesh
- * @param[in]  vertexID  The vertex id
- *
- * @tparam     rings     { description }
+ * @param[out] mesh      SurfaceMesh of int
+ * @param[in]  vertexID  SimplexID of the vertex to smooth.
+ * @param[in]  rings     The number of neighbor rings to use to compute the LST.
  */
-template <std::size_t rings>
-void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
-{
-    auto   centerName = mesh.get_name(vertexID)[0];
-    auto  &center = *vertexID; // get the vertex data
-
-    double sumWeights = 0;
-    Vector newPos;
-
-
-    // Compute the following sum to get the new position
-    // \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(\alpha_i
-    // + 1) x_i
-
-    for (auto edge : mesh.up(vertexID))
-    {
-        // Get the vertex connected by edge
-        auto edgeName = mesh.get_name(edge);
-        auto shared   = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
-
-        // Get the vertices connected to adjacent edge
-        auto up   = mesh.get_cover(edge);
-        auto prev = *mesh.get_simplex_up({up[0]});
-        auto next = *mesh.get_simplex_up({up[1]});
-
-        auto pS = prev - shared;
-        pS /= std::sqrt(pS|pS);
-        auto nS = next - shared;
-        nS /= std::sqrt(nS|nS);
-        auto bisector = (pS + nS)/2;
-        bisector /= std::sqrt(bisector|bisector);
-
-        // Get a reference vecter to shared which lies on the plane of interest.
-        auto disp = center - shared;
-        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
-
-        //auto tanNorm = getNormalFromTangent(pS^nS);
-        auto tanNorm = cross(pS, nS);
-
-        // Get the perpendicular plane made up of plane normal of bisector
-        //auto perpPlane = tanNorm^bisector;
-        //auto perpNorm = getNormalFromTangent(perpPlane);
-        auto perpNorm = cross(tanNorm, bisector);
-        perpNorm /= std::sqrt(perpNorm|perpNorm);
-        auto perpProj = perpNorm*perpNorm; // tensor product
-
-        // Compute perpendicular component
-        Vector perp;
-        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
-        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
-        perp_e = perpProj_e*disp_e;
-
-        auto alpha = (pS|nS)+1; // keep the dot product positive
-        sumWeights += alpha;
-        newPos += alpha*(center.position - perp);
-    }
-    newPos /= sumWeights;
-    /**
-     * Scale by PCA
-     * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
-     * \vec{e_k})\vec{e_k}
-     */
-
-    // Set of neighbors
-    std::set<SurfaceMesh::SimplexID<1> > nbors;
-    // Get list of neighbors
-    casc::kneighbors_up(mesh, vertexID, 3, nbors);
-    // local structure tensor
-    tensor<double, 3, 2> lst = tensor<double, 3, 2>();
-    for (auto nid : nbors)
-    {
-        auto norm = getNormal(mesh, nid);           // Get Vector normal
-        lst += norm*norm;                           // tensor product
-    }
-    auto eigen_result = getEigenvalues(lst);
-    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues()
-    // << std::endl;
-    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
-    //      << "corresponding to these eigenvalues:\n"
-    //      << eigen_result.eigenvectors() << std::endl;
-
-    newPos -= center.position;
-    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
-
-    // dot product followed by elementwise-division
-    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array()
-              / (eigen_result.eigenvalues().array()+1)).matrix();
-    newPos_e = eigen_result.eigenvectors()*w; // matrix product
-    center.position += newPos;
-}
+void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
 
 /**
  * @brief      Perform an edge flip operation
@@ -429,6 +347,15 @@ void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
  */
 void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
 
+/**
+ * @brief      Select edges which are good candidates for flipping
+ *
+ * @param[in]  mesh            SurfaceMesh to operate on.
+ * @param[in]  preserveRidges  Whether or not to try preserving ridges.
+ * @param[in]  checkFlip       Functor specifying flip criteria 
+ *
+ * @return     Returns a vector of edges to flip.
+ */
 std::vector<SurfaceMesh::SimplexID<2> > selectFlipEdges(const SurfaceMesh &mesh, bool preserveRidges,
                                                         std::function<bool(const SurfaceMesh &, SurfaceMesh::SimplexID<2> &)> &checkFlip);
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
@@ -438,3 +365,10 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
 
 void normalSmooth(SurfaceMesh &mesh);
 void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+/**
+ * @brief      Refine the mesh by quadrisection of faces
+ *
+ * @param      mesh  The mesh
+ */
+std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);

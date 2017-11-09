@@ -694,3 +694,160 @@ Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 
         abort();
     return eigensolver;
 }
+
+void weightedVertexSmooth(SurfaceMesh &mesh, 
+    SurfaceMesh::SimplexID<1> vertexID,
+    int rings)
+{
+    auto   centerName = mesh.get_name(vertexID)[0];
+    auto  &center = *vertexID; // get the vertex data
+
+    double sumWeights = 0;
+    Vector newPos;
+
+
+    // Compute the following sum to get the new position
+    // \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(\alpha_i
+    // + 1) x_i
+
+    for (auto edge : mesh.up(vertexID))
+    {
+        // Get the vertex connected by edge
+        auto edgeName = mesh.get_name(edge);
+        auto shared   = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+
+        // Get the vertices connected to adjacent edge
+        auto up   = mesh.get_cover(edge);
+        auto prev = *mesh.get_simplex_up({up[0]});
+        auto next = *mesh.get_simplex_up({up[1]});
+
+        auto pS = prev - shared;
+        pS /= std::sqrt(pS|pS);
+        auto nS = next - shared;
+        nS /= std::sqrt(nS|nS);
+        auto bisector = (pS + nS)/2;
+        bisector /= std::sqrt(bisector|bisector);
+
+        // Get a reference vecter to shared which lies on the plane of interest.
+        auto disp = center - shared;
+        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+
+        //auto tanNorm = getNormalFromTangent(pS^nS);
+        auto tanNorm = cross(pS, nS);
+
+        // Get the perpendicular plane made up of plane normal of bisector
+        //auto perpPlane = tanNorm^bisector;
+        //auto perpNorm = getNormalFromTangent(perpPlane);
+        auto perpNorm = cross(tanNorm, bisector);
+        perpNorm /= std::sqrt(perpNorm|perpNorm);
+        auto perpProj = perpNorm*perpNorm; // tensor product
+
+        // Compute perpendicular component
+        Vector perp;
+        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+        perp_e = perpProj_e*disp_e;
+
+        auto alpha = (pS|nS)+1; // keep the dot product positive
+        sumWeights += alpha;
+        newPos += alpha*(center.position - perp);
+    }
+    newPos /= sumWeights;
+    /**
+     * Scale by PCA
+     * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
+     * \vec{e_k})\vec{e_k}
+     */
+
+    // Set of neighbors
+    std::set<SurfaceMesh::SimplexID<1> > nbors;
+    // Get list of neighbors
+    casc::kneighbors_up(mesh, vertexID, rings, nbors);
+    // local structure tensor
+    tensor<double, 3, 2> lst = tensor<double, 3, 2>();
+    for (auto nid : nbors)
+    {
+        auto norm = getNormal(mesh, nid);           // Get Vector normal
+        lst += norm*norm;                           // tensor product
+    }
+    auto eigen_result = getEigenvalues(lst);
+    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues()
+    // << std::endl;
+    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+    //      << "corresponding to these eigenvalues:\n"
+    //      << eigen_result.eigenvectors() << std::endl;
+
+    newPos -= center.position;
+    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+
+    // dot product followed by elementwise-division
+    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array()
+              / (eigen_result.eigenvalues().array()+1)).matrix();
+    newPos_e = eigen_result.eigenvectors()*w; // matrix product
+    center.position += newPos;
+}
+
+bool smooth(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int max_iter, bool preserveRidges){
+    return true;
+}
+
+/**
+ * @brief      Refine the mesh by quadrisection.
+ * 
+ * Note that this function will delete all stored data on edges and faces. But 
+ * this can be easily fixed.
+ *
+ * @param      mesh  The mesh
+ */
+std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
+    std::unique_ptr<SurfaceMesh> refinedMesh(new SurfaceMesh);
+
+    // Copy over vertices to refinedMesh
+    for (auto vertex : mesh.get_level_id<1>()){
+        auto key = mesh.get_name(vertex);
+        refinedMesh->insert(key, *vertex);        
+    }
+
+    // Split edges and generate a map of names before to after
+    std::map<std::array<int,2>, int> edgeMap;
+
+    for(auto edge : mesh.get_level_id<2>()){
+        auto edgeName = mesh.get_name(edge);
+        auto v1 = *mesh.get_simplex_up({edgeName[0]});
+        auto v2 = *mesh.get_simplex_up({edgeName[1]});
+
+        auto newVertex = refinedMesh->add_vertex(Vertex(0.5*(v1+v2)));
+        edgeMap.emplace(std::make_pair(edgeName, newVertex));
+    }
+
+    // Connect edges and face and copy data
+    for(auto face : mesh.get_level_id<3>()){
+        auto name = mesh.get_name(face);
+        int a, b, c;
+
+        // Skip checking if found
+        auto it = edgeMap.find({name[0],name[1]});
+        a = it->second;
+
+        it = edgeMap.find({name[1],name[2]});
+        b = it->second;
+
+        it = edgeMap.find({name[0],name[2]});
+        c = it->second;
+
+        refinedMesh->insert({name[0], a});
+        refinedMesh->insert({a, name[1]});
+
+        refinedMesh->insert({name[1], b});
+        refinedMesh->insert({b, name[2]});
+
+        refinedMesh->insert({name[0], c});
+        refinedMesh->insert({c, name[2]});
+
+        refinedMesh->insert({a,b,c});
+        refinedMesh->insert({name[0],a,c}, *face);
+        refinedMesh->insert({name[1],a,b}, *face);
+        refinedMesh->insert({name[2],b,c}, *face);
+    }
+    return refinedMesh;
+}

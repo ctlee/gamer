@@ -46,6 +46,13 @@ struct Vertex
         marker = m;
         selected = sel;
     }
+
+    Vertex(Vector v){
+        position = v;
+        marker = 0;
+        selected = false;
+    }
+
     /**
      * @brief      Copy Constructor
      *
@@ -210,6 +217,7 @@ struct Vertex
 };
 
 Vertex operator+(const Vertex& A, const Vector& B);
+Vector operator+(const Vertex& A, const Vertex& B);
 Vertex operator-(const Vertex& A, const Vector& B);
 Vector operator-(const Vertex& A, const Vertex& B);
 Vertex operator*(double x, const Vertex& A);

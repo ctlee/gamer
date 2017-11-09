@@ -8,6 +8,10 @@ Vertex operator+(const Vertex& A, const Vector& B){
     return rval;
 }
 
+Vector operator+(const Vertex& A, const Vertex& B){
+    return A.position + B.position; 
+}
+
 Vertex operator-(const Vertex& A, const Vector& B){
     Vertex rval(A);
     rval -= B;

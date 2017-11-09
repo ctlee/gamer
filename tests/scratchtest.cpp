@@ -105,14 +105,16 @@ int  main(int argc, char *argv[])
 
     std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
 
-    casc::orientation_detail::init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
-    compute_orientation(*mesh);
-    writeDOT("test.dot", *mesh);
+    mesh = refineMesh(*mesh);
 
-    print(*mesh);
+    // casc::orientation_detail::init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
+    // compute_orientation(*mesh);
+    // writeDOT("test.dot", *mesh);
 
-    auto s = mesh->get_simplex_up({3,4});
-    decimate(*mesh, s, Callback<SurfaceMesh>());
+    // print(*mesh);
+
+    // auto s = mesh->get_simplex_up({3,4});
+    // decimate(*mesh, s, Callback<SurfaceMesh>());
     writeOFF("test.off", *mesh);
 
 

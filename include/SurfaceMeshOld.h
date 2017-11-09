@@ -96,17 +96,16 @@ public:
     // Having a needless friend function like this is a special kind of terrible, but one step at a time.
     friend void SurfaceExtract(TeTraMesh *volmesh, SurfaceMeshOld *surfmesh);
 
-    void        createNeighborlist();
-    void        destroyNeighborlist();
-    void        flipNormals();
+    void        createNeighborlist();           // NO LONGER NEEDED CTL
+    void        destroyNeighborlist();          // NO LONGER NEEDED CTL
+    void        flipNormals();                  // NO LONGER NEEDED CTL
     //void        releaseData();
-    void        correctNormals();
+    void        correctNormals();               // NO LONGER NEEDED CTL
     void        writeOFF(char *filename);       // DONE CTL
     void        writePoly(char *filename);
-    void        getMinMaxAngles(float *, float *, int *, int *,
-                                int, int);      // DONE CTL
-    void        eigenvalues();
-    void        refine();
+    void        getMinMaxAngles(float *, float *, int *, int *, int, int);  // DONE CTL
+    void        eigenvalues();                  // NO LONGER NEEDED CTL
+    void        refine();                       // DONE CTL
     bool        smooth(unsigned int, unsigned int,
                        unsigned int, bool);
     void        normalSmooth();                 // DONE CTL
