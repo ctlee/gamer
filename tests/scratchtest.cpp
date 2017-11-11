@@ -104,11 +104,10 @@ int  main(int argc, char *argv[])
     std::cout << "Done reading" << std::endl;
 
     std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
+    compute_orientation(*mesh);
+    centeralize(*mesh);
+    smoothMesh(*mesh, 15, 150, 25, true);
 
-    mesh = refineMesh(*mesh);
-
-    // casc::orientation_detail::init_orientation_helper<SurfaceMesh,std::integral_constant<std::size_t,0>>::f(*mesh);
-    // compute_orientation(*mesh);
     // writeDOT("test.dot", *mesh);
 
     // print(*mesh);

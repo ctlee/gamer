@@ -107,14 +107,14 @@ public:
     void        eigenvalues();                  // NO LONGER NEEDED CTL
     void        refine();                       // DONE CTL
     bool        smooth(unsigned int, unsigned int,
-                       unsigned int, bool);
+                       unsigned int, bool);     // DONE CTL
     void        normalSmooth();                 // DONE CTL
     char        coarse(float, float, float, float);
     void        assignActiveSites(ATOM *, unsigned int, unsigned int *);
     ATOM        getCenterRadius(); // this function probably does not belong as an interface function.
-    void        translate(float dx, float dy, float dz);
-    void        scale(float scale_x, float scale_y, float scale_z);
-    void        scale(float scale);
+    void        translate(float dx, float dy, float dz);    // DONE CTL
+    void        scale(float scale_x, float scale_y, float scale_z); // DONE CTL 
+    void        scale(float scale); // DONE CTL
     void        centeralize();
     void        splitMultipleConnectedSurfaces();
     void        removeUnconnectedPatches(int minimal_number);

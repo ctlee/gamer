@@ -21,5 +21,5 @@ TEST(TensorTest,MathOperations){
 
     auto v01 = v0 ^ v1;
     auto v10 = v1 ^ v0;
-    EXPECT_EQ(v01, v10*-1.0);
+    EXPECT_EQ(v01, -v10);
 }

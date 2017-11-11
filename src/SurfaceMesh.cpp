@@ -214,6 +214,7 @@ double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
  */
 double getVolume(const SurfaceMesh &mesh)
 {
+    bool orientError = false;
     double volume = 0;
     for (auto faceID : mesh.get_level_id<3>())
     {
@@ -239,10 +240,8 @@ double getVolume(const SurfaceMesh &mesh)
         }
         else
         {
-            std::cerr << "Orientation undefined..." << std::endl;
-            // TODO: Add in helpful error
+            orientError = true;
         }
-
         // Far less efficient but cooler way...
         // norm = getNormalFromTangent(getTangent(mesh, faceID));
         // auto wedge = a^b^c;
@@ -252,8 +251,11 @@ double getVolume(const SurfaceMesh &mesh)
         // if(sgn <= 0) {
         //     tmp = -1*tmp;
         // }
-
         volume += tmp/6.0;
+    }
+    if(orientError){
+        std::cerr << "ERROR getVolume(): Orientation undefined for one or more " 
+                  << "simplices. Did you call compute_orientation()?" << std::endl;
     }
     return std::abs(volume);
 }
@@ -294,6 +296,32 @@ void scale(SurfaceMesh &mesh, double s)
     scale(mesh, v);
 }
 
+std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh){
+    Vector center = Vector();
+    double radius = 0;
+    if (mesh.size<1>() > 0){
+        for(auto vertexID : mesh.get_level_id<1>()){
+            center += *vertexID;
+        }
+        center /= mesh.size<1>(); 
+
+        for(auto vertexID : mesh.get_level_id<1>()){
+            Vector tmp = *vertexID - center;
+            double dist = std::sqrt(tmp|tmp);
+            if(dist > radius) radius = dist;
+        }
+    }
+    return std::make_pair(center, radius);
+}
+
+
+void centeralize(SurfaceMesh &mesh){
+    Vector center;
+    double radius;
+    std::tie(center, radius) = getCenterRadius(mesh);
+    translate(mesh, -center);
+}
+
 void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
 {
     // Assuming that the mesh is manifold and edge has been vetted for flipping
@@ -302,105 +330,6 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     mesh.remove<2>({name[0], name[1]});
     mesh.insert<3>({name[0], up[0], up[1]});
     mesh.insert<3>({name[1], up[0], up[1]});
-}
-
-std::vector<SurfaceMesh::SimplexID<2> > selectFlipEdges(
-    const SurfaceMesh &mesh,
-    bool preserveRidges,
-    std::function<bool(const SurfaceMesh &, SurfaceMesh::SimplexID<2> &)> &checkFlip)
-{
-
-    std::vector<SurfaceMesh::SimplexID<2> >   edgesToFlip;
-    casc::NodeSet<SurfaceMesh::SimplexID<2> > ignoredEdges;
-
-    for (auto edgeID : mesh.get_level_id<2>())
-    {
-        if (!ignoredEdges.count(edgeID))
-        {
-            auto name = mesh.get_name(edgeID);
-            std::pair<Vertex, Vertex> shared;
-            shared.first  = *mesh.get_simplex_up({name[0]});
-            shared.second = *mesh.get_simplex_up({name[1]});
-
-            std::pair<Vertex, Vertex> notShared;
-            auto up = mesh.get_cover(edgeID);
-
-            if (up.size() > 2)
-            {
-                //std::cerr << "This edge participates in more than 2 faces.
-                // Returning..." << std::endl;
-                continue;
-            }
-            else if (up.size() < 2)
-            {
-                //std::cerr << "This edge participates in fewer than 2 faces.
-                // Returning..." << std::endl;
-                continue;
-            }
-            notShared.first  = *mesh.get_simplex_up({up[0]});
-            notShared.second = *mesh.get_simplex_up({up[1]});
-
-            // Add check to see if notShared.first and second are connected.
-            if (mesh.exists<2>({up[0], up[1]}))
-            {
-                //std::cerr << "Found a tetrahedron cannot edge flip." <<
-                // std::endl;
-                continue;
-            }
-
-            // Check if we're on a ridge
-            if (preserveRidges)
-            {
-                // auto t1 = getTangent(mesh, mesh.get_simplex_up(edgeID,
-                // up[0]));
-                // auto a = getNormalFromTangent(t1);
-                // auto t2 = getTangent(mesh, mesh.get_simplex_up(edgeID,
-                // up[1]));
-                // auto b = getNormalFromTangent(t2);
-                auto a   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[0]));
-                auto b   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[1]));
-                auto val = angle(a, b);
-                if (val > 60)
-                {
-                    continue;
-                }
-            }
-
-            // Check if flipping creates a fold
-            auto f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
-            auto f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
-            auto f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
-            auto f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
-            auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
-            auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
-            if (areaFlip/area > 1.01) // TODO: this is an arbitrary area
-                                      // ratio...
-            {                         //std::cerr << "Suspect flipping will
-                                      // create fold."  <<
-                // std::endl;
-                continue;
-            }
-
-            if (checkFlip(mesh, edgeID))
-            {
-                edgesToFlip.push_back(edgeID);
-                std::vector<SurfaceMesh::SimplexID<2> > neighbors;
-                std::vector<SurfaceMesh::SimplexID<2> > neighborsAway;
-                neighbors_up(mesh, edgeID, std::back_inserter(neighbors));
-                for (auto neighbor : neighbors)
-                {
-                    ignoredEdges.insert(neighbor);
-                    neighbors_up(mesh, neighbor, std::back_inserter(neighborsAway));
-                }
-                for (auto neighbor : neighborsAway)
-                {
-                    ignoredEdges.insert(neighbor);
-                }
-            }
-        }
-    }
-
-    return edgesToFlip;
 }
 
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
@@ -458,7 +387,7 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
     notShared.second = mesh.get_simplex_up({up[1]});
     std::array<double, 20> valence;
     // assuming there are no boundaries
-    // TODO check if it's a boundary...
+    // TODO: (5) check if it's a boundary...
     valence[0] = getValence(mesh, shared.first)-6;
     valence[1] = getValence(mesh, shared.second)-6;
     valence[2] = getValence(mesh, notShared.first)-6;
@@ -679,7 +608,9 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
     }
     else
     {
-        std::cerr << "Orientation undefined..." << std::endl;
+        std::cerr << "ERROR(getNormal): Orientation undefined, cannot compute "
+                  << "normal. Did you call compute_orientation()?" << std::endl;
+        std::exit(EXIT_FAILURE);
     }
     return norm;
 }
@@ -687,8 +618,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat)
 {
     Eigen::Map<Eigen::Matrix3d> emat(mat.data());
-    // TODO: How much optimization can we get from having a persistent
-    // eigensolver?
+    // TODO: (99) How much optimization can we get from having a persistent eigensolver?
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(emat);
     if (eigensolver.info() != Eigen::Success)
         abort();
@@ -699,17 +629,16 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
     SurfaceMesh::SimplexID<1> vertexID,
     int rings)
 {
+    // TODO: (2) Fix problems when manipulating boundary vertices.
     auto   centerName = mesh.get_name(vertexID)[0];
     auto  &center = *vertexID; // get the vertex data
 
     double sumWeights = 0;
     Vector newPos;
 
-
     // Compute the following sum to get the new position
     // \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(\alpha_i
     // + 1) x_i
-
     for (auto edge : mesh.up(vertexID))
     {
         // Get the vertex connected by edge
@@ -787,8 +716,63 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
     center.position += newPos;
 }
 
-bool smooth(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int max_iter, bool preserveRidges){
-    return true;
+bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges){
+    bool smoothed;
+    double minAngle, maxAngle;
+    int nSmall, nLarge;
+    int nIter = 1;
+
+    // Check if we are smoothed already
+    smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
+
+    std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle); 
+    std::cout << "Initial Quality: Min Angle = " << minAngle << ", " 
+              << "Max Angle = " << maxAngle << ", "
+              << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
+              << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
+
+
+    // while not smoothed and not at maxiter perform one round of
+    // weightedVertexSmooth + edgeflipping    
+    while (!smoothed && nIter < maxIter){
+
+        for(auto vertex : mesh.get_level_id<1>()){
+            weightedVertexSmooth(mesh, vertex, 3);
+        }
+
+        std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
+        
+        // Get set of good, non-interfering edges to flip according to the
+        // Angle based criteria.
+        selectFlipEdges(mesh, preserveRidges, checkFlipAngle, 
+                            std::back_inserter(edgesToFlip));
+        for(auto edgeID : edgesToFlip){
+            edgeFlip(mesh, edgeID);
+        }
+        compute_orientation(mesh);
+
+        // Mark for flipping by edge valence.
+        // edgesToFlip.clear();
+        // selectFlipEdges(mesh, preserveRidges, checkFlipValence, 
+        //                    std::back_inserter(edgesToFlip));
+        // for(auto edgeID : edgesToFlip){
+        //     edgeFlip(mesh, edgeID);
+        // }
+        // compute_orientation(mesh);
+
+        std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle); 
+        std::cout << "Iteration " << nIter << ":" << std::endl;
+        std::cout << "Min Angle = " << minAngle << ", " 
+                  << "Max Angle = " << maxAngle << ", "
+                  << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
+                  << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
+
+        smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
+        ++nIter;
+    }
+
+    // moveVerticesSurfaceOnly == weightedVertexSmooth
+    return smoothed;
 }
 
 /**

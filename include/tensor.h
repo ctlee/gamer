@@ -363,6 +363,17 @@ public:
 		return *this;
 	}
 
+	tensor operator-() const
+	{
+		tensor rhs;
+		typename DataType::iterator rhs_curr = rhs.begin();
+		for(typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+		{
+			*rhs_curr = - (*tcurr);
+		}
+		return rhs;
+	}
+
 	auto data()
 	{
 		return _data.data();

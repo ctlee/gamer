@@ -233,13 +233,15 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
     fout.precision(10); 
     // Get the vertex data directly 
-    // TODO: this actually has to print out the vertices in order of the index...
+    // TODO: (3) Will this always print in order?
     for(const auto& vertex : mesh.get_level<1>()){
         fout    << vertex[0] << " "
                 << vertex[1] << " " 
                 << vertex[2] << " " 
                 << "\n";
     }
+
+    bool orientationError = false;
 
     // Get the face nodes
     for(auto faceNodeID : mesh.get_level_id<3>()){
@@ -254,9 +256,14 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
         }
         else{
-            std::cerr << "~~Orientation undefined..." << std::endl;
+            orientationError = true;
             fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
+    }
+    if(orientationError){
+        std::cerr << "WARNING(writeOFF): The orientation of one or more faces "
+                  << "is not defined. Did you run compute_orientation()?" 
+                  << std::endl;
     }
     fout.close();
 }
