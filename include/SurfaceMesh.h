@@ -325,6 +325,8 @@ void centeralize(SurfaceMesh &mesh);
 
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
 
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, double maxNormalAngle);
+
 /**
  * @brief      Compute the eigenvalues of a 3x3 matrix.
  *

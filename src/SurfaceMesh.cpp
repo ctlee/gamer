@@ -835,3 +835,23 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
     }
     return refinedMesh;
 }
+
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, double maxNormalAngle){
+    // TODO: Check if all polygons are closed (0)
+    
+    double avgLen = 0;
+
+    if (denseWeight > 0){
+        // TODO: check if there are edges?
+        for (auto edgeID : mesh.get_level_id<2>()){
+            auto name =  mesh.get_name(edgeID);
+            auto e1 = mesh.get_simplex_down(edgeID, name[1]);
+            auto e2 = mesh.get_simplex_down(edgeID, name[2]);
+            avgLen += std::sqrt(e1|e2);
+        }
+
+        avgLen /= mesh.size<2>();
+    }
+
+}
+
