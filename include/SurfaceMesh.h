@@ -322,10 +322,16 @@ void scale(SurfaceMesh &mesh, double s);
 std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
 void centeralize(SurfaceMesh &mesh);
 
+tensor<double,3,2> computeLocalStructureTensor(
+        const SurfaceMesh &mesh, 
+        const SurfaceMesh::SimplexID<1> vertexID, 
+        const int rings);
 
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
 
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, double maxNormalAngle);
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
+
+void triangulateHole(SurfaceMesh &mesh, std::vector<SurfaceMesh::SimplexID<1>> boundaryVerts);
 
 /**
  * @brief      Compute the eigenvalues of a 3x3 matrix.

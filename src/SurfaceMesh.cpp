@@ -688,6 +688,28 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
      * \vec{e_k})\vec{e_k}
      */
 
+    auto lst = computeLocalStructureTensor(mesh, vertexID, rings);
+
+    auto eigen_result = getEigenvalues(lst);
+    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues()
+    // << std::endl;
+    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+    //      << "corresponding to these eigenvalues:\n"
+    //      << eigen_result.eigenvectors() << std::endl;
+
+    newPos -= center.position;
+    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+
+    // dot product followed by elementwise-division EQN 4.
+    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array()
+              / (eigen_result.eigenvalues().array()+1)).matrix();
+    newPos_e = eigen_result.eigenvectors()*w; // matrix product
+    center.position += newPos;
+}
+
+tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
+        const SurfaceMesh::SimplexID<1> vertexID, 
+        const int rings){
     // Set of neighbors
     std::set<SurfaceMesh::SimplexID<1> > nbors;
     // Get list of neighbors
@@ -699,21 +721,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         auto norm = getNormal(mesh, nid);           // Get Vector normal
         lst += norm*norm;                           // tensor product
     }
-    auto eigen_result = getEigenvalues(lst);
-    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues()
-    // << std::endl;
-    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
-    //      << "corresponding to these eigenvalues:\n"
-    //      << eigen_result.eigenvectors() << std::endl;
-
-    newPos -= center.position;
-    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
-
-    // dot product followed by elementwise-division
-    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array()
-              / (eigen_result.eigenvalues().array()+1)).matrix();
-    newPos_e = eigen_result.eigenvectors()*w; // matrix product
-    center.position += newPos;
+    return lst;
 }
 
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges){
@@ -836,7 +844,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
     return refinedMesh;
 }
 
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, double maxNormalAngle){
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
     // TODO: Check if all polygons are closed (0)
     
     double avgLen = 0;
@@ -845,13 +853,106 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         // TODO: check if there are edges?
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
-            auto e1 = mesh.get_simplex_down(edgeID, name[1]);
-            auto e2 = mesh.get_simplex_down(edgeID, name[2]);
-            avgLen += std::sqrt(e1|e2);
+            Vector v1 = *mesh.get_simplex_down(edgeID, name[1]);
+            Vector v2 = *mesh.get_simplex_down(edgeID, name[2]);
+            avgLen += std::sqrt(v1|v2);
         }
 
         avgLen /= mesh.size<2>();
     }
 
+    double sparsenessRatio = 1;
+    double flatnessRatio = 1;
+    for(auto vertexID : mesh.get_level_id<1>()){
+        // Sparseness as coarsening criteria
+        if(denseWeight > 0){
+            // Get max length of edges.
+            auto edges = mesh.up(vertexID);
+            double maxLen = 0;
+            for(auto edgeID : edges){
+                auto name =  mesh.get_name(edgeID);
+                Vector v1 = *mesh.get_simplex_down(edgeID, name[1]);
+                Vector v2 = *mesh.get_simplex_down(edgeID, name[2]);
+                double tmpLen = std::sqrt(v1|v2);
+                if(tmpLen > maxLen) maxLen = tmpLen;
+            }
+            sparsenessRatio = std::pow(maxLen/avgLen, denseWeight);
+        }
+    
+
+        // Curvature as coarsening criteria
+        if(flatRate > 0){
+            // TODO: how many rings to consider? (0)
+            auto lst = computeLocalStructureTensor(mesh, vertexID, 3);
+
+            auto eigenvalues = getEigenvalues(lst).eigenvalues();
+            // The closer this ratio is to 0 the flatter the local region.
+            flatnessRatio = eigenvalues[1]/eigenvalues[2];
+        }
+
+        // Delete the vertex and retriangulate the hole
+        if(sparsenessRatio * flatnessRatio < coarseRate){
+
+
+            std::set<SurfaceMesh::SimplexID<1>> boundaryVerts;
+            neighbors_up(mesh, vertexID, 
+                    std::inserter(boundaryVerts, boundaryVerts.end()));
+
+            mesh.remove(vertexID);
+            std::vector<SurfaceMesh::SimplexID<1>> sortedVerts;
+
+            auto firstID = *boundaryVerts.begin();
+            boundaryVerts.erase(firstID);
+            sortedVerts.push_back(firstID);
+            auto currID = firstID;
+
+            int tmpSize = boundaryVerts.size();
+
+            while(tmpSize > 0){
+                std::vector<SurfaceMesh::SimplexID<1>> nbors;
+                neighbors_up(mesh, currID, std::back_inserter(nbors));
+                int prevSize = boundaryVerts.size();
+                for(auto nbor : nbors){
+                    auto result = boundaryVerts.find(nbor);
+                    if(result != boundaryVerts.end()){
+                        currID = *result;
+                        std::cout << "CurrID: " << currID << std::endl;
+                        sortedVerts.push_back(currID);
+                        boundaryVerts.erase(result);
+                        --tmpSize;
+                        break; 
+                    }
+                }
+
+                if(tmpSize == prevSize){
+                    std::cerr << "ERROR: Something isn't closed." << std::endl;
+                    abort(); // Something bad happened...
+                }
+            }
+
+            triangulateHole(mesh, sortedVerts);
+        }
+    }
 }
 
+void triangulateHole(SurfaceMesh &mesh, std::vector<SurfaceMesh::SimplexID<1>> boundaryVerts){
+    // Terminal case
+    if(boundaryVerts.size() == 3){
+        // create the face
+        auto a = mesh.get_name(boundaryVerts.pop_back());
+        auto b = mesh.get_name(boundaryVerts.pop_back());
+        auto c = mesh.get_name(boundaryVerts.pop_back());
+        mesh.insert({a,b,c}); 
+    }
+
+    // Construct a sorted vector of pairs... (valence, vertexID)
+    std::vector<std::pair<int, SurfaceMesh::SimplexID<1>>> list;
+    for(auto vertexID : boundaryVerts){
+        list.push_back(std::make_pair(getValence(mesh, vertexID), vertexID));
+    }
+    std::sort(list.begin(), list.end(), [](
+                const std::pair<int, SurfaceMesh::SimplexID<1>> &lhs, 
+                const std::pair<int, SurfaceMesh::SimplexID<1>> &rhs){
+            return lhs.first < rhs.first;
+        });
+}

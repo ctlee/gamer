@@ -19,8 +19,8 @@ public:
 
     // Move as many of these as possible to global functions.
     // SurfaceMeshOld 
-    static SurfaceMeshOld* merge(SurfaceMeshOld *, SurfaceMeshOld *);
-    static SurfaceMeshOld* readOFF(std::string filename);
+    static SurfaceMeshOld* merge(SurfaceMeshOld *, SurfaceMeshOld *);   
+    static SurfaceMeshOld* readOFF(std::string filename);   // DONE CTL
     static SurfaceMeshOld* readPoly(std::string filename);
     static std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> readPDB_molsurf(std::string filename);
     static std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> readPDB_gauss(const char *filename, float blobbyness, float iso_value);
