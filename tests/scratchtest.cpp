@@ -91,76 +91,24 @@ struct Callback
 
 int  main(int argc, char *argv[])
 {
-    // if(argc != 2)
-    // {
-    //     std::cerr << "Wrong arguments passed" << std::endl;
-    //     return -1;
-    // }
-    // auto mesh = readOFF(argv[1]);
-    // if(mesh == nullptr){
-    //     std::cout << "Something bad happened...";
-    //     exit(1);
-    // }
-    // std::cout << "Done reading" << std::endl;
-
-    // std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
-    // compute_orientation(*mesh);
-    //centeralize(*mesh);
-    //smoothMesh(*mesh, 15, 150, 25, true);
-
-    //coarse(*mesh, 0, 1, 0);
-
-    SurfaceMesh mesh;
-
-    mesh.insert({0,1,2});
-    mesh.insert({0,2,3});
-    mesh.insert({0,3,4});
-    mesh.insert({0,4,5});
-    mesh.insert({0,5,6});
-    mesh.insert({0,6,1});
-
-    auto vertexID = mesh.get_simplex_up({0});
-
-    std::set<SurfaceMesh::SimplexID<1>> boundaryVerts;
-    neighbors_up(mesh, vertexID, 
-            std::inserter(boundaryVerts, boundaryVerts.end()));
-
-    mesh.remove(vertexID);
-    std::vector<SurfaceMesh::SimplexID<1>> sortedVerts;
-
-    auto firstID = *boundaryVerts.begin();
-    boundaryVerts.erase(firstID);
-    sortedVerts.push_back(firstID);
-    auto currID = firstID;
-
-    int tmpSize = boundaryVerts.size();
-
-    while(tmpSize > 0){
-        std::vector<SurfaceMesh::SimplexID<1>> nbors;
-        neighbors_up(mesh, currID, std::back_inserter(nbors));
-        int prevSize = boundaryVerts.size();
-        for(auto nbor : nbors){
-            auto result = boundaryVerts.find(nbor);
-            if(result != boundaryVerts.end()){
-                currID = *result;
-                std::cout << "CurrID: " << currID << std::endl;
-                sortedVerts.push_back(currID);
-                boundaryVerts.erase(result);
-                --tmpSize;
-                break; 
-            }
-        }
-
-        if(tmpSize == prevSize){
-            std::cerr << "ERROR: Something isn't closed." << std::endl;
-            break; // Something wrong happened
-        }
+    if(argc != 2)
+    {
+        std::cerr << "Wrong arguments passed" << std::endl;
+        return -1;
     }
-
-    for(auto v : sortedVerts){
-        std::cout << v << std::endl;
+    auto mesh = readOFF(argv[1]);
+    if(mesh == nullptr){
+        std::cout << "Something bad happened...";
+        exit(1);
     }
+    std::cout << "Done reading" << std::endl;
 
+    std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
+    compute_orientation(*mesh);
+    centeralize(*mesh);
+    smoothMesh(*mesh, 15, 150, 5, true);
+
+    coarse(*mesh, 0.05, 1, 0);
 
     // writeDOT("test.dot", *mesh);
 
@@ -168,7 +116,7 @@ int  main(int argc, char *argv[])
 
     // auto s = mesh->get_simplex_up({3,4});
     // decimate(*mesh, s, Callback<SurfaceMesh>());
-    //writeOFF("test.off", *mesh);
+    writeOFF("test.off", *mesh);
 
 
     // compute_orientation(*mesh);

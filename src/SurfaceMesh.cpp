@@ -29,6 +29,7 @@
 #include <map>
 #include <vector>
 
+#include <libraries/casc/include/CASCFunctions.h>
 #include <libraries/casc/include/CASCTraversals.h>
 #include <libraries/casc/include/stringutil.h>
 #include <libraries/Eigen/Dense>
@@ -542,11 +543,9 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
     (*vertexID).position = Vertex({newPos_e[0], newPos_e[1], newPos_e[2]});
 }
 
-int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> SimplexID)
+int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
-    std::vector<SurfaceMesh::SimplexID<1> > vertices;
-    neighbors_up(mesh, SimplexID, std::back_inserter(vertices));
-    return vertices.size();
+    return mesh.get_cover(vertexID).size();    
 }
 
 tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
@@ -745,7 +744,7 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
     while (!smoothed && nIter < maxIter){
 
         for(auto vertex : mesh.get_level_id<1>()){
-            weightedVertexSmooth(mesh, vertex, 3);
+            weightedVertexSmooth(mesh, vertex, RINGS);
         }
 
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
@@ -846,23 +845,25 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
     // TODO: Check if all polygons are closed (0)
-    
-    double avgLen = 0;
+    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
 
+    // Compute the average edge length
+    double avgLen = 0;
     if (denseWeight > 0){
-        // TODO: check if there are edges?
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
             Vector v1 = *mesh.get_simplex_down(edgeID, name[1]);
             Vector v2 = *mesh.get_simplex_down(edgeID, name[2]);
             avgLen += std::sqrt(v1|v2);
         }
-
         avgLen /= mesh.size<2>();
     }
 
     double sparsenessRatio = 1;
     double flatnessRatio = 1;
+
+    std::vector<SurfaceMesh::SimplexID<1> > toRemove;
+
     for(auto vertexID : mesh.get_level_id<1>()){
         // Sparseness as coarsening criteria
         if(denseWeight > 0){
@@ -878,76 +879,116 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
             }
             sparsenessRatio = std::pow(maxLen/avgLen, denseWeight);
         }
-    
 
         // Curvature as coarsening criteria
         if(flatRate > 0){
             // TODO: how many rings to consider? (0)
-            auto lst = computeLocalStructureTensor(mesh, vertexID, 3);
-
+            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);
             auto eigenvalues = getEigenvalues(lst).eigenvalues();
             // The closer this ratio is to 0 the flatter the local region.
             flatnessRatio = eigenvalues[1]/eigenvalues[2];
         }
 
-        // Delete the vertex and retriangulate the hole
+        // Add vertex to delete list
         if(sparsenessRatio * flatnessRatio < coarseRate){
+            toRemove.push_back(vertexID); 
+        }
+    }
 
+    //std::cout << toRemove.size() << " vertices are marked to be removed." << std::endl;
 
-            std::set<SurfaceMesh::SimplexID<1>> boundaryVerts;
-            neighbors_up(mesh, vertexID, 
-                    std::inserter(boundaryVerts, boundaryVerts.end()));
+    for(auto vertexID : toRemove){
+        auto fdata = **mesh.up(std::move(mesh.up(vertexID))).begin();
 
-            mesh.remove(vertexID);
-            std::vector<SurfaceMesh::SimplexID<1>> sortedVerts;
+        std::set<SurfaceMesh::SimplexID<1> > boundary;
+        casc::neighbors_up(mesh, vertexID, std::inserter(boundary, boundary.end()));
+        std::set<SurfaceMesh::SimplexID<1>> backupBoundary(boundary);
 
-            auto firstID = *boundaryVerts.begin();
-            boundaryVerts.erase(firstID);
-            sortedVerts.push_back(firstID);
-            auto currID = firstID;
+        // Remove the vertex
+        mesh.remove(vertexID);
 
-            int tmpSize = boundaryVerts.size();
+        // Sort vertices into ring order
+        std::vector<SurfaceMesh::SimplexID<1>> sortedVerts;
+        std::set<int> bNames; // boundary names
+        std::vector<SurfaceMesh::SimplexID<2>> edgeList;
 
-            while(tmpSize > 0){
-                std::vector<SurfaceMesh::SimplexID<1>> nbors;
-                neighbors_up(mesh, currID, std::back_inserter(nbors));
-                int prevSize = boundaryVerts.size();
+        auto it = boundary.begin();
+        int firstName = mesh.get_name(*it)[0];
+
+        while(boundary.size() > 0)
+        {
+            std::vector<SurfaceMesh::SimplexID<1>> nbors;
+            auto currID = *it;
+
+            auto n1 = mesh.get_name(currID)[0];
+            bNames.insert(n1);
+
+            bool success = false;
+            std::move(it, std::next(it), std::back_inserter(sortedVerts));
+            boundary.erase(it);
+
+            if(boundary.size() == 0){
+                if(mesh.exists({n1,firstName})){
+                   edgeList.push_back(mesh.get_simplex_up(currID, firstName));
+                   break; // Out of while
+                }
+            }
+            else{
+                // Get neighbors and search for next vertex
+                casc::neighbors_up(mesh, currID, std::back_inserter(nbors));
                 for(auto nbor : nbors){
-                    auto result = boundaryVerts.find(nbor);
-                    if(result != boundaryVerts.end()){
-                        currID = *result;
-                        std::cout << "CurrID: " << currID << std::endl;
-                        sortedVerts.push_back(currID);
-                        boundaryVerts.erase(result);
-                        --tmpSize;
+                    auto result = boundary.find(nbor);
+                    if(result != boundary.end()){
+                        it = result;
+                        edgeList.push_back(mesh.get_simplex_up(*result, n1));
+                        success = true;
                         break; 
                     }
                 }
-
-                if(tmpSize == prevSize){
-                    std::cerr << "ERROR: Something isn't closed." << std::endl;
-                    abort(); // Something bad happened...
-                }
             }
 
-            triangulateHole(mesh, sortedVerts);
+            // The ring isn't really a ring
+            if(!success){
+                std::cerr << "ERROR(coarse): Hole ring is not closed." << std::endl;
+                abort(); // Something bad happened...
+            }
+        }
+
+        triangulateHole(mesh, sortedVerts, fdata);
+
+        // Fix the orientation
+        // TODO: (0) Make orientation automatic
+        orientHoleHelper<std::integral_constant<std::size_t,1>>::apply(mesh, std::move(bNames), backupBoundary.begin(), backupBoundary.end());
+
+        // TODO: COMPUTE THE FACE ORIENTATIONS!.....
+        computeHoleOrientation(mesh, edgeList.begin(), edgeList.end());
+
+        // Smooth vertices around the filled hole
+        for(auto v : backupBoundary){
+            weightedVertexSmooth(mesh, v, RINGS);
         }
     }
+
+    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
 }
 
-void triangulateHole(SurfaceMesh &mesh, std::vector<SurfaceMesh::SimplexID<1>> boundaryVerts){
+void triangulateHole(SurfaceMesh &mesh, 
+        std::vector<SurfaceMesh::SimplexID<1>> &boundary,
+        const Face &fdata){
+    
     // Terminal case
-    if(boundaryVerts.size() == 3){
+    if(boundary.size() == 3){
         // create the face
-        auto a = mesh.get_name(boundaryVerts.pop_back());
-        auto b = mesh.get_name(boundaryVerts.pop_back());
-        auto c = mesh.get_name(boundaryVerts.pop_back());
-        mesh.insert({a,b,c}); 
+        auto a = mesh.get_name(boundary[0])[0];
+        auto b = mesh.get_name(boundary[1])[0];
+        auto c = mesh.get_name(boundary[2])[0];
+        mesh.insert({a,b,c}, fdata);
+        return;
     }
 
     // Construct a sorted vector of pairs... (valence, vertexID)
     std::vector<std::pair<int, SurfaceMesh::SimplexID<1>>> list;
-    for(auto vertexID : boundaryVerts){
+    for(auto vertexID : boundary){
         list.push_back(std::make_pair(getValence(mesh, vertexID), vertexID));
     }
     std::sort(list.begin(), list.end(), [](
@@ -955,4 +996,39 @@ void triangulateHole(SurfaceMesh &mesh, std::vector<SurfaceMesh::SimplexID<1>> b
                 const std::pair<int, SurfaceMesh::SimplexID<1>> &rhs){
             return lhs.first < rhs.first;
         });
+
+    SurfaceMesh::SimplexID<1> v1, v2;
+    v1 = list[0].second;
+
+    // Find v1 and rotate so that it is first for easy splitting later
+    auto v1it =  std::find(boundary.begin(), boundary.end(), v1);
+    std::rotate(boundary.begin(), v1it, boundary.end());
+
+    // Get the next lowest valence vertex
+    for(auto it = ++list.begin(); it != list.end(); ++it){
+        v2 = (*it).second;
+        // Check that it is not already connected to v1
+        if(v2 != boundary[1] && v2 != boundary.back()){
+            break;
+        }
+    }
+    // Insert new edge
+    auto a = mesh.get_name(v1)[0];
+    auto b = mesh.get_name(v2)[0];
+    mesh.insert({a,b});
+
+    auto v2it =  std::find(boundary.begin(), boundary.end(), v2);
+    std::vector<SurfaceMesh::SimplexID<1>> other;
+    other.push_back(v2);
+    std::move(v2it+1, boundary.end(), std::back_inserter(other));
+    boundary.erase(v2it+1, boundary.end());
+    
+    other.push_back(v1);
+   
+    // Recurse to fill sub-holes 
+    triangulateHole(mesh, boundary, fdata);
+    triangulateHole(mesh, other, fdata);
 }
+
+
+

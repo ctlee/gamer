@@ -39,6 +39,9 @@
 #include <utility>
 #include "Vertex.h"
 
+// The number of rings to use to compute local structure tensor
+#define RINGS 2
+
 /**
  * @brief      Properties that Faces should have
  */
@@ -331,7 +334,113 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
-void triangulateHole(SurfaceMesh &mesh, std::vector<SurfaceMesh::SimplexID<1>> boundaryVerts);
+void triangulateHole(SurfaceMesh &mesh, 
+        std::vector<SurfaceMesh::SimplexID<1>> &boundary,
+        const Face &fdata);
+
+template <class K>
+struct orientHoleHelper {};
+
+template <std::size_t k>
+struct orientHoleHelper<std::integral_constant<std::size_t, k>>{
+    template <typename Iterator>
+    static void apply(SurfaceMesh & mesh, 
+            const std::set<int> &&names, 
+            Iterator begin,
+            Iterator end){
+        std::vector<SurfaceMesh::SimplexID<k+1>> next;
+        for(auto curr = begin; curr != end; ++curr){
+            for(auto a : mesh.get_cover(*curr)){
+                auto find = names.find(a);
+                if(find != names.end()){
+                    next.push_back(mesh.get_simplex_up(*curr, a));
+
+                    int orient = 1;
+                    for(auto b : mesh.get_name(*curr)){
+                        if(a > b){
+                            if(a > b)
+                            {
+                                orient *= -1;
+                            }
+                            else{
+                                break;
+                            }
+                        }
+                    }
+                    (*mesh.get_edge_up(*curr,a)).orientation = orient;
+                }
+            }
+        }
+        orientHoleHelper<std::integral_constant<std::size_t,k+1>>::apply(mesh, std::move(names), next.begin(), next.end());
+    } 
+};
+
+template <>
+struct orientHoleHelper<std::integral_constant<std::size_t, SurfaceMesh::topLevel>>{
+    template <typename Iterator>
+    static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){} 
+};
+
+template<typename Iterator>
+bool computeHoleOrientation(SurfaceMesh &mesh, Iterator begin, Iterator end){
+    bool orientable = true;
+    for(auto currIT = begin; currIT != end; ++currIT){
+        SurfaceMesh::SimplexID<2> curr = *currIT;
+        auto w = mesh.get_cover(curr);
+
+        if(w.size() == 1)
+        {
+            //std::cout << curr << ":" << w[0] << " ~ Boundary" << std::endl;
+        }
+        else if(w.size() == 2)
+        {
+            auto& edge0 = *mesh.get_edge_up(curr, w[0]);
+            auto& edge1 = *mesh.get_edge_up(curr, w[1]);
+
+            auto& node0 = *mesh.get_simplex_up(curr, w[0]);
+            auto& node1 = *mesh.get_simplex_up(curr, w[1]);
+
+            if(node0.orientation == 0)
+            {
+                if(node1.orientation == 0)
+                {
+                    node0.orientation = 1;
+                    node1.orientation = -edge1.orientation * edge0.orientation * node0.orientation;
+                }
+                else
+                {
+                    node0.orientation = -edge0.orientation * edge1.orientation * node1.orientation;
+                }
+            }
+            else
+            {
+                if(node1.orientation == 0)
+                {
+                    node1.orientation = -edge1.orientation * edge0.orientation * node0.orientation;
+                }
+                else
+                {
+                    if(edge0.orientation*node0.orientation + edge1.orientation*node1.orientation != 0)
+                    {
+                        orientable = false;
+                        std::cout << "+++++" << std::endl;
+                        std::cout << edge0.orientation << " : " << node0.orientation << std::endl;
+                        std::cout << edge1.orientation << " : " << node1.orientation << std::endl;
+
+                        std::cout << " : "
+                                  << edge0.orientation*node0.orientation + edge1.orientation*node1.orientation
+                                  << std::endl;
+                        std::cout << "-----"
+                                  << std::endl;
+                        std::cout << "Non-Orientable: "
+                                  << edge0.orientation*node0.orientation + edge1.orientation*node1.orientation
+                                  << std::endl;
+                    }
+                }
+            }
+        }
+    }
+}
 
 /**
  * @brief      Compute the eigenvalues of a 3x3 matrix.
