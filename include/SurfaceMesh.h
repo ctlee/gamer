@@ -334,9 +334,66 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
+template <typename InsertIter>
 void triangulateHole(SurfaceMesh &mesh, 
         std::vector<SurfaceMesh::SimplexID<1>> &boundary,
-        const Face &fdata);
+        const Face &fdata,
+        InsertIter iter){
+    // Terminal case
+    if(boundary.size() == 3){
+        // create the face
+        auto a = mesh.get_name(boundary[0])[0];
+        auto b = mesh.get_name(boundary[1])[0];
+        auto c = mesh.get_name(boundary[2])[0];
+        mesh.insert({a,b,c}, fdata);
+        return;
+    }
+
+    // Construct a sorted vector of pairs... (valence, vertexID)
+    std::vector<std::pair<int, SurfaceMesh::SimplexID<1>>> list;
+    for(auto vertexID : boundary){
+        list.push_back(std::make_pair(getValence(mesh, vertexID), vertexID));
+    }
+    std::sort(list.begin(), list.end(), [](
+                const std::pair<int, SurfaceMesh::SimplexID<1>> &lhs, 
+                const std::pair<int, SurfaceMesh::SimplexID<1>> &rhs){
+            return lhs.first < rhs.first;
+        });
+
+    SurfaceMesh::SimplexID<1> v1, v2;
+    v1 = list[0].second;
+
+    // Find v1 and rotate so that it is first for easy splitting later
+    auto v1it =  std::find(boundary.begin(), boundary.end(), v1);
+    std::rotate(boundary.begin(), v1it, boundary.end());
+
+    // Get the next lowest valence vertex
+    for(auto it = ++list.begin(); it != list.end(); ++it){
+        v2 = (*it).second;
+        // Check that it is not already connected to v1
+        if(v2 != boundary[1] && v2 != boundary.back()){
+            break;
+        }
+    }
+    // Insert new edge
+    auto a = mesh.get_name(v1)[0];
+    auto b = mesh.get_name(v2)[0];
+    mesh.insert({a,b});
+    // TODO: (0) Get the simplex from insert.
+    *iter++ = mesh.get_simplex_up({a,b});
+
+    auto v2it =  std::find(boundary.begin(), boundary.end(), v2);
+    std::vector<SurfaceMesh::SimplexID<1>> other;
+    other.push_back(v2);
+    std::move(v2it+1, boundary.end(), std::back_inserter(other));
+    boundary.erase(v2it+1, boundary.end());
+    
+    other.push_back(v1);
+   
+    // Recurse to fill sub-holes 
+    triangulateHole(mesh, boundary, fdata, iter);
+    triangulateHole(mesh, other, fdata, iter);
+}
 
 template <class K>
 struct orientHoleHelper {};
@@ -440,6 +497,7 @@ bool computeHoleOrientation(SurfaceMesh &mesh, Iterator begin, Iterator end){
             }
         }
     }
+    return orientable;
 }
 
 /**
