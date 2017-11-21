@@ -899,6 +899,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
 
     for(auto vertexID : toRemove){
         auto fdata = **mesh.up(std::move(mesh.up(vertexID))).begin();
+        fdata.orientation = 0; // Reset the orientation accordingly
 
         std::set<SurfaceMesh::SimplexID<1> > boundary;
         casc::neighbors_up(mesh, vertexID, std::inserter(boundary, boundary.end()));
@@ -914,13 +915,14 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
 
         auto it = boundary.begin();
         int firstName = mesh.get_name(*it)[0];
+        int n1;
 
         while(boundary.size() > 0)
         {
             std::vector<SurfaceMesh::SimplexID<1>> nbors;
             auto currID = *it;
 
-            auto n1 = mesh.get_name(currID)[0];
+            n1 = mesh.get_name(currID)[0];
             bNames.insert(n1);
 
             bool success = false;
@@ -929,8 +931,8 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
 
             if(boundary.size() == 0){
                 if(mesh.exists({n1,firstName})){
-                   edgeList.push_back(mesh.get_simplex_up(currID, firstName));
-                   break; // Out of while
+                    edgeList.push_back(mesh.get_simplex_up(currID, firstName));
+                    break; // Break out of while loop
                 }
             }
             else{
@@ -939,36 +941,130 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
                 for(auto nbor : nbors){
                     auto result = boundary.find(nbor);
                     if(result != boundary.end()){
-                        it = result;
-                        edgeList.push_back(mesh.get_simplex_up(*result, n1));
-                        success = true;
-                        break; 
+                        // Check that the edge is a boundary
+                        auto tmp = mesh.get_simplex_up(*result, n1);
+                        if(mesh.get_cover(tmp).size() == 1){
+                            // std::cout << "Sorted: " << tmp << std::endl;
+                            it = result;
+                            edgeList.push_back(tmp);
+                            success = true;
+                            break;
+                        }
                     }
                 }
             }
-
             // The ring isn't really a ring
             if(!success){
                 std::cerr << "ERROR(coarse): Hole ring is not closed." << std::endl;
-                abort(); // Something bad happened...
+                //abort(); // Something bad happened...
+                return;
             }
         }
 
         triangulateHole(mesh, sortedVerts, fdata, std::back_inserter(edgeList));
 
-        // Fix the orientation
+        // Set the orientation of each edge
         // TODO: (0) Make orientation automatic
         orientHoleHelper<std::integral_constant<std::size_t,1>>::apply(mesh, std::move(bNames), backupBoundary.begin(), backupBoundary.end());
 
         // TODO: COMPUTE THE FACE ORIENTATIONS!.....
-        computeHoleOrientation(mesh, edgeList.begin(), edgeList.end());
+        if(!computeHoleOrientation(mesh, std::move(edgeList))){
+            std::cerr << "ERROR(coarse): Mesh became non-orientable." << std::endl;
+            return;
+        }
 
         // Smooth vertices around the filled hole
         for(auto v : backupBoundary){
-            weightedVertexSmooth(mesh, v, RINGS);
+            weightedVertexSmooth(mesh, v, RINGS-1);
         }
     }
 
     std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
 }
+
+bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList){
+    std::deque<SurfaceMesh::SimplexID<2> > frontier;
+    std::set<SurfaceMesh::SimplexID<2> > visited;
+    bool orientable = true;
+
+    for(auto outer : edgeList)
+    {
+        if(visited.find(outer) == visited.end()){
+            frontier.push_back(outer);
+
+            while(!frontier.empty()){
+                auto curr = frontier.front();
+
+                if(visited.find(curr) == visited.end())
+                {
+                    visited.insert(curr);
+                    auto w = mesh.get_cover(curr);
+
+                    if(w.size() == 1)
+                    {
+                        //std::cout << curr << ":" << w[0] << " ~ Boundary" << std::endl;
+                    }
+                    else if(w.size() == 2)
+                    {
+                        auto& edge0 = *mesh.get_edge_up(curr, w[0]);
+                        auto& edge1 = *mesh.get_edge_up(curr, w[1]);
+
+                        auto& node0 = *mesh.get_simplex_up(curr, w[0]);
+                        auto& node1 = *mesh.get_simplex_up(curr, w[1]);
+
+                        if(node0.orientation == 0)
+                        {
+                            if(node1.orientation == 0)
+                            {
+                                node0.orientation = 1;
+                                node1.orientation = -edge1.orientation * edge0.orientation * node0.orientation;
+                            }
+                            else
+                            {
+                                node0.orientation = -edge0.orientation * edge1.orientation * node1.orientation;
+                            }
+                        }
+                        else
+                        {
+                            if(node1.orientation == 0)
+                            {
+                                node1.orientation = -edge1.orientation * edge0.orientation * node0.orientation;
+                            }
+                            else
+                            {
+                                if(edge0.orientation*node0.orientation + edge1.orientation*node1.orientation != 0)
+                                {
+                                    orientable = false;
+
+                                    // std::cout << "+++++" << std::endl;
+                                    // std::cout << s0 << " : " << s1 << std::endl;
+                                    // std::cout << edge0.orientation << " : " << node0.orientation << std::endl;
+                                    // std::cout << edge1.orientation << " : " << node1.orientation << std::endl;
+                                    // std::cout << "-----"
+                                    //           << std::endl;
+                                    // std::cout << "Non-Orientable: "
+                                    //           << edge0.orientation*node0.orientation + edge1.orientation*node1.orientation
+                                    //           << std::endl;
+                                }
+                            }
+                        }
+                        std::vector<SurfaceMesh::SimplexID<2> > tmp;
+                        neighbors_up(mesh, curr, std::back_inserter(tmp));
+                        for(auto e : tmp){
+                            if(std::find(edgeList.begin(), edgeList.end(), e) != edgeList.end())
+                                frontier.push_back(e);
+                        }
+                    }
+                    else{
+                        std::cerr << "ERROR(computeHoleOrientation): SurfaceMesh is no longer a surface mesh." << std::endl;
+                        abort();
+                    }
+                }
+                frontier.pop_front();
+            }
+        }
+    }
+    return orientable;
+}
+
 

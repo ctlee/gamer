@@ -103,12 +103,14 @@ int  main(int argc, char *argv[])
     }
     std::cout << "Done reading" << std::endl;
 
-    std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
+    //std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
     compute_orientation(*mesh);
     centeralize(*mesh);
-    smoothMesh(*mesh, 15, 150, 5, true);
+    //smoothMesh(*mesh, 15, 150, 5, true);
 
-    coarse(*mesh, 0.05, 1, 0);
+    coarse(*mesh, 0.015, 1, 0);
+
+    smoothMesh(*mesh, 15, 150, 5, true);
 
     // writeDOT("test.dot", *mesh);
 
