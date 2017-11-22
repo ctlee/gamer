@@ -109,18 +109,18 @@ public:
     bool        smooth(unsigned int, unsigned int,
                        unsigned int, bool);     // DONE CTL
     void        normalSmooth();                 // DONE CTL
-    char        coarse(float, float, float, float);
+    char        coarse(float, float, float, float); // DONE CTL
     void        assignActiveSites(ATOM *, unsigned int, unsigned int *);
-    ATOM        getCenterRadius(); // this function probably does not belong as an interface function.
+    ATOM        getCenterRadius();              // DONE CTL 
     void        translate(float dx, float dy, float dz);    // DONE CTL
     void        scale(float scale_x, float scale_y, float scale_z); // DONE CTL 
-    void        scale(float scale); // DONE CTL
-    void        centeralize();
+    void        scale(float scale);             // DONE CTL
+    void        centeralize();                  // DONE CTL 
     void        splitMultipleConnectedSurfaces();
     void        removeUnconnectedPatches(int minimal_number);
     void        removeUnconnectedVertices();
-    void        deleteVertices();
-    void        deleteFaces();
+    void        deleteVertices();               // DONE CTL
+    void        deleteFaces();                  // DONE CTL
 
 public:
 

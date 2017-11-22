@@ -98,7 +98,7 @@ int  main(int argc, char *argv[])
     }
     auto mesh = readOFF(argv[1]);
     if(mesh == nullptr){
-        std::cout << "Something bad happened...";
+        std::cout << "Something bad happened..." << std::endl;
         exit(1);
     }
     std::cout << "Done reading" << std::endl;
@@ -106,11 +106,12 @@ int  main(int argc, char *argv[])
     //std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
     compute_orientation(*mesh);
     centeralize(*mesh);
+    //smoothMesh(*mesh, 45, 90, 5, true);
+
+    //coarse(*mesh, 0.016, 1, 0);
+    coarse(*mesh, 2.5, 0, 10);
+
     //smoothMesh(*mesh, 15, 150, 5, true);
-
-    coarse(*mesh, 0.015, 1, 0);
-
-    smoothMesh(*mesh, 15, 150, 5, true);
 
     // writeDOT("test.dot", *mesh);
 

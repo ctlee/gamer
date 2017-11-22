@@ -35,6 +35,7 @@
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
 
+#include <libraries/casc/include/typetraits.h>
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 
@@ -642,67 +643,74 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
     {
         // Get the vertex connected by edge
         auto edgeName = mesh.get_name(edge);
-        auto shared   = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+        Vertex shared   = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
 
-        // Get the vertices connected to adjacent edge
+        // Get the vertices connected to adjacent edge by face
         auto up   = mesh.get_cover(edge);
-        auto prev = *mesh.get_simplex_up({up[0]});
-        auto next = *mesh.get_simplex_up({up[1]});
 
-        auto pS = prev - shared;
-        pS /= std::sqrt(pS|pS);
-        auto nS = next - shared;
+        Vertex prev = *mesh.get_simplex_up({up[0]});
+        Vertex next = *mesh.get_simplex_up({up[1]});
+
+        Vector pS = prev - shared;
+        pS  /= std::sqrt(pS|pS);
+        Vector nS = next - shared;
         nS /= std::sqrt(nS|nS);
-        auto bisector = (pS + nS)/2;
+
+        // Bisector of the 'diamond'
+        Vector bisector = (pS + nS)/2;
         bisector /= std::sqrt(bisector|bisector);
 
         // Get a reference vecter to shared which lies on the plane of interest.
-        auto disp = center - shared;
+        Vector disp = center - shared;
         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
+        // Normal of tangent plane
         //auto tanNorm = getNormalFromTangent(pS^nS);
-        auto tanNorm = cross(pS, nS);
+        Vector tanNorm = cross(pS, nS);
 
         // Get the perpendicular plane made up of plane normal of bisector
         //auto perpPlane = tanNorm^bisector;
         //auto perpNorm = getNormalFromTangent(perpPlane);
         auto perpNorm = cross(tanNorm, bisector);
         perpNorm /= std::sqrt(perpNorm|perpNorm);
+
         auto perpProj = perpNorm*perpNorm; // tensor product
 
         // Compute perpendicular component
         Vector perp;
         Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
         Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
-        perp_e = perpProj_e*disp_e;
+        perp_e = perpProj_e*disp_e; // matrix (3x3) * vector = vector
 
         auto alpha = (pS|nS)+1; // keep the dot product positive
         sumWeights += alpha;
         newPos += alpha*(center.position - perp);
     }
     newPos /= sumWeights;
+
     /**
-     * Scale by PCA
+     * Project to move onto LST eigenvector space and scale by eigenvalues.
+     * 
      * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
      * \vec{e_k})\vec{e_k}
      */
-
     auto lst = computeLocalStructureTensor(mesh, vertexID, rings);
-
     auto eigen_result = getEigenvalues(lst);
-    // std::cout << "The eigenvalues of A are:\n" << eigen_result.eigenvalues()
+    // std::cout << "The eigenvalues of LST are:\n" << eigen_result.eigenvalues()
     // << std::endl;
-    // std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+    // std::cout << "Here's a matrix whose columns are eigenvectors of LST \n"
     //      << "corresponding to these eigenvalues:\n"
     //      << eigen_result.eigenvectors() << std::endl;
 
-    newPos -= center.position;
+    newPos -= center.position;  // Vector of old position to new position
     Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
 
     // dot product followed by elementwise-division EQN 4.
-    auto w = ((eigen_result.eigenvectors().transpose()*newPos_e).array()
-              / (eigen_result.eigenvalues().array()+1)).matrix();
-    newPos_e = eigen_result.eigenvectors()*w; // matrix product
+    auto w = (
+                (eigen_result.eigenvectors().transpose()*newPos_e).array()
+                / (eigen_result.eigenvalues().array()+1)
+             ).matrix(); // vector 3x1
+    newPos_e = eigen_result.eigenvectors()*w; // matrix 3x3 * vector = vector
     center.position += newPos;
 }
 
@@ -742,7 +750,6 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
     // while not smoothed and not at maxiter perform one round of
     // weightedVertexSmooth + edgeflipping    
     while (!smoothed && nIter < maxIter){
-
         for(auto vertex : mesh.get_level_id<1>()){
             weightedVertexSmooth(mesh, vertex, RINGS);
         }
@@ -777,8 +784,6 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
         smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
         ++nIter;
     }
-
-    // moveVerticesSurfaceOnly == weightedVertexSmooth
     return smoothed;
 }
 
@@ -852,8 +857,8 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     if (denseWeight > 0){
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
-            Vector v1 = *mesh.get_simplex_down(edgeID, name[1]);
-            Vector v2 = *mesh.get_simplex_down(edgeID, name[2]);
+            Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
+            Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
             avgLen += std::sqrt(v1|v2);
         }
         avgLen /= mesh.size<2>();
@@ -872,8 +877,8 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
             double maxLen = 0;
             for(auto edgeID : edges){
                 auto name =  mesh.get_name(edgeID);
-                Vector v1 = *mesh.get_simplex_down(edgeID, name[1]);
-                Vector v2 = *mesh.get_simplex_down(edgeID, name[2]);
+                Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
+                Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
                 double tmpLen = std::sqrt(v1|v2);
                 if(tmpLen > maxLen) maxLen = tmpLen;
             }
@@ -883,19 +888,23 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         // Curvature as coarsening criteria
         if(flatRate > 0){
             // TODO: how many rings to consider? (0)
-            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);
+            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);  
             auto eigenvalues = getEigenvalues(lst).eigenvalues();
+            std::cout << "E[0]: " << eigenvalues[0] << std::endl;
+            std::cout << "E[1]: " << eigenvalues[1] << std::endl;
+            std::cout << "E[2]: " << eigenvalues[2] << std::endl;
             // The closer this ratio is to 0 the flatter the local region.
-            flatnessRatio = eigenvalues[1]/eigenvalues[2];
+            flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
         }
 
+        //std::cout << "Coarse value: " << sparsenessRatio*flatnessRatio << std::endl;
         // Add vertex to delete list
         if(sparsenessRatio * flatnessRatio < coarseRate){
             toRemove.push_back(vertexID); 
         }
     }
 
-    //std::cout << toRemove.size() << " vertices are marked to be removed." << std::endl;
+    std::cout << toRemove.size() << " vertices are marked to be removed." << std::endl;
 
     for(auto vertexID : toRemove){
         auto fdata = **mesh.up(std::move(mesh.up(vertexID))).begin();
@@ -956,8 +965,8 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
             // The ring isn't really a ring
             if(!success){
                 std::cerr << "ERROR(coarse): Hole ring is not closed." << std::endl;
-                //abort(); // Something bad happened...
-                return;
+                abort(); // Something bad happened...
+                //return;
             }
         }
 
@@ -1056,7 +1065,9 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
                         }
                     }
                     else{
-                        std::cerr << "ERROR(computeHoleOrientation): SurfaceMesh is no longer a surface mesh." << std::endl;
+                        std::cerr << "ERROR(computeHoleOrientation): Found an edge"
+                                  << " connected to " << w.size() << " faces. The SurfaceMesh " 
+                                  << "is no longer a surface mesh." << std::endl;
                         abort();
                     }
                 }
