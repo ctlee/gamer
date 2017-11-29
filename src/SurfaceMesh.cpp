@@ -695,9 +695,10 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
      * \vec{e_k})\vec{e_k}
      */
     auto lst = computeLocalStructureTensor(mesh, vertexID, rings);
+
     auto eigen_result = getEigenvalues(lst);
-    // std::cout << "The eigenvalues of LST are:\n" << eigen_result.eigenvalues()
-    // << std::endl;
+    // std::cout << "Eigenvalues(LST): " 
+    //      << eigen_result.eigenvalues().transpose() << std::endl;
     // std::cout << "Here's a matrix whose columns are eigenvectors of LST \n"
     //      << "corresponding to these eigenvalues:\n"
     //      << eigen_result.eigenvectors() << std::endl;
@@ -705,7 +706,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
     newPos -= center.position;  // Vector of old position to new position
     Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
 
-    // dot product followed by elementwise-division EQN 4.
+    // dot product followed by elementwise-division EQN 4. w is a scale factor.
     auto w = (
                 (eigen_result.eigenvectors().transpose()*newPos_e).array()
                 / (eigen_result.eigenvalues().array()+1)
@@ -726,8 +727,17 @@ tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
     for (auto nid : nbors)
     {
         auto norm = getNormal(mesh, nid);           // Get Vector normal
+        norm /= std::sqrt(norm|norm);               // normalize
         lst += norm*norm;                           // tensor product
     }
+
+    // Print the LST nicely
+    // std::cout << "LST:\n" << std::endl;
+    // for(int i = 0; i < 3; ++i){
+    //     for(int j = 0; j < 3; ++j)
+    //         std::cout << lst.get(i,j) << " ";
+    //     std::cout << "\n";
+    // }
     return lst;
 }
 
@@ -890,9 +900,9 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
             // TODO: how many rings to consider? (0)
             auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);  
             auto eigenvalues = getEigenvalues(lst).eigenvalues();
-            std::cout << "E[0]: " << eigenvalues[0] << std::endl;
-            std::cout << "E[1]: " << eigenvalues[1] << std::endl;
-            std::cout << "E[2]: " << eigenvalues[2] << std::endl;
+            // std::cout << "E[0]: " << eigenvalues[0] << std::endl;
+            // std::cout << "E[1]: " << eigenvalues[1] << std::endl;
+            // std::cout << "E[2]: " << eigenvalues[2] << std::endl;
             // The closer this ratio is to 0 the flatter the local region.
             flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
         }
@@ -953,7 +963,6 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
                         // Check that the edge is a boundary
                         auto tmp = mesh.get_simplex_up(*result, n1);
                         if(mesh.get_cover(tmp).size() == 1){
-                            // std::cout << "Sorted: " << tmp << std::endl;
                             it = result;
                             edgeList.push_back(tmp);
                             success = true;
@@ -976,15 +985,154 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         // TODO: (0) Make orientation automatic
         orientHoleHelper<std::integral_constant<std::size_t,1>>::apply(mesh, std::move(bNames), backupBoundary.begin(), backupBoundary.end());
 
-        // TODO: COMPUTE THE FACE ORIENTATIONS!.....
+        // Compute the face orientations
         if(!computeHoleOrientation(mesh, std::move(edgeList))){
             std::cerr << "ERROR(coarse): Mesh became non-orientable." << std::endl;
-            return;
+            abort();
+            //return;
         }
 
         // Smooth vertices around the filled hole
         for(auto v : backupBoundary){
-            weightedVertexSmooth(mesh, v, RINGS-1);
+            weightedVertexSmooth(mesh, v, RINGS);
+        }
+    }
+
+    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
+}
+
+
+void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
+    // TODO: Check if all polygons are closed (0)
+    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
+
+    // Compute the average edge length
+    double avgLen = 0;
+    if (denseWeight > 0){
+        for (auto edgeID : mesh.get_level_id<2>()){
+            auto name =  mesh.get_name(edgeID);
+            Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
+            Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
+            avgLen += std::sqrt(v1|v2);
+        }
+        avgLen /= mesh.size<2>();
+    }
+
+    double sparsenessRatio = 1;
+    double flatnessRatio = 1;
+    auto range = mesh.get_level_id<1>();
+    const std::vector<SurfaceMesh::SimplexID<1> > Vertices(range.begin(), range.end());
+
+    for(auto vertexID : Vertices) {
+        // Sparseness as coarsening criteria
+        if(denseWeight > 0){
+            // Get max length of edges.
+            auto edges = mesh.up(vertexID);
+            double maxLen = 0;
+            for(auto edgeID : edges){
+                auto name =  mesh.get_name(edgeID);
+                Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
+                Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
+                double tmpLen = std::sqrt(v1|v2);
+                if(tmpLen > maxLen) maxLen = tmpLen;
+            }
+            sparsenessRatio = std::pow(maxLen/avgLen, denseWeight);
+        }
+
+        // Curvature as coarsening criteria
+        if(flatRate > 0){
+            // TODO: how many rings to consider? (0)
+            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);  
+            auto eigenvalues = getEigenvalues(lst).eigenvalues();
+            // std::cout << "E[0]: " << eigenvalues[0] << std::endl;
+            // std::cout << "E[1]: " << eigenvalues[1] << std::endl;
+            // std::cout << "E[2]: " << eigenvalues[2] << std::endl;
+            // The closer this ratio is to 0 the flatter the local region.
+            flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
+        }
+
+        std::cout << "Coarse value: " << sparsenessRatio*flatnessRatio << std::endl;
+        // Add vertex to delete list
+        if(sparsenessRatio * flatnessRatio < coarseRate){
+            auto fdata = **mesh.up(std::move(mesh.up(vertexID))).begin();
+            fdata.orientation = 0; // Reset the orientation accordingly
+
+            std::set<SurfaceMesh::SimplexID<1> > boundary;
+            casc::neighbors_up(mesh, vertexID, std::inserter(boundary, boundary.end()));
+            std::set<SurfaceMesh::SimplexID<1>> backupBoundary(boundary);
+
+            // Remove the vertex
+            mesh.remove(vertexID);
+
+            // Sort vertices into ring order
+            std::vector<SurfaceMesh::SimplexID<1>> sortedVerts;
+            std::set<int> bNames; // boundary names
+            std::vector<SurfaceMesh::SimplexID<2>> edgeList;
+
+            auto it = boundary.begin();
+            int firstName = mesh.get_name(*it)[0];
+            int n1;
+
+            while(boundary.size() > 0)
+            {
+                std::vector<SurfaceMesh::SimplexID<1>> nbors;
+                auto currID = *it;
+
+                n1 = mesh.get_name(currID)[0];
+                bNames.insert(n1);
+
+                bool success = false;
+                std::move(it, std::next(it), std::back_inserter(sortedVerts));
+                boundary.erase(it);
+
+                if(boundary.size() == 0){
+                    if(mesh.exists({n1,firstName})){
+                        edgeList.push_back(mesh.get_simplex_up(currID, firstName));
+                        break; // Break out of while loop
+                    }
+                }
+                else{
+                    // Get neighbors and search for next vertex
+                    casc::neighbors_up(mesh, currID, std::back_inserter(nbors));
+                    for(auto nbor : nbors){
+                        auto result = boundary.find(nbor);
+                        if(result != boundary.end()){
+                            // Check that the edge is a boundary
+                            auto tmp = mesh.get_simplex_up(*result, n1);
+                            if(mesh.get_cover(tmp).size() == 1){
+                                // std::cout << "Sorted: " << tmp << std::endl;
+                                it = result;
+                                edgeList.push_back(tmp);
+                                success = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                // The ring isn't really a ring
+                if(!success){
+                    std::cerr << "ERROR(coarse): Hole ring is not closed." << std::endl;
+                    abort(); // Something bad happened...
+                    //return;
+                }
+            }
+
+            triangulateHole(mesh, sortedVerts, fdata, std::back_inserter(edgeList));
+
+            // Set the orientation of each edge
+            // TODO: (0) Make orientation automatic
+            orientHoleHelper<std::integral_constant<std::size_t,1>>::apply(mesh, std::move(bNames), backupBoundary.begin(), backupBoundary.end());
+
+            // TODO: COMPUTE THE FACE ORIENTATIONS!.....
+            if(!computeHoleOrientation(mesh, std::move(edgeList))){
+                std::cerr << "ERROR(coarse): Mesh became non-orientable." << std::endl;
+                return;
+            }
+
+            // Smooth vertices around the filled hole
+            for(auto v : backupBoundary){
+                weightedVertexSmooth(mesh, v, RINGS);
+            }
         }
     }
 

@@ -23,6 +23,88 @@
 #include <libraries/casc/include/decimate.h>
 #include <libraries/casc/include/typetraits.h>
 
+void CardanosMethod(double A[3][3]){
+    double c0, c1, c2;
+    double x1, x2, x3;
+    double a, b, Q;
+    double theta, p;
+    double B[6];
+
+    c0 = A[0][0] * A[1][1] * A[2][2] + 2 * A[0][1] * A[0][2] * A[1][2] - A[0][0] * A[1][2] * A[1][2]
+         - A[1][1] * A[0][2] * A[0][2] - A[2][2] * A[0][1] * A[0][1];
+    c1 = A[0][0] * A[1][1] - A[0][1] * A[0][1] + A[0][0] * A[2][2] -
+         A[0][2] * A[0][2] + A[1][1] * A[2][2] - A[1][2] * A[1][2];
+    c2 = A[0][0] + A[1][1] + A[2][2];
+
+    a = (3.0 * c1 - c2 * c2) / 3.0;
+    b = (-2.0 * c2 * c2 * c2 + 9.0 * c1 * c2 - 27.0 * c0) / 27.0;
+    Q = b * b / 4.0 + a * a * a / 27.0;
+
+    theta = atan2(sqrt(-Q), -0.5 * b);
+    p     = sqrt(0.25 * b * b - Q);
+
+    x1 = c2 / 3.0 + 2.0 * pow(p, 1.0 / 3.0) * cos(theta / 3.0);
+    x2 = c2 / 3.0 - pow(p, 1.0 / 3.0) * (cos(theta / 3.0) + sqrt(3.0) * sin(theta / 3.0));
+    x3 = c2 / 3.0 - pow(p, 1.0 / 3.0) * (cos(theta / 3.0) - sqrt(3.0) * sin(theta / 3.0));
+
+
+    double tx, ty, tz;
+
+    // TODO: use a vector to represent these... and call SORT!
+    tx = std::max(x1, std::max(x2, x3));
+
+    if (tx == x1)
+    {
+        if (x2 >= x3)
+        {
+            ty = x2;
+            tz = x3;
+        }
+        else
+        {
+            ty = x3;
+            tz = x2;
+        }
+    }
+    else if (tx == x2)
+    {
+        if (x1 >= x3)
+        {
+            ty = x1;
+            tz = x3;
+        }
+        else
+        {
+            ty = x3;
+            tz = x1;
+        }
+    }
+    else // if (tx == x3)
+    {
+        if (x1 >= x2)
+        {
+            ty = x1;
+            tz = x2;
+        }
+        else
+        {
+            ty = x2;
+            tz = x1;
+        }
+    }
+    double evx, evy, evz;
+
+    x1             = tx;
+    x2             = ty;
+    x3             = tz;
+    evx = tx;
+    evy = ty;
+    evz = tz;
+
+    std::cout << "Old Eigenvalues: " << evx << " " << evy << " " << evz << std::endl;
+}
+
+
 template <typename T, std::size_t k>
 std::ostream& operator<<(std::ostream& out, const std::array<T,k>& A)
 {
@@ -103,29 +185,20 @@ int  main(int argc, char *argv[])
     }
     std::cout << "Done reading" << std::endl;
 
-    //std::cout << "Sizes: " << mesh->size<1>() << " " << mesh->size<2>() << " " << mesh->size<3>() << std::endl;
     compute_orientation(*mesh);
-    centeralize(*mesh);
-    //smoothMesh(*mesh, 45, 90, 5, true);
 
-    //coarse(*mesh, 0.016, 1, 0);
-    coarse(*mesh, 2.5, 0, 10);
+    double volume = getVolume(*mesh);
+    std::cout << "Volume: " << volume << std::endl;
 
-    //smoothMesh(*mesh, 15, 150, 5, true);
-
-    // writeDOT("test.dot", *mesh);
-
-    // print(*mesh);
-
-    // auto s = mesh->get_simplex_up({3,4});
-    // decimate(*mesh, s, Callback<SurfaceMesh>());
+    //coarseIT(*mesh, 0.0160, 1, 0);
+    coarseIT(*mesh, 1, 0, 10);
     writeOFF("test.off", *mesh);
 
+    // auto oldmesh = SurfaceMeshOld::readOFF(argv[1]);
+    // oldmesh->coarse(0.016,1,0,-1);
 
     // compute_orientation(*mesh);
-    // double volume = getVolume(*mesh);
    
-    // std::cout << "Volume: " << volume << std::endl;
 
     // auto it = mesh->get_level_id<1>().begin();
     // auto nid = *it;

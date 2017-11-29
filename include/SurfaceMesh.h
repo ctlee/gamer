@@ -40,7 +40,7 @@
 #include "Vertex.h"
 
 // The number of rings to use to compute local structure tensor
-#define RINGS 2 
+#define RINGS 2
 
 /**
  * @brief      Properties that Faces should have
@@ -333,6 +333,7 @@ tensor<double,3,2> computeLocalStructureTensor(
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
+void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
 template <typename InsertIter>
 void triangulateHole(SurfaceMesh &mesh, 
@@ -465,6 +466,14 @@ Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 
 void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
 
 /**
+ * @brief      Traditional barycenter smooth. 
+ *
+ * @param      mesh      SurfaceMesh to manipulate.
+ * @param[in]  vertexID  SimplexID of the vertex to move.
+ */
+void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+/**
  * @brief      Perform an edge flip operation
  *
  * @param      mesh    SurfaceMesh of interest.
@@ -579,14 +588,6 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  *             otherwise.
  */
 bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
-
-/**
- * @brief      Traditional barycenter smooth. 
- *
- * @param      mesh      SurfaceMesh to manipulate.
- * @param[in]  vertexID  SimplexID of the vertex to move.
- */
-void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
 void normalSmooth(SurfaceMesh &mesh);
 void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);

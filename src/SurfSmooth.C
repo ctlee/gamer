@@ -453,12 +453,12 @@ char SurfaceMeshOld::coarse(float coarse_rate,
     for (n = 0; n < num_vertices; n++)
     {
         // Status report
-        if ((((n + 1) % 888) == 0) || ((n + 1) == num_vertices))
-        {
-            printf("%2.2f%% done (%08d)          \r", 100.0 * (n + 1) /
-                   (float)num_vertices, n + 1);
-            fflush(stdout);
-        }
+        // if ((((n + 1) % 888) == 0) || ((n + 1) == num_vertices))
+        // {
+        //     printf("%2.2f%% done (%08d)          \r", 100.0 * (n + 1) /
+        //            (float)num_vertices, n + 1);
+        //     fflush(stdout);
+        // }
 
         // If the vertex have been flagged to not be removed
         if (!vertex[n].sel)
@@ -569,6 +569,7 @@ char SurfaceMeshOld::coarse(float coarse_rate,
                 }
             }
 
+            //std::cout << ratio1*ratio2 << std::endl;
             // Compare the two coarseness criterias against the given coarse_rate
             delete_vertex = ratio1 * ratio2 < coarse_rate;
 
@@ -723,6 +724,8 @@ char SurfaceMeshOld::coarse(float coarse_rate,
                     }
                 }
 
+                //std::cout << neighbor_number << std::endl;
+
                 /* Smooth the neighbors */
                 for (m = 0; m < neighbor_number; m++)
                 {
@@ -781,7 +784,9 @@ char SurfaceMeshOld::coarse(float coarse_rate,
                         }
                         else
                         {
-                            nx -= x;
+                            std::cout << eigen_value.x << " " << eigen_value.y << " " << eigen_value.z << std::endl;
+                            //std::cout << eigen_vect.x1 << " " << eigen_vect.y1 << " " << eigen_vect.z1 << std::endl;
+                            nx -= x; 
                             ny -= y;
                             nz -= z;
                             w1  = (nx * eigen_vect.x1 + ny * eigen_vect.y1 + nz * eigen_vect.z1) /
@@ -1495,6 +1500,8 @@ EIGENVECT GetEigenVector(SurfaceMeshOld *surfmesh,
                     normal = GetNormals(surfmesh, m);
                     angle  = normal0.x * normal.x + normal0.y * normal.y + normal0.z * normal.z;
 
+                    std::cout << "normal: " << normal.x << " " << normal.y << " " << normal.z << std::endl;
+
                     if (angle < 0)
                     {
                         angle = -angle;
@@ -1524,6 +1531,12 @@ EIGENVECT GetEigenVector(SurfaceMeshOld *surfmesh,
     A[2][0] = A[0][2];
     A[2][1] = A[1][2];
 
+    std::cout << "LSTOLD:\n";
+    for(int i = 0; i < 3; ++i){
+        for(int j = 0; j < 3; ++j)
+            std::cout << A[i][j] << " ";
+        std::cout << "\n";
+    }
 
     // A is the "Local Structure Tensor"
     // Now compute the eigenvalues using Cardano's Method (del Ferro and Tartaglia should also be noted).
