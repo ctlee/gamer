@@ -114,6 +114,8 @@ using TetMesh = casc::simplicial_complex<tetmesh_detail::complex_traits>;
 /// Forward class declaration
 class tetgenio;
 
+
+// TODO: Change this to use a more flexible vector of surface meshes...
 template <size_t n>
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::array<std::unique_ptr<SurfaceMesh>, n> &surfmeshes, 
@@ -261,6 +263,13 @@ std::unique_ptr<TetMesh> makeTetMesh(
         }
         ++nRegions;
     } // endif for surfmesh :surfmeshes
+
+    // Add oundary marker on each node
+    // TODO: Why? aren't the markers set on the generated mesh? (from old notes)
+    in.pointmarkerlist = new int[in.numberofpoints];
+    for (int i = 0; i < in.numberofpoints; ++i){
+        in.pointmakerlist[j] = 1;
+    }
    
     // Casting away const is an evil thing to do, however, tetgen has not yet
     // conformed... 
@@ -268,13 +277,15 @@ std::unique_ptr<TetMesh> makeTetMesh(
     in.save_nodes(plc);
     in.save_poly(plc);
 
-
+    // Call TetGen
     tetrahedralize(tetgen_params, &in, &out, NULL);
 
     auto result = const_cast<char*>("result");
     out.save_nodes(result);
     out.save_elements(result);
     out.save_faces(result);
+
+    tetmesh.swap(tetgenToTetMesh(out));
 
     return tetmesh;
 }
