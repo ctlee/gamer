@@ -77,19 +77,19 @@ struct Global
     /// Is the SurfaceMesh closed or not.
     bool  closed;
     /// Domain marker to be used when tetrahedralizing.
-    int   _marker;
+    int   marker;
     /// Volume constraint of the tetrahedralized domain.
-    float volume_constraint;
+    float volumeConstraint;
     /// flag that determines if the volume constraint is used.
-    bool  use_volume_constraint;
+    bool  useVolumeConstraint;
     /// Minimum coordinate of vertices
     float min[3];
     /// Max coordinate of vertices
     float max[3];
     /// Average edge length
     float avglen;
-    /// Flag that determines if the mesh has a hole or not
-    bool  hole;
+    /// Flag that determines if the mesh represents a hole or not
+    bool  ishole;
 };
 
 /**

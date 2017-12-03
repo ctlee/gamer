@@ -58,21 +58,23 @@ list(APPEND SOURCES
     "src/GemMesh.C"
     "src/GenerateSphereMesh.C"
     "src/MarchingCube.C"
-    "src/OFF_SurfaceMesh.cpp"
-    "src/OBJ_SurfaceMesh.cpp"
     "src/PDB2Mesh.C"
     "src/PDB2Volume.C"
     "src/ReadLattice.C"
     "src/ReadWriteMesh.C"
     "src/RegionGrowing.C"
-    "src/SurfaceMesh.cpp"
     "src/SurfaceMeshOld.C"
     "src/SurfExtract.C"
     "src/SurfRefine.C"
     "src/SurfSmooth.C"
     "src/Triangulate.C"
-    "src/Vertex.cpp"
     "src/WrapSurfaceMesh.C"
+
+    "src/OFF_SurfaceMesh.cpp"
+    "src/OBJ_SurfaceMesh.cpp"
+    "src/SurfaceMesh.cpp"
+    "src/Vertex.cpp"
+    "src/TetMesh.cpp"
 )
 
 add_library(gamershared SHARED ${SOURCES})

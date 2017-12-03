@@ -867,9 +867,9 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     if (denseWeight > 0){
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
-            Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
-            Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
-            avgLen += std::sqrt(v1|v2);
+            auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+                     - *mesh.get_simplex_down(edgeID, name[1]);
+            avgLen += std::sqrt(v|v);
         }
         avgLen /= mesh.size<2>();
     }
@@ -887,9 +887,9 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
             double maxLen = 0;
             for(auto edgeID : edges){
                 auto name =  mesh.get_name(edgeID);
-                Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
-                Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
-                double tmpLen = std::sqrt(v1|v2);
+                auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+                         - *mesh.get_simplex_down(edgeID, name[1]);
+                double tmpLen = std::sqrt(v|v);
                 if(tmpLen > maxLen) maxLen = tmpLen;
             }
             sparsenessRatio = std::pow(maxLen/avgLen, denseWeight);
@@ -1011,9 +1011,9 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
     if (denseWeight > 0){
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
-            Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
-            Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
-            avgLen += std::sqrt(v1|v2);
+            auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+                     - *mesh.get_simplex_down(edgeID, name[1]);
+            avgLen += std::sqrt(v|v);
         }
         avgLen /= mesh.size<2>();
     }
@@ -1031,9 +1031,9 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
             double maxLen = 0;
             for(auto edgeID : edges){
                 auto name =  mesh.get_name(edgeID);
-                Vector v1 = *mesh.get_simplex_down(edgeID, name[0]);
-                Vector v2 = *mesh.get_simplex_down(edgeID, name[1]);
-                double tmpLen = std::sqrt(v1|v2);
+                auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+                         - *mesh.get_simplex_down(edgeID, name[1]);
+                double tmpLen = std::sqrt(v|v);
                 if(tmpLen > maxLen) maxLen = tmpLen;
             }
             sparsenessRatio = std::pow(maxLen/avgLen, denseWeight);
@@ -1051,7 +1051,7 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
             flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
         }
 
-        std::cout << "Coarse value: " << sparsenessRatio*flatnessRatio << std::endl;
+        //std::cout << "Coarse value: " << sparsenessRatio*flatnessRatio << std::endl;
         // Add vertex to delete list
         if(sparsenessRatio * flatnessRatio < coarseRate){
             auto fdata = **mesh.up(std::move(mesh.up(vertexID))).begin();
@@ -1072,7 +1072,6 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
             auto it = boundary.begin();
             int firstName = mesh.get_name(*it)[0];
             int n1;
-
             while(boundary.size() > 0)
             {
                 std::vector<SurfaceMesh::SimplexID<1>> nbors;
@@ -1216,7 +1215,7 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
                         std::cerr << "ERROR(computeHoleOrientation): Found an edge"
                                   << " connected to " << w.size() << " faces. The SurfaceMesh " 
                                   << "is no longer a surface mesh." << std::endl;
-                        abort();
+                        return false;
                     }
                 }
                 frontier.pop_front();

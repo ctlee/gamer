@@ -569,7 +569,7 @@ char SurfaceMeshOld::coarse(float coarse_rate,
                 }
             }
 
-            //std::cout << ratio1*ratio2 << std::endl;
+            std::cout << "CoarseRateOld: " << ratio1*ratio2 << std::endl;
             // Compare the two coarseness criterias against the given coarse_rate
             delete_vertex = ratio1 * ratio2 < coarse_rate;
 
@@ -784,7 +784,7 @@ char SurfaceMeshOld::coarse(float coarse_rate,
                         }
                         else
                         {
-                            std::cout << eigen_value.x << " " << eigen_value.y << " " << eigen_value.z << std::endl;
+                            // std::cout << eigen_value.x << " " << eigen_value.y << " " << eigen_value.z << std::endl;
                             //std::cout << eigen_vect.x1 << " " << eigen_vect.y1 << " " << eigen_vect.z1 << std::endl;
                             nx -= x; 
                             ny -= y;
@@ -1500,7 +1500,7 @@ EIGENVECT GetEigenVector(SurfaceMeshOld *surfmesh,
                     normal = GetNormals(surfmesh, m);
                     angle  = normal0.x * normal.x + normal0.y * normal.y + normal0.z * normal.z;
 
-                    std::cout << "normal: " << normal.x << " " << normal.y << " " << normal.z << std::endl;
+                    // std::cout << "normal: " << normal.x << " " << normal.y << " " << normal.z << std::endl;
 
                     if (angle < 0)
                     {
@@ -1531,12 +1531,12 @@ EIGENVECT GetEigenVector(SurfaceMeshOld *surfmesh,
     A[2][0] = A[0][2];
     A[2][1] = A[1][2];
 
-    std::cout << "LSTOLD:\n";
-    for(int i = 0; i < 3; ++i){
-        for(int j = 0; j < 3; ++j)
-            std::cout << A[i][j] << " ";
-        std::cout << "\n";
-    }
+    // std::cout << "LSTOLD:\n";
+    // for(int i = 0; i < 3; ++i){
+    //     for(int j = 0; j < 3; ++j)
+    //         std::cout << A[i][j] << " ";
+    //     std::cout << "\n";
+    // }
 
     // A is the "Local Structure Tensor"
     // Now compute the eigenvalues using Cardano's Method (del Ferro and Tartaglia should also be noted).

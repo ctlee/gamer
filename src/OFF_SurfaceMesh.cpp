@@ -143,7 +143,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         # If nOFF, each vertex has Ndim components.
         # If 4nOFF, each vertex has Ndim+1 components.
     */
-    for(int i=0; i < numVertices; i++){
+    for(int i = 0; i < numVertices; i++){
         getline(fin, line);
         //std::cout << line << std::endl;
         arr = split(line);
@@ -167,7 +167,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
 
         TODO: This should parse the number of vertices in each face (0)
     */
-    for(int i=0; i < numFaces; i++){
+    for(int i = 0; i < numFaces; i++){
         getline(fin, line);
         arr = split(line);
         if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
@@ -215,13 +215,6 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
         exit(1); 
     }
 
-    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
-    typename SurfaceMesh::KeyType cnt = 0;
-    for(const auto& x : mesh.get_level_id<1>())
-    {
-        sigma[mesh.get_name(x)[0]] = cnt++;
-    }
-
     fout << "OFF" << std::endl;
 
     int numVertices = mesh.size<1>();
@@ -231,10 +224,16 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
             << numFaces << " "
             << numEdges << "\n"; 
 
+    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+    typename SurfaceMesh::KeyType cnt = 0;
+
     fout.precision(10); 
     // Get the vertex data directly 
     // TODO: (3) Will this always print in order?
-    for(const auto& vertex : mesh.get_level<1>()){
+    for(const auto vertexID : mesh.get_level_id<1>()){
+        sigma[mesh.get_name(vertexID)[0]] = cnt++;
+        auto vertex = *vertexID;
+
         fout    << vertex[0] << " "
                 << vertex[1] << " " 
                 << vertex[2] << " " 
