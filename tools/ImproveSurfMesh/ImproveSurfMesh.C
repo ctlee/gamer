@@ -30,7 +30,7 @@
  */
 
 
-#include "gamer.h"
+#include "gamerOld.h"
 #include <iostream>
 
 // Constants and default values

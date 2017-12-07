@@ -1,18 +1,9 @@
-/**
- *  @file       gamer.h
- *  @ingroup    global_gamer
- *  @brief      The foundation header for GAMER.
- *  @authors    Michael Holst
- *  @note       This is the main header file for all of GAMER.
- *              This is the only file that needs to be included in order to 
- *              access the entire library.
- *  @version    $Id: gamer.h,v 1.12 2010/08/12 05:43:09 fetk Exp $
- *  
- *  @attention
- *  @verbatim
- *
- * GAMER = < Geometry-preserving Adaptive MeshER >
- * Copyright (C) 1994-- Michael Holst and Zeyun Yu
+/*
+ * ***************************************************************************
+ * This file is part of the GAMer software.
+ * Copyright (C) 2016-2017
+ * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+ *    and Michael Holst
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,20 +18,37 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- * 
- *  @endverbatim
+ *
+ * ***************************************************************************
  */
 
+#pragma once
 
-#ifndef _GAMER_H_
-#define _GAMER_H_
+//#include <libraries/triangle/triangle.h>
 
-#include "gamer_base.h"
-#include <libraries/triangle/triangle.h>
-#include <libraries/tetgen/tetgen.h>
-#include "biom.h"
-#include "SurfaceMeshOld.h"
-#include "PDB2Volume.h"
+//#define TRILIBRARY
 
-#endif /* _GAMER_H_ */
 
+/** @brief Isovalue used in the Marching Cube method */
+#define IsoValue          2.5
+
+/** @brief Blurring blobyness used in conversion from PDB/PQR to 3D volumes */
+#define BLOBBYNESS        -0.2f
+
+/** @brief Discretization rate of 3D volumes */
+#define DIM_SCALE         1.99
+
+/** @brief Coarsening Rate in surface post-processing */
+#define CoarsenRate       0.1666
+
+/** @brief The minimal volumes (in voxels) of islands to be removed */
+#define MIN_VOLUME        333333
+
+/** @brief The size of the bounding sphere (= object size X the following rate) */
+#define SphereRatio       40
+#define MaxVal            999999
+#define MaxAtom           10
+
+// Other definitions and data structures
+/** @brief Other definition */
+#define _LITTLE_ENDIAN   1

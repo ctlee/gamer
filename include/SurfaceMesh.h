@@ -598,3 +598,6 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  * @param      mesh  The mesh
  */
 std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
+
+std::unique_ptr<SurfaceMesh> sphere(int order);
+

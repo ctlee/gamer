@@ -1225,4 +1225,30 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
     return orientable;
 }
 
+std::unique_ptr<SurfaceMesh> sphere(int order){
+    std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+
+    mesh->insert({0}, Vertex(0,0,-1));
+    mesh->insert({1}, Vertex(-1,-1,0));
+    mesh->insert({2}, Vertex(-1,1,0));
+    mesh->insert({3}, Vertex(1,1,0));
+    mesh->insert({4}, Vertex(1,-1,0));
+    mesh->insert({5}, Vertex(0,0,1));
+
+    mesh->insert({0,1,2});
+    mesh->insert({0,2,3});
+    mesh->insert({0,3,4});
+    mesh->insert({0,1,4});
+    mesh->insert({5,1,2});
+    mesh->insert({5,2,3});
+    mesh->insert({5,3,4});
+    mesh->insert({5,1,4});
+    for (int i = 0; i < order; ++i){
+        mesh = refineMesh(*mesh);
+
+    }
+
+    compute_orientation(*mesh);
+    return mesh;
+}
 

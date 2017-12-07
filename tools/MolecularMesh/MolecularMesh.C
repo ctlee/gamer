@@ -29,7 +29,7 @@
  * ***************************************************************************
  */
 
-#include "gamer.h"
+#include "gamerOld.h"
 #include <iostream>
 
 // parameters for mesh smoothing, refinement, and coarsening
