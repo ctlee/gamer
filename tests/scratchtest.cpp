@@ -39,34 +39,44 @@ int  main(int argc, char *argv[])
     std::cout << "Done reading" << std::endl;
 
     compute_orientation(*mesh);
-    coarseIT(*mesh, 0.016, 1, 0);
-    coarseIT(*mesh, 2.5, 0, 10);
+    if(getVolume(*mesh) < 0){
+        for(auto &face : mesh->get_level<3>())
+            face.orientation *= -1;
+    }
 
-    smoothMesh(*mesh, 15, 165, 5, true);
+    // coarseIT(*mesh, 0.016, 1, 0);
+    // coarseIT(*mesh, 2.5, 0, 10);
 
+    // smoothMesh(*mesh, 15, 165, 5, true);
+    writeOFF("tmp.off", *mesh);
 
-    auto &global = *mesh->get_simplex_up();
-    global.closed = true;
-    global.ishole = true;
+    // auto &global = *mesh->get_simplex_up();
+    // global.closed = true;
+    // global.ishole = true;
 
-    auto box = sphere(5);    
+    // auto box = sphere(5);    
 
-    auto &global2 = *box->get_simplex_up();
-    global2.closed = true;
-    global2.ishole = false;
+    // auto &global2 = *box->get_simplex_up();
+    // global2.closed = true;
+    // global2.ishole = false;
 
-    Vector center;
-    double radius;
-    std::tie(center, radius) = getCenterRadius(*mesh);
+    // Vector center;
+    // double radius;
+    // std::tie(center, radius) = getCenterRadius(*mesh);
 
-    scale(*box, radius*10);
-    writeOFF("test.off", *box);
+    // scale(*box, radius*10);
+    // writeOFF("box.off", *box);
 
-    std::vector<std::unique_ptr<SurfaceMesh>> meshes;
-    meshes.push_back(std::move(mesh));
-    meshes.push_back(std::move(box));
+    // std::vector<std::unique_ptr<SurfaceMesh>> meshes;
 
-    auto temesh = makeTetMesh(meshes, "npq1.33VAAYY");
+    // std::cout << "Volume of mesh: " << getVolume(*mesh) << std::endl;
+    // std::cout << "Volume of box: " << getVolume(*box) << std::endl;
+
+    // meshes.push_back(std::move(mesh));
+    // meshes.push_back(std::move(box));
+
+    // std::cout << "\n\n\nBEGINNING TETRAHEDRALIZATION..." << std::endl;
+    // auto temesh = makeTetMesh(meshes, "pq1.4zYAV");
 
     // writeOFF("test.off", *mesh);
     // auto oldmesh = SurfaceMeshOld::readOFF(argv[1]);

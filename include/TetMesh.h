@@ -129,7 +129,7 @@ std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio);
 
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes, 
-        char *tetgen_params);
+        std::string tetgen_params);
 
 
 

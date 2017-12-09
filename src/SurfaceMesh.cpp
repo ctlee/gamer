@@ -213,6 +213,7 @@ double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 
 /**
  * http://research.microsoft.com/en-us/um/people/chazhang/publications/icip01_ChaZhang.pdf
+ * http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf
  */
 double getVolume(const SurfaceMesh &mesh)
 {
@@ -227,14 +228,14 @@ double getVolume(const SurfaceMesh &mesh)
 
         Vector norm;
         double tmp;
-        if ((*faceID).orientation == 1)
+        if ((*faceID).orientation == -1)
         {
             // a->b->c
             norm = cross(b, c);
             tmp  = dot(a, norm);
 
         }
-        else if ((*faceID).orientation == -1)
+        else if ((*faceID).orientation == 1)
         {
             // c->b->a
             norm = cross(b, a);
@@ -244,22 +245,22 @@ double getVolume(const SurfaceMesh &mesh)
         {
             orientError = true;
         }
+
         // Far less efficient but cooler way...
         // norm = getNormalFromTangent(getTangent(mesh, faceID));
         // auto wedge = a^b^c;
         // tmp = std::sqrt(wedge|wedge);
-
         // auto sgn = dot((a+b+c)/3, norm);
         // if(sgn <= 0) {
         //     tmp = -1*tmp;
         // }
-        volume += tmp/6.0;
+        volume += tmp;
     }
     if(orientError){
         std::cerr << "ERROR getVolume(): Orientation undefined for one or more " 
                   << "simplices. Did you call compute_orientation()?" << std::endl;
     }
-    return std::abs(volume);
+    return volume/6;
 }
 
 void translate(SurfaceMesh &mesh, Vector v)
@@ -598,11 +599,11 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
     auto b = *mesh.get_simplex_up({name[1]});
     auto c = *mesh.get_simplex_up({name[2]});
 
-    if ((*faceID).orientation == 1)
+    if ((*faceID).orientation == -1)
     {
         norm = cross(c-b, a-b);
     }
-    else if ((*faceID).orientation == -1)
+    else if ((*faceID).orientation == 1)
     {
         norm = cross(a-b, c-b);
     }
@@ -1249,6 +1250,10 @@ std::unique_ptr<SurfaceMesh> sphere(int order){
     }
 
     compute_orientation(*mesh);
+    if(getVolume(*mesh) < 0){
+        for(auto &data : mesh->get_level<3>())
+            data.orientation *= -1;
+    }
     return mesh;
 }
 

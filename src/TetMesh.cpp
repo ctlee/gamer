@@ -37,7 +37,7 @@
 
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes, 
-        char *tetgen_params){
+        std::string tetgen_params){
 
     // Create new tetmesh object
     std::unique_ptr<TetMesh> tetmesh(new TetMesh);
@@ -64,7 +64,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
             tetmesh.reset();
             return tetmesh;
         }
-        metadata.ishole ? ++nRegions : ++nHoles;
+        metadata.ishole ? ++nHoles : ++nRegions;
 
         nVertices += nverts;
         nFaces += nfaces;
@@ -76,6 +76,13 @@ std::unique_ptr<TetMesh> makeTetMesh(
         tetmesh.reset();
         return tetmesh;
     }
+
+
+    std::cout << "Number of vertices: " << nVertices << std::endl;
+    std::cout << "Number of Faces: " << nFaces << std::endl;
+    std::cout << "Number of Regions: " << nRegions << std::endl;
+    std::cout << "Number of Holes: " << nHoles << std::endl;
+
 
     tetgenio in, out;
 
@@ -99,7 +106,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
     }
 
     // Reset counters
-    nVertices = nFaces = nRegions = nHoles = 0;
+    nFaces = nRegions = nHoles = 0;
     typename TetMesh::KeyType cnt = 0;
 
     for (auto &surfmesh : surfmeshes){
@@ -127,6 +134,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
             f->holelist             = (REAL *)NULL;
             f->numberofholes        = 0;
             f->numberofpolygons     = 1;
+
             f->polygonlist          = new tetgenio::polygon[f->numberofpolygons];
             p                       = &f->polygonlist[0];
             p->numberofvertices     = 3;
@@ -152,12 +160,24 @@ std::unique_ptr<TetMesh> makeTetMesh(
         Vertex c = *surfmesh->get_simplex_up({fname[2]});
 
         Vector d = a-b;
-        double weight = std::sqrt(d|d); 
+        double weight = std::sqrt(d|d);
+
+        // flip normal and scale by weight
         normal *= weight;
+        std::cout << "Midpoint: " << (a+b+c)/2 << std::endl;
+        Vector midpoint = (a+b+c)/3 - normal;
 
-        Vector midpoint = (a+b+c)/3 * weight;
-
-        if(!metadata.ishole){
+        if(metadata.ishole){
+            std::cout << "Hole midpoint: " << midpoint << std::endl;
+            auto idx            = nHoles*3;
+            in.holelist[idx]    = midpoint[0];
+            in.holelist[idx+1]  = midpoint[1];
+            in.holelist[idx+2]  = midpoint[2];
+            ++nHoles;
+        }
+        else
+        {
+            std::cout << "Region midpoint: " << midpoint << std::endl;
             auto idx                = nRegions*5;
             in.regionlist[idx]      = midpoint[0];
             in.regionlist[idx+1]    = midpoint[1];
@@ -171,15 +191,8 @@ std::unique_ptr<TetMesh> makeTetMesh(
             else{
                 in.regionlist[idx+4]    = -1; 
             }
+            ++nRegions; 
         }
-        else{
-            auto idx            = nHoles*3;
-            in.holelist[idx]    = midpoint[0];
-            in.holelist[idx+1]  = midpoint[1];
-            in.holelist[idx+2]  = midpoint[2];
-            ++nHoles;
-        }
-        ++nRegions;
     } // endif for surfmesh :surfmeshes
 
     // Add oundary marker on each node
@@ -196,7 +209,9 @@ std::unique_ptr<TetMesh> makeTetMesh(
     in.save_poly(plc);
 
     // Call TetGen
-    tetrahedralize(tetgen_params, &in, &out, NULL);
+
+
+    tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
 
     auto result = const_cast<char*>("result");
     out.save_nodes(result);
@@ -225,54 +240,57 @@ std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio){
    
     metadata.higher_order = higher_order;
 
-
     std::set<int> vertices;
 
-    // Copy over tetrahedron data
-    for (int i = 0; i < tetio.numberoftetrahedra; ++i){
-        // Set material
-        int material = 0;
-        if(tetio.numberoftetrahedronattributes > 0) 
-            material = (int) tetio.tetrahedronattributelist[i * tetio.numberoftetrahedronattributes];
+    std::cout << "Number of tetrahedron attributes: " << tetio.numberoftetrahedronattributes
+        << std::endl;
 
-        // Get vertex id's
-        int *ptr = &tetio.tetrahedronlist[i*tetio.numberofcorners];
+    // // Copy over tetrahedron data
+    // for (int i = 0; i < tetio.numberoftetrahedra; ++i){
+    //     // Set material
+    //     int material = 0;
 
-        vertices.insert({ptr[0], ptr[1], ptr[2], ptr[3]});
+    //     if(tetio.numberoftetrahedronattributes > 0) 
+    //         material = (int) tetio.tetrahedronattributelist[i * tetio.numberoftetrahedronattributes];
 
-        // TODO: (0) Do we need to set the orientation?
-        mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]}, 
-                tetmesh::Cell(casc::Orientable{0}, tetmesh::CellProperties{0, 0, material}));
-    }
+    //     // Get vertex id's
+    //     int *ptr = &tetio.tetrahedronlist[i*tetio.numberofcorners];
 
-    // Copy over vertex data
-    for (auto i : vertices){
-        double *ptr = &tetio.pointlist[i*3];
-        mesh->insert({i}, 
-                Vertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false));
-    }
+    //     vertices.insert({ptr[0], ptr[1], ptr[2], ptr[3]});
 
-    // Go over faces and copy over marker information
-    for (int i = 0; i < tetio.numberoftrifaces; ++i){
-    	int *ptr = &tetio.trifacelist[i*3];
-        auto &face = *mesh->get_simplex_up({ptr[0], ptr[1], ptr[2]});
+    //     // TODO: (0) Do we need to set the orientation?
+    //     mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]}, 
+    //             tetmesh::Cell(casc::Orientable{0}, tetmesh::CellProperties{0, 0, material}));
+    // }
 
-        face.marker = tetio.trifacemarkerlist[i];
-    }
+    // // Copy over vertex data
+    // for (auto i : vertices){
+    //     double *ptr = &tetio.pointlist[i*3];
+    //     mesh->insert({i}, 
+    //             Vertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false));
+    // }
 
-    for (int i = 0; i < tetio.numberofedges; ++i){
-        int *ptr = &tetio.edgelist[i*2];
+    // // Go over faces and copy over marker information
+    // for (int i = 0; i < tetio.numberoftrifaces; ++i){
+    // 	int *ptr = &tetio.trifacelist[i*3];
+    //     auto &face = *mesh->get_simplex_up({ptr[0], ptr[1], ptr[2]});
 
-        auto edgeID = mesh->get_simplex_up({ptr[0], ptr[1]});
-        auto &edata = *edgeID;
+    //     face.marker = tetio.trifacemarkerlist[i];
+    // }
 
-        edata.marker = tetio.edgemarkerlist[i];
+    // for (int i = 0; i < tetio.numberofedges; ++i){
+    //     int *ptr = &tetio.edgelist[i*2];
 
-        if (higher_order){
-            double *pos = &tetio.pointlist[tetio.o2edgelist[i]*3];
-            edata.position = Vector({pos[0], pos[1], pos[2]});                
-        }
-    }
+    //     auto edgeID = mesh->get_simplex_up({ptr[0], ptr[1]});
+    //     auto &edata = *edgeID;
+
+    //     edata.marker = tetio.edgemarkerlist[i];
+
+    //     if (higher_order){
+    //         double *pos = &tetio.pointlist[tetio.o2edgelist[i]*3];
+    //         edata.position = Vector({pos[0], pos[1], pos[2]});                
+    //     }
+    // }
 
     return mesh;
 }

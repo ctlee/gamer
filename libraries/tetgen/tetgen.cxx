@@ -31179,7 +31179,7 @@ void tetrahedralize(tetgenbehavior *b, tetgenio *in, tetgenio *out,
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 
 #else // with TETLIBRARY
 
