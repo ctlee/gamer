@@ -30,9 +30,9 @@
 #include <set>
 #include <vector>
 
-#include <libraries/casc/include/CASCFunctions.h>
-
+#include <libraries/casc/casc>
 //#include <libraries/casc/include/typetraits.h>
+
 #include "TetMesh.h"
 
 std::unique_ptr<TetMesh> makeTetMesh(
@@ -77,12 +77,10 @@ std::unique_ptr<TetMesh> makeTetMesh(
         return tetmesh;
     }
 
-
-    std::cout << "Number of vertices: " << nVertices << std::endl;
-    std::cout << "Number of Faces: " << nFaces << std::endl;
-    std::cout << "Number of Regions: " << nRegions << std::endl;
-    std::cout << "Number of Holes: " << nHoles << std::endl;
-
+    // std::cout << "Number of vertices: " << nVertices << std::endl;
+    // std::cout << "Number of Faces: " << nFaces << std::endl;
+    // std::cout << "Number of Regions: " << nRegions << std::endl;
+    // std::cout << "Number of Holes: " << nHoles << std::endl;
 
     tetgenio in, out;
 
@@ -164,26 +162,23 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
         // flip normal and scale by weight
         normal *= weight;
-        std::cout << "Midpoint: " << (a+b+c)/2 << std::endl;
-        Vector midpoint = (a+b+c)/3 - normal;
+        Vector regionPoint = (a+b+c)/3 - normal;
 
         if(metadata.ishole){
-            std::cout << "Hole midpoint: " << midpoint << std::endl;
             auto idx            = nHoles*3;
-            in.holelist[idx]    = midpoint[0];
-            in.holelist[idx+1]  = midpoint[1];
-            in.holelist[idx+2]  = midpoint[2];
+            in.holelist[idx]    = regionPoint[0];
+            in.holelist[idx+1]  = regionPoint[1];
+            in.holelist[idx+2]  = regionPoint[2];
             ++nHoles;
         }
         else
         {
-            std::cout << "Region midpoint: " << midpoint << std::endl;
             auto idx                = nRegions*5;
-            in.regionlist[idx]      = midpoint[0];
-            in.regionlist[idx+1]    = midpoint[1];
-            in.regionlist[idx+2]    = midpoint[2];
-
+            in.regionlist[idx]      = regionPoint[0];
+            in.regionlist[idx+1]    = regionPoint[1];
+            in.regionlist[idx+2]    = regionPoint[2];
             in.regionlist[idx+3]    = metadata.marker;
+            // std::cout << "Region marker: " << metadata.marker << std::endl;
 
             if(metadata.useVolumeConstraint){
                 in.regionlist[idx+4]    = metadata.volumeConstraint; 
@@ -209,8 +204,6 @@ std::unique_ptr<TetMesh> makeTetMesh(
     in.save_poly(plc);
 
     // Call TetGen
-
-
     tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
 
     auto result = const_cast<char*>("result");
@@ -218,9 +211,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
     out.save_elements(result);
     out.save_faces(result);
 
-    std::cout << "WE HAVE GAINED BACK CONTROL\n";
     tetmesh = tetgenToTetMesh(out);
-
     return tetmesh;
 }
 
@@ -242,55 +233,73 @@ std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio){
 
     std::set<int> vertices;
 
-    std::cout << "Number of tetrahedron attributes: " << tetio.numberoftetrahedronattributes
-        << std::endl;
+    // std::cout << "Number of tetrahedron attributes: " << tetio.numberoftetrahedronattributes
+    //     << std::endl;
 
-    // // Copy over tetrahedron data
-    // for (int i = 0; i < tetio.numberoftetrahedra; ++i){
-    //     // Set material
-    //     int material = 0;
+    // Copy over tetrahedron data
+    // std::cout << "Copying over tetrahedron data..." << std::endl;
+    for (int i = 0; i < tetio.numberoftetrahedra; ++i){
+        // Set marker
+        int marker = 0;
 
-    //     if(tetio.numberoftetrahedronattributes > 0) 
-    //         material = (int) tetio.tetrahedronattributelist[i * tetio.numberoftetrahedronattributes];
+        if(tetio.numberoftetrahedronattributes > 0) 
+            marker = (int) tetio.tetrahedronattributelist[i * tetio.numberoftetrahedronattributes];
 
-    //     // Get vertex id's
-    //     int *ptr = &tetio.tetrahedronlist[i*tetio.numberofcorners];
+        // Get vertex id's
+        int *ptr = &tetio.tetrahedronlist[i*tetio.numberofcorners];
 
-    //     vertices.insert({ptr[0], ptr[1], ptr[2], ptr[3]});
+        vertices.insert({ptr[0], ptr[1], ptr[2], ptr[3]});
 
-    //     // TODO: (0) Do we need to set the orientation?
-    //     mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]}, 
-    //             tetmesh::Cell(casc::Orientable{0}, tetmesh::CellProperties{0, 0, material}));
-    // }
+        // TODO: (0) Do we need to set the orientation?
+        // std::cout << casc::to_string(std::array<int,4>({ptr[0], ptr[1], ptr[2], ptr[3]})) << std::endl;
+        mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]}, 
+                tetmesh::Cell(casc::Orientable{0}, tetmesh::CellProperties{marker, 0, 0}));
+    }
 
-    // // Copy over vertex data
-    // for (auto i : vertices){
-    //     double *ptr = &tetio.pointlist[i*3];
-    //     mesh->insert({i}, 
-    //             Vertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false));
-    // }
+    // std::cout << "Number of vertices: " << mesh->size<1>() << std::endl;
+    // std::cout << "Number of edges: " << mesh->size<2>() << std::endl;
+    // std::cout << "Number of faces: " << mesh->size<3>() << std::endl;
+    // std::cout << "Number of tetrahedra: " << mesh->size<4>() << std::endl;
 
-    // // Go over faces and copy over marker information
-    // for (int i = 0; i < tetio.numberoftrifaces; ++i){
-    // 	int *ptr = &tetio.trifacelist[i*3];
-    //     auto &face = *mesh->get_simplex_up({ptr[0], ptr[1], ptr[2]});
+    // Copy over vertex data
+    // std::cout << "Copying over vertex data..." << std::endl;
+    for (auto i : vertices){
+        double *ptr = &tetio.pointlist[i*3];
+        auto vertex = mesh->get_simplex_up({i});
+        if (vertex != nullptr){
+            auto &vdata = *vertex;
+            // std::cout << casc::to_string(std::array<double,3>({ptr[0],ptr[1],ptr[2]})) << std::endl;
+            vdata = Vertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
+        }
+    }
 
-    //     face.marker = tetio.trifacemarkerlist[i];
-    // }
+    // Go over faces and copy over marker information
+    // std::cout << "Copying over face data..." << std::endl;
+    for (int i = 0; i < tetio.numberoftrifaces; ++i){
+    	int *ptr = &tetio.trifacelist[i*3];
+        auto face = mesh->get_simplex_up({ptr[0], ptr[1], ptr[2]});
+        if (face != nullptr){
+            auto &fdata = *face;
+            fdata.marker = tetio.trifacemarkerlist[i];
+        }
+    }
 
-    // for (int i = 0; i < tetio.numberofedges; ++i){
-    //     int *ptr = &tetio.edgelist[i*2];
+    // Copy over edge markers
+    // std::cout << "Copying over edge data..."  << std::endl;
+    for (int i = 0; i < tetio.numberofedges; ++i){
+        int *ptr = &tetio.edgelist[i*2];
 
-    //     auto edgeID = mesh->get_simplex_up({ptr[0], ptr[1]});
-    //     auto &edata = *edgeID;
+        auto edgeID = mesh->get_simplex_up({ptr[0], ptr[1]});
+        if(edgeID != nullptr){
+            auto &edata = *edgeID;
+            edata.marker = tetio.edgemarkerlist[i];
 
-    //     edata.marker = tetio.edgemarkerlist[i];
-
-    //     if (higher_order){
-    //         double *pos = &tetio.pointlist[tetio.o2edgelist[i]*3];
-    //         edata.position = Vector({pos[0], pos[1], pos[2]});                
-    //     }
-    // }
-
+            if (higher_order){
+                double *pos = &tetio.pointlist[tetio.o2edgelist[i]*3];
+                edata.position = Vector({pos[0], pos[1], pos[2]});                
+            }
+        }
+    }
+    compute_orientation(*mesh);
     return mesh;
 }

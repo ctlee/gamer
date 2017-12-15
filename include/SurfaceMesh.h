@@ -25,11 +25,7 @@
 #pragma once
 
 #include <iostream>
-#include <libraries/casc/include/SimplicialComplex.h>
-#include <libraries/casc/include/CASCTraversals.h>
-#include <libraries/casc/include/util.h>
-#include <libraries/casc/include/Orientable.h>
-#include <libraries/casc/include/stringutil.h>
+#include <libraries/casc/casc>
 
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
@@ -600,4 +596,5 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
 
 std::unique_ptr<SurfaceMesh> sphere(int order);
+std::unique_ptr<SurfaceMesh> cube(int order);
 

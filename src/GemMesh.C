@@ -493,7 +493,7 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
     }
 
     // Store the actual number of boundary faces
-//    boundary->numFaces() = boundary_face;
+    // boundary->numFaces() = boundary_face;
 
     // Generate facetype information
     face_type = new int[tetio.numberoftetrahedra * 4];

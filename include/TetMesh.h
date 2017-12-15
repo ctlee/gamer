@@ -35,13 +35,7 @@
 #define TETLIBRARY
 #include <libraries/tetgen/tetgen.h>
 
-
-
-#include <libraries/casc/include/SimplicialComplex.h>
-#include <libraries/casc/include/CASCTraversals.h>
-#include <libraries/casc/include/util.h>
-#include <libraries/casc/include/Orientable.h>
-#include <libraries/casc/include/stringutil.h>
+#include <libraries/casc/casc>
 
 #include "Vertex.h"
 #include "SurfaceMesh.h"
@@ -77,7 +71,7 @@ struct Face : FaceProperties
 
 struct CellProperties
 {
-    int id;
+    int marker;
     int grpID;
     int material;
 };

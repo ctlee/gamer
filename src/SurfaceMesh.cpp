@@ -1244,9 +1244,51 @@ std::unique_ptr<SurfaceMesh> sphere(int order){
     mesh->insert({5,2,3});
     mesh->insert({5,3,4});
     mesh->insert({5,1,4});
-    for (int i = 0; i < order; ++i){
+    for (int i = 1; i < order; ++i){
         mesh = refineMesh(*mesh);
+    }
 
+    compute_orientation(*mesh);
+    if(getVolume(*mesh) < 0){
+        for(auto &data : mesh->get_level<3>())
+            data.orientation *= -1;
+    }
+    return mesh;
+}
+
+std::unique_ptr<SurfaceMesh> cube(int order){
+    std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+
+    mesh->insert({0}, Vertex(-1,-1,-1));
+    mesh->insert({1}, Vertex(-1,1,-1));
+    mesh->insert({2}, Vertex(1,1,-1));
+    mesh->insert({3}, Vertex(1,-1,-1));
+
+    mesh->insert({4}, Vertex(-1,-1,1));
+    mesh->insert({5}, Vertex(-1,1,1));
+    mesh->insert({6}, Vertex(1,1,1));
+    mesh->insert({7}, Vertex(1,-1,1));
+
+    mesh->insert({0,1,5});
+    mesh->insert({0,4,5});
+
+    mesh->insert({0,3,4});
+    mesh->insert({3,4,7});
+
+    mesh->insert({2,3,7});
+    mesh->insert({2,6,7});
+
+    mesh->insert({1,6,2});
+    mesh->insert({1,5,6});
+
+    mesh->insert({4,5,6});
+    mesh->insert({4,6,7});
+
+    mesh->insert({0,1,3});
+    mesh->insert({1,2,3});
+
+    for (int i = 1; i < order; ++i){
+        mesh = refineMesh(*mesh);
     }
 
     compute_orientation(*mesh);
