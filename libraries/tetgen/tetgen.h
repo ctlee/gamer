@@ -327,29 +327,29 @@ public:
 
   // Input & output routines.
   bool load_node_call(FILE* infile, int markers, int uvflag, char*);
-  bool load_node(char*);
-  bool load_edge(char*);
-  bool load_face(char*);
-  bool load_tet(char*);
-  bool load_vol(char*);
-  bool load_var(char*);
-  bool load_mtr(char*);
-  bool load_pbc(char*);
-  bool load_poly(char*);
-  bool load_off(char*);
-  bool load_ply(char*);
-  bool load_stl(char*);
-  bool load_vtk(char*);
-  bool load_medit(char*, int);
-  bool load_plc(char*, int);
-  bool load_tetmesh(char*, int);
-  void save_nodes(char*);
-  void save_elements(char*);
-  void save_faces(char*);
-  void save_edges(char*);
-  void save_neighbors(char*);
-  void save_poly(char*);
-  void save_faces2smesh(char*);
+  bool load_node(const char*);
+  bool load_edge(const char*);
+  bool load_face(const char*);
+  bool load_tet(const char*);
+  bool load_vol(const char*);
+  bool load_var(const char*);
+  bool load_mtr(const char*);
+  bool load_pbc(const char*);
+  bool load_poly(const char*);
+  bool load_off(const char*);
+  bool load_ply(const char*);
+  bool load_stl(const char*);
+  bool load_vtk(const char*);
+  bool load_medit(const char*, int);
+  bool load_plc(const char*, int);
+  bool load_tetmesh(const char*, int);
+  void save_nodes(const char*);
+  void save_elements(const char*);
+  void save_faces(const char*);
+  void save_edges(const char*);
+  void save_neighbors(const char*);
+  void save_poly(const char*);
+  void save_faces2smesh(const char*);
 
   // Read line and parse string functions.
   char *readline(char* string, FILE* infile, int *linenumber);

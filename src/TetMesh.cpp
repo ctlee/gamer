@@ -25,10 +25,13 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
-#include <iomanip>
 #include <map>
 #include <set>
 #include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <ostream>
 
 #include <libraries/casc/casc>
 //#include <libraries/casc/include/typetraits.h>
@@ -77,10 +80,10 @@ std::unique_ptr<TetMesh> makeTetMesh(
         return tetmesh;
     }
 
-    // std::cout << "Number of vertices: " << nVertices << std::endl;
-    // std::cout << "Number of Faces: " << nFaces << std::endl;
-    // std::cout << "Number of Regions: " << nRegions << std::endl;
-    // std::cout << "Number of Holes: " << nHoles << std::endl;
+    std::cout << "Number of vertices: " << nVertices << std::endl;
+    std::cout << "Number of Faces: " << nFaces << std::endl;
+    std::cout << "Number of Regions: " << nRegions << std::endl;
+    std::cout << "Number of Holes: " << nHoles << std::endl;
 
     tetgenio in, out;
 
@@ -211,8 +214,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
     out.save_elements(result);
     out.save_faces(result);
 
-    tetmesh = tetgenToTetMesh(out);
-    return tetmesh;
+    return tetgenToTetMesh(out);
 }
 
 std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio){
@@ -302,4 +304,15 @@ std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio){
     }
     compute_orientation(*mesh);
     return mesh;
+}
+
+void writeVTK(const std::string& filename, const TetMesh &mesh){
+    std::ofstream fout(filename);
+    if(!fout.is_open())
+    {
+        std::cerr   << "File '" << filename 
+                    << "' could not be writen to." << std::endl;
+        exit(1); 
+    }
+
 }
