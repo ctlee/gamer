@@ -125,10 +125,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes, 
         std::string tetgen_params);
 
-
-
-
-
+void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
 void writeMCSF(const std::string &filename, const TetMesh &mesh);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);

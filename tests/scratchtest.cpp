@@ -90,14 +90,19 @@ int  main(int argc, char *argv[])
     std::cout << "Volume of mesh: " << getVolume(*mesh) << std::endl;
     std::cout << "Volume of box: " << getVolume(*box) << std::endl;
 
-    writeOFF("boxa.off",*mesh);
-    writeOFF("boxb.off",*box);
-
     meshes.push_back(std::move(mesh));
     meshes.push_back(std::move(box));
 
     std::cout << "\n\n\nBEGINNING TETRAHEDRALIZATION..." << std::endl;
     auto tetmesh = makeTetMesh(meshes, "pq1.4zYAQ");
+
+    writeVTK("output.vtk", *tetmesh);
+
+    std::cout << "General TetMesh statistics: " << std::endl;
+    std::cout << "# Vertices: " << tetmesh->size<1>() << std::endl;
+    std::cout << "# Edges: " << tetmesh->size<2>() << std::endl;
+    std::cout << "# Faces: " << tetmesh->size<3>() << std::endl;
+    std::cout << "# Cells: " << tetmesh->size<4>() << std::endl;
 
     int cnt = 0;
     int cnt2 = 0;

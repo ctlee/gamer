@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <ostream>
 
@@ -315,4 +316,67 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
         exit(1); 
     }
 
+    fout << "# vtk DataFile Version 2.0\n"
+         << "Unstructured Grid\n"
+         << "ASCII\n"  // BINARY
+         << "DATASET UNSTRUCTURED_GRID\n";
+
+    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+    typename SurfaceMesh::KeyType cnt = 0;
+
+    // Output vertices
+    fout << "POINTS " << mesh.size<1>() << " double" << std::endl;
+    for (auto vertexID : mesh.get_level_id<1>()){
+        sigma[mesh.get_name(vertexID)[0]] = cnt++;
+        auto vertex = *vertexID;
+        fout    << std::setprecision(17) << vertex[0] << " "
+                << vertex[1] << " " 
+                << vertex[2] << "\n";
+    }
+    fout << "\n";
+
+    bool orientationError = false;
+
+    fout << "CELLS " << mesh.size<4>() << " " << mesh.size<4>()*(4+1) << "\n";
+    for (auto cellID : mesh.get_level_id<4>()){
+        auto w = mesh.get_name(cellID);
+        auto orientation = (*cellID).orientation;
+
+        if (orientation == 1){
+            fout << "4 " << std::setw(4) << sigma[w[1]] << " " 
+                         << std::setw(4) << sigma[w[0]] << " " 
+                         << std::setw(4) << sigma[w[2]] << " " 
+                         << std::setw(4) << sigma[w[3]] << "\n";
+        }
+        else if(orientation == -1){
+            fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
+                         << std::setw(4) << sigma[w[1]] << " " 
+                         << std::setw(4) << sigma[w[2]] << " " 
+                         << std::setw(4) << sigma[w[3]] << "\n";
+        }
+        else{
+            orientationError = true;
+            fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
+                         << std::setw(4) << sigma[w[1]] << " " 
+                         << std::setw(4) << sigma[w[2]] << " " 
+                         << std::setw(4) << sigma[w[3]] << "\n";
+        }
+    }
+    fout << "\n";
+
+    fout << "CELL_TYPES " << mesh.size<4>() << "\n";
+    for (int i = 0; i < mesh.size<4>(); ++i){
+        fout << "10\n";
+    }
+    fout << "\n";
+
+    fout << "CELL_DATA " << mesh.size<4>() << "\n";
+    fout << "SCALARS cell_scalars int 1\n";
+    fout << "LOOKUP_TABLE default\n";
+    // This should output in the same order...
+    for (auto cell : mesh.get_level<4>()){
+        fout << cell.marker << "\n";
+    }
+    fout << "\n";
+    fout.close();
 }
