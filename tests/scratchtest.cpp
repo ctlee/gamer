@@ -26,20 +26,19 @@
 
 int  main(int argc, char *argv[])
 {
-    // if(argc != 2)
-    // {
-    //     std::cerr << "Wrong arguments passed" << std::endl;
-    //     return -1;
-    // }
-    // auto mesh = readOFF(argv[1]);
-    // if(mesh == nullptr){
-    //     std::cout << "Something bad happened..." << std::endl;
-    //     exit(1);
-    // }
-    // std::cout << "Done reading" << std::endl;
+    if(argc != 2)
+    {
+        std::cerr << "Wrong arguments passed" << std::endl;
+        return -1;
+    }
+    auto mesh = readOFF(argv[1]);
+    if(mesh == nullptr){
+        std::cout << "Something bad happened..." << std::endl;
+        exit(1);
+    }
+    std::cout << "Done reading" << std::endl;
 
-    auto mesh = cube(2);
-
+    // auto mesh = cube(2);
     compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &face : mesh->get_level<3>())
@@ -65,7 +64,7 @@ int  main(int argc, char *argv[])
     std::cout << "# Edges: " << mesh->size<2>() << std::endl;
     std::cout << "# Faces: " << mesh->size<3>() << std::endl;
 
-    auto box = cube(2);    
+    auto box = cube(5);    
 
     for(auto &face : box->get_level<3>())
         face.marker = 50;

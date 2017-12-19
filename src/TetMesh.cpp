@@ -343,10 +343,10 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
         auto orientation = (*cellID).orientation;
 
         if (orientation == 1){
-            fout << "4 " << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[0]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[3]] << " " 
+                         << std::setw(4) << sigma[w[1]] << " " 
                          << std::setw(4) << sigma[w[2]] << " " 
-                         << std::setw(4) << sigma[w[3]] << "\n";
+                         << std::setw(4) << sigma[w[0]] << "\n";
         }
         else if(orientation == -1){
             fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
@@ -378,5 +378,11 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
         fout << cell.marker << "\n";
     }
     fout << "\n";
+
+    if(orientationError){
+        std::cerr << "WARNING(writeVTK): The orientation of one or more faces "
+                  << "is not defined. Did you run compute_orientation()?" 
+                  << std::endl;
+    }
     fout.close();
 }
