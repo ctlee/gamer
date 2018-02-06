@@ -75,6 +75,7 @@ list(APPEND SOURCES
     "src/SurfaceMesh.cpp"
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
+    "src/PDBReader.cpp"
 )
 
 add_library(gamershared SHARED ${SOURCES})

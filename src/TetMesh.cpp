@@ -215,10 +215,10 @@ std::unique_ptr<TetMesh> makeTetMesh(
     out.save_elements(result);
     out.save_faces(result);
 
-    return tetgenToTetMesh(out);
+    return tetgenioToTetMesh(out);
 }
 
-std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio){
+std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     std::unique_ptr<TetMesh> mesh(new TetMesh);
 
     if (tetio.mesh_dim == 2){

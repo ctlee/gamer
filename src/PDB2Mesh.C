@@ -32,7 +32,7 @@
 
 #include "biom.h"
 #include "SurfaceMeshOld.h"
-#include "ReadPDB.h"
+#include "ReadPDBold.h"
 #include <vector>
 #include <cmath>
 

@@ -119,7 +119,7 @@ using TetMesh = casc::simplicial_complex<tetmesh::complex_traits>;
 /// Forward class declaration
 class tetgenio;
 
-std::unique_ptr<TetMesh> tetgenToTetMesh(tetgenio &tetio);
+std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
 
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes, 
@@ -127,8 +127,8 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
 void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
-void writeMCSF(const std::string &filename, const TetMesh &mesh);
-void writeDolfin(const std::string &filename, const TetMesh &mesh);
 
+// void writeMCSF(const std::string &filename, const TetMesh &mesh);
+// void writeDolfin(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack
 //void writeCARP

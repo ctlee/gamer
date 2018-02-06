@@ -40,7 +40,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cstdlib>
-#include "ReadPDB.h"
+#include "ReadPDBold.h"
 
 #define MAX_STRING       256
 
