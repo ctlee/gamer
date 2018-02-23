@@ -37,7 +37,7 @@
 
 namespace detail
 {
-
+    const double EPSILON    = 1e-3;
     static const std::regex PDB(".*.pdb", std::regex::icase | std::regex::optimize);
     static const std::regex PQR(".*.pqr", std::regex::icase | std::regex::optimize);
     static const std::regex XYZR(".*.xyzr", std::regex::icase | std::regex::optimize);
@@ -308,7 +308,46 @@ bool readPDB(const std::string& filename, Inserter inserter)
     }
 }
 
+template <typename Iterator>
+void getMinMax(Iterator begin, Iterator end, float min[3], float max[3], float blobbyness)
+{
+    float maxRad = 0.0;
+    float tmpRad;
 
-std::array<double, N, N> 
+    min[0] = min[1] = min[2] = std::numeric_limits<float>::infinity();
+    max[0] = max[1] = max[2] = -std::numeric_limits<float>::infinity();
 
-std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, double blobbyness, float iso_value);
+    for (auto curr = begin; curr != end; ++curr)
+    {
+        float x = curr->x;
+        float y = curr->y;
+        float z = curr->z;
+
+        if (min[0] < x)
+            min[0] = x;
+        if (max[0] > x)
+            max[0] = x;
+
+        if (min[1] < y)
+            min[1] = y;
+        if (max[1] > y)
+            max[1] = y;
+
+        if (min[2] < z)
+            min[2] = z;
+        if (max[2] > z)
+            max[2] = z;
+
+        tmpRad = curr->radius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);
+        if (maxRad < tmpRad)
+            maxRad = tmpRad;
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        min[i] -= maxRad;
+        max[i] += maxRad;
+    }
+}
+
+std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, float blobbyness, float iso_value);

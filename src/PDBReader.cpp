@@ -30,13 +30,14 @@
 #include <regex>
 #include <cmath>
 #include <vector>
+#include <limits>
 
 #include "SurfaceMesh.h"
 #include "PDBReader.h"
 
 
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, 
- 			double blobbyness, 
+ 		    float blobbyness, 
 			float iso_value){
 	std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
@@ -48,7 +49,15 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
         return mesh;
     }
 
-    std::cout << "Begin blurring coordinates..." << std::endl;
+    float min[3], max[3];    
+    getMinMax(atomTypes.cbegin(), atomTypes.cend(), min, max, blobbyness);
 
+
+    float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
+    
+
+
+    std::cout << "Begin blurring coordinates..." << std::endl;
+    // blurAtoms();
     std::cout << "Done blurring coords" << std::endl;
 }
