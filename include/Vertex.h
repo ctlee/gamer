@@ -4,7 +4,6 @@
 #include <sstream>
 #include "tensor.h"
 
-
 using Vector = tensor<double,3,1>;
 
 /**

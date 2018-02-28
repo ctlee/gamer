@@ -248,6 +248,12 @@ public:
 		return _dimensions;
 	}
 */
+	template <typename NumType> 
+	operator tensor<NumType, _vector_dimension, _index_dimension>(){
+		tensor<NumType, _vector_dimension, _index_dimension> t;
+		std::copy(_data.cbegin(), _data.cend(), t.begin());
+		return t;
+	}
 
 	friend std::ostream& operator<<(std::ostream& output, const tensor& t){
 		output  << "Tensor(";
@@ -354,6 +360,13 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief      Scalar division
+	 *
+	 * @param[in]  x     { parameter_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor& operator/=(ElemType x)
 	{
 		for(auto& a : *this)
@@ -363,6 +376,11 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief      Negation operator
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor operator-() const
 	{
 		tensor rhs;
@@ -372,6 +390,28 @@ public:
 			*rhs_curr = - (*tcurr);
 		}
 		return rhs;
+	}
+
+	tensor ElementwiseProduct(const tensor& rhs) const{
+		tensor ret;
+		typename DataType::iterator ret_curr = ret.begin();
+		typename DataType::const_iterator rhs_curr = rhs.begin();
+		for(typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr, ++ret_curr)
+		{
+			*ret_curr = *tcurr * (*rhs_curr);
+		}
+		return ret;
+	}
+
+	tensor ElementwiseDivision(const tensor& rhs) const{
+		tensor ret;
+		typename DataType::iterator ret_curr = ret.begin();
+		typename DataType::const_iterator rhs_curr = rhs.begin();
+		for(typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr, ++ret_curr)
+		{
+			*ret_curr = *tcurr / (*rhs_curr);
+		}
+		return ret;
 	}
 
 	auto data()
@@ -505,6 +545,18 @@ tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<Ele
 	return rval;
 }
 
+/**
+ * @brief      Elementwise sum 
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> operator+(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {
@@ -556,6 +608,18 @@ tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<Ele
 	return rval;
 }
 
+/**
+ * @brief      Inner product
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 ElemType dot(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {
@@ -596,16 +660,48 @@ ElemType operator|(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 	return rval / scale;
 }
 
+/**
+ * @brief      Normalize tensor
+ *
+ * @param[in]  A         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 double norm(const tensor<ElemType,D,N>& A){
 	return std::sqrt(A|A);
 }
 
+/**
+ * @brief      Squared norm
+ *
+ * @param[in]  A         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 double norm_sq(const tensor<ElemType,D,N>& A){
 	return A|A;
 }
 
+/**
+ * @brief      Cross product for vectors only
+ *
+ * @param[in]  x         { parameter_description }
+ * @param[in]  y         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType>
 tensor<ElemType,3,1> cross(const tensor<ElemType,3,1>& x, const tensor<ElemType,3,1>& y)
 {

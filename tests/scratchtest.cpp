@@ -32,7 +32,7 @@ int  main(int argc, char *argv[])
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
     }
-    auto mesh = readPDB_gauss(argv[1], 1, 1);
+    auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
     if(mesh == nullptr){
         std::cout << "Something bad happened..." << std::endl;
         exit(1);
