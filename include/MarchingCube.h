@@ -343,25 +343,43 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 
 	int* mask = new int[dim[0]*dim[1]*dim[2]];
 
+
+	std::cout << "Isolating isosurface" << std::endl;
+
 	// Mask all of the vertices connected to {0,0,0} outside of isosurface
 	// TODO: (5) Parallelize this
 	std::deque<iVector> visit = {iVector({0,0,0})};
 	while(!visit.empty()){
-		iVector tmp = visit.front();
+		const iVector tmp = visit.front();
 		visit.pop_front();
+		// std::cout << tmp << std::endl;
 
-		// Look at the 9 neighbor vertices
-		for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]); ++i){
-			for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]); ++j){
-				for(int k = std::max(tmp[2]-1, 0); i <= std::min(tmp[2]+1, dim[2]); ++k){
-					if(dataset[Vect2Index(i,j,k) < isovalue] && mask[Vect2Index(i,j,k)] == 0){
+		// Look at the neighbor vertices
+		for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
+			for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]-1); ++j){
+				for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
+					if((dataset[Vect2Index(i,j,k)] < isovalue) && (mask[Vect2Index(i,j,k)] == 0)){
+						// std::cout << "{" << i << ", " << j << ", " << k << "}"<< std::endl;
 						mask[Vect2Index(i,j,k)] = 1;
 						visit.push_back(iVector({i,j,k}));
 					}	
 				}
 			}
 		}
-	}
+		// std::cout << visit.size() << std::endl;
+	}	
+	std::cout << "Done isolating isosurface" << std::endl;
+
+    for(int i = 0; i < dim[0]; i++){
+        for(int j = 0; j < dim[1]; j++){
+            for(int k = 0; k < dim[2]; k++){
+            	std::cout << mask[Vect2Index(i,j,k)];
+            }
+		    std::cout << std::endl;
+        }
+	    std::cout << std::endl;
+    }
+
 	delete[] mask;
 	return mesh;
 }

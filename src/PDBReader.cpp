@@ -53,6 +53,8 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
         return mesh;
     }
 
+    std::cout << "Atoms: " << atomTypes.size() << std::endl;
+
     fVector min, max;    
     getMinMax(atomTypes.cbegin(), atomTypes.cend(), min, max, blobbyness);
 

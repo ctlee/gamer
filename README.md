@@ -5,15 +5,19 @@ software umbrella.
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-
-
 ### Prerequisites
 To use this library you will need to a C++ compiler which has full support of C++14.
 Note that there is a known issue with Clang 4.x.x versioned compilers (including XCode version 9), which will produce a compiler error. 
 The current workaround to this problem is to obtain and use Clang version 5+.
 
-
 ### Installing
+```bash
+git clone https://github.com/ctlee/gamer.git
+cd gamer
+git submodule init
+git submodule update
+```
+
 ```bash
 mkdir build
 cd build
