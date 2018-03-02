@@ -57,7 +57,7 @@ list(APPEND SOURCES
     "src/CorrectNormals.C"
     "src/GemMesh.C"
     "src/GenerateSphereMesh.C"
-    "src/MarchingCube.C"
+    "src/MarchingCubeOld.C"
     "src/PDB2Mesh.C"
     "src/PDB2Volume.C"
     "src/ReadLattice.C"
@@ -76,6 +76,7 @@ list(APPEND SOURCES
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"
+    "src/MarchingCube.cpp"
 )
 
 add_library(gamershared SHARED ${SOURCES})

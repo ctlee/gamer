@@ -33,6 +33,7 @@
 #include <limits>
 
 #include "SurfaceMesh.h"
+#include "MarchingCube.h"
 #include "PDBReader.h"
 #include "Vertex.h"
 
@@ -101,12 +102,10 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
     {
         isovalue = data_isoval;
     }
-
     std::cout << "Isovalue: " << isovalue << std::endl;
-
-    // auto meshes = SurfaceMeshOld::marchingCube(xdim, ydim, zdim, dataset, iso_value, &holelist);
-
+ 
+    std::vector<Vertex> holelist;
+    mesh = std::move(marchingCubes(dataset, dim, isovalue, std::back_inserter(holelist)));
     delete[] dataset;
-
     return mesh;
 }

@@ -4,6 +4,8 @@
  * Copyright (C) 2016-2017
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
+ * 
+ * Copyright (C) 1994-- Michael Holst and Zeyun Yu
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -359,14 +361,10 @@ void blurAtoms(Iterator begin, Iterator end,
         const iVector& dim, 
         float blobbyness)
 {
-    int xdim = dim[0];
-    int ydim = dim[1];
-    int zdim = dim[2];
-
     // Functor to compute array index from 3D indices
-    auto IndexVect = [xdim, ydim, zdim](const int i, const int j, const int k) 
+    auto Vect2Index = [&dim](const int i, const int j, const int k) 
             -> int {
-        return k*xdim*ydim + j*xdim + i;
+        return k*dim[0]*dim[1] + j*dim[0] + i;
     };
 
     // Functor to calculate gaussian blur
@@ -389,6 +387,7 @@ void blurAtoms(Iterator begin, Iterator end,
         return (float) exp(expval);
     };
 
+    // Values should be 0 upon initialization...
     // for(int i = 0; i < dim[0]; i++){
     //     for(int j = 0; j < dim[1]; j++){
     //         for(int k = 0; k < dim[2]; k++){
@@ -440,7 +439,7 @@ void blurAtoms(Iterator begin, Iterator end,
                     fVector pnt = min + fVector({static_cast<float>(i),
                                                  static_cast<float>(j),
                                                  static_cast<float>(k)}).ElementwiseProduct(span);
-                    dataset[IndexVect(i, j, k)] += evalDensity(*curr, pnt, maxRad);
+                    dataset[Vect2Index(i, j, k)] += evalDensity(*curr, pnt, maxRad);
                 }
             }
         }
