@@ -9,6 +9,7 @@ sudo: false
 branches:
   only:
     - master
+    - development
 matrix:
   include:
     - os: osx

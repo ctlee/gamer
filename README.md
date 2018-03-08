@@ -1,5 +1,5 @@
 # Geometry-preserving Adaptive MeshER
-[![Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
+[![Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)  
 GAMer is a surface mesh improvement library included in the FEtk 
 software umbrella.
 
