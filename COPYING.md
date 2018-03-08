@@ -1,4 +1,4 @@
-### CASC License
+### GAMer License
 
 The GAMer library is free software distributed under the GNU Lesser General 
 Public License Version 2.1. You can redistribute it and/or modify it under the 

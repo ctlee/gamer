@@ -1,4 +1,5 @@
-# Release snapshot of GAMer
+# Geometry-preserving Adaptive MeshER
+[![Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
 GAMer is a surface mesh improvement library included in the FEtk 
 software umbrella.
 
@@ -26,16 +27,20 @@ make -j12
 ```
 
 ## Authors
-* **John Moody** <jbmoody@ucsd.edu>
-* **Christopher Lee** <ctlee@ucsd.edu>
+**John Moody**  
+Department of Mathematics  
+University of California, San Diego  
+
+**[Christopher Lee](https://github.com/ctlee)**  
+Department of Chemistry & Biochemistry  
+University of California, San Diego  
+
+See also the list of [contributors](https://github.com/ctlee/gamer/contributors) who participated in this project.
 
 ## License
 This project is licensed under the GNU Lesser General Public License v2.1 - 
 please see the [COPYING.md](COPYING.md) file for details.
 
 ## Acknowledgments
-This project is supported by the National Institutes of Health under grant
-numbers P41-GM103426, T32-GM008326, and R01-GM31749. 
+This project is supported by the National Institutes of Health under grant numbers P41-GM103426 ([NBCR](http://nbcr.ucsd.edu/)), T32-GM008326, and R01-GM31749. 
 It is also supported in part by the National Science Foundation under awards DMS-CM1620366 and DMS-FRG1262982.
-
-

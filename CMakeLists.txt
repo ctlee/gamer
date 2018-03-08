@@ -2,10 +2,15 @@ cmake_minimum_required(VERSION 3.6)
 
 project(GAMer VERSION 1.0.0)
 
-option(BUILD_STATIC_LIB "Build the static libraries" OFF)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(BUILD_STATIC_LIB "Build static libraries" OFF)
 # BUILD_BLENDER will build static libraries as well
 option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
 
+# Compile the test suite
 option(BUILD_TESTS "Build the test scripts" OFF)
 
 if(BUILD_TESTS)
@@ -48,7 +53,7 @@ include_directories(include)
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 foreach(dir ${dirs})
-    message(STATUS "dir='${dir}'")
+    message(STATUS "GAMer include_dir='${dir}'")
 endforeach()
 
 # Change this to not use GLOB
@@ -80,10 +85,8 @@ list(APPEND SOURCES
 )
 
 add_library(gamershared SHARED ${SOURCES})
-
 message(STATUS "SOURCES: ${SOURCES}")
 
-set_target_properties(gamershared PROPERTIES COMPILE_FLAGS "-std=c++14")
 target_link_libraries(gamershared tetshared trishared)
 # TODO: populate the list of headers to install...
 #install(FILES gamer.h DESTINATION include/gamer)
@@ -92,7 +95,6 @@ install(TARGETS gamershared DESTINATION lib/gamer)
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
     
-    set_target_properties(gamerstatic PROPERTIES COMPILE_FLAGS "-std=c++14")
     target_link_libraries(gamerstatic tetstatic tristatic)
     install(TARGETS gamerstatic DESTINATION lib/gamer)
 endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
@@ -111,12 +113,15 @@ endif(BUILD_TESTS)
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 
-message(STATUS "Doxygen ${DOXYGEN_EXECUTABLE}")
 if(DOXYGEN_FOUND)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
+    message(STATUS "Build the documentation using `make docs`")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
     add_custom_target(docs
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
+else()
+    message(STATUS "CMake could not find Doxygen. Please install Doxygen or help me find your Doxygen binary to build the documentation!")
 endif(DOXYGEN_FOUND)

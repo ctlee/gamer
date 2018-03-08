@@ -1,0 +1,51 @@
+notifications:
+  email: false
+
+language: cpp
+dist: trusty
+sudo: false
+
+# Blacklist
+branches:
+  only:
+    - master
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode9.3beta
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+before_install:
+  - eval "${MATRIX_EVAL}"
+  - ${CXX} --version
+install:
+  - mkdir build;
+    cd build;
+  - cmake .. -DBUILD_TESTS=on;
+  - make;
+script:
+  - ./bin/objecttests;
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew install doxygen;
+      brew install graphviz;
+      cmake ..;
+      make docs;
+    fi;
+deploy:
+  provider: pages
+  local-dir: build/html
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: false
+  on:
+    branch: master
+    condition: $TRAVIS_OS_NAME == osx

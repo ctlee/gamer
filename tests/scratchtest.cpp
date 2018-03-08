@@ -32,7 +32,8 @@ int  main(int argc, char *argv[])
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
     }
-    auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
+    auto mesh = readOFF(argv[1]);
+    // auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
     if(mesh == nullptr){
         std::cout << "Something bad happened..." << std::endl;
         exit(1);
@@ -40,11 +41,15 @@ int  main(int argc, char *argv[])
     std::cout << "Done reading" << std::endl;
 
     // auto mesh = cube(2);
-    // compute_orientation(*mesh);
-    // if(getVolume(*mesh) < 0){
-    //     for(auto &face : mesh->get_level<3>())
-    //         face.orientation *= -1;
-    // }
+    compute_orientation(*mesh);
+    if(getVolume(*mesh) < 0){
+        for(auto &face : mesh->get_level<3>())
+            face.orientation *= -1;
+    }
+
+    
+
+
 
     // for(auto &face : mesh->get_level<3>())
     //     face.marker = 23;
