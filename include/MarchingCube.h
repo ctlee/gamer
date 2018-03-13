@@ -24,9 +24,14 @@
  * ***************************************************************************
  */
 
+#include <algorithm>
+#include <bitset>
 #include <type_traits>
 #include <queue>
 #include "SurfaceMesh.h"
+
+/** @brief The minimal volumes (in voxels) of islands to be removed */
+#define MIN_VOLUME        100
 
 using fVector = tensor<float,3,1>;
 using iVector = tensor<int,3,1>;
@@ -325,62 +330,413 @@ static const int triTable[256][16] =
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
 
+int Vect2Index(const int i, const int j, const int k, const iVector& dim);
+
 template <typename NumType, typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
 		  class Inserter>
 std::unique_ptr<SurfaceMesh> marchingCubes(
-		NumType* dataset, 
+		NumType* dataset,
+		NumType maxval,
 		const iVector& dim, 
 		NumType isovalue,
-		Inserter holeList
+		Inserter holelist
 ){
 	std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
-	
-    // Functor to compute array index from 3D indices
-    auto Vect2Index = [&dim](const int i, const int j, const int k) 
-            -> int {
-        return k*dim[0]*dim[1] + j*dim[0] + i;
-    };
-
-	int* mask = new int[dim[0]*dim[1]*dim[2]];
-
+	bool* mask = new bool[dim[0]*dim[1]*dim[2]];
 
 	std::cout << "Isolating isosurface" << std::endl;
 
+	// TODO: (4) is it necessary to go through this three setp masking process?
+
 	// Mask all of the vertices connected to {0,0,0} outside of isosurface
-	// TODO: (5) Parallelize this
 	std::deque<iVector> visit = {iVector({0,0,0})};
 	while(!visit.empty()){
 		const iVector tmp = visit.front();
 		visit.pop_front();
-		// std::cout << tmp << std::endl;
 
 		// Look at the neighbor vertices
 		for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
 			for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]-1); ++j){
 				for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
-					if((dataset[Vect2Index(i,j,k)] < isovalue) && (mask[Vect2Index(i,j,k)] == 0)){
-						// std::cout << "{" << i << ", " << j << ", " << k << "}"<< std::endl;
-						mask[Vect2Index(i,j,k)] = 1;
+					if((dataset[Vect2Index(i,j,k,dim)] < isovalue) 
+							&& !mask[Vect2Index(i,j,k,dim)]){
+						mask[Vect2Index(i,j,k,dim)] = true;
 						visit.push_back(iVector({i,j,k}));
 					}	
 				}
 			}
 		}
-		// std::cout << visit.size() << std::endl;
 	}	
+
+	// Find internal holes
+	for (int l = 0; l < dim[0]; l++){
+		for (int m = 0; m < dim[1]; m++){
+			for (int n = 0; n < dim[2]; n++){
+				if((dataset[Vect2Index(l,m,n,dim)] < isovalue) 
+						&& !mask[Vect2Index(l,m,n,dim)]){
+					int holesize = 1;
+					visit.push_back(iVector({l,m,n}));
+
+					std::vector<int> holevoxels;
+
+					while(!visit.empty()){
+						const iVector tmp = visit.front();
+						visit.pop_front();
+
+						// Look at the neighbor vertices
+						for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
+							for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]-1); ++j){
+								for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
+									if((dataset[Vect2Index(i,j,k,dim)] < isovalue) 
+											&& !mask[Vect2Index(i,j,k,dim)]){
+										int idx = Vect2Index(i,j,k,dim);
+										holevoxels.push_back(idx);
+
+										mask[idx] = true;
+										visit.push_back(iVector({i,j,k}));
+										holesize++;
+									}	
+								}
+							}
+						}
+					}
+					std::cout << "Hole size: " << holesize << std::endl;
+
+					if (holesize < MIN_VOLUME){
+						for(auto idx : holevoxels){
+							dataset[idx] = maxval;
+							// TODO: (0) do we need to replace mask?
+						}
+					}
+					else{
+						*holelist++ = Vector({static_cast<double>(l),
+											  static_cast<double>(m),
+											  static_cast<double>(n)});
+						std::cout << Vector({static_cast<double>(l),
+											 static_cast<double>(m),
+											 static_cast<double>(n)}) << std::endl;
+					}
+				}		
+			}
+		}
+	}
 	std::cout << "Done isolating isosurface" << std::endl;
 
-    for(int i = 0; i < dim[0]; i++){
-        for(int j = 0; j < dim[1]; j++){
-            for(int k = 0; k < dim[2]; k++){
-            	std::cout << mask[Vect2Index(i,j,k)];
+	int v_num = 0;
+	int t_num = 0;
+	iVector* triangles = new iVector[dim[0]*dim[1]*dim[2]];
+	iVector* edges = new iVector[dim[0]*dim[1]*dim[2]];
+	Vector* vertices = new Vector[dim[0]*dim[1]*dim[2]];
+
+	// This section in particular is weird...
+    for(int i = 0; i < dim[0]-1; i++){
+        for(int j = 0; j < dim[1]-1; j++){
+            for(int k = 0; k < dim[2]-1; k++){
+            	int idx = Vect2Index(i,j,k,dim);
+            	// If isovalue is within tolerance make it bigger
+            	if ((dataset[idx] > isovalue - 0.0001) &&
+            			(dataset[idx < isovalue + 0.0001]))
+            		dataset[idx] = isovalue + 0.0001;
+            	edges[idx] = iVector({-1,-1,-1});
+
+            	if(dataset[idx] >= isovalue){
+            		mask[idx] = false;
+            	}
+            	else {
+            		mask[idx] = true;
+            	}
             }
-		    std::cout << std::endl;
         }
-	    std::cout << std::endl;
     }
 
+    std::cout << "Marching..." << std::endl;
+	// Marching cubes vertex indices and edges convention
+	//		   v4_________e4_________v5
+	//			/|  				/|
+	//		e7 / |                 / |
+	//		  /  |             e5 /  |
+	//		 /   | e8            /	 | e9
+	//	  v7/____|_____e6_______/v6	 |
+	//		|	 |              |	 |
+	//	 	|  v0|______e0______|____|v1
+	//	e11 |	/        		|   / 	
+	//		|  /			e10	|  / 
+	//		| /	e3				| / e1
+	//		|/					|/
+	//	  v3/_________e2________/v2
+	//            
+    for(int i = 0; i < dim[0]-1; i++){
+        for(int j = 0; j < dim[1]-1; j++){
+            for(int k = 0; k < dim[2]-1; k++){
+
+            	int cellVerts[12];
+            	std::fill_n(cellVerts, 12, -1);
+            	int indexTable[8];
+
+            	indexTable[0] = Vect2Index(i,j,k,dim);
+            	indexTable[1] = Vect2Index(i,j+1,k,dim);
+            	indexTable[2] = Vect2Index(i+1,j+1,k,dim);
+            	indexTable[3] = Vect2Index(i+1,j,k,dim);
+            	indexTable[4] = Vect2Index(i,j,k+1,dim);
+            	indexTable[5] = Vect2Index(i,j+1,k+1,dim);
+            	indexTable[6] = Vect2Index(i+1,j+1,k+1,dim);
+            	indexTable[7] = Vect2Index(i+1,j,k+1,dim);
+
+            	int cellIndex = 0;
+            	for(int idx = 0; idx < 8; ++idx){
+					if (mask[indexTable[idx]]){
+	            		cellIndex |= (1 << idx);
+					}
+            	}
+            	// std::cout << std::bitset<8>(cellIndex) << std::endl;
+
+            	NumType den1, den2;
+            	// int idx = Vect2Index(i,j,k,dim);
+
+				if (edgeTable[cellIndex] & (1 << 0)){
+					if (edges[indexTable[0]][1] == -1){
+						den1 = dataset[indexTable[0]];
+						den2 = dataset[indexTable[1]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i),
+												  static_cast<double>(j) + ratio,
+												  static_cast<double>(k)
+												});
+						cellVerts[0] = v_num;
+						edges[indexTable[0]][1] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[0] = edges[indexTable[0]][1];
+					}
+    			}
+
+				if (edgeTable[cellIndex] & (1 << 1)){
+					if (edges[indexTable[1]][0] == -1){
+						den1 = dataset[indexTable[1]];
+						den2 = dataset[indexTable[2]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+												  static_cast<double>(j) + 1,
+												  static_cast<double>(k)
+												});
+						cellVerts[1] = v_num;
+						edges[indexTable[1]][0] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[1] = edges[indexTable[1]][0];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 2)){
+					if (edges[indexTable[2]][1] == -1){
+						den1 = dataset[indexTable[3]];
+						den2 = dataset[indexTable[2]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+												  static_cast<double>(j) + ratio,
+												  static_cast<double>(k)
+												});
+						cellVerts[2] = v_num;
+						edges[indexTable[3]][1] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[2] = edges[indexTable[3]][1];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 3)){
+					if (edges[indexTable[0]][0] == -1){
+						den1 = dataset[indexTable[0]];
+						den2 = dataset[indexTable[3]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+												  static_cast<double>(j),
+												  static_cast<double>(k)
+												});
+						cellVerts[3] = v_num;
+						edges[indexTable[0]][0] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[3] = edges[indexTable[0]][0];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 4)){
+					if (edges[indexTable[4]][1] == -1){
+						den1 = dataset[indexTable[4]];
+						den2 = dataset[indexTable[5]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i),
+												  static_cast<double>(j) + ratio,
+												  static_cast<double>(k) + 1
+												});
+						cellVerts[4] = v_num;
+						edges[indexTable[4]][1] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[4] = edges[indexTable[4]][1];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 5)){
+					if (edges[indexTable[5]][0] == -1){
+						den1 = dataset[indexTable[5]];
+						den2 = dataset[indexTable[6]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+												  static_cast<double>(j) + 1,
+												  static_cast<double>(k) + 1
+												});
+						cellVerts[5] = v_num;
+						edges[indexTable[5]][0] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[5] = edges[indexTable[5]][0];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 6)){
+					if (edges[indexTable[7]][1] == -1){
+						den1 = dataset[indexTable[7]];
+						den2 = dataset[indexTable[6]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+												  static_cast<double>(j),
+												  static_cast<double>(k) + 1
+												});
+						cellVerts[6] = v_num;
+						edges[indexTable[7]][1] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[6] = edges[indexTable[7]][1];
+					}
+    			}
+
+				if (edgeTable[cellIndex] & (1 << 7)){
+					if (edges[indexTable[4]][0] == -1){
+						den1 = dataset[indexTable[4]];
+						den2 = dataset[indexTable[7]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+												  static_cast<double>(j),
+												  static_cast<double>(k) + 1
+												});
+						cellVerts[7] = v_num;
+						edges[indexTable[4]][0] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[7] = edges[indexTable[4]][0];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 8)){
+    				// using edge = edges[indexTable[0]][2];
+					if (edges[indexTable[0]][2] == -1){
+						den1 = dataset[indexTable[0]];
+						den2 = dataset[indexTable[4]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i),
+												  static_cast<double>(j),
+												  static_cast<double>(k) + ratio
+												});
+						cellVerts[8] = v_num;
+						edges[indexTable[0]][2] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[8] = edges[indexTable[0]][2];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 9)){
+    				// using edge = edges[indexTable[0]][2];
+					if (edges[indexTable[1]][2] == -1){
+						den1 = dataset[indexTable[1]];
+						den2 = dataset[indexTable[5]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i),
+												  static_cast<double>(j) + 1,
+												  static_cast<double>(k) + ratio
+												});
+						cellVerts[9] = v_num;
+						edges[indexTable[1]][2] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[9] = edges[indexTable[1]][2];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 10)){
+    				// using edge = edges[indexTable[0]][2];
+					if (edges[indexTable[2]][2] == -1){
+						den1 = dataset[indexTable[2]];
+						den2 = dataset[indexTable[6]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+												  static_cast<double>(j) + 1,
+												  static_cast<double>(k)
+												});
+						cellVerts[10] = v_num;
+						edges[indexTable[2]][2] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[10] = edges[indexTable[2]][2];
+					}
+    			}
+
+    			if (edgeTable[cellIndex] & (1 << 11)){
+    				// using edge = edges[indexTable[0]][2];
+					if (edges[indexTable[3]][2] == -1){
+						den1 = dataset[indexTable[3]];
+						den2 = dataset[indexTable[7]];
+						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+												  static_cast<double>(j),
+												  static_cast<double>(k) + ratio
+												});
+						cellVerts[11] = v_num;
+						edges[indexTable[3]][2] = v_num;
+						v_num++;
+					}
+					else{
+						cellVerts[11] = edges[indexTable[3]][2];
+					}
+    			}
+
+    			int ii = 0;
+    			while (triTable[cellIndex][ii] != -1){
+    				triangles[t_num] = iVector({cellVerts[triTable[cellIndex][ii++]],
+    											cellVerts[triTable[cellIndex][ii++]],
+    											cellVerts[triTable[cellIndex][ii++]]});
+    				t_num++;
+    			}
+            }
+        }
+    }
+
+    for (int i = 0; i < v_num; ++i){
+    	mesh->insert<1>({i}, Vertex(vertices[i]));
+    }
+
+    for (int i = 0; i < t_num; ++i){
+    	mesh->insert<3>({triangles[i][0], triangles[i][1], triangles[i][2]});
+    }
+
+    delete[] vertices;
+    delete[] triangles;
 	delete[] mask;
+	delete[] edges;
+
 	return mesh;
 }
 

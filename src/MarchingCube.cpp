@@ -22,4 +22,9 @@
  * ***************************************************************************
  */
 
+#include "MarchingCube.h"
 
+
+int Vect2Index(const int i, const int j, const int k, const iVector& dim){
+    return k*dim[0]*dim[1] + j*dim[0] + i;
+}

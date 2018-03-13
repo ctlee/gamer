@@ -107,7 +107,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
     std::cout << "Isovalue: " << isovalue << std::endl;
  
     std::vector<Vertex> holelist;
-    mesh = std::move(marchingCubes(dataset, dim, isovalue, std::back_inserter(holelist)));
+    mesh = std::move(marchingCubes(dataset, maxval, dim, isovalue, std::back_inserter(holelist)));
     delete[] dataset;
     return mesh;
 }

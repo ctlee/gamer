@@ -162,13 +162,14 @@ std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> SurfaceMeshOld::marchingCube(int x
     hole_end   = NULL;
     den1       = 0;
 
-
+    // LOOP FILLS THE HOLES IN THE MASK
     for (l = 0; l < zdim; l++)
     {
         for (n = 0; n < ydim; n++)
         {
             for (m = 0; m < xdim; m++)
             {
+                // den1 = largest value seen thus far
                 if (dataset[IndexVect(m, n, l)] > den1)
                 {
                     den1            = dataset[IndexVect(m, n, l)];
@@ -401,18 +402,16 @@ std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> SurfaceMeshOld::marchingCube(int x
                 {
                     if (mc_edge[IndexVect(tempt_x, tempt_y + 1, tempt_z)].a == -1)
                     {
+                        den1 = dataset[IndexVect(tempt_x, tempt_y + 1, tempt_z)];
+                        den2 = dataset[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)];
                         if (use_intensity)
                         {
-                            den1 = intensity[IndexVect(tempt_x, tempt_y + 1, tempt_z)];
-                            den2 = intensity[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)];
+
 
                             ratio = get_intensity_ratio(den1, den2, intensity_isovalue);
                         }
                         else
                         {
-                            den1 = dataset[IndexVect(tempt_x, tempt_y + 1, tempt_z)];
-                            den2 = dataset[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)];
-
                             if (den1 != den2)
                             {
                                 ratio = (isovalue - den1) / (den2 - den1);
@@ -439,18 +438,13 @@ std::tuple<SurfaceMeshOld*, SurfaceMesh_ASC*> SurfaceMeshOld::marchingCube(int x
                 {
                     if (mc_edge[IndexVect(tempt_x + 1, tempt_y, tempt_z)].b == -1)
                     {
+                        den1 = intensity[IndexVect(tempt_x + 1, tempt_y, tempt_z)];
+                        den2 = intensity[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)];
                         if (use_intensity)
                         {
-                            den1 = intensity[IndexVect(tempt_x + 1, tempt_y, tempt_z)];
-                            den2 = intensity[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)];
-
                             ratio = get_intensity_ratio(den1, den2, intensity_isovalue);
                         }
-                        else
-                        {
-                            den1 = dataset[IndexVect(tempt_x + 1, tempt_y, tempt_z)];
-                            den2 = dataset[IndexVect(tempt_x + 1, tempt_y + 1, tempt_z)];
-
+                        else{
                             if (den1 != den2)
                             {
                                 ratio = (isovalue - den1) / (den2 - den1);
