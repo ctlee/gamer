@@ -31,7 +31,7 @@
 #include "SurfaceMesh.h"
 
 /** @brief The minimal volumes (in voxels) of islands to be removed */
-#define MIN_VOLUME        100
+#define MIN_VOLUME        33333
 
 using fVector = tensor<float,3,1>;
 using iVector = tensor<int,3,1>;
@@ -422,9 +422,9 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	}
 	std::cout << "Done isolating isosurface" << std::endl;
 
-	int v_num = 0;
-	int t_num = 0;
-	iVector* triangles = new iVector[dim[0]*dim[1]*dim[2]];
+	size_t vertexNum = 0;
+	size_t triNum = 0;
+	std::array<int,3>* triangles = new std::array<int,3>[dim[0]*dim[1]*dim[2]];
 	iVector* edges = new iVector[dim[0]*dim[1]*dim[2]];
 	Vector* vertices = new Vector[dim[0]*dim[1]*dim[2]];
 
@@ -469,10 +469,12 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
         for(int j = 0; j < dim[1]-1; j++){
             for(int k = 0; k < dim[2]-1; k++){
 
-            	int cellVerts[12];
-            	std::fill_n(cellVerts, 12, -1);
+            	// List of vertices for the current cell
+            	int cellVertices[12];
+            	std::fill_n(cellVertices, 12, -1);
+            
+            	// Table of integer indices to overall dataset array	
             	int indexTable[8];
-
             	indexTable[0] = Vect2Index(i,j,k,dim);
             	indexTable[1] = Vect2Index(i,j+1,k,dim);
             	indexTable[2] = Vect2Index(i+1,j+1,k,dim);
@@ -482,7 +484,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
             	indexTable[6] = Vect2Index(i+1,j+1,k+1,dim);
             	indexTable[7] = Vect2Index(i+1,j,k+1,dim);
 
-            	int cellIndex = 0;
+            	int cellIndex = 0;	// Bitmask for intersections
             	for(int idx = 0; idx < 8; ++idx){
 					if (mask[indexTable[idx]]){
 	            		cellIndex |= (1 << idx);
@@ -491,245 +493,252 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
             	// std::cout << std::bitset<8>(cellIndex) << std::endl;
 
             	NumType den1, den2;
-            	// int idx = Vect2Index(i,j,k,dim);
 
 				if (edgeTable[cellIndex] & (1 << 0)){
-					if (edges[indexTable[0]][1] == -1){
+					auto& edgeIdx = edges[indexTable[0]][1];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[0]];
 						den2 = dataset[indexTable[1]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i),
+						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k)
 												});
-						cellVerts[0] = v_num;
-						edges[indexTable[0]][1] = v_num;
-						v_num++;
+						cellVertices[0] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[0] = edges[indexTable[0]][1];
+						cellVertices[0] = edgeIdx;
 					}
     			}
 
 				if (edgeTable[cellIndex] & (1 << 1)){
-					if (edges[indexTable[1]][0] == -1){
+					auto& edgeIdx = edges[indexTable[1]][0];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[1]];
 						den2 = dataset[indexTable[2]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k)
 												});
-						cellVerts[1] = v_num;
-						edges[indexTable[1]][0] = v_num;
-						v_num++;
+						cellVertices[1] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[1] = edges[indexTable[1]][0];
+						cellVertices[1] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 2)){
-					if (edges[indexTable[2]][1] == -1){
+    				auto& edgeIdx = edges[indexTable[3]][1];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[3]];
 						den2 = dataset[indexTable[2]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k)
 												});
-						cellVerts[2] = v_num;
-						edges[indexTable[3]][1] = v_num;
-						v_num++;
+						cellVertices[2] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[2] = edges[indexTable[3]][1];
+						cellVertices[2] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 3)){
-					if (edges[indexTable[0]][0] == -1){
+    				auto& edgeIdx = edges[indexTable[0]][0];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[0]];
 						den2 = dataset[indexTable[3]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j),
 												  static_cast<double>(k)
 												});
-						cellVerts[3] = v_num;
-						edges[indexTable[0]][0] = v_num;
-						v_num++;
+						cellVertices[3] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[3] = edges[indexTable[0]][0];
+						cellVertices[3] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 4)){
-					if (edges[indexTable[4]][1] == -1){
+    				auto& edgeIdx = edges[indexTable[4]][1];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[4]];
 						den2 = dataset[indexTable[5]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i),
+						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k) + 1
 												});
-						cellVerts[4] = v_num;
-						edges[indexTable[4]][1] = v_num;
-						v_num++;
+						cellVertices[4] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[4] = edges[indexTable[4]][1];
+						cellVertices[4] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 5)){
-					if (edges[indexTable[5]][0] == -1){
+	    			auto& edgeIdx = edges[indexTable[5]][0];	
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[5]];
 						den2 = dataset[indexTable[6]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k) + 1
 												});
-						cellVerts[5] = v_num;
-						edges[indexTable[5]][0] = v_num;
-						v_num++;
+						cellVertices[5] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[5] = edges[indexTable[5]][0];
+						cellVertices[5] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 6)){
-					if (edges[indexTable[7]][1] == -1){
+	    			auto& edgeIdx = edges[indexTable[7]][1];	
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[7]];
 						den2 = dataset[indexTable[6]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + 1,
-												  static_cast<double>(j),
+						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
+												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k) + 1
 												});
-						cellVerts[6] = v_num;
-						edges[indexTable[7]][1] = v_num;
-						v_num++;
+						cellVertices[6] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[6] = edges[indexTable[7]][1];
+						cellVertices[6] = edgeIdx;
 					}
     			}
 
 				if (edgeTable[cellIndex] & (1 << 7)){
-					if (edges[indexTable[4]][0] == -1){
+					auto& edgeIdx = edges[indexTable[4]][0];	
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[4]];
 						den2 = dataset[indexTable[7]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + ratio,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j),
 												  static_cast<double>(k) + 1
 												});
-						cellVerts[7] = v_num;
-						edges[indexTable[4]][0] = v_num;
-						v_num++;
+						cellVertices[7] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[7] = edges[indexTable[4]][0];
+						cellVertices[7] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 8)){
-    				// using edge = edges[indexTable[0]][2];
-					if (edges[indexTable[0]][2] == -1){
+    				auto& edgeIdx = edges[indexTable[0]][2];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[0]];
 						den2 = dataset[indexTable[4]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i),
+						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j),
 												  static_cast<double>(k) + ratio
 												});
-						cellVerts[8] = v_num;
-						edges[indexTable[0]][2] = v_num;
-						v_num++;
+						cellVertices[8] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[8] = edges[indexTable[0]][2];
+						cellVertices[8] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 9)){
-    				// using edge = edges[indexTable[0]][2];
-					if (edges[indexTable[1]][2] == -1){
+    				auto& edgeIdx = edges[indexTable[1]][2];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[1]];
 						den2 = dataset[indexTable[5]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i),
+						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k) + ratio
 												});
-						cellVerts[9] = v_num;
-						edges[indexTable[1]][2] = v_num;
-						v_num++;
+						cellVertices[9] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[9] = edges[indexTable[1]][2];
+						cellVertices[9] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 10)){
-    				// using edge = edges[indexTable[0]][2];
-					if (edges[indexTable[2]][2] == -1){
+    				auto& edgeIdx = edges[indexTable[2]][2];	
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[2]];
 						den2 = dataset[indexTable[6]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j) + 1,
-												  static_cast<double>(k)
+												  static_cast<double>(k) + ratio
 												});
-						cellVerts[10] = v_num;
-						edges[indexTable[2]][2] = v_num;
-						v_num++;
+						cellVertices[10] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[10] = edges[indexTable[2]][2];
+						cellVertices[10] = edgeIdx;
 					}
     			}
 
     			if (edgeTable[cellIndex] & (1 << 11)){
-    				// using edge = edges[indexTable[0]][2];
-					if (edges[indexTable[3]][2] == -1){
+    				auto& edgeIdx = edges[indexTable[3]][2];
+					if (edgeIdx == -1){
 						den1 = dataset[indexTable[3]];
 						den2 = dataset[indexTable[7]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
-						vertices[v_num] = Vector({static_cast<double>(i) + 1,
+						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j),
 												  static_cast<double>(k) + ratio
 												});
-						cellVerts[11] = v_num;
-						edges[indexTable[3]][2] = v_num;
-						v_num++;
+						cellVertices[11] = vertexNum;
+						edgeIdx = vertexNum;
+						vertexNum++;
 					}
 					else{
-						cellVerts[11] = edges[indexTable[3]][2];
+						cellVertices[11] = edgeIdx;
 					}
     			}
 
     			int ii = 0;
     			while (triTable[cellIndex][ii] != -1){
-    				triangles[t_num] = iVector({cellVerts[triTable[cellIndex][ii++]],
-    											cellVerts[triTable[cellIndex][ii++]],
-    											cellVerts[triTable[cellIndex][ii++]]});
-    				t_num++;
+    				triangles[triNum] = {cellVertices[triTable[cellIndex][ii++]],
+    									 cellVertices[triTable[cellIndex][ii++]],
+    									 cellVertices[triTable[cellIndex][ii++]]};
+    				triNum++;
     			}
             }
         }
     }
 
-    for (int i = 0; i < v_num; ++i){
+    for (int i = 0; i < vertexNum; ++i){
     	mesh->insert<1>({i}, Vertex(vertices[i]));
     }
 
-    for (int i = 0; i < t_num; ++i){
-    	mesh->insert<3>({triangles[i][0], triangles[i][1], triangles[i][2]});
+    for (int i = 0; i < triNum; ++i){
+    	mesh->insert<3>(triangles[i]);
     }
 
     delete[] vertices;
@@ -737,6 +746,8 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	delete[] mask;
 	delete[] edges;
 
+
+	compute_orientation(*mesh);
 	return mesh;
 }
 

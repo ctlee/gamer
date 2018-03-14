@@ -62,8 +62,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
    
     std::cout << "Min Dimension: " << min_dimension << std::endl;
 
-    //TODO (0): update DIM_SCALE
-    float DIM_SCALE = 2;
+    float DIM_SCALE = 2; // 0.5 Angstroms grid resolution is about right
     iVector dim;
 
     fVector maxMin = max-min;

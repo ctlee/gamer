@@ -39,18 +39,19 @@ int  main(int argc, char *argv[])
         exit(1);
     }
     std::cout << "Done reading" << std::endl;
-
+    std::cout << "General protein statistics: " << std::endl;
+    std::cout << "# Vertices: " << mesh->size<1>() << std::endl;
+    std::cout << "# Edges: " << mesh->size<2>() << std::endl;
+    std::cout << "# Faces: " << mesh->size<3>() << std::endl;
 
     // auto mesh = cube(2);
     // compute_orientation(*mesh);
-    // if(getVolume(*mesh) < 0){
-    //     for(auto &face : mesh->get_level<3>())
-    //         face.orientation *= -1;
-    // }
+    if(getVolume(*mesh) < 0){
+        for(auto &face : mesh->get_level<3>())
+            face.orientation *= -1;
+    }
 
-
-
-
+    smoothMesh(*mesh, 15, 165, 5, true);
 
     writeOFF("test.off", *mesh);
 
@@ -60,7 +61,7 @@ int  main(int argc, char *argv[])
     // // coarseIT(*mesh, 0.016, 1, 0);
     // // coarseIT(*mesh, 2.5, 0, 10);
 
-    // // smoothMesh(*mesh, 15, 165, 5, true);
+
     // // writeOFF("tmp.off", *mesh);
 
     // auto &global = *mesh->get_simplex_up();
