@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -248,8 +249,10 @@ public:
 		return _dimensions;
 	}
 */
-	template <typename NumType> 
-	operator tensor<NumType, _vector_dimension, _index_dimension>(){
+	template <typename NumType, 
+			typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
+			typename = std::enable_if_t<std::is_arithmetic<ElemType>::value>>
+	operator tensor<NumType, _vector_dimension, _index_dimension>() const {
 		tensor<NumType, _vector_dimension, _index_dimension> t;
 		std::copy(_data.cbegin(), _data.cend(), t.begin());
 		return t;

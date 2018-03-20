@@ -32,26 +32,27 @@ int  main(int argc, char *argv[])
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
     }
+
+    // auto mesh = std::get<1>(SurfaceMeshOld::readPDB_molsurf(argv[1]));
+
     // auto mesh = readOFF(argv[1]);
-    auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
-    if(mesh == nullptr){
-        std::cout << "Something bad happened..." << std::endl;
-        exit(1);
-    }
-    std::cout << "Done reading" << std::endl;
-    std::cout << "General protein statistics: " << std::endl;
-    std::cout << "# Vertices: " << mesh->size<1>() << std::endl;
-    std::cout << "# Edges: " << mesh->size<2>() << std::endl;
-    std::cout << "# Faces: " << mesh->size<3>() << std::endl;
+    // auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
+    auto mesh = readPDB_distgrid(argv[1],1.4);
+    // if(mesh == nullptr){
+    //     std::cout << "Something bad happened..." << std::endl;
+    //     exit(1);
+    // }
+    // std::cout << "Done reading" << std::endl;
+
 
     // auto mesh = cube(2);
     // compute_orientation(*mesh);
-    if(getVolume(*mesh) < 0){
-        for(auto &face : mesh->get_level<3>())
-            face.orientation *= -1;
-    }
+    // if(getVolume(*mesh) < 0){
+    //     for(auto &face : mesh->get_level<3>())
+    //         face.orientation *= -1;
+    // }
 
-    smoothMesh(*mesh, 15, 165, 5, true);
+    // smoothMesh(*mesh, 15, 165, 5, true);
 
     writeOFF("test.off", *mesh);
 

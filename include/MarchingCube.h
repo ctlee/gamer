@@ -28,13 +28,9 @@
 #include <bitset>
 #include <type_traits>
 #include <queue>
+#include "gamer.h"
 #include "SurfaceMesh.h"
 
-/** @brief The minimal volumes (in voxels) of islands to be removed */
-#define MIN_VOLUME        33333
-
-using fVector = tensor<float,3,1>;
-using iVector = tensor<int,3,1>;
 
 /// Marching cubes tables
 static const int edgeTable[256]={
@@ -330,14 +326,14 @@ static const int triTable[256][16] =
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
 
-int Vect2Index(const int i, const int j, const int k, const iVector& dim);
-
 template <typename NumType, typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
 		  class Inserter>
 std::unique_ptr<SurfaceMesh> marchingCubes(
 		NumType* dataset,
 		NumType maxval,
-		const iVector& dim, 
+		const i3Vector& dim, 
+		const f3Vector& span,
+		const f3Vector& min,
 		NumType isovalue,
 		Inserter holelist
 ){
@@ -349,9 +345,9 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	// TODO: (4) is it necessary to go through this three setp masking process?
 
 	// Mask all of the vertices connected to {0,0,0} outside of isosurface
-	std::deque<iVector> visit = {iVector({0,0,0})};
+	std::deque<i3Vector> visit = {i3Vector({0,0,0})};
 	while(!visit.empty()){
-		const iVector tmp = visit.front();
+		const i3Vector tmp = visit.front();
 		visit.pop_front();
 
 		// Look at the neighbor vertices
@@ -361,7 +357,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 					if((dataset[Vect2Index(i,j,k,dim)] < isovalue) 
 							&& !mask[Vect2Index(i,j,k,dim)]){
 						mask[Vect2Index(i,j,k,dim)] = true;
-						visit.push_back(iVector({i,j,k}));
+						visit.push_back(i3Vector({i,j,k}));
 					}	
 				}
 			}
@@ -375,12 +371,12 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 				if((dataset[Vect2Index(l,m,n,dim)] < isovalue) 
 						&& !mask[Vect2Index(l,m,n,dim)]){
 					int holesize = 1;
-					visit.push_back(iVector({l,m,n}));
+					visit.push_back(i3Vector({l,m,n}));
 
 					std::vector<int> holevoxels;
 
 					while(!visit.empty()){
-						const iVector tmp = visit.front();
+						const i3Vector tmp = visit.front();
 						visit.pop_front();
 
 						// Look at the neighbor vertices
@@ -393,7 +389,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 										holevoxels.push_back(idx);
 
 										mask[idx] = true;
-										visit.push_back(iVector({i,j,k}));
+										visit.push_back(i3Vector({i,j,k}));
 										holesize++;
 									}	
 								}
@@ -409,12 +405,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						}
 					}
 					else{
-						*holelist++ = Vector({static_cast<double>(l),
-											  static_cast<double>(m),
-											  static_cast<double>(n)});
-						std::cout << Vector({static_cast<double>(l),
-											 static_cast<double>(m),
-											 static_cast<double>(n)}) << std::endl;
+						Vector v = Vector({static_cast<double>(l),
+										   static_cast<double>(m),
+										   static_cast<double>(n)}).ElementwiseProduct(span);
+						*holelist++ = v;
+						std::cout << v << std::endl;
 					}
 				}		
 			}
@@ -425,7 +420,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	size_t vertexNum = 0;
 	size_t triNum = 0;
 	std::array<int,3>* triangles = new std::array<int,3>[dim[0]*dim[1]*dim[2]];
-	iVector* edges = new iVector[dim[0]*dim[1]*dim[2]];
+	i3Vector* edges = new i3Vector[dim[0]*dim[1]*dim[2]];
 	Vector* vertices = new Vector[dim[0]*dim[1]*dim[2]];
 
 	// This section in particular is weird...
@@ -434,10 +429,9 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
             for(int k = 0; k < dim[2]-1; k++){
             	int idx = Vect2Index(i,j,k,dim);
             	// If isovalue is within tolerance make it bigger
-            	if ((dataset[idx] > isovalue - 0.0001) &&
-            			(dataset[idx < isovalue + 0.0001]))
+            	if ((dataset[idx] > isovalue - 0.0001) && (dataset[idx] < isovalue + 0.0001))
             		dataset[idx] = isovalue + 0.0001;
-            	edges[idx] = iVector({-1,-1,-1});
+            	edges[idx] = i3Vector({-1,-1,-1});
 
             	if(dataset[idx] >= isovalue){
             		mask[idx] = false;
@@ -500,10 +494,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[0]];
 						den2 = dataset[indexTable[1]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k)
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[0] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -519,10 +514,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[1]];
 						den2 = dataset[indexTable[2]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k)
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[1] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -538,10 +534,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[3]];
 						den2 = dataset[indexTable[2]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k)
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[2] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -557,10 +554,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[0]];
 						den2 = dataset[indexTable[3]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j),
 												  static_cast<double>(k)
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[3] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -576,10 +574,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[4]];
 						den2 = dataset[indexTable[5]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k) + 1
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[4] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -595,10 +594,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[5]];
 						den2 = dataset[indexTable[6]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k) + 1
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[5] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -614,10 +614,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[7]];
 						den2 = dataset[indexTable[6]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j) + ratio,
 												  static_cast<double>(k) + 1
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[6] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -633,10 +634,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[4]];
 						den2 = dataset[indexTable[7]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + ratio,
 												  static_cast<double>(j),
 												  static_cast<double>(k) + 1
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[7] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -652,10 +654,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[0]];
 						den2 = dataset[indexTable[4]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j),
 												  static_cast<double>(k) + ratio
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[8] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -671,10 +674,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[1]];
 						den2 = dataset[indexTable[5]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i),
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k) + ratio
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[9] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -690,10 +694,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[2]];
 						den2 = dataset[indexTable[6]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j) + 1,
 												  static_cast<double>(k) + ratio
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[10] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -709,10 +714,11 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						den1 = dataset[indexTable[3]];
 						den2 = dataset[indexTable[7]];
 						NumType ratio = (den1 != den2) ? (isovalue-den1)/(den2-den1) : 0;
+						// std::cout << den1 << " " << den2 << " " << ratio << std::endl;
 						vertices[vertexNum] = Vector({static_cast<double>(i) + 1,
 												  static_cast<double>(j),
 												  static_cast<double>(k) + ratio
-												});
+												}).ElementwiseProduct(span);
 						cellVertices[11] = vertexNum;
 						edgeIdx = vertexNum;
 						vertexNum++;
@@ -734,7 +740,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     }
 
     for (int i = 0; i < vertexNum; ++i){
-    	mesh->insert<1>({i}, Vertex(vertices[i]));
+    	mesh->insert<1>({i}, Vertex(vertices[i]+min));
     }
 
     for (int i = 0; i < triNum; ++i){
@@ -745,7 +751,6 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     delete[] triangles;
 	delete[] mask;
 	delete[] edges;
-
 
 	compute_orientation(*mesh);
 	return mesh;

@@ -35,11 +35,9 @@
 #include <string>
 #include <fstream>
 #include <array>
+#include "gamer.h"
 #include "Vertex.h"
 
-
-using fVector = tensor<float,3,1>;
-using iVector = tensor<int,3,1>;
 
 namespace detail
 {
@@ -238,7 +236,7 @@ namespace detail
 
 
 struct AtomType {
-    fVector pos;    /**< @brief position */
+    f3Vector pos;    /**< @brief position */
     double radius; /**< @brief radius */
 };
 
@@ -314,8 +312,8 @@ bool readPDB(const std::string& filename, Inserter inserter)
 }
 
 
-template <typename Iterator>
-void getMinMax(Iterator begin, Iterator end, fVector& min, fVector& max, const float blobbyness)
+template <typename Iterator, typename BlurFunc>
+void getMinMax(Iterator begin, Iterator end, f3Vector& min, f3Vector& max, BlurFunc &&f)
 {
     float maxRad = 0.0;
     float tmpRad;
@@ -344,35 +342,30 @@ void getMinMax(Iterator begin, Iterator end, fVector& min, fVector& max, const f
         if (max[2] < z)
             max[2] = z;
 
-        tmpRad = curr->radius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);
+        tmpRad = f(curr->radius); // * sqrt(1.0 + log(detail::EPSILON) / blobbyness);
         if (maxRad < tmpRad)
             maxRad = tmpRad;
     }
 
-    min -= fVector({maxRad, maxRad, maxRad});
-    max += fVector({maxRad, maxRad, maxRad});
+    min -= f3Vector({maxRad, maxRad, maxRad});
+    max += f3Vector({maxRad, maxRad, maxRad});
 }
 
 template <typename Iterator>
 void blurAtoms(Iterator begin, Iterator end, 
         float* dataset, 
-        const fVector& min, 
-        const fVector& max, 
-        const iVector& dim, 
+        const f3Vector& min, 
+        const f3Vector& maxMin, 
+        const i3Vector& dim, 
         float blobbyness)
 {
-    // Functor to compute array index from 3D indices
-    auto Vect2Index = [&dim](const int i, const int j, const int k) 
-            -> int {
-        return k*dim[0]*dim[1] + j*dim[0] + i;
-    };
-
+    
     // Functor to calculate gaussian blur
-    auto evalDensity = [blobbyness](const AtomType& atom, fVector& pnt, float maxRadius) 
+    auto evalDensity = [blobbyness](const AtomType& atom, f3Vector& pnt, float maxRadius) 
             -> float {
         double expval;
 
-        fVector tmp = atom.pos - pnt;
+        f3Vector tmp = atom.pos - pnt;
         double r = tmp|tmp; 
         double r0 = atom.radius*atom.radius;
 
@@ -387,36 +380,23 @@ void blurAtoms(Iterator begin, Iterator end,
         return (float) exp(expval);
     };
 
-    // Values should be 0 upon initialization...
-    // for(int i = 0; i < dim[0]; i++){
-    //     for(int j = 0; j < dim[1]; j++){
-    //         for(int k = 0; k < dim[2]; k++){
-    //             if (dataset[IndexVect(i,j,k)] != 0)
-    //                 std::cerr << IndexVect(i,j,k) << ": is not zero." << std::endl;
-    //         }
-    //     }
-    // }
-
-    fVector span;
-
-    // TODO: How to implement elementwise division?
-
-    span = (max-min).ElementwiseDivision(static_cast<fVector>((dim - iVector({1,1,1}))));
+    f3Vector span;
+    span = (maxMin).ElementwiseDivision(static_cast<f3Vector>((dim - i3Vector({1,1,1}))));
 
     float radFactor = sqrt(1.0 + log(detail::EPSILON)/(2.0 * blobbyness));
 
     for (auto curr = begin; curr != end; ++curr){
         float maxRad = curr->radius * radFactor;
         // compute the dataset coordinates of the atom's center
-        fVector tmpVec = (curr->pos-min).ElementwiseDivision(span);
-        iVector c;
+        f3Vector tmpVec = (curr->pos-min).ElementwiseDivision(span);
+        i3Vector c;
         std::transform(tmpVec.begin(), tmpVec.end(), c.begin(), [](float v)-> int {return round(v);});
 
         // std::cout << "Max Radius: " << maxRad << std::endl;
 
         // compute the bounding box of the atom (maxRad^3)
-        iVector amin;
-        iVector amax;
+        i3Vector amin;
+        i3Vector amax;
         for (int j = 0; j < 3; ++j){
             int tmp;
             float tmpRad = maxRad/span[j];
@@ -436,14 +416,69 @@ void blurAtoms(Iterator begin, Iterator end,
             {
                 for (int i = amin[0]; i <= amax[0]; i++)
                 {
-                    fVector pnt = min + fVector({static_cast<float>(i),
+                    f3Vector pnt = min + f3Vector({static_cast<float>(i),
                                                  static_cast<float>(j),
                                                  static_cast<float>(k)}).ElementwiseProduct(span);
-                    dataset[Vect2Index(i, j, k)] += evalDensity(*curr, pnt, maxRad);
+                    dataset[Vect2Index(i, j, k, dim)] += evalDensity(*curr, pnt, maxRad);
                 }
             }
         }
     }
 }
 
+/**
+ * @brief      Compute the grid based Solvent Accessible Area.
+ * 
+ * Assumes that the domain is in the {+,+,+} octant.
+ *
+ * @param[in]  begin       The begin
+ * @param[in]  end         The end
+ * @param[in]  dim         The dim
+ * @param      dataset     The atom index
+ *
+ * @tparam     Iterator    { description }
+ */
+template <typename Iterator>
+void gridSAS(Iterator begin, Iterator end, const i3Vector& dim, float* dataset){
+    // For atom in atoms :
+    for (auto curr = begin; curr != end; ++curr){
+        float radius = curr->radius;
+        f3Vector pos = curr->pos;
+        // compute the dataset coordinates of the atom's center
+        i3Vector c;
+        std::transform(pos.begin(), pos.end(), c.begin(), [](float v)-> int {return round(v);});
+       
+        // compute bounding box for atom 
+        i3Vector amin;
+        i3Vector amax;
+        for (int j = 0; j < 3; ++j){
+            int tmp;
+            tmp     = (int)(c[j] - radius - 2);
+            amin[j] = (tmp < 0) ? 0 : tmp; // check if tmp is < 0
+            tmp     = (int)(c[j] + radius + 2);
+            amax[j] = (tmp > (dim[j] - 1)) ? (dim[j] - 1) : tmp;
+        }
+
+        // Blur kernel in bounding box
+        for (int k = amin[2]; k <= amax[2]; k++)
+        {
+            for (int j = amin[1]; j <= amax[1]; j++)
+            {
+                for (int i = amin[0]; i <= amax[0]; i++)
+                {
+                    f3Vector coord = f3Vector({static_cast<float>(i), static_cast<float>(j), static_cast<float>(k)});
+                    coord -= curr->pos;
+                    float dist = -(std::sqrt(coord|coord)-radius);
+                    int idx = Vect2Index(i,j,k,dim);
+
+                    if(dist > dataset[idx]){
+                        dataset[idx] = dist;
+                    }
+                }
+            }
+        }
+    }
+}  
+
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, float blobbyness, float isovalue);
+std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius);

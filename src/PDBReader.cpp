@@ -38,12 +38,63 @@
 #include "Vertex.h"
 
 
+std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius){
+    std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+
+    std::vector<AtomType> atomTypes;
+    // If readPDB errors return nullptr
+    if(!readPDB(filename, std::back_inserter(atomTypes)))
+    {
+        mesh.reset();
+        return mesh;
+    }
+    std::cout << "Atoms: " << atomTypes.size() << std::endl;
+    f3Vector min, max;    
+    getMinMax(atomTypes.cbegin(), atomTypes.cend(), min, max, [&radius](const float atomRadius)->float {return DIM_SCALE*(atomRadius + radius);});
+
+    float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
+    std::cout << "Min Dimension: " << min_dimension << std::endl;
+
+    i3Vector dim;
+    f3Vector maxMin = max-min;
+
+    dim = static_cast<i3Vector>((maxMin) + f3Vector({1,1,1})) * DIM_SCALE;
+
+    std::cout << "Dimension: " << dim << std::endl;
+    std::cout << "Min:" << min << std::endl;
+    std::cout << "Max:" << max << std::endl;
+
+    f3Vector span = (maxMin).ElementwiseDivision(static_cast<f3Vector>(dim) - f3Vector({1,1,1}));
+    std::cout << "Delta: " << span << std::endl;
+
+    // Move dataset to positive octant and scale
+    for(auto& atom : atomTypes){
+        atom.pos = (atom.pos-min).ElementwiseDivision(span);
+        atom.radius = (atom.radius + radius)/((span[0] + span[1] + span[2]) / 3.0);
+    }
+
+    float* dataset = new float[dim[0]*dim[1]*dim[2]];
+    for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
+        dataset[i] = -5.0f;
+    }
+    gridSAS(atomTypes.cbegin(), atomTypes.cend(), dim, dataset);
+
+    // for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
+    //     std::cout << dataset[i] << std::endl;
+    // }
+
+    std::vector<Vertex> holelist;
+    mesh = std::move(marchingCubes(dataset, 5.0f, dim, span, min, 0.0f, std::back_inserter(holelist)));
+
+
+    delete[] dataset;
+    return mesh;
+}
+
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, 
  		    const float blobbyness, 
 			float isovalue){
 	std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
-
-	std::ifstream fin(filename);
 
 	std::vector<AtomType> atomTypes;
     // If readPDB errors return nullptr
@@ -55,30 +106,36 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
 
     std::cout << "Atoms: " << atomTypes.size() << std::endl;
 
-    fVector min, max;    
-    getMinMax(atomTypes.cbegin(), atomTypes.cend(), min, max, blobbyness);
+    f3Vector min, max;    
+    getMinMax(atomTypes.cbegin(), atomTypes.cend(), min, max, 
+            [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);});
 
     float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
    
     std::cout << "Min Dimension: " << min_dimension << std::endl;
 
-    float DIM_SCALE = 2; // 0.5 Angstroms grid resolution is about right
-    iVector dim;
+    i3Vector dim;
 
-    fVector maxMin = max-min;
+    f3Vector maxMin = max-min;
 
-    dim = static_cast<iVector>((static_cast<iVector>(max-min) + iVector({1,1,1}))* DIM_SCALE);
+    dim = static_cast<i3Vector>((maxMin) + f3Vector({1,1,1})) * DIM_SCALE;
 
     std::cout << "Dimension: " << dim << std::endl;
     std::cout << "Min:" << min << std::endl;
     std::cout << "Max:" << max << std::endl;
-    printf("delta[3]: %f %f %f \n", (max[0] - min[0]) / (float)(dim[0] - 1),
-           (max[1] - min[1]) / (float)(dim[1] - 1), (max[2] - min[2]) / (float)(dim[2] - 1));
+
+    f3Vector span = (maxMin).ElementwiseDivision(static_cast<f3Vector>(dim) - f3Vector({1,1,1}));
+    std::cout << "Delta: " << span << std::endl;
 
     float* dataset = new float[dim[0]*dim[1]*dim[2]]();
 
+    // Bring atoms to +++ quadrant
+    // for(auto& atom : atomTypes){
+    //     atom.pos = (atom.pos-min).ElementwiseDivision(span);
+    // }
+
     std::cout << "Begin blurring coordinates" << std::endl;
-    blurAtoms(atomTypes.cbegin(), atomTypes.cend(), dataset, min, max, dim, blobbyness);
+    blurAtoms(atomTypes.cbegin(), atomTypes.cend(), dataset, min, maxMin, dim, blobbyness);
     std::cout << "Done blurring coords" << std::endl;
 
     float minval, maxval;
@@ -106,7 +163,8 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
     std::cout << "Isovalue: " << isovalue << std::endl;
  
     std::vector<Vertex> holelist;
-    mesh = std::move(marchingCubes(dataset, maxval, dim, isovalue, std::back_inserter(holelist)));
+    mesh = std::move(marchingCubes(dataset, maxval, dim, span, min, isovalue, std::back_inserter(holelist)));
     delete[] dataset;
+    // TODO: (0) What to do with holelist...
     return mesh;
 }

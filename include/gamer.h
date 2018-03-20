@@ -27,7 +27,7 @@
 //#include <libraries/triangle/triangle.h>
 
 //#define TRILIBRARY
-
+#include "tensor.h"
 
 /** @brief Isovalue used in the Marching Cube method */
 #define IsoValue          2.5
@@ -52,3 +52,13 @@
 // Other definitions and data structures
 /** @brief Other definition */
 #define _LITTLE_ENDIAN   1
+
+
+using Vector = tensor<double,3,1>;
+using f3Vector = tensor<float,3,1>;
+using i3Vector = tensor<int,3,1>;
+
+template <class T>
+std::size_t Vect2Index(const T i, const T j, const T k, const i3Vector& dim){
+    return k*dim[0]*dim[1] + j*dim[0] + i;
+}

@@ -2,9 +2,9 @@
 
 #include <iostream>
 #include <sstream>
+#include "gamer.h"
 #include "tensor.h"
 
-using Vector = tensor<double,3,1>;
 
 /**
  * @brief      Vertex class

@@ -81,7 +81,6 @@ list(APPEND SOURCES
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"
-    "src/MarchingCube.cpp"
 )
 
 add_library(gamershared SHARED ${SOURCES})
