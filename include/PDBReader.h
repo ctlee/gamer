@@ -35,6 +35,8 @@
 #include <string>
 #include <fstream>
 #include <array>
+#include <libraries/octree/octree.h>
+
 #include "gamer.h"
 #include "Vertex.h"
 
@@ -235,7 +237,7 @@ namespace detail
 } // End namespace detail
 
 
-struct AtomType {
+struct Atom {
     f3Vector pos;    /**< @brief position */
     double radius; /**< @brief radius */
 };
@@ -268,7 +270,7 @@ bool readPDB(const std::string& filename, Inserter inserter)
             std::smatch match;
             if (std::regex_match(line, match, detail::atom))
             {
-                AtomType atom;
+                Atom atom;
                 // See PDB file formatting guidelines
                 float x = std::atof(line.substr(30,8).c_str());
                 float y = std::atof(line.substr(38,8).c_str());
@@ -288,7 +290,7 @@ bool readPDB(const std::string& filename, Inserter inserter)
                         atom.radius = typeIT->second.radius;
                     }
                     else{
-                        std::cout << "Could not find AtomType of '" 
+                        std::cout << "Could not find atomtype of '" 
                                   << atomName << "' in residue '"
                                   << residueName << "'. " 
                                   << "Using default radius." << std::endl;
@@ -361,7 +363,7 @@ void blurAtoms(Iterator begin, Iterator end,
 {
     
     // Functor to calculate gaussian blur
-    auto evalDensity = [blobbyness](const AtomType& atom, f3Vector& pnt, float maxRadius) 
+    auto evalDensity = [blobbyness](const Atom& atom, f3Vector& pnt, float maxRadius) 
             -> float {
         double expval;
 
@@ -439,7 +441,7 @@ void blurAtoms(Iterator begin, Iterator end,
  * @tparam     Iterator    { description }
  */
 template <typename Iterator>
-void gridSAS(Iterator begin, Iterator end, const i3Vector& dim, float* dataset){
+void gridSAS(const Iterator begin, const Iterator end, const i3Vector& dim, float* dataset){
     // For atom in atoms :
     for (auto curr = begin; curr != end; ++curr){
         float radius = curr->radius;
@@ -453,9 +455,9 @@ void gridSAS(Iterator begin, Iterator end, const i3Vector& dim, float* dataset){
         i3Vector amax;
         for (int j = 0; j < 3; ++j){
             int tmp;
-            tmp     = (int)(c[j] - radius - 2);
+            tmp     = (int)(c[j] - radius - 1);
             amin[j] = (tmp < 0) ? 0 : tmp; // check if tmp is < 0
-            tmp     = (int)(c[j] + radius + 2);
+            tmp     = (int)(c[j] + radius + 1);
             amax[j] = (tmp > (dim[j] - 1)) ? (dim[j] - 1) : tmp;
         }
 
@@ -468,7 +470,7 @@ void gridSAS(Iterator begin, Iterator end, const i3Vector& dim, float* dataset){
                 {
                     f3Vector coord = f3Vector({static_cast<float>(i), static_cast<float>(j), static_cast<float>(k)});
                     coord -= curr->pos;
-                    float dist = -(std::sqrt(coord|coord)-radius);
+                    float dist = -(std::sqrt(coord|coord)-radius); // inside is positive
                     int idx = Vect2Index(i,j,k,dim);
 
                     if(dist > dataset[idx]){
@@ -478,7 +480,44 @@ void gridSAS(Iterator begin, Iterator end, const i3Vector& dim, float* dataset){
             }
         }
     }
-}  
+}
+
+template <typename Iterator>
+void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim, 
+        Octree<std::vector<Atom>>& oct, float* dataset, const float radius){
+    for (auto curr = begin; curr != end; ++curr){
+        f3Vector pos = (*curr).position;
+        
+        // compute bounding box for atom 
+        i3Vector amin;
+        i3Vector amax;
+        for (int i = 0; i < 3; ++i){
+            int tmp;
+            tmp     = (int)(pos[i] - radius - 1);
+            amin[i] = (tmp < 0) ? 0 : tmp; // check if tmp is < 0
+            tmp     = (int)(pos[i] + radius + 1);
+            amax[i] = (tmp > (dim[i] - 1)) ? (dim[i] - 1) : tmp;
+        }
+
+        // Blur kernel in bounding box
+        for (int k = amin[2]; k <= amax[2]; k++)
+        {
+            for (int j = amin[1]; j <= amax[1]; j++)
+            {
+                for (int i = amin[0]; i <= amax[0]; i++)
+                {
+                    f3Vector coord = f3Vector({static_cast<float>(i), static_cast<float>(j), static_cast<float>(k)});
+                    coord -= pos;
+                    float dist = -(std::sqrt(coord|coord)-radius);
+                    int idx = Vect2Index(i,j,k,dim);
+                    if(dist > dataset[idx]){
+                        dataset[idx] = dist;
+                    }
+                }
+            }
+        }
+    }
+}
 
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, float blobbyness, float isovalue);
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius);

@@ -333,7 +333,6 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 		NumType maxval,
 		const i3Vector& dim, 
 		const f3Vector& span,
-		const f3Vector& min,
 		NumType isovalue,
 		Inserter holelist
 ){
@@ -351,9 +350,9 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 		visit.pop_front();
 
 		// Look at the neighbor vertices
-		for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
+		for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
 			for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]-1); ++j){
-				for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
+				for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
 					if((dataset[Vect2Index(i,j,k,dim)] < isovalue) 
 							&& !mask[Vect2Index(i,j,k,dim)]){
 						mask[Vect2Index(i,j,k,dim)] = true;
@@ -365,9 +364,9 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	}	
 
 	// Find internal holes
-	for (int l = 0; l < dim[0]; l++){
+	for (int n = 0; n < dim[2]; n++){
 		for (int m = 0; m < dim[1]; m++){
-			for (int n = 0; n < dim[2]; n++){
+			for (int l = 0; l < dim[0]; l++){
 				if((dataset[Vect2Index(l,m,n,dim)] < isovalue) 
 						&& !mask[Vect2Index(l,m,n,dim)]){
 					int holesize = 1;
@@ -401,7 +400,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 					if (holesize < MIN_VOLUME){
 						for(auto idx : holevoxels){
 							dataset[idx] = maxval;
-							// TODO: (0) do we need to replace mask?
+							mask[idx] = false;
 						}
 					}
 					else{
@@ -424,9 +423,10 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	Vector* vertices = new Vector[dim[0]*dim[1]*dim[2]];
 
 	// This section in particular is weird...
-    for(int i = 0; i < dim[0]-1; i++){
+
+    for(int k = 0; k < dim[2]-1; k++){
         for(int j = 0; j < dim[1]-1; j++){
-            for(int k = 0; k < dim[2]-1; k++){
+		    for(int i = 0; i < dim[0]-1; i++){
             	int idx = Vect2Index(i,j,k,dim);
             	// If isovalue is within tolerance make it bigger
             	if ((dataset[idx] > isovalue - 0.0001) && (dataset[idx] < isovalue + 0.0001))
@@ -740,9 +740,8 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     }
 
     for (int i = 0; i < vertexNum; ++i){
-    	mesh->insert<1>({i}, Vertex(vertices[i]+min));
+    	mesh->insert<1>({i}, Vertex(vertices[i]));
     }
-
     for (int i = 0; i < triNum; ++i){
     	mesh->insert<3>(triangles[i]);
     }

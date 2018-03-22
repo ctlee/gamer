@@ -37,7 +37,7 @@ int  main(int argc, char *argv[])
 
     // auto mesh = readOFF(argv[1]);
     // auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
-    auto mesh = readPDB_distgrid(argv[1],1.4);
+    auto mesh = readPDB_distgrid(argv[1], 1.4);
     // if(mesh == nullptr){
     //     std::cout << "Something bad happened..." << std::endl;
     //     exit(1);
