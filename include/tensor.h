@@ -34,6 +34,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <sstream>
 
 // TODO: rename this namespace to something else...
 namespace util
@@ -274,6 +275,12 @@ public:
 		}
 		output << ")";
 		return output;
+	}
+
+	std::string as_string() const {
+		std::ostringstream output;
+		output << *this;
+		return output.str();
 	}
 
 	template <typename... Ts>
