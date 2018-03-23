@@ -3,7 +3,6 @@
 #include "WrapSurfaceMesh.h"
 #include "SurfaceMesh.h"
 #include "Vertex.h"
-#include "util.h"
 
 
 using WSM = WrappedSurfaceMesh;

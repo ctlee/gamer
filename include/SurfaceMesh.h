@@ -326,6 +326,17 @@ tensor<double,3,2> computeLocalStructureTensor(
         const SurfaceMesh::SimplexID<1> vertexID, 
         const int rings);
 
+/**
+ * @brief      Smooth the surface mesh 
+ *
+ * @param      mesh            The mesh
+ * @param[in]  maxMinAngle     The maximum minimum angle
+ * @param[in]  minMaxAngle     The minimum maximum angle
+ * @param[in]  maxIter         The maximum iterator
+ * @param[in]  preserveRidges  The preserve ridges
+ *
+ * @return     { description_of_the_return_value }
+ */
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);

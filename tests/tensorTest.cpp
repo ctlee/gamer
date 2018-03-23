@@ -22,4 +22,6 @@ TEST(TensorTest,MathOperations){
     auto v01 = v0 ^ v1;
     auto v10 = v1 ^ v0;
     EXPECT_EQ(v01, -v10);
+
+    // TODO: (0) add test for elementwise division etc...
 }

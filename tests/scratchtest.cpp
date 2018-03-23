@@ -32,12 +32,18 @@ int  main(int argc, char *argv[])
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
     }
-    auto mesh = readPDB_gauss(argv[1], 1, 1);
-    if(mesh == nullptr){
-        std::cout << "Something bad happened..." << std::endl;
-        exit(1);
-    }
-    std::cout << "Done reading" << std::endl;
+
+    // auto mesh = std::get<1>(SurfaceMeshOld::readPDB_molsurf(argv[1]));
+
+    // auto mesh = readOFF(argv[1]);
+    // auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
+    auto mesh = readPDB_distgrid(argv[1], 1.4);
+    // if(mesh == nullptr){
+    //     std::cout << "Something bad happened..." << std::endl;
+    //     exit(1);
+    // }
+    // std::cout << "Done reading" << std::endl;
+
 
     // auto mesh = cube(2);
     // compute_orientation(*mesh);
@@ -46,13 +52,17 @@ int  main(int argc, char *argv[])
     //         face.orientation *= -1;
     // }
 
+    // smoothMesh(*mesh, 15, 165, 5, true);
+
+    writeOFF("test.off", *mesh);
+
     // for(auto &face : mesh->get_level<3>())
     //     face.marker = 23;
 
     // // coarseIT(*mesh, 0.016, 1, 0);
     // // coarseIT(*mesh, 2.5, 0, 10);
 
-    // // smoothMesh(*mesh, 15, 165, 5, true);
+
     // // writeOFF("tmp.off", *mesh);
 
     // auto &global = *mesh->get_simplex_up();

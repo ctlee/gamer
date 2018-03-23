@@ -159,6 +159,14 @@ std::tuple<SurfaceMeshOld*,SurfaceMesh_ASC*> SurfaceMeshOld::readPDB_molsurf(std
     num    = ExtractSAS(atom_list.size(), atom_list.data());
     finish = clock();
 
+    for(int q=0; q < GLOBAL_xdim; ++q){
+        for(int r=0; r < GLOBAL_ydim; ++r){
+            for(int s=0; s < GLOBAL_zdim; ++s){
+                std::cout << GLOBAL_atom_index[IndexVect(q,r,s)] << std::endl;
+            }
+        }
+    }
+
     // printf("   Extract SAS voxels: CPU Time = %f seconds \n",(double)(finish-begin)/CLOCKS_PER_SEC);
     // printf("   Number of boundary voxels: %d\n\n",num);
 
@@ -791,7 +799,6 @@ FLT2VECT FindIntersection(int n, int m, int j, int k, ATOM *atom_list)
             intersect.y = (float)(dist / ax);
         }
     }
-
     return intersect;
 }
 
@@ -882,6 +889,7 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
                 {
                     int count = 0;
 
+                    // Look at neighbor voxels
                     for (k = std::max(l - 1, 0); k <= std::min(l + 1, GLOBAL_zdim - 1); k++)
                     {
                         for (j = std::max(n - 1, 0); j <= std::min(n + 1, GLOBAL_ydim - 1); j++)
