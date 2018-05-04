@@ -9,6 +9,7 @@ namespace std {
 	%template(VertexKey) array<int,1>;
 	%template(EdgeKey) array<int,2>;
 	%template(FaceKey) array<int, 3>;
+	//%template(Edge) array<Vertex, 2>;
 }
 
 %include "Vertex.i"
@@ -20,13 +21,10 @@ namespace std {
 
 class SurfaceMesh{
 
-
-//%rename (insert_vertex) insert<1>(const std::array<int, 1> &s, const Vertex &data);
-
-
 public:	
 	SurfaceMesh();
 	~SurfaceMesh();
+
 
 	%extend {
 		void insertVertex(std::array<int, 1> &s, const Vertex &data) {
@@ -34,7 +32,19 @@ public:
 		}
 	}
 
-	//void insert<1>(const std::array<int, 1> &s, const Vertex &data);
+	%extend {
+		void insertEdge(std::array<int, 2> &s) {
+			$self->insert(s);
+		}
+	}
+
+
+	%extend {
+		void insertFace(std::array<int, 3> &s, const Face &data) {
+			$self->insert(s, data);
+		}
+	}
+
 };
 
 void print(const SurfaceMesh& mesh);
