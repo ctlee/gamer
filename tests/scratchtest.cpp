@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "stringutil.h"
-#include "SurfaceMeshOld.h"
 #include "SurfaceMesh.h"
 #include "TetMesh.h"
 #include "Vertex.h"

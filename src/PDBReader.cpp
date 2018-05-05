@@ -39,6 +39,15 @@
 #include "Vertex.h"
 
 
+/**
+ * @brief      WIP. Compute the Connolly surface using a distance grid based
+ *             strategy
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  radius    The radius
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius){
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
@@ -94,15 +103,16 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
         oct(c[0],c[1],c[2]).push_back(*curr);
     }
 
+    // Reset dataset
     for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
         dataset[i] = -5.0f;
     }
 
     auto SASverts = SASmesh->get_level<1>();
     gridSES(SASverts.begin(), SASverts.end(), dim, oct, dataset, radius);
-    for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
-        std::cout << dataset[i] << std::endl;
-    } 
+    // for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
+    //     std::cout << dataset[i] << std::endl;
+    // } 
 
     mesh = std::move(marchingCubes(dataset, 5.0f, dim, span, 0.0f, std::back_inserter(holelist)));
     delete[] dataset;
@@ -114,6 +124,15 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
     return mesh;
 }
 
+/**
+ * @brief      Reads a pdb gauss.
+ *
+ * @param[in]  filename    The filename
+ * @param[in]  blobbyness  The blobbyness
+ * @param[in]  isovalue    The isovalue
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, 
  		    const float blobbyness, 
 			float isovalue){

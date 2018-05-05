@@ -59,21 +59,21 @@ endforeach()
 # Change this to not use GLOB
 #file(GLOB SOURCES "src/*.C")
 list(APPEND SOURCES 
-    "src/CorrectNormals.C"
-    "src/GemMesh.C"
-    "src/GenerateSphereMesh.C"
-    "src/MarchingCubeOld.C"
-    "src/PDB2Mesh.C"
-    "src/PDB2Volume.C"
-    "src/ReadLattice.C"
-    "src/ReadWriteMesh.C"
-    "src/RegionGrowing.C"
-    "src/SurfaceMeshOld.C"
-    "src/SurfExtract.C"
-    "src/SurfRefine.C"
-    "src/SurfSmooth.C"
-    "src/Triangulate.C"
-    "src/WrapSurfaceMesh.C"
+    # "src/CorrectNormals.C"
+    # "src/GemMesh.C"
+    # "src/GenerateSphereMesh.C"
+    # "src/MarchingCubeOld.C"
+    # "src/PDB2Mesh.C"
+    # "src/PDB2Volume.C"
+    # "src/ReadLattice.C"
+    # "src/ReadWriteMesh.C"
+    # "src/RegionGrowing.C"
+    # "src/SurfaceMeshOld.C"
+    # "src/SurfExtract.C"
+    # "src/SurfRefine.C"
+    # "src/SurfSmooth.C"
+    # "src/Triangulate.C"
+    # "src/WrapSurfaceMesh.C"
 
     "src/OFF_SurfaceMesh.cpp"
     "src/OBJ_SurfaceMesh.cpp"
@@ -81,6 +81,7 @@ list(APPEND SOURCES
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"
+    "src/pdb2mesh.cpp"
 )
 
 add_library(gamershared SHARED ${SOURCES})
@@ -103,7 +104,7 @@ if(BUILD_BLENDER)
     add_subdirectory(swig)
 endif(BUILD_BLENDER)
 
-add_subdirectory(tools)
+# add_subdirectory(tools)
 
 if(BUILD_TESTS)
     add_subdirectory(tests)

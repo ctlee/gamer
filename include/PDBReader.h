@@ -519,5 +519,6 @@ void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim,
     }
 }
 
+std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& filename);
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, float blobbyness, float isovalue);
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius);
