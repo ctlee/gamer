@@ -6,7 +6,7 @@ set(BLENDER_EXECUTABLE "")
 set(BLENDER_VERSION "")
 if(APPLE)
     # First look to see if it's installed as an app bundle...
-    set(bundle "/Applications/blender.app")
+    set(bundle "/Applications/Blender/blender.app")
     if(EXISTS ${bundle} AND EXISTS "${bundle}/Contents/Info.plist")
         # Parse Info.plist for exe and version
         set(line_is_main_executable 0)

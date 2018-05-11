@@ -57,6 +57,9 @@ int  main(int argc, char *argv[])
     smoothMesh(*mesh, 15, 165, 5, true);
     writeOFF("test.off", *mesh);
 
+    std::cout << "decltype(i) is " << type_name<decltype(mesh->get_level<1>())>() << '\n';
+
+
     // for(auto &face : mesh->get_level<3>())
     //     face.marker = 23;
 

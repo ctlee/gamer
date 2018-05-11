@@ -48,7 +48,7 @@ set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
 add_subdirectory(libraries)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(include)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # List the include directories...
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
