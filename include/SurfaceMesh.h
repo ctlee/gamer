@@ -35,9 +35,6 @@
 #include <utility>
 #include "Vertex.h"
 
-// The number of rings to use to compute local structure tensor
-#define RINGS 2
-
 /**
  * @brief      Properties that Faces should have
  */

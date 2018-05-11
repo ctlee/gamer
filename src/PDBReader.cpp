@@ -31,7 +31,6 @@
 #include <cmath>
 #include <vector>
 #include <limits>
-#include <libraries/octree/octree.h>
 
 #include "SurfaceMesh.h"
 #include "MarchingCube.h"
@@ -94,13 +93,11 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
     std::vector<Vertex> holelist;
     std::unique_ptr<SurfaceMesh> SASmesh = std::move(marchingCubes(dataset, 5.0f, dim, span, 0.0f, std::back_inserter(holelist)));
 
-    Octree<std::vector<Atom>> oct(std::max(std::max(dim[0],dim[1]), dim[2]));
     for (auto curr = atoms.cbegin(); curr != atoms.cend(); ++curr){
         f3Vector pos = curr->pos;
         // compute the dataset coordinates of the atom's center
         i3Vector c;
         std::transform(pos.begin(), pos.end(), c.begin(), [](float v)-> int {return round(v);});
-        oct(c[0],c[1],c[2]).push_back(*curr);
     }
 
     // Reset dataset
@@ -109,7 +106,7 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
     }
 
     auto SASverts = SASmesh->get_level<1>();
-    gridSES(SASverts.begin(), SASverts.end(), dim, oct, dataset, radius);
+    gridSES(SASverts.begin(), SASverts.end(), dim, dataset, radius);
     // for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
     //     std::cout << dataset[i] << std::endl;
     // } 

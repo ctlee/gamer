@@ -35,7 +35,6 @@
 #include <string>
 #include <fstream>
 #include <array>
-#include <libraries/octree/octree.h>
 
 #include "gamer.h"
 #include "Vertex.h"
@@ -484,7 +483,7 @@ void gridSAS(const Iterator begin, const Iterator end, const i3Vector& dim, floa
 
 template <typename Iterator>
 void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim, 
-        Octree<std::vector<Atom>>& oct, float* dataset, const float radius){
+        float* dataset, const float radius){
     for (auto curr = begin; curr != end; ++curr){
         f3Vector pos = (*curr).position;
         

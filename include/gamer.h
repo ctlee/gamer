@@ -25,12 +25,11 @@
 #pragma once
 
 //#include <libraries/triangle/triangle.h>
-
 //#define TRILIBRARY
 #include "tensor.h"
 
-/** @brief Isovalue used in the Marching Cube method */
-#define IsoValue          2.5
+// The number of rings to use to compute local structure tensor
+#define RINGS 3
 
 /** @brief Blurring blobyness used in conversion from PDB/PQR to 3D volumes */
 #define BLOBBYNESS        -0.2f
@@ -38,20 +37,13 @@
 /** @brief Discretization rate of 3D volumes */
 #define DIM_SCALE         1.99
 
-/** @brief Coarsening Rate in surface post-processing */
-#define CoarsenRate       0.1666
-
 /** @brief The minimal volumes (in voxels) of islands to be removed */
 #define MIN_VOLUME        333333
 
-/** @brief The size of the bounding sphere (= object size X the following rate) */
-#define SphereRatio       40
-#define MaxVal            999999
-#define MaxAtom           10
 
-// Other definitions and data structures
-/** @brief Other definition */
-#define _LITTLE_ENDIAN   1
+// // Other definitions and data structures
+// /** @brief Other definition */
+// #define _LITTLE_ENDIAN   1
 
 
 using Vector = tensor<double,3,1>;

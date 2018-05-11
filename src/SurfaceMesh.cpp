@@ -725,7 +725,7 @@ tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
     casc::kneighbors_up(mesh, vertexID, rings, nbors);
     // local structure tensor
     tensor<double, 3, 2> lst = tensor<double, 3, 2>();
-    for (auto nid : nbors)
+    for (SurfaceMesh::SimplexID<1> nid : nbors)
     {
         auto norm = getNormal(mesh, nid);           // Get Vector normal
         norm /= std::sqrt(norm|norm);               // normalize

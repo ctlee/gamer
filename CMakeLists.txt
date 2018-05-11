@@ -104,7 +104,7 @@ if(BUILD_BLENDER)
     add_subdirectory(swig)
 endif(BUILD_BLENDER)
 
-# add_subdirectory(tools)
+add_subdirectory(tools)
 
 if(BUILD_TESTS)
     add_subdirectory(tests)

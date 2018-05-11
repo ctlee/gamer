@@ -37,6 +37,8 @@
 #include <cmath>
 
 #define IndexVect1(i, j, k) ((k) * xdim1 * ydim1 + (j) * xdim1 + (i))
+#define MaxVal            999999
+#define MaxAtom           10
 
 struct MOL_VERTEX {
     float         x;     // vertex coordinate
@@ -1019,7 +1021,7 @@ void getMinMax(Iterator begin,
     }
 }
 
-std::unique_ptr<SurfaceMesh> readPDB_molsurf(std::string input_name)
+std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
 {
     int       i, j, k;
     int       a, b, c, d;
@@ -1090,13 +1092,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(std::string input_name)
     num    = ExtractSAS(atom_list.size(), atom_list.data());
     finish = clock();
 
-    for(int q=0; q < GLOBAL_xdim; ++q){
-        for(int r=0; r < GLOBAL_ydim; ++r){
-            for(int s=0; s < GLOBAL_zdim; ++s){
-                std::cout << GLOBAL_atom_index[IndexVect(q,r,s)] << std::endl;
-            }
-        }
-    }
+    // for(int q=0; q < GLOBAL_xdim; ++q){
+    //     for(int r=0; r < GLOBAL_ydim; ++r){
+    //         for(int s=0; s < GLOBAL_zdim; ++s){
+    //             std::cout << GLOBAL_atom_index[IndexVect(q,r,s)] << std::endl;
+    //         }
+    //     }
+    // }
 
     // printf("   Extract SAS voxels: CPU Time = %f seconds \n",(double)(finish-begin)/CLOCKS_PER_SEC);
     // printf("   Number of boundary voxels: %d\n\n",num);
@@ -1505,6 +1507,7 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(std::string input_name)
     free(GLOBAL_vertex);
     free(GLOBAL_quads);
 
+    compute_orientation(*mesh);
     return mesh;
 }
 
