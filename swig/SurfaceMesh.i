@@ -9,6 +9,11 @@
 %template(EdgeKey) std::array<int,2>;
 %template(FaceKey) std::array<int, 3>;
 
+%include "std_unique_ptr.i"
+
+
+wrap_unique_ptr(SMUniquePtr, SurfaceMesh);
+
 %include "SurfaceMesh.h"
 
 %inline %{
@@ -23,12 +28,18 @@ public:
     {
       return this;
     }
-// private:
+
+    T& next(){
+    	if(curr != end)
+    		return *curr++;
+    	else
+    		throw StopIterator();
+    }
+
     IT curr;
     IT end;
 };
 %}
-
 
 %exception IteratorWrapper::next {
   try
@@ -42,24 +53,25 @@ public:
   }
 }
 
-%extend IteratorWrapper<SMVDataIterator, Vertex>
-{
-  Vertex& next()
-  {
-    if ($self->curr != $self->end)
-    {
-      // dereference the iterator and return reference to the object,
-      // after that it increments the iterator
-      return *$self->curr++;
-    }
-    throw StopIterator();
-  }
-}
+class Face {};
+
+// %extend IteratorWrapper<SMVDataIterator, Vertex>
+// {
+//   Vertex& next()
+//   {
+//     if ($self->curr != $self->end)
+//     {
+//       // dereference the iterator and return reference to the object,
+//       // after that it increments the iterator
+//       return *$self->curr++;
+//     }
+//     throw StopIterator();
+//   }
+// }
 
 
 %template(VIT) IteratorWrapper<SMVDataIterator, Vertex>;
-
-
+%template(FIT) IteratorWrapper<SMFDataIterator, Face>;
 
 // Class to shadow complicated alias
 class SurfaceMesh{
@@ -93,9 +105,6 @@ public:
 		def vertices(self):
 			for v in self.getVertexIT():
 				yield v
-			# iterable = self.getVertexIT();	
-			# for i in range(self.sizeVertices()):
-			# yield iterable.next()
 	%}
 	}
 };

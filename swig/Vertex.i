@@ -6,7 +6,6 @@
 %ignore Vertex::operator=(const Vertex& v); //created a separate copy function if necessary
 %ignore Vertex(const Vertex& x);
 %ignore Vertex(const Vertex&& x);
-%ignore operator<<(std::ostream& output, const Vertex& v);
 
 
 %rename(vector) operator Vector;
@@ -21,8 +20,17 @@
 %rename(getitem) operator[](std::size_t index);
 %rename(copy) operator=(const Vertex& v);
 
-
+// %feature("python:slot", "tp_str", functype="reprfunc") Vertex::to_string;
+%ignore operator<<(std::ostream& output, const Vertex& v);
 %include "Vertex.h"
+// %feature("python:slot", "tp_repr", functype="reprfunc") Vertex::to_string;
+
+// %extend Vertex{
+// 	std::string to_string(){
+// 		return $self->to_string();
+// 	}	
+// }
+
 
 class Vector{
 public:	

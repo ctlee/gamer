@@ -105,8 +105,9 @@ struct complex_traits
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 using SMVertIterator = SurfaceMesh::SimplexIDIterator<1>;
 using SMVDataIterator = SurfaceMesh::DataIterator<1>;
+using SMFDataIterator = SurfaceMesh::DataIterator<3>;
 
-#ifndef SWIG
+
 /**
  * @brief      Reads in a GeomView OFF file.
  *
@@ -116,6 +117,7 @@ using SMVDataIterator = SurfaceMesh::DataIterator<1>;
  */
 std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
 
+#ifndef SWIG
 /**
  * @brief      Write the SurfaceMesh to file in OFF format.
  *
