@@ -57,7 +57,13 @@ int  main(int argc, char *argv[])
     smoothMesh(*mesh, 15, 165, 5, true);
     writeOFF("test.off", *mesh);
 
-    std::cout << "decltype(i) is " << type_name<decltype(mesh->get_level<1>())>() << '\n';
+
+    auto it = mesh->get_level_id<1>();
+
+    std::cout << "decltype(i) is " << type_name<decltype(mesh->get_level_id<1>())>() << '\n';
+    std::cout << "decltype(SurfaceMesh) is " << type_name<decltype(*mesh)>() << std::endl;
+
+
 
 
     // for(auto &face : mesh->get_level<3>())

@@ -35,6 +35,8 @@
 #include <utility>
 #include "Vertex.h"
 
+
+#ifndef SWIG
 /**
  * @brief      Properties that Faces should have
  */
@@ -98,12 +100,13 @@ struct complex_traits
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable>;
 };
+#endif //SWIG
 
-// This alias is for legacy purposes...
-using SurfaceMesh_ASC = casc::simplicial_complex<complex_traits>;
-using ASC = casc::simplicial_complex<complex_traits>; // Alias for the lazy
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
+using SMVertIterator = SurfaceMesh::SimplexIDIterator<1>;
+using SMVDataIterator = SurfaceMesh::DataIterator<1>;
 
+#ifndef SWIG
 /**
  * @brief      Reads in a GeomView OFF file.
  *
@@ -133,7 +136,6 @@ double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 double getVolume(const SurfaceMesh &mesh);
 int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
-
 
 /**
  * @brief      Terminal case
@@ -605,4 +607,5 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
 
 std::unique_ptr<SurfaceMesh> sphere(int order);
 std::unique_ptr<SurfaceMesh> cube(int order);
+#endif //SWIG
 

@@ -1,18 +1,15 @@
 %{
+#include <iostream>
 #include "SurfaceMesh.h"
-#include "libraries/casc/casc"
-
 %}
 
 %include <std_array.i>
-%include <carrays.i>
-namespace std {
-	%template(VertexKey) array<int,1>;
-	%template(EdgeKey) array<int,2>;
-	%template(FaceKey) array<int, 3>;
-}
 
-%include "Vertex.i"
+%template(VertexKey) std::array<int,1>;
+%template(EdgeKey) std::array<int,2>;
+%template(FaceKey) std::array<int, 3>;
+
+%include "SurfaceMesh.h"
 
 %inline %{
 class StopIterator {};
@@ -20,17 +17,19 @@ class StopIterator {};
 template <typename IT, typename T>
 class IteratorWrapper {
 public:
-    Iterator(IT _cur, IT _end) : cur(_cur), end(_end) {}
-    Iterator* __iter__()
+    IteratorWrapper(IT _begin, IT _end): curr(_begin), end(_end) {}
+	
+	IteratorWrapper* __iter__()
     {
       return this;
     }
-    IT cur;
+// private:
+    IT curr;
     IT end;
-  };
+};
 %}
 
-%include "exception.i"
+
 %exception IteratorWrapper::next {
   try
   {
@@ -43,22 +42,26 @@ public:
   }
 }
 
-%extend Iterator
+%extend IteratorWrapper<SMVDataIterator, Vertex>
 {
-  T& next()
+  Vertex& next()
   {
-    if ($self->cur != $self->end)
+    if ($self->curr != $self->end)
     {
       // dereference the iterator and return reference to the object,
       // after that it increments the iterator
-      return *$self->cur++;
+      return *$self->curr++;
     }
     throw StopIterator();
   }
 }
 
-// %template(VertexIterator) Iterator<VertexIT, Vertex>;
 
+%template(VIT) IteratorWrapper<SMVDataIterator, Vertex>;
+
+
+
+// Class to shadow complicated alias
 class SurfaceMesh{
 public:	
 	%extend {
@@ -71,7 +74,6 @@ public:
 		void insertFace(std::array<int, 3> &s, const Face &data) {
 			$self->insert(s, data);
 		}
-		
 		int sizeVertices(){
 			return $self->size<1>();
 		}
@@ -82,23 +84,21 @@ public:
 			return $self->size<3>();
 		}
 
-		// VertexIterator getVertexIT(){
-		// 	return std::static_cast<VertexIterator>($self->get_level<1>());
-		// }
+		IteratorWrapper<SMVDataIterator, Vertex> getVertexIT(){
+			auto it = $self->get_level<1>();
+			return IteratorWrapper<SMVDataIterator, Vertex>(it.begin(), it.end());
+		}
 
-	// %pythoncode%{
-	// 	def vertices(self):
-	// 		iterable = self.getVertexIT();	
-	// 		for i in range(self.sizeVertices()):
-	// 			yield next(iterable)
-	// %}
+	%pythoncode %{
+		def vertices(self):
+			for v in self.getVertexIT():
+				yield v
+			# iterable = self.getVertexIT();	
+			# for i in range(self.sizeVertices()):
+			# yield iterable.next()
+	%}
 	}
 };
-
-// def vertices(self):
-//     "Return an iterator over vertices"
-//     for i in range(self.num_vertices):
-//         yield _Vertex_getitem(self, i)
 
 %rename(printMesh) print(const SurfaceMesh &mesh);
 void print(const SurfaceMesh& mesh);

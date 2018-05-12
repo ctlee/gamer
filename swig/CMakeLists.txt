@@ -35,9 +35,10 @@ endforeach()
 SET(CMAKE_SWIG_FLAGS "")
 
 # SET(SWIG_MODULE_gamer_EXTRA_DEPS "../include/WrapSurfaceMesh.h" "../src/WrapSurfaceMesh.C")
+SET(SWIG_MODULE_gamer_EXTRA_DEPS "")
 
 SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-builtin")
+# SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-builtin")
 SWIG_ADD_MODULE(gamer python gamer.i)
 SWIG_LINK_LIBRARIES(gamer ${PYTHON_LIBRARIES} gamerstatic)
 
