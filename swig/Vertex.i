@@ -23,7 +23,7 @@
 // %feature("python:slot", "tp_str", functype="reprfunc") Vertex::to_string;
 %ignore operator<<(std::ostream& output, const Vertex& v);
 %include "Vertex.h"
-// %feature("python:slot", "tp_repr", functype="reprfunc") Vertex::to_string;
+%feature("python:slot", "tp_repr", functype="reprfunc") Vertex::to_string;
 
 // %extend Vertex{
 // 	std::string to_string(){
