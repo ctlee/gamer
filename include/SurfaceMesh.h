@@ -103,10 +103,6 @@ struct complex_traits
 #endif //SWIG
 
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
-using SMVertIterator = SurfaceMesh::SimplexIDIterator<1>;
-using SMVDataIterator = SurfaceMesh::DataIterator<1>;
-using SMFDataIterator = SurfaceMesh::DataIterator<3>;
-
 
 /**
  * @brief      Reads in a GeomView OFF file.

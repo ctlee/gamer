@@ -54,14 +54,17 @@ int  main(int argc, char *argv[])
             face.orientation *= -1;
     }
 
-    smoothMesh(*mesh, 15, 165, 5, true);
+    // coarseIT(*mesh, 0.016, 1, 0);
+    // coarseIT(*mesh, 2.5, 0, 10);
+ 
+    // smoothMesh(*mesh, 15, 165, 5, true);
     writeOFF("test.off", *mesh);
 
 
-    auto it = mesh->get_level_id<1>();
+    // auto it = mesh->get_level_id<1>();
 
-    std::cout << "decltype(i) is " << type_name<decltype(mesh->get_level_id<1>())>() << '\n';
-    std::cout << "decltype(SurfaceMesh) is " << type_name<decltype(*mesh)>() << std::endl;
+    // std::cout << "decltype(i) is " << type_name<decltype(mesh->get_level_id<1>())>() << '\n';
+    // std::cout << "decltype(SurfaceMesh) is " << type_name<decltype(*mesh)>() << std::endl;
 
 
 

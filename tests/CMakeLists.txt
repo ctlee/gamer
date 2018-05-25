@@ -46,7 +46,8 @@ add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
 
 
 add_executable(scratchtest scratchtest.cpp)
-target_link_libraries(scratchtest gamershared profiler)
+target_link_libraries(scratchtest gamershared)
+# target_link_libraries(scratchtest gamershared profiler)
 
 add_executable(masonscratch masonscratch.cpp)
 set_target_properties(masonscratch PROPERTIES COMPILE_FLAGS "-std=c++14")

@@ -38,9 +38,21 @@ SET(CMAKE_SWIG_FLAGS "")
 SET(SWIG_MODULE_gamer_EXTRA_DEPS "")
 
 SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-O")
 # SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-builtin")
+
+
 SWIG_ADD_MODULE(gamer python gamer.i)
-SWIG_LINK_LIBRARIES(gamer ${PYTHON_LIBRARIES} gamerstatic)
+
+# Handle some problems with Anaconda dylib linking in OSX
+if(APPLE)
+    swig_link_libraries(gamer ${swigpy_LINK_LIBRARIES})
+    set_target_properties(${SWIG_MODULE_gamer_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+else()
+    swig_link_libraries(gamer ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
+endif()
+
+SWIG_LINK_LIBRARIES(gamer gamerstatic)
 
 install(TARGETS _gamer DESTINATION lib/site-packages)
 install(FILES ${CMAKE_BINARY_DIR}/swig/gamer.py DESTINATION lib/site-packages)

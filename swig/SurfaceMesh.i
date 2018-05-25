@@ -1,6 +1,10 @@
 %{
 #include <iostream>
 #include "SurfaceMesh.h"
+
+using SMVertIterator = SurfaceMesh::SimplexIDIterator<1>;
+using SMVDataIterator = SurfaceMesh::DataIterator<1>;
+using SMFDataIterator = SurfaceMesh::DataIterator<3>;
 %}
 
 %include <std_array.i>
@@ -29,7 +33,16 @@ public:
       return this;
     }
 
+    // Iterator function for python 2.x
     T& next(){
+    	if(curr != end)
+    		return *curr++;
+    	else
+    		throw StopIterator();
+    }
+
+    // Iterator function for python 3.x
+    T& __next__(){
     	if(curr != end)
     		return *curr++;
     	else
@@ -42,6 +55,18 @@ public:
 %}
 
 %exception IteratorWrapper::next {
+  try
+  {
+    $action // calls %extend function next() below
+  }
+  catch (StopIterator)
+  {
+    PyErr_SetString(PyExc_StopIteration, "End of iterator");
+    return NULL;
+  }
+}
+
+%exception IteratorWrapper::__next__ {
   try
   {
     $action // calls %extend function next() below
