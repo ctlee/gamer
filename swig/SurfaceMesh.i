@@ -13,10 +13,8 @@ using SMFDataIterator = SurfaceMesh::DataIterator<3>;
 %template(EdgeKey) std::array<int,2>;
 %template(FaceKey) std::array<int, 3>;
 
-%include "std_unique_ptr.i"
-
-
 wrap_unique_ptr(SMUniquePtr, SurfaceMesh);
+%rename(printMesh) print(const SurfaceMesh &mesh);
 
 %include "SurfaceMesh.h"
 
@@ -26,31 +24,35 @@ class StopIterator {};
 template <typename IT, typename T>
 class IteratorWrapper {
 public:
-    IteratorWrapper(IT _begin, IT _end): curr(_begin), end(_end) {}
-	
-	IteratorWrapper* __iter__()
-    {
-      return this;
-    }
+  IteratorWrapper(IT _begin, IT _end): curr(_begin), end(_end) {}
 
-    // Iterator function for python 2.x
-    T& next(){
-    	if(curr != end)
-    		return *curr++;
-    	else
-    		throw StopIterator();
-    }
+  IteratorWrapper* __iter__(){
+    return this;
+  }
 
-    // Iterator function for python 3.x
-    T& __next__(){
-    	if(curr != end)
-    		return *curr++;
-    	else
-    		throw StopIterator();
-    }
+  // Iterator function for Python 2.x
+  T& next(){
+    return __next__();
+  }
 
-    IT curr;
-    IT end;
+  // Iterator function for Python 3.x
+  T& __next__(){
+    if(curr != end){
+      std::cout << "Next()" << std::endl;
+      T& obj = *curr;
+      std::cout << "C++ object: " << obj <<  std::endl;
+      std::cout << "C++ ptr: " << &obj << std::endl;
+      ++curr;
+      return obj;
+    }
+    else{
+      std::cout << "Throwing StopIterator()" << std::endl;
+      throw StopIterator();
+    }
+  }
+
+  IT curr;
+  IT end;
 };
 %}
 
@@ -78,65 +80,57 @@ public:
   }
 }
 
-class Face {};
-
-// %extend IteratorWrapper<SMVDataIterator, Vertex>
-// {
-//   Vertex& next()
-//   {
-//     if ($self->curr != $self->end)
-//     {
-//       // dereference the iterator and return reference to the object,
-//       // after that it increments the iterator
-//       return *$self->curr++;
-//     }
-//     throw StopIterator();
-//   }
-// }
-
-
-%template(VIT) IteratorWrapper<SMVDataIterator, Vertex>;
-%template(FIT) IteratorWrapper<SMFDataIterator, Face>;
+%template(VertexIT) IteratorWrapper<SMVDataIterator, Vertex>;
+%template(FaceIT) IteratorWrapper<SMFDataIterator, Face>;
 
 // Class to shadow complicated alias
 class SurfaceMesh{
-public:	
-	%extend {
-		void insertVertex(std::array<int, 1> &s, const Vertex &data) {
-			$self->insert(s, data);
-		}
-		void insertEdge(std::array<int, 2> &s) {
-			$self->insert(s);
-		}
-		void insertFace(std::array<int, 3> &s, const Face &data) {
-			$self->insert(s, data);
-		}
-		int sizeVertices(){
-			return $self->size<1>();
-		}
-		int sizeEdges(){
-			return $self->size<2>();
-		}
-		int sizeFaces(){
-			return $self->size<3>();
-		}
+public:
+  %extend {
+    void insertVertex(std::array<int, 1> &s, const Vertex &data) {
+      $self->insert(s, data);
+    }
+    void insertEdge(std::array<int, 2> &s) {
+      $self->insert(s);
+    }
+    void insertFace(std::array<int, 3> &s, const Face &data) {
+      $self->insert(s, data);
+    }
+    int sizeVertices(){
+      return $self->size<1>();
+    }
+    int sizeEdges(){
+      return $self->size<2>();
+    }
+    int sizeFaces(){
+      return $self->size<3>();
+    }
 
-		IteratorWrapper<SMVDataIterator, Vertex> getVertexIT(){
-			auto it = $self->get_level<1>();
-			return IteratorWrapper<SMVDataIterator, Vertex>(it.begin(), it.end());
-		}
+    IteratorWrapper<SMVDataIterator, Vertex> getVertexIT(){
+      auto it = $self->get_level<1>();
+      return IteratorWrapper<SMVDataIterator, Vertex>(it.begin(), it.end());
+    }
 
-	%pythoncode %{
-		def vertices(self):
-			for v in self.getVertexIT():
-				yield v
-	%}
-	}
+    IteratorWrapper<SMFDataIterator, Face> getFaceIT(){
+      auto it = $self->get_level<3>();
+      return IteratorWrapper<SMFDataIterator, Face>(it.begin(), it.end());
+    }
+
+  %pythoncode %{
+    def vertices(self):
+      for v in self.getVertexIT():
+        yield v
+
+    def faces(self):
+      for f in self.getFaceIT():
+        yield f
+  %}
+  }
 };
 
-%rename(printMesh) print(const SurfaceMesh &mesh);
-void print(const SurfaceMesh& mesh);
-
-// import _gamer as g
-// mesh = g.SurfaceMesh()
-// mesh.insertVertex(g.VertexKey([1]), g.Vertex(1,2,3))
+%{
+SurfaceMesh* ReadOFF(const std::string &filename){
+  return readOFF(filename).release();
+}
+%}
+SurfaceMesh* ReadOFF(const std::string &filename);

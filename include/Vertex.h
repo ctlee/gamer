@@ -14,7 +14,7 @@ struct Vertex
     Vector position;    /**< @brief a 3 tensor for x, y, z */
     int marker = 0;                 /**< @brief Boundary marking ID */
     bool selected = false;          /**< @brief Selection flag */
-    
+
     /**
      * @brief      Default constructor with x,y,z = 0
      */
@@ -80,14 +80,14 @@ struct Vertex
      */
     friend std::ostream& operator<<(std::ostream& output, const Vertex& v){
         output  << "Vertex(x:" << v[0]
-                << ",y:" << v[1] 
+                << ",y:" << v[1]
                 << ",z:" << v[2]
                 << ";m:" << v.marker
                 << ";sel:" << v.selected
                 << ")";
         return output;
     }
-    
+
     /**
      * @brief      Returns a string representation of the object.
      *
@@ -96,7 +96,7 @@ struct Vertex
     std::string to_string() const{
         std::ostringstream output;
         output  << "Vertex(x:" << position[0]
-                << ",y:" << position[1] 
+                << ",y:" << position[1]
                 << ",z:" << position[2]
                 << ";m:" << marker
                 << ";sel:" << selected
@@ -115,7 +115,7 @@ struct Vertex
     const double& operator[](std::size_t index) const{
         return position[index];
     }
-    
+
     /**
      * @brief      Operator[] overload allows easy access to x, y, z using intuitive syntax
      *
@@ -126,7 +126,7 @@ struct Vertex
     double& operator[](std::size_t index){
         return position[index];
     }
-    
+
     /**
      * @brief      Assignment operator overload
      *
@@ -137,7 +137,7 @@ struct Vertex
         marker = v.marker;
         selected = v.selected;
     }
-   
+
     /**
      * @brief      Equivalence operator
      *
@@ -146,7 +146,7 @@ struct Vertex
      * @return     True if all values are equal
      */
     bool operator==(const Vertex& rhs) const{
-        Vertex temp(rhs); 
+        Vertex temp(rhs);
         if(position != temp.position) return false;
         if(marker != temp.marker) return false;
         if(selected != temp.selected) return false;
@@ -172,11 +172,11 @@ struct Vertex
      * @return     Vertex with sum of positions
      */
     Vertex& operator+=(const Vector& rhs){
-        // retains the marker of the lhs 
+        // retains the marker of the lhs
         position += rhs;
         return *this;
     }
-    
+
     /**
      * @brief      Subtracts a vector from a vertex
      *
@@ -189,7 +189,7 @@ struct Vertex
         position -= rhs;
         return *this;
     }
-    
+
     /**
      * @brief      Multiply the Vertex by a scalar
      *
@@ -203,7 +203,7 @@ struct Vertex
     }
 
     /**
-     * @brief     Divide the Vertex by a scalar 
+     * @brief     Divide the Vertex by a scalar
      *
      * @param[in]  x     Scalar to divide by
      *

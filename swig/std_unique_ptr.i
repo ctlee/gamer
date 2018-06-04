@@ -4,7 +4,7 @@ namespace std {
   %feature("novaluewrapper") unique_ptr;
   template <typename Type>
   struct unique_ptr {
-     typedef Type* pointer;
+     using pointer = Type*;
 
      explicit unique_ptr( pointer Ptr );
      unique_ptr (unique_ptr&& Right);

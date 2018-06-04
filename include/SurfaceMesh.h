@@ -62,6 +62,12 @@ struct Face : casc::Orientable, FaceProperties
     Face(Orientable orient, FaceProperties prop)
         : Orientable(orient), FaceProperties(prop)
     {}
+
+
+    friend std::ostream& operator<<(std::ostream& output, const Face& f){
+        output  << "Face()";
+        return output;
+    }
 };
 
 /**
@@ -104,6 +110,8 @@ struct complex_traits
 
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
+
+#ifndef SWIG
 /**
  * @brief      Reads in a GeomView OFF file.
  *
@@ -113,7 +121,6 @@ using SurfaceMesh = casc::simplicial_complex<complex_traits>;
  */
 std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
 
-#ifndef SWIG
 /**
  * @brief      Write the SurfaceMesh to file in OFF format.
  *
@@ -125,10 +132,15 @@ void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
 // Wavefront OBJ
 std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
+#endif
+
+
 
 void print(const SurfaceMesh &mesh);
+
+#ifndef SWIG
 void generateHistogram(const SurfaceMesh &mesh);
-std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh, 
+std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
     int maxMinAngle, int minMaxAngle);
 double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
@@ -286,7 +298,7 @@ Vector getNormalFromTangent(const tensor<double, 3, 2> tangent);
  * The vertex normal is defined as the mean of incident triangle normals as
  * follows,
  * \f$\mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}n_t\f$.
- * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of 
+ * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of
  * incident faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
  *
  * @param[in]  mesh      SurfaceMesh of interest.
@@ -319,12 +331,12 @@ std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
 void centeralize(SurfaceMesh &mesh);
 
 tensor<double,3,2> computeLocalStructureTensor(
-        const SurfaceMesh &mesh, 
-        const SurfaceMesh::SimplexID<1> vertexID, 
+        const SurfaceMesh &mesh,
+        const SurfaceMesh::SimplexID<1> vertexID,
         const int rings);
 
 /**
- * @brief      Smooth the surface mesh 
+ * @brief      Smooth the surface mesh
  *
  * @param      mesh            The mesh
  * @param[in]  maxMinAngle     The maximum minimum angle
@@ -340,7 +352,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
 void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
 template <typename InsertIter>
-void triangulateHole(SurfaceMesh &mesh, 
+void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &boundary,
         const Face &fdata,
         InsertIter iter){
@@ -360,7 +372,7 @@ void triangulateHole(SurfaceMesh &mesh,
         list.push_back(std::make_pair(getValence(mesh, vertexID), vertexID));
     }
     std::sort(list.begin(), list.end(), [](
-                const std::pair<int, SurfaceMesh::SimplexID<1>> &lhs, 
+                const std::pair<int, SurfaceMesh::SimplexID<1>> &lhs,
                 const std::pair<int, SurfaceMesh::SimplexID<1>> &rhs){
             return lhs.first < rhs.first;
         });
@@ -392,10 +404,10 @@ void triangulateHole(SurfaceMesh &mesh,
     other.push_back(v2);
     std::move(v2it+1, boundary.end(), std::back_inserter(other));
     boundary.erase(v2it+1, boundary.end());
-    
+
     other.push_back(v1);
-   
-    // Recurse to fill sub-holes 
+
+    // Recurse to fill sub-holes
     triangulateHole(mesh, boundary, fdata, iter);
     triangulateHole(mesh, other, fdata, iter);
 }
@@ -407,8 +419,8 @@ template <std::size_t k>
 struct orientHoleHelper<std::integral_constant<std::size_t, k>>
 {
     template <typename Iterator>
-    static void apply(SurfaceMesh & mesh, 
-            const std::set<int> &&names, 
+    static void apply(SurfaceMesh & mesh,
+            const std::set<int> &&names,
             Iterator begin,
             Iterator end)
     {
@@ -440,13 +452,13 @@ struct orientHoleHelper<std::integral_constant<std::size_t, k>>
             }
         }
         orientHoleHelper<std::integral_constant<std::size_t,k+1>>::apply(mesh, std::move(names), next.begin(), next.end());
-    } 
+    }
 };
 
 template <>
 struct orientHoleHelper<std::integral_constant<std::size_t, SurfaceMesh::topLevel>>{
     template <typename Iterator>
-    static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){} 
+    static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){}
 };
 
 bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList);
@@ -470,7 +482,7 @@ Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 
 void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
 
 /**
- * @brief      Traditional barycenter smooth. 
+ * @brief      Traditional barycenter smooth.
  *
  * @param      mesh      SurfaceMesh to manipulate.
  * @param[in]  vertexID  SimplexID of the vertex to move.
@@ -496,7 +508,7 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
  * @tparam     Inserter        Typename of the inserter.
  */
 template <class Inserter>
-void selectFlipEdges(const SurfaceMesh &mesh, 
+void selectFlipEdges(const SurfaceMesh &mesh,
                      bool preserveRidges,
                      std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> && checkFlip,
                      Inserter iter){
@@ -533,7 +545,7 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             // Check if the edge is a part of a tetrahedron.
             if (mesh.exists<2>({up[0], up[1]}))
             {
-                // std::cerr << "Found a tetrahedron cannot edge flip." 
+                // std::cerr << "Found a tetrahedron cannot edge flip."
                 //           << std::endl;
                 continue;
             }
@@ -564,8 +576,8 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             if (checkFlip(mesh, edgeID))
             {
                 *iter++ = edgeID;   // Insert into edges to flip
-                // The local topology will be changed. Don't flip neighbors 
-                // which share a common face. 
+                // The local topology will be changed. Don't flip neighbors
+                // which share a common face.
                 neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
             }
         }
@@ -573,11 +585,11 @@ void selectFlipEdges(const SurfaceMesh &mesh,
 }
 /**
  * @brief      Check if we should flip an edge to improve the angles.
- *             
+ *
  * @param[in]  mesh    SurfaceMesh to manipulate.
  * @param[in]  edgeID  SimplexID of the edge to consider.
  *
- * @return     Returns true if flippiing the edge will improve angles, false 
+ * @return     Returns true if flippiing the edge will improve angles, false
  *             otherwise.
  */
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
