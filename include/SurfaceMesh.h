@@ -53,6 +53,15 @@ struct Face : casc::Orientable, FaceProperties
 {
     /// Default constructor
     Face() {}
+
+    /**
+     * @brief      Constructor
+     *
+     * @param[in]  marker    The marker
+     * @param[in]  selected  The selected
+     */
+    Face(int marker, bool selected) : Face(Orientable{0}, FaceProperties{marker, selected}) {}
+
     /**
      * @brief      Constructor
      *
@@ -62,6 +71,7 @@ struct Face : casc::Orientable, FaceProperties
     Face(Orientable orient, FaceProperties prop)
         : Orientable(orient), FaceProperties(prop)
     {}
+
 
 
     friend std::ostream& operator<<(std::ostream& output, const Face& f){
@@ -132,13 +142,7 @@ void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
 // Wavefront OBJ
 std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
-#endif
-
-
-
 void print(const SurfaceMesh &mesh);
-
-#ifndef SWIG
 void generateHistogram(const SurfaceMesh &mesh);
 std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
     int maxMinAngle, int minMaxAngle);

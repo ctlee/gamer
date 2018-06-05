@@ -4,7 +4,6 @@ import bpy
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
-import mathutils
 import gamer
 import gamer_addon.gamer_gui
 
@@ -110,7 +109,7 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     is_hole = BoolProperty ( name="Hole", default=False, description="Use this domain as a hole" )
     constrain_vol  = BoolProperty ( name="Constrain Volume", default=False, description="Constrain Volume" )
     vol_constraint = FloatProperty ( name="Vol Constraint", default=10.0, description="Volume Constraint" )
-    
+
     def draw_layout ( self, layout ):
         row = layout.row()
         col = row.column()
@@ -189,7 +188,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
   diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
   carp = BoolProperty ( name="Carp", default=False, description="Generate Carp output", update=check_formats_callback )
   fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
-  
+
   status = StringProperty ( name="status", default="" )
 
   def check_formats_callback(self, context):
@@ -219,7 +218,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
           row = layout.row()
           row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
-          
+
           domain.draw_layout ( layout )
 
           box = layout.box()

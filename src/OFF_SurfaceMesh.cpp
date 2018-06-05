@@ -85,7 +85,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         else
             dimension = tempDim;
     }
-  
+
     // Lambda function to split the string
     auto split = [](const std::string& cstr, std::vector<char> delim = {' ','\t'}) -> std::vector<std::string>{
         std::string str = cstr;
@@ -98,14 +98,14 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
             auto end = begin;
             while(*end != delim[0] && end != str.end())
                 end++;
-            if(end != begin) 
+            if(end != begin)
                 result.push_back(std::string(begin,end));
             begin = end;
-        } while (begin++ != str.end());  
+        } while (begin++ != str.end());
         return result;
     };
 
-    std::vector<std::string> arr; 
+    std::vector<std::string> arr;
     // Allow some comments denoted by #...
     while(getline(fin,line)){
         if (line.find("#") == 0) {
@@ -115,7 +115,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         if(arr[0].length() != 0) // Assume that comments are over
             break;
     }
-    
+
     // Parse the second line:
     // NVertices  NFaces  NEdges
     arr = split(arr[0]);
@@ -133,7 +133,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
 
     // Parse the vertices
     /*
-     x[0]  y[0]  z[0]   
+     x[0]  y[0]  z[0]
         # Vertices, possibly with normals,
         # colors, and/or texture coordinates, in that order,
         # if the prefixes N, C, ST
@@ -193,7 +193,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
             auto b = std::stod(arr[6]);
             //auto k = std::stod(arr[7]);
             mesh->insert<3>({v0,v1,v2},
-                            Face(casc::Orientable{0}, 
+                            Face(casc::Orientable{0},
                             FaceProperties{get_marker(r,g,b),0}));
         }
         else {
@@ -203,6 +203,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         }
     }
     fin.close();
+    compute_orientation(*mesh);
     return mesh;
 }
 
@@ -210,9 +211,9 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     std::ofstream fout(filename);
     if(!fout.is_open())
     {
-        std::cerr   << "File '" << filename 
+        std::cerr   << "File '" << filename
                     << "' could not be writen to." << std::endl;
-        exit(1); 
+        exit(1);
     }
 
     fout << "OFF" << std::endl;
@@ -220,23 +221,23 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     int numVertices = mesh.size<1>();
     int numFaces = mesh.size<3>();
     int numEdges = mesh.size<2>();
-    fout    << numVertices << " " 
+    fout    << numVertices << " "
             << numFaces << " "
-            << numEdges << "\n"; 
+            << numEdges << "\n";
 
     std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
     typename SurfaceMesh::KeyType cnt = 0;
 
-    fout.precision(10); 
-    // Get the vertex data directly 
+    fout.precision(10);
+    // Get the vertex data directly
     // TODO: (3) Will this always print in order?
     for(const auto vertexID : mesh.get_level_id<1>()){
         sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto vertex = *vertexID;
 
         fout    << vertex[0] << " "
-                << vertex[1] << " " 
-                << vertex[2] << " " 
+                << vertex[1] << " "
+                << vertex[2] << " "
                 << "\n";
     }
 
@@ -261,7 +262,7 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     }
     if(orientationError){
         std::cerr << "WARNING(writeOFF): The orientation of one or more faces "
-                  << "is not defined. Did you run compute_orientation()?" 
+                  << "is not defined. Did you run compute_orientation()?"
                   << std::endl;
     }
     fout.close();

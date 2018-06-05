@@ -1,5 +1,5 @@
 # CMake List to build trinagle
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 project(Triangle VERSION 1.6)
 
@@ -31,7 +31,7 @@ install(TARGETS ${TARGET_LIBS} DESTINATION lib/triangle)
 if(BUILD_TRIANGLE_BIN)
     add_executable(triangle triangle.c)
     list(APPEND TARGET_BINS triangle)
-    
+
     find_package(X11 QUIET)
     if(X11_FOUND)
         include_directories(${X11_INCLUDE_DIR})

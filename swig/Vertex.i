@@ -10,10 +10,8 @@
 %ignore Vertex(const Vertex&& x);
 %ignore Vertex::to_string() const; // Passing strings from c++ to python often segmentation faults...
 
-
-
-%ignore operator=(const Vertex& v);
-%ignore operator==(const Vertex& rhs);
+// %ignore Vertex::operator=(const Vertex& v);
+// %ignore Vertex::operator==(const Vertex& rhs);
 %ignore operator+(const Vertex& A, const Vector& B);
 %ignore operator+(const Vertex& A, const Vertex& B);
 %ignore operator-(const Vertex& A, const Vector& B);
@@ -35,14 +33,6 @@
 %ignore operator<<(std::ostream& output, const Vertex& v);
 %include "Vertex.h"
 
-// class Vector{
-// public:
-// 	Vector();
-// 	~Vector();
-
-// 	std::string as_string();
-// };
-
 %extend Vertex{
 	const double& getitem(std::size_t index) const {
 		return (*($self))[index];
@@ -53,7 +43,8 @@
       output = "Vertex(x:" + str(self.getitem(0)) \
           + ";y:" + str(self.getitem(1)) \
           + ";z:" + str(self.getitem(2)) \
-          + ";m:" + str(self.marker) + " sel:" + str(self.selected) + ")"
+          + ";m:" + str(self.marker)     \
+          + ";sel:" + str(self.selected) + ")"
       return output
   %}
 }

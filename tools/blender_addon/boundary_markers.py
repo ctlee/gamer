@@ -1,15 +1,35 @@
+# ***************************************************************************
+# This file is part of the GAMer software.
+# Copyright (C) 2016-2017
+# by Tom Bartol, Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+#    and Michael Holst
+
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# ***************************************************************************
+
+
 import bpy
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
 from bpy.app.handlers import persistent
-import mathutils
 import gamer
 
 # python imports
 import os
 import re
-import numpy as np
 
 
 # we use per module class registration/unregistration
@@ -170,7 +190,7 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
         name="Boundary Name", default="Boundary", update=boundary_name_update)
     boundary_id = StringProperty(name="Unique ID of This Boundary",default="")
     marker = IntProperty(name="Marker Value", default = 1, update=boundary_marker_update)
-#    color = FloatVectorProperty ( name="Boundary Color", min=0.0, max=1.0, default=(0.5,0.5,0.5), subtype='COLOR', description='Boundary Color')
+    # color = FloatVectorProperty ( name="Boundary Color", min=0.0, max=1.0, default=(0.5,0.5,0.5), subtype='COLOR', description='Boundary Color')
     status = StringProperty(name="Status")
 
 
@@ -206,7 +226,7 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
         obj["boundaries"].pop(bnd_key)
         self.boundary_key = bnd_name
 
-        return 
+        return
     '''
 
 
@@ -215,14 +235,14 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
         bnd_id = self.boundary_id
         obj['boundaries'][bnd_id]['marker'] = self.marker
 
-        return 
+        return
 
 
     def assign_boundary_faces(self, context):
         obj = context.active_object
         mesh = obj.data
         if (mesh.total_face_sel > 0):
-            face_set = self.get_boundary_faces(context) 
+            face_set = self.get_boundary_faces(context)
             bpy.ops.object.mode_set(mode='OBJECT')
             for f in mesh.polygons:
                 if f.select:
@@ -238,7 +258,7 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
             bpy.ops.object.material_slot_assign()
             obj.active_material_index = act_mat_idx
 
-            self.set_boundary_faces(context, face_set) 
+            self.set_boundary_faces(context, face_set)
 
         return {'FINISHED'}
 
@@ -260,7 +280,7 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
         obj = context.active_object
         mesh = obj.data
         if (mesh.total_face_sel > 0):
-            face_set = self.get_boundary_faces(context) 
+            face_set = self.get_boundary_faces(context)
             bpy.ops.object.mode_set(mode='OBJECT')
             for f in mesh.polygons:
                 if f.select:
@@ -277,7 +297,7 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
             bpy.ops.object.material_slot_assign()
             obj.active_material_index = act_mat_idx
 
-            self.set_boundary_faces(context, face_set) 
+            self.set_boundary_faces(context, face_set)
 
         return {'FINISHED'}
 
@@ -365,8 +385,8 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
           bnd_mat = mat_list[0]
         bpy.ops.object.material_slot_add()
         obj.material_slots[-1].material = bnd_mat
-        
-        
+
+
 
 
     def set_boundary_from_id_boundary(self, context, bnd_dict):
@@ -418,7 +438,7 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
         face_list = []
         for seg_id in obj["boundaries"][bnd_id]['faces'].keys():
           face_list.extend(obj["boundaries"][bnd_id]['faces'][seg_id].to_list())
-        if (len(face_list) > 0): 
+        if (len(face_list) > 0):
             face_set = set(face_list)
         else:
             face_set = set([])
@@ -495,10 +515,10 @@ class GAMerBoundaryMarkersListPropertyGroup(bpy.types.PropertyGroup):
           bpy.ops.object.mode_set(mode='OBJECT')
           face_index = [f.index for f in mesh.polygons if f.select][0]
           bpy.ops.object.mode_set(mode='EDIT')
-          for bnd in self.boundary_list: 
+          for bnd in self.boundary_list:
             if bnd.face_in_boundary(context,face_index):
               bnd_list = bnd_list + " " + bnd.name
-        
+
         return bnd_list
 
 
@@ -510,7 +530,7 @@ class GAMerBoundaryMarkersListPropertyGroup(bpy.types.PropertyGroup):
           bpy.ops.object.mode_set(mode='OBJECT')
           selface_set = set([f.index for f in mesh.polygons if f.select])
           bpy.ops.object.mode_set(mode='EDIT')
-          for bnd in self.boundary_list: 
+          for bnd in self.boundary_list:
             bnd_faces = bnd.get_boundary_faces(context)
             if not selface_set.isdisjoint(bnd_faces):
               bnd_info.append(bnd.name)

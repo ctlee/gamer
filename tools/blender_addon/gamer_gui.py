@@ -3,7 +3,6 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
 from bpy.app.handlers import persistent
-import mathutils
 import gamer
 
 from . import boundary_markers
@@ -285,7 +284,7 @@ class GAMER_PT_main_panel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "GAMer"
-   
+
     @classmethod
     def poll(cls, context):
         return (context.scene is not None)
@@ -333,8 +332,8 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
   def init_properties ( self ):
     self.gamer_version = "0.1"
     self.boundary_id_counter = 0
-    
-    if not bpy.data.materials.get('bnd_unset_mat') : 
+
+    if not bpy.data.materials.get('bnd_unset_mat') :
       bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
       bnd_unset_mat.use_fake_user = True
       bnd_unset_mat.gamer.boundary_id = 'bnd_unset'
@@ -363,10 +362,6 @@ def vertToVec(v):
     return[v[0],v[1],v[2]]
 
 
-def vertFromVec(v):
-    return mathutils.Vector((v[0],v[1],v[2]))
-
-
 def toggle(var,val):
     var = val
 
@@ -379,7 +374,7 @@ def getSelectedMesh(errorreport=True):
     if not obj or obj.type != 'MESH':
         if errorreport:
 #            self.drawError(errormsg="expected a selected mesh")
-            print("expected a selected mesh") 
+            print("expected a selected mesh")
         return None
     return obj
 
@@ -394,7 +389,7 @@ def getMeshVertices(obj, selected=False):
     else:
         vertices = [vertToVec(v.co) for v in mesh.vertices]
         return vertices
-    
+
 
 def getMeshFaces( obj, selected = False):
     mesh = obj.data
@@ -418,8 +413,19 @@ def getBoundaryFaces(boundary):
     all_faces = []
     for faces in list(boundary["faces"].values()):
         all_faces.extend(faces)
-
     return all_faces
+
+
+# def getBoundaryFaces(boundary, obj):
+# if not "faces" in boundary:
+#     return []
+# all_faces = []
+# for faces in list(boundary["faces"].values()):
+#     all_faces.extend(faces)
+# facetuples = []
+# for face in all_faces:
+#     facetuples.append(tuple(obj.data.polygons[face].vertices))
+# return facetuples
 
 
 def setBoundaryFaces(boundary, faces):
@@ -430,7 +436,7 @@ def setBoundaryFaces(boundary, faces):
     max_ind = 32767
     num_sub_arrays = int(len(faces)/max_ind)+1
 
-    # If the faces allready exist delete it and re attach it
+    # If the faces already exist delete it and re attach it
     if "faces" in boundary:
         for key in boundary["faces"]:
             del boundary["faces"][key]
@@ -460,7 +466,7 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     # Take the first one
     #myprint("blender_to_gamer ", obj)
 
-    
+
     # Get selected mesh
     if obj is None:
         obj = getSelectedMesh()
@@ -471,12 +477,11 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     # Ensure editmode is off
     editmode = setObjectMode(obj)
 
-#    self.waitingCursor(1)
-    
-    # Grab vertices and Faces
+    # self.waitingCursor(1)
+
+    # Grab vertices
     vertices, selected_vertices = getMeshVertices(obj, selected=True)
     vertices = getMeshVertices(obj)
-    faces = getMeshFaces(obj)
 
     # myprint("verts ",len(vertices), len(faces))
     # Get world location and offset each vertex with this value
@@ -484,20 +489,22 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         translation = getTranslation(obj)
     else:
         translation = [0., 0., 0.]
-        
+
     # Init gamer mesh
-    gmesh = gamer.SurfaceMesh(len(vertices), len(faces))
-    def setVert(co, gvert, sel):
-        gvert.x = co[0] + translation[0]
-        gvert.y = co[1] + translation[1]
-        gvert.z = co[2] + translation[2]
-        gvert.sel = bool(sel)
+    gmesh = gamer.SurfaceMesh()
+
+    def setVert(co, sel):
+        gmesh.insertVertex(g.VertexKey([key]),
+            g.Vertex(co[0] + translation[0],
+                     co[1] + translation[1],
+                     co[2] + translation[2]),
+            0, sel)
 
     # Check we have vertices selected
     if check_for_vertex_selection and not selected_vertices:
         myprint("No selected vertices")
         return None, None
-    
+
     # If all vertices are selected
     if len(selected_vertices) == len(vertices):
         selected_vertices = np.ones(len(vertices), dtype=bool)
@@ -505,34 +512,39 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         selection = np.zeros(len(vertices), dtype=bool)
         selection[selected_vertices] = 1
         selected_vertices = selection
-    
-    [setVert(*args) for args in zip(vertices, gmesh.vertices(), selected_vertices)]
 
-    # Transfere data from blender mesh to gamer mesh
-    for face, gface in zip(faces, gmesh.faces()):
-        if len(face) != 3:
-#            self.drawError(errormsg="expected mesh with only triangles in")
-            print("expected a triangulated mesh")
-#            self.waitingCursor(0)
-            restoreInteractionMode(obj,editmode)
-            return None, None
-        
-        gface.a, gface.b, gface.c = face
-        gface.m = -1
+    [setVert(*args) for args in zip(vertices, selected_vertices)]
 
     # Transfer boundary information
     boundaries = obj.get('boundaries')
     if not boundaries:
         obj['boundaries'] = {}
-        boundaries = obj['boundaries']
+        boundaries = obj['boundaries']  # TODO (9): This line might be redundant CTL
 
     # Iterate over the faces and transfer marker information
     for boundary in boundaries.values():
         for face_ind in getBoundaryFaces(boundary):
             gmesh.face(face_ind).m = boundary["marker"]
 
-#    self.waitingCursor(0)
-    #myprint(gmesh)
+
+    faces = [f.vertices for f in mesh.polygons]
+
+    # Transfer data from blender mesh to gamer mesh
+    for face in faces:
+        if len(face) != 3:
+            # self.drawError(errormsg="expected mesh with only triangles in")
+            print("expected a triangulated mesh")
+            # self.waitingCursor(0)
+            restoreInteractionMode(obj,editmode)
+            return None, None
+        gmesh.insertFace(g.FaceKey(face), g.Face(-1, False))
+
+
+
+
+    # self.waitingCursor(0)
+    # myprint(gmesh)
+
     # Restore editmode
     restoreInteractionMode(obj,editmode)
     return gmesh, boundaries
@@ -544,17 +556,17 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
     #myprint("gamer_to_blender ",gmesh)
     # Check arguments
     if not isinstance(gmesh, gamer.SurfaceMesh):
-#        self.drawError(errormsg="expected a GAMer SurfaceMesh") 
-        print("expected a SurfaceMesh") 
-    
+#        self.drawError(errormsg="expected a GAMer SurfaceMesh")
+        print("expected a SurfaceMesh")
+
     # Get scene
     scn = bpy.context.scene
 #    self.waitingCursor(1)
-    
+
     verts = [(gvert.x, gvert.y, gvert.z) for gvert in gmesh.vertices()]
     un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices())
                             if not gvert.sel]
-    
+
     faces = [(gface.a, gface.b, gface.c) for gface in gmesh.faces()]
     markers = [(i, gface.m) for i, gface in enumerate(gmesh.faces()) \
                if gface.m != -1]
@@ -567,10 +579,10 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
             new_boundaries[bnd_id] = dict(
                 marker=boundary["marker"], r=boundary["r"], g=boundary["g"], \
                 b=boundary["b"], faces={})
-        
+
         # Do not copy the faces information, grab that from the gamer mesh
         boundaries = new_boundaries
-    
+
     # Create marker to boundary map
     face_markers = {}
     for boundary in boundaries.values():
@@ -584,7 +596,7 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
     # Set the faces of the corresponding boundary
     for boundary in boundaries.values():
         setBoundaryFaces(boundary, face_markers[boundary["marker"]])
-    
+
     # Ensure editmode is off
     obj = getSelectedMesh()
     editmode = setObjectMode(obj)
@@ -597,7 +609,7 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
         scn.objects.link(obj)
         bpy.ops.object.select_all(action='DESELECT')
         obj.select=True
-    
+
         # If not generating a totally new mesh
         switch_to_layer = self.helper.getLayers(scn)[-1]
         if switch_layer:
@@ -608,7 +620,7 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
 
         self.helper.setLayers(scn, [switch_to_layer])
         self.helper.setLayers(obj, [switch_to_layer])
-        
+
         self.helper.addObjectToScene(scn, obj)
         self.helper.ObjectsSelection([obj])
 
@@ -616,7 +628,7 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
         # FIXME: Is this safe? Is boundaries always something I can use?
 #        self.helper.setProperty(obj, "boundaries", boundaries)
         obj['boundaries'] = boundaries
-    
+
     else:
 
         orig_mesh = obj.data
@@ -627,13 +639,13 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
 
     #myprint("un_selected_vertices ", len(un_selected_vertices))
     [toggle(v.select,False) for v in bmesh.vertices if v.index in un_selected_vertices]
-    
+
     # Restore editmode
     restoreInteractionMode(obj,editmode)
 
     # Repaint boundaries
     obj.gamer.repaint_boundaries(bpy.context)
-    
+
 #    self.waitingCursor(0)
 #    self.updateViewer()
 

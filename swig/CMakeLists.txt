@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
@@ -16,7 +16,7 @@ message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
 message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
 message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
 
-find_package(Numpy REQUIRED)
+# find_package(Numpy REQUIRED)
 
 if(NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
     message(FATAL_ERROR "Python interpreter and libs versions do not match")
@@ -33,7 +33,6 @@ foreach(dir ${dirs})
 endforeach()
 
 SET(CMAKE_SWIG_FLAGS "")
-
 # SET(SWIG_MODULE_gamer_EXTRA_DEPS "../include/WrapSurfaceMesh.h" "../src/WrapSurfaceMesh.C")
 SET(SWIG_MODULE_gamer_EXTRA_DEPS "")
 
@@ -42,7 +41,8 @@ SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-O")
 # SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-builtin")
 
 
-SWIG_ADD_MODULE(gamer python gamer.i)
+# SWIG_ADD_MODULE(gamer python gamer.i)
+SWIG_ADD_LIBRARY(gamer LANGUAGE python SOURCES gamer.i)
 
 # Handle some problems with Anaconda dylib linking in OSX
 if(APPLE)
@@ -56,3 +56,6 @@ SWIG_LINK_LIBRARIES(gamer gamerstatic)
 
 install(TARGETS _gamer DESTINATION lib/site-packages)
 install(FILES ${CMAKE_BINARY_DIR}/swig/gamer.py DESTINATION lib/site-packages)
+
+install(TARGETS _gamer DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)
+install(FILES ${CMAKE_BINARY_DIR}/swig/gamer.py DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)

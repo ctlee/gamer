@@ -1,10 +1,12 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 project(GAMer VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
 option(BUILD_STATIC_LIB "Build static libraries" OFF)
 # BUILD_BLENDER will build static libraries as well
@@ -58,7 +60,7 @@ endforeach()
 
 # Change this to not use GLOB
 #file(GLOB SOURCES "src/*.C")
-list(APPEND SOURCES 
+list(APPEND SOURCES
     # "src/CorrectNormals.C"
     # "src/GemMesh.C"
     # "src/GenerateSphereMesh.C"
@@ -94,7 +96,7 @@ install(TARGETS gamershared DESTINATION lib/gamer)
 
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
-    
+
     target_link_libraries(gamerstatic tetstatic tristatic)
     install(TARGETS gamerstatic DESTINATION lib/gamer)
 endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
