@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include "SurfaceMesh.h"
+#include "PDBReader.h"
 
 using SMVertIterator = SurfaceMesh::SimplexIDIterator<1>;
 using SMVDataIterator = SurfaceMesh::DataIterator<1>;
@@ -158,10 +159,18 @@ SurfaceMesh* ReadOBJ(const std::string &filename){
 SurfaceMesh* RefineMesh(const SurfaceMesh &mesh){
   return refineMesh(mesh).release();
 }
+SurfaceMesh* ReadPDB_molsurf(const std::string & filename){
+  return readPDB_molsurf(filename).release();
+}
+SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float isovalue){
+  return readPDB_gauss(filename, blobbyness, isovalue).release();
+}
 %}
 SurfaceMesh* ReadOFF(const std::string &filename);
 SurfaceMesh* ReadOBJ(const std::string &filename);
 SurfaceMesh* RefineMesh(const SurfaceMesh &mesh);
+SurfaceMesh* ReadPDB_molsurf(const std::string& filename);
+SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float isovalue);
 
 void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
@@ -177,6 +186,7 @@ double getArea(const SurfaceMesh &mesh);
 void print(const SurfaceMesh &mesh);
 
 void compute_orientation(SurfaceMesh& F); // Currently force return to void
+
 
 %pythoncode %{
   def coarse_dense(self, mesh, rate=1.6, numiter=1):

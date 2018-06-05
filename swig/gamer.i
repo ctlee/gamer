@@ -52,10 +52,9 @@ struct index_map {
   index_map(std::size_t size);
   void updatemap(int marker, PyObject* incoming);
   void printMap();
-
-  %pythoncode %{
-    def __getitem__(self,key){
-      return $self->operator[](key);
+  %extend{
+    int __getitem__(std::size_t key){
+      return $self->map[key];
     }
-  %}
+  }
 };
