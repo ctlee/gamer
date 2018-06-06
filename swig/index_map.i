@@ -20,21 +20,43 @@
 
 // ***************************************************************************
 
+%ignore index_map::operator[](std::size_t idx);
+%inline %{
+struct index_map {
+  std::vector<int> map;
 
+  index_map(std::size_t size){
+    map = std::vector<int>(size);
+  }
 
-%module (package="gamer") gamer
+  void updatemap(int marker, PyObject* incoming){
+   if (PyList_Check(incoming)) {
+      for(Py_ssize_t i = 0; i < PyList_Size(incoming); i++) {
+        PyObject *value = PyList_GetItem(incoming, i);
+        map[PyLong_AsSize_t(value)] = marker;
+      }
+    }
+    else {
+      throw std::logic_error("Passed PyObject pointer was not a list!");
+    }
+  }
 
-%{
-#include "gamer.h"
+  int operator[](std::size_t idx){
+    return map[idx];
+  }
+
+  void printMap(){
+    for(auto item : map){
+      std::cout << item << ", ";
+    }
+    std::cout << std::endl;
+  }
+
+  int __getitem__(int key){
+    if (key < 0 || key > map.size()){
+      throw std::out_of_range("Index out of bounds");
+    }
+    return map[key];
+  }
+};
 %}
-
-%include <std_string.i>
-%include <std_vector.i>
-
-%include "typemaps.i"
-%include "exceptions.i"
-%include "std_unique_ptr.i"
-
-%include "Vertex.i"
-%include "SurfaceMesh.i"
-%include "index_map.i"

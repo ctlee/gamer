@@ -4,7 +4,7 @@
  * Copyright (C) 2016-2017
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
- * 
+ *
  * Copyright (C) 1994-- Michael Holst and Zeyun Yu
  *
  * This library is free software; you can redistribute it and/or
@@ -25,7 +25,7 @@
  */
 
 /*
- * Parts of this are adapted from the PDBParser developed in Chandrajit 
+ * Parts of this are adapted from the PDBParser developed in Chandrajit
  * Bajaj's group at The University of Texas at Austin for GAMer by Zeyun Yu.
  */
 
@@ -48,7 +48,7 @@ namespace detail
     static const std::regex XYZR(".*.xyzr", std::regex::icase | std::regex::optimize);
     static const std::regex atom("ATOM.*\n*", std::regex::optimize);
 
-    struct PDBelementInformation 
+    struct PDBelementInformation
     {
       const char*       atomName;
       const char*       residueName;
@@ -230,6 +230,8 @@ namespace detail
          {" CD ", "GLU", 1.875f, 0.3f, 0.3f, 0.3f,  1,  8 },
          {" OE1", "GLU", 1.480f, 1.0f, 0.0f, 0.0f,  1,  8 },
          {" OE2", "GLU", 1.480f, 1.0f, 0.0f, 0.0f,  1,  8 }
+         // {"SI  ", "UNL", 1.875f, 1.0f, 1.0f, 1.0f,  1, 27 },
+         // {" O  ", "UNL", 1.480f, 1.0f, 0.0f, 0.0f,  1, 27 }
     };
 
     static std::map<std::string, std::map<std::string, PDBelementInformation>> PDBelementMap;
@@ -260,7 +262,7 @@ bool readPDB(const std::string& filename, Inserter inserter)
     std::ifstream infile(filename);
     std::string line;
 
-    initElementMap(); // Init the element map if it 
+    initElementMap(); // Init the element map if it
 
     if(infile.is_open())
     {
@@ -283,20 +285,20 @@ bool readPDB(const std::string& filename, Inserter inserter)
                 auto innerMapIT = detail::PDBelementMap.find(residueName);
 
                 if(innerMapIT != detail::PDBelementMap.end()){
-                    auto innerMap = innerMapIT->second; 
+                    auto innerMap = innerMapIT->second;
                     auto typeIT = innerMap.find(atomName);
                     if(typeIT != innerMap.end()){
                         atom.radius = typeIT->second.radius;
                     }
                     else{
-                        std::cout << "Could not find atomtype of '" 
+                        std::cout << "Could not find atomtype of '"
                                   << atomName << "' in residue '"
-                                  << residueName << "'. " 
+                                  << residueName << "'. "
                                   << "Using default radius." << std::endl;
                     }
                 }
                 else{
-                    std::cout << "Could not find ResidueName '" 
+                    std::cout << "Could not find ResidueName '"
                               << residueName << "' in table. "
                               << "Using default radius." << std::endl;
                 }
@@ -353,21 +355,21 @@ void getMinMax(Iterator begin, Iterator end, f3Vector& min, f3Vector& max, BlurF
 }
 
 template <typename Iterator>
-void blurAtoms(Iterator begin, Iterator end, 
-        float* dataset, 
-        const f3Vector& min, 
-        const f3Vector& maxMin, 
-        const i3Vector& dim, 
+void blurAtoms(Iterator begin, Iterator end,
+        float* dataset,
+        const f3Vector& min,
+        const f3Vector& maxMin,
+        const i3Vector& dim,
         float blobbyness)
 {
-    
+
     // Functor to calculate gaussian blur
-    auto evalDensity = [blobbyness](const Atom& atom, f3Vector& pnt, float maxRadius) 
+    auto evalDensity = [blobbyness](const Atom& atom, f3Vector& pnt, float maxRadius)
             -> float {
         double expval;
 
         f3Vector tmp = atom.pos - pnt;
-        double r = tmp|tmp; 
+        double r = tmp|tmp;
         double r0 = atom.radius*atom.radius;
 
         // expval = BLOBBYNESS*(r/r0 - 1.0);
@@ -429,7 +431,7 @@ void blurAtoms(Iterator begin, Iterator end,
 
 /**
  * @brief      Compute the grid based Solvent Accessible Area.
- * 
+ *
  * Assumes that the domain is in the {+,+,+} octant.
  *
  * @param[in]  begin       The begin
@@ -448,8 +450,8 @@ void gridSAS(const Iterator begin, const Iterator end, const i3Vector& dim, floa
         // compute the dataset coordinates of the atom's center
         i3Vector c;
         std::transform(pos.begin(), pos.end(), c.begin(), [](float v)-> int {return round(v);});
-       
-        // compute bounding box for atom 
+
+        // compute bounding box for atom
         i3Vector amin;
         i3Vector amax;
         for (int j = 0; j < 3; ++j){
@@ -482,12 +484,12 @@ void gridSAS(const Iterator begin, const Iterator end, const i3Vector& dim, floa
 }
 
 template <typename Iterator>
-void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim, 
+void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim,
         float* dataset, const float radius){
     for (auto curr = begin; curr != end; ++curr){
         f3Vector pos = (*curr).position;
-        
-        // compute bounding box for atom 
+
+        // compute bounding box for atom
         i3Vector amin;
         i3Vector amax;
         for (int i = 0; i < 3; ++i){

@@ -72,10 +72,10 @@ struct Face : casc::Orientable, FaceProperties
         : Orientable(orient), FaceProperties(prop)
     {}
 
-
-
     friend std::ostream& operator<<(std::ostream& output, const Face& f){
-        output  << "Face()";
+        output  << "Face(o:" << f.orientation
+                << ";m:" << f.marker
+                << ";sel:" << f.selected << ")";
         return output;
     }
 };

@@ -1009,6 +1009,7 @@ void getMinMax(Iterator begin,
         min[2] = std::min(min[2], z);
         max[2] = std::max(max[2], z);
 
+        // Definition of surface boundary
         tempRad = curr->radius * sqrt(1.0 + log(detail::EPSILON) / BLOBBYNESS);
 
         maxRad = std::max(maxRad, tempRad);
@@ -1047,7 +1048,7 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         new_atom.x = atom.pos[0];
         new_atom.y = atom.pos[1];
         new_atom.z = atom.pos[2];
-        new_atom.radius = atom.radius; 
+        new_atom.radius = atom.radius;
 
         atom_list.push_back(new_atom);
     }
@@ -1392,14 +1393,14 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
 
     // Allocate memory
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
-    
+
     // write vertices
     for (int i = 0; i < GLOBAL_vert_num; i++)
     {
         float x = GLOBAL_vertex[i].x * span[0] + orig[0];
         float y = GLOBAL_vertex[i].y * span[1] + orig[1];
         float z = GLOBAL_vertex[i].z * span[2] + orig[2];
-        
+
         mesh->insert<1>({i}, Vertex({x,y,z}));
     }
 

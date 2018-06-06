@@ -21,20 +21,65 @@
 // ***************************************************************************
 
 
+%inline %{
+class StopIterator {};
 
-%module (package="gamer") gamer
+template <typename IT, typename T>
+class IteratorWrapper {
+public:
+  // Constructor
+  IteratorWrapper(IT _begin, IT _end): curr(_begin), end(_end) {}
 
-%{
-#include "gamer.h"
+  // Required iterator container function
+  IteratorWrapper* __iter__(){
+    return this;
+  }
+
+  // Iterator function for Python 2.x
+  T& next(){
+    return __next__();
+  }
+
+  // Iterator function for Python 3.x
+  T& __next__(){
+    if(curr != end){
+      T& obj = *curr;
+      ++curr;
+      return obj;
+    }
+    else{
+      throw StopIterator();
+    }
+  }
+
+private:
+  IT curr;
+  IT end;
+};
 %}
 
-%include <std_string.i>
-%include <std_vector.i>
+// Python 2.x exception
+%exception IteratorWrapper::next {
+  try
+  {
+    $action // calls %extend function next() below
+  }
+  catch (StopIterator)
+  {
+    PyErr_SetString(PyExc_StopIteration, "End of iterator");
+    return NULL;
+  }
+}
 
-%include "typemaps.i"
-%include "exceptions.i"
-%include "std_unique_ptr.i"
-
-%include "Vertex.i"
-%include "SurfaceMesh.i"
-%include "index_map.i"
+// Python 3.x exception
+%exception IteratorWrapper::__next__ {
+  try
+  {
+    $action // calls %extend function next() below
+  }
+  catch (StopIterator)
+  {
+    PyErr_SetString(PyExc_StopIteration, "End of iterator");
+    return NULL;
+  }
+}

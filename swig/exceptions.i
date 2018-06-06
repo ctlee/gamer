@@ -16,6 +16,10 @@ SWIGINTERN void handle_gamer_exceptions()
   {
     PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
   }
+  catch (std::out_of_range &e)
+  {
+    PyErr_SetString(PyExc_IndexError, const_cast<char*>(e.what()));
+  }
   // all the rest
   catch (std::exception &e)
   {
