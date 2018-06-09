@@ -21,8 +21,7 @@
 // ***************************************************************************
 
 
-
-%module (package="gamer") gamer
+%module (package="pygamer") pygamer
 
 %{
 #include "gamer.h"

@@ -52,7 +52,7 @@ struct FaceProperties
 struct Face : casc::Orientable, FaceProperties
 {
     /// Default constructor
-    Face() {}
+    Face() : Face(Orientable{0}, FaceProperties{0, false}) {}
 
     /**
      * @brief      Constructor
@@ -75,7 +75,7 @@ struct Face : casc::Orientable, FaceProperties
     friend std::ostream& operator<<(std::ostream& output, const Face& f){
         output  << "Face(o:" << f.orientation
                 << ";m:" << f.marker
-                << ";sel:" << f.selected << ")";
+                << ";sel:" << std::boolalpha << f.selected << ")";
         return output;
     }
 };

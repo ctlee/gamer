@@ -3,7 +3,7 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
 from bpy.app.handlers import persistent
-import gamer
+import gamer.pygamer as g
 
 from . import boundary_markers
 from . import tetrahedralization
@@ -119,8 +119,8 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
   def smooth ( self, context):
       print("Calling smooth")
       gmesh, boundaries = blender_to_gamer(create_new_mesh=self.new_mesh)
-      gmesh.smooth(max_min_angle=self.max_min_angle, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
-      gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
+      g.smoothMesh(gmesh, max_min_angle=self.max_min_angle, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
+      # gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
   def normal_smooth ( self, context):
       print("Calling smooth")
@@ -466,7 +466,6 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     # Take the first one
     #myprint("blender_to_gamer ", obj)
 
-
     # Get selected mesh
     if obj is None:
         obj = getSelectedMesh()
@@ -491,14 +490,13 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         translation = [0., 0., 0.]
 
     # Init gamer mesh
-    gmesh = gamer.SurfaceMesh()
+    gmesh = g.SurfaceMesh()
 
     def setVert(co, sel):
-        gmesh.insertVertex(g.VertexKey([key]),
-            g.Vertex(co[0] + translation[0],
+        gmesh.addVertex(g.Vertex(co[0] + translation[0],
                      co[1] + translation[1],
-                     co[2] + translation[2]),
-            0, sel)
+                     co[2] + translation[2],
+            0, bool(sel)))
 
     # Check we have vertices selected
     if check_for_vertex_selection and not selected_vertices:
@@ -521,26 +519,25 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         obj['boundaries'] = {}
         boundaries = obj['boundaries']  # TODO (9): This line might be redundant CTL
 
+    # map of indices to marker
+    indexMap = g.index_map(len(obj.data.polygons))
     # Iterate over the faces and transfer marker information
     for boundary in boundaries.values():
-        for face_ind in getBoundaryFaces(boundary):
-            gmesh.face(face_ind).m = boundary["marker"]
+        indexMap.updatemap(boundary['marker'], boundary['faces'].values()[0].to_list())
+        # for face_ind in getBoundaryFaces(boundary):
+        #     gmesh.face(face_ind).m = boundary["marker"]
 
-
-    faces = [f.vertices for f in mesh.polygons]
+    faces = obj.data.polygons
 
     # Transfer data from blender mesh to gamer mesh
     for face in faces:
-        if len(face) != 3:
+        if len(face.vertices) != 3:
             # self.drawError(errormsg="expected mesh with only triangles in")
             print("expected a triangulated mesh")
             # self.waitingCursor(0)
             restoreInteractionMode(obj,editmode)
             return None, None
-        gmesh.insertFace(g.FaceKey(face), g.Face(-1, False))
-
-
-
+        gmesh.insertFace(g.FaceKey(face.vertices), g.Face(indexMap[face.index], False))
 
     # self.waitingCursor(0)
     # myprint(gmesh)
@@ -555,7 +552,7 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
                      mesh_name="gamer_improved", switch_layer=True):
     #myprint("gamer_to_blender ",gmesh)
     # Check arguments
-    if not isinstance(gmesh, gamer.SurfaceMesh):
+    if not isinstance(gmesh, g.SurfaceMesh):
 #        self.drawError(errormsg="expected a GAMer SurfaceMesh")
         print("expected a SurfaceMesh")
 
@@ -563,13 +560,17 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
     scn = bpy.context.scene
 #    self.waitingCursor(1)
 
-    verts = [(gvert.x, gvert.y, gvert.z) for gvert in gmesh.vertices()]
-    un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices())
-                            if not gvert.sel]
+    verts = [(gvert[0], gvert[1], gver[2]) for gvert in gmesh.vertices()]
+    un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices()) if not gvert.selected]
 
-    faces = [(gface.a, gface.b, gface.c) for gface in gmesh.faces()]
-    markers = [(i, gface.m) for i, gface in enumerate(gmesh.faces()) \
-               if gface.m != -1]
+    # verts = [(gvert.x, gvert.y, gvert.z) for gvert in gmesh.vertices()]
+    # un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices())
+    #                         if not gvert.sel]
+
+
+    # faces = [(gface.a, gface.b, gface.c) for gface in gmesh.faces()]
+    # markers = [(i, gface.m) for i, gface in enumerate(gmesh.faces()) \
+    #            if gface.m != -1]
 
     # If we create a new mesh we copy the boundaries to a dict
     if create_new_mesh:

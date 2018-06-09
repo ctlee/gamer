@@ -48,17 +48,21 @@ int  main(int argc, char *argv[])
     std::cout << "# Faces: " << mesh->size<3>() << std::endl;
 
     // auto mesh = cube(2);
-    compute_orientation(*mesh);
-    if(getVolume(*mesh) < 0){
-        for(auto &face : mesh->get_level<3>())
-            face.orientation *= -1;
+    // compute_orientation(*mesh);
+    // if(getVolume(*mesh) < 0){
+    //     for(auto &face : mesh->get_level<3>())
+    //         face.orientation *= -1;
+    // }
+
+    for(auto face : mesh->get_level_id<3>()){
+        std::cout << face << "  " << *face << std::endl;
     }
 
     // coarseIT(*mesh, 0.016, 1, 0);
     // coarseIT(*mesh, 2.5, 0, 10);
- 
+
     // smoothMesh(*mesh, 15, 165, 5, true);
-    writeOFF("test.off", *mesh);
+    // writeOFF("test.off", *mesh);
 
 
     // auto it = mesh->get_level_id<1>();
@@ -84,7 +88,7 @@ int  main(int argc, char *argv[])
     // global.marker = -1;
 
 
-    // auto box = cube(5);    
+    // auto box = cube(5);
 
     // for(auto &face : box->get_level<3>())
     //     face.marker = 50;
@@ -146,7 +150,7 @@ int  main(int argc, char *argv[])
 
     //         for (auto vertex : vertices){
     //             auto &data  = *(protein.get_simplex_up(tetmesh->get_name(vertex)));
-    //             data = *vertex;              
+    //             data = *vertex;
     //         }
 
     //     } else if (fdata.marker == 50){
@@ -156,7 +160,7 @@ int  main(int argc, char *argv[])
 
     //         for (auto vertex : vertices){
     //             auto &data = *(boxE.get_simplex_up(tetmesh->get_name(vertex)));
-    //             data = *vertex;              
+    //             data = *vertex;
     //         }
     //     } else{
     //         // std::cout << fdata.marker << std::endl;
@@ -178,6 +182,6 @@ int  main(int argc, char *argv[])
     // auto oldmesh = SurfaceMeshOld::readOFF(argv[1]);
     // //oldmesh->coarse(0.016,1,0,-1);
     // oldmesh->coarse(2.5,0,10,-1);
-    // 
+    //
     std::cout << "EOF" << std::endl;
 }

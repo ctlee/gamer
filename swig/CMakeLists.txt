@@ -34,28 +34,28 @@ endforeach()
 
 SET(CMAKE_SWIG_FLAGS "")
 # SET(SWIG_MODULE_gamer_EXTRA_DEPS "../include/WrapSurfaceMesh.h" "../src/WrapSurfaceMesh.C")
-SET(SWIG_MODULE_gamer_EXTRA_DEPS "")
+SET(SWIG_MODULE_pygamer_EXTRA_DEPS "")
 
-SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-O")
-# SET_SOURCE_FILES_PROPERTIES(gamer.i PROPERTIES SWIG_FLAGS "-builtin")
+SET_SOURCE_FILES_PROPERTIES(pygamer.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(pygamer.i PROPERTIES SWIG_FLAGS "-O")
+# SET_SOURCE_FILES_PROPERTIES(pygamer.i PROPERTIES SWIG_FLAGS "-builtin")
 
 
-# SWIG_ADD_MODULE(gamer python gamer.i)
-SWIG_ADD_LIBRARY(gamer LANGUAGE python SOURCES gamer.i)
+# SWIG_ADD_MODULE(pygamer python pygamer.i)
+SWIG_ADD_LIBRARY(pygamer LANGUAGE python SOURCES pygamer.i)
 
 # Handle some problems with Anaconda dylib linking in OSX
 if(APPLE)
-    swig_link_libraries(gamer ${swigpy_LINK_LIBRARIES})
-    set_target_properties(${SWIG_MODULE_gamer_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+    swig_link_libraries(pygamer ${swigpy_LINK_LIBRARIES})
+    set_target_properties(${SWIG_MODULE_pygamer_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 else()
-    swig_link_libraries(gamer ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
+    swig_link_libraries(pygamer ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
 endif()
 
-SWIG_LINK_LIBRARIES(gamer gamerstatic)
+SWIG_LINK_LIBRARIES(pygamer gamerstatic)
 
-install(TARGETS _gamer DESTINATION lib/site-packages)
-install(FILES ${CMAKE_BINARY_DIR}/swig/gamer.py DESTINATION lib/site-packages)
+install(TARGETS _pygamer DESTINATION lib/site-packages)
+install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 
-install(TARGETS _gamer DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)
-install(FILES ${CMAKE_BINARY_DIR}/swig/gamer.py DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)
+install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)
+install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)

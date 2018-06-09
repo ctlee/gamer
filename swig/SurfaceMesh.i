@@ -24,10 +24,15 @@
 #include <iostream>
 #include "SurfaceMesh.h"
 #include "PDBReader.h"
+%}
 
-using SMVertIterator = SurfaceMesh::SimplexIDIterator<1>;
-using SMVDataIterator = SurfaceMesh::DataIterator<1>;
-using SMFDataIterator = SurfaceMesh::DataIterator<3>;
+%inline %{
+using VertexID_Iterator = SurfaceMesh::SimplexIDIterator<1>;
+using VertexData_Iterator = SurfaceMesh::DataIterator<1>;
+
+using FaceID_Iterator = SurfaceMesh::SimplexIDIterator<3>;
+using FaceData_Iterator = SurfaceMesh::DataIterator<3>;
+
 using VertexID = SurfaceMesh::SimplexID<1>;
 using EdgeID = SurfaceMesh::SimplexID<2>;
 using FaceID = SurfaceMesh::SimplexID<3>;
@@ -60,13 +65,18 @@ struct Face
 %include "SurfaceMesh.h"
 %include "IteratorWrapper.i"
 
-%template(VertexIT) IteratorWrapper<SMVDataIterator, Vertex>;
-%template(FaceIT) IteratorWrapper<SMFDataIterator, Face>;
+%template(VertexIT) IteratorWrapper<VertexData_Iterator, Vertex>;
+%template(FaceIT) IteratorWrapper<FaceData_Iterator, Face>;
+
+%template(FaceIDIT) IDIteratorWrapper<FaceID_Iterator, FaceID>;
 
 // Class to shadow complicated alias
 class SurfaceMesh{
 public:
   %extend {
+    void addVertex(const Vertex &data){
+      $self->add_vertex(data);
+    }
     void insertVertex(std::array<int, 1> &s, const Vertex &data) {
       $self->insert<1>(s, data);
     }
@@ -98,14 +108,23 @@ public:
       return $self->size<3>();
     }
 
-    IteratorWrapper<SMVDataIterator, Vertex> getVertexIT(){
-      auto it = $self->get_level<1>();
-      return IteratorWrapper<SMVDataIterator, Vertex>(it.begin(), it.end());
+    std::array<int, 3> getFaceName(FaceID f){
+      return $self->get_name(f);
     }
 
-    IteratorWrapper<SMFDataIterator, Face> getFaceIT(){
+    IteratorWrapper<VertexData_Iterator, Vertex> getVertexIT(){
+      auto it = $self->get_level<1>();
+      return IteratorWrapper<VertexData_Iterator, Vertex>(it.begin(), it.end());
+    }
+
+    IteratorWrapper<FaceData_Iterator, Face> getFaceDataIT(){
       auto it = $self->get_level<3>();
-      return IteratorWrapper<SMFDataIterator, Face>(it.begin(), it.end());
+      return IteratorWrapper<FaceData_Iterator, Face>(it.begin(), it.end());
+    }
+
+    IDIteratorWrapper<FaceID_Iterator, FaceID> getFaceIT(){
+      auto it = $self->get_level_id<3>();
+      return IDIteratorWrapper<FaceID_Iterator, FaceID>(it.begin(), it.end());
     }
   }
 
@@ -115,6 +134,10 @@ public:
         yield v
 
     def faces(self):
+      for f in self.getFaceDataIT():
+        yield f
+
+    def faceIDs(self):
       for f in self.getFaceIT():
         yield f
   %}

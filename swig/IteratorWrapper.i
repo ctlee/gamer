@@ -83,3 +83,75 @@ private:
     return NULL;
   }
 }
+
+
+%inline %{
+template <typename IT, typename T>
+class IDIteratorWrapper {
+public:
+  // Constructor
+  IDIteratorWrapper(IT _begin, IT _end): curr(_begin), end(_end) {}
+
+  // ~IDIteratorWrapper(){
+  //   while(!allocated.empty()){
+  //     T* obj = allocated.back();
+  //     allocated.pop_back();
+  //     delete obj;
+  //   }
+  // }
+
+  // Required iterator container function
+  IDIteratorWrapper* __iter__(){
+    return this;
+  }
+
+  // Iterator function for Python 2.x
+  T next(){
+    return __next__();
+  }
+
+  // Iterator function for Python 3.x
+  T __next__(){
+    if(curr != end){
+      T obj = std::move(*curr);
+      // allocated.push_back(obj);
+      ++curr;
+      return std::move(obj);
+    }
+    else{
+      throw StopIterator();
+    }
+  }
+
+private:
+  // std::vector<T*> allocated;
+  IT curr;
+  IT end;
+};
+%}
+
+// Python 2.x exception
+%exception IDIteratorWrapper::next {
+  try
+  {
+    $action // calls %extend function next() below
+  }
+  catch (StopIterator)
+  {
+    PyErr_SetString(PyExc_StopIteration, "End of iterator");
+    return NULL;
+  }
+}
+
+// Python 3.x exception
+%exception IDIteratorWrapper::__next__ {
+  try
+  {
+    $action // calls %extend function next() below
+  }
+  catch (StopIterator)
+  {
+    PyErr_SetString(PyExc_StopIteration, "End of iterator");
+    return NULL;
+  }
+}

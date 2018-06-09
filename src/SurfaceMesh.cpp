@@ -155,10 +155,10 @@ void generateHistogram(const SurfaceMesh &mesh)
 }
 
 std::tuple<double, double, int, int> getMinMaxAngles(
-    const SurfaceMesh &mesh, 
-    int maxMinAngle, 
+    const SurfaceMesh &mesh,
+    int maxMinAngle,
     int minMaxAngle)
-{    
+{
     double minAngle = 360;
     double maxAngle = 0;
     int small = 0;
@@ -257,7 +257,7 @@ double getVolume(const SurfaceMesh &mesh)
         volume += tmp;
     }
     if(orientError){
-        std::cerr << "ERROR getVolume(): Orientation undefined for one or more " 
+        std::cerr << "ERROR getVolume(): Orientation undefined for one or more "
                   << "simplices. Did you call compute_orientation()?" << std::endl;
     }
     return volume/6;
@@ -306,7 +306,7 @@ std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh){
         for(auto vertexID : mesh.get_level_id<1>()){
             center += *vertexID;
         }
-        center /= mesh.size<1>(); 
+        center /= mesh.size<1>();
 
         for(auto vertexID : mesh.get_level_id<1>()){
             Vector tmp = *vertexID - center;
@@ -333,6 +333,7 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     mesh.remove<2>({name[0], name[1]});
     mesh.insert<3>({name[0], up[0], up[1]});
     mesh.insert<3>({name[1], up[0], up[1]});
+    // TODO: this gets rid of boundary markings...
 }
 
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
@@ -469,9 +470,9 @@ void normalSmooth(SurfaceMesh &mesh){
     double min, max;
     int nSmall, nLarge;
     std::tie(min,max, nSmall, nLarge) = getMinMaxAngles(mesh, 15, 150);
-    std::cout << "  Min Angle: " << min << ", Max Angle: " << max 
-              << ", # Small Angles: " << nSmall 
-              << ", # Large Angles: " << nLarge << std::endl; 
+    std::cout << "  Min Angle: " << min << ", Max Angle: " << max
+              << ", # Small Angles: " << nSmall
+              << ", # Large Angles: " << nLarge << std::endl;
 }
 
 /**
@@ -547,7 +548,7 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
 
 int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
-    return mesh.get_cover(vertexID).size();    
+    return mesh.get_cover(vertexID).size();
 }
 
 tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
@@ -626,7 +627,7 @@ Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 
     return eigensolver;
 }
 
-void weightedVertexSmooth(SurfaceMesh &mesh, 
+void weightedVertexSmooth(SurfaceMesh &mesh,
     SurfaceMesh::SimplexID<1> vertexID,
     int rings)
 {
@@ -691,14 +692,14 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
 
     /**
      * Project to move onto LST eigenvector space and scale by eigenvalues.
-     * 
+     *
      * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
      * \vec{e_k})\vec{e_k}
      */
     auto lst = computeLocalStructureTensor(mesh, vertexID, rings);
 
     auto eigen_result = getEigenvalues(lst);
-    // std::cout << "Eigenvalues(LST): " 
+    // std::cout << "Eigenvalues(LST): "
     //      << eigen_result.eigenvalues().transpose() << std::endl;
     // std::cout << "Here's a matrix whose columns are eigenvectors of LST \n"
     //      << "corresponding to these eigenvalues:\n"
@@ -717,7 +718,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
 }
 
 tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
-        const SurfaceMesh::SimplexID<1> vertexID, 
+        const SurfaceMesh::SimplexID<1> vertexID,
         const int rings){
     // Set of neighbors
     std::set<SurfaceMesh::SimplexID<1> > nbors;
@@ -746,30 +747,30 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
     bool smoothed;
     double minAngle, maxAngle;
     int nSmall, nLarge;
-    int nIter = 1;
+    int nIter = 0;
 
     // Check if we are smoothed already
     smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
 
-    std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle); 
-    std::cout << "Initial Quality: Min Angle = " << minAngle << ", " 
+    std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
+    std::cout << "Initial Quality: Min Angle = " << minAngle << ", "
               << "Max Angle = " << maxAngle << ", "
               << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
               << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
 
 
     // while not smoothed and not at maxiter perform one round of
-    // weightedVertexSmooth + edgeflipping    
+    // weightedVertexSmooth + edgeflipping
     while (!smoothed && nIter < maxIter){
         for(auto vertex : mesh.get_level_id<1>()){
             weightedVertexSmooth(mesh, vertex, RINGS);
         }
 
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
-        
+
         // Get set of good, non-interfering edges to flip according to the
         // Angle based criteria.
-        selectFlipEdges(mesh, preserveRidges, checkFlipAngle, 
+        selectFlipEdges(mesh, preserveRidges, checkFlipAngle,
                             std::back_inserter(edgesToFlip));
         for(auto edgeID : edgesToFlip){
             edgeFlip(mesh, edgeID);
@@ -778,16 +779,16 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
 
         // Mark for flipping by edge valence.
         // edgesToFlip.clear();
-        // selectFlipEdges(mesh, preserveRidges, checkFlipValence, 
+        // selectFlipEdges(mesh, preserveRidges, checkFlipValence,
         //                    std::back_inserter(edgesToFlip));
         // for(auto edgeID : edgesToFlip){
         //     edgeFlip(mesh, edgeID);
         // }
         // compute_orientation(mesh);
 
-        std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle); 
+        std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
         std::cout << "Iteration " << nIter << ":" << std::endl;
-        std::cout << "Min Angle = " << minAngle << ", " 
+        std::cout << "Min Angle = " << minAngle << ", "
                   << "Max Angle = " << maxAngle << ", "
                   << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
                   << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
@@ -800,8 +801,8 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
 
 /**
  * @brief      Refine the mesh by quadrisection.
- * 
- * Note that this function will delete all stored data on edges and faces. But 
+ *
+ * Note that this function will delete all stored data on edges and faces. But
  * this can be easily fixed.
  *
  * @param      mesh  The mesh
@@ -812,7 +813,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
     // Copy over vertices to refinedMesh
     for (auto vertex : mesh.get_level_id<1>()){
         auto key = mesh.get_name(vertex);
-        refinedMesh->insert(key, *vertex);        
+        refinedMesh->insert(key, *vertex);
     }
 
     // Split edges and generate a map of names before to after
@@ -861,14 +862,14 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
     // TODO: Check if all polygons are closed (0)
-    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
+    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 
     // Compute the average edge length
     double avgLen = 0;
     if (denseWeight > 0){
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
-            auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+            auto v = *mesh.get_simplex_down(edgeID, name[0])
                      - *mesh.get_simplex_down(edgeID, name[1]);
             avgLen += std::sqrt(v|v);
         }
@@ -888,7 +889,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
             double maxLen = 0;
             for(auto edgeID : edges){
                 auto name =  mesh.get_name(edgeID);
-                auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+                auto v = *mesh.get_simplex_down(edgeID, name[0])
                          - *mesh.get_simplex_down(edgeID, name[1]);
                 double tmpLen = std::sqrt(v|v);
                 if(tmpLen > maxLen) maxLen = tmpLen;
@@ -899,7 +900,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         // Curvature as coarsening criteria
         if(flatRate > 0){
             // TODO: how many rings to consider? (0)
-            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);  
+            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);
             auto eigenvalues = getEigenvalues(lst).eigenvalues();
             // std::cout << "E[0]: " << eigenvalues[0] << std::endl;
             // std::cout << "E[1]: " << eigenvalues[1] << std::endl;
@@ -911,7 +912,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         //std::cout << "Coarse value: " << sparsenessRatio*flatnessRatio << std::endl;
         // Add vertex to delete list
         if(sparsenessRatio * flatnessRatio < coarseRate){
-            toRemove.push_back(vertexID); 
+            toRemove.push_back(vertexID);
         }
     }
 
@@ -999,20 +1000,20 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         }
     }
 
-    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
+    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 }
 
 
 void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
     // TODO: Check if all polygons are closed (0)
-    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
+    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 
     // Compute the average edge length
     double avgLen = 0;
     if (denseWeight > 0){
         for (auto edgeID : mesh.get_level_id<2>()){
             auto name =  mesh.get_name(edgeID);
-            auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+            auto v = *mesh.get_simplex_down(edgeID, name[0])
                      - *mesh.get_simplex_down(edgeID, name[1]);
             avgLen += std::sqrt(v|v);
         }
@@ -1032,7 +1033,7 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
             double maxLen = 0;
             for(auto edgeID : edges){
                 auto name =  mesh.get_name(edgeID);
-                auto v = *mesh.get_simplex_down(edgeID, name[0]) 
+                auto v = *mesh.get_simplex_down(edgeID, name[0])
                          - *mesh.get_simplex_down(edgeID, name[1]);
                 double tmpLen = std::sqrt(v|v);
                 if(tmpLen > maxLen) maxLen = tmpLen;
@@ -1043,7 +1044,7 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
         // Curvature as coarsening criteria
         if(flatRate > 0){
             // TODO: how many rings to consider? (0)
-            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);  
+            auto lst = computeLocalStructureTensor(mesh, vertexID, RINGS);
             auto eigenvalues = getEigenvalues(lst).eigenvalues();
             // std::cout << "E[0]: " << eigenvalues[0] << std::endl;
             // std::cout << "E[1]: " << eigenvalues[1] << std::endl;
@@ -1136,7 +1137,7 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
         }
     }
 
-    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;    
+    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 }
 
 bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList){
@@ -1214,7 +1215,7 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
                     }
                     else{
                         std::cerr << "ERROR(computeHoleOrientation): Found an edge"
-                                  << " connected to " << w.size() << " faces. The SurfaceMesh " 
+                                  << " connected to " << w.size() << " faces. The SurfaceMesh "
                                   << "is no longer a surface mesh." << std::endl;
                         return false;
                     }

@@ -25,7 +25,7 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
 from bpy.app.handlers import persistent
-import gamer
+import gamer.pygamer as g
 
 # python imports
 import os

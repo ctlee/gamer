@@ -24,8 +24,10 @@
 %inline %{
 struct index_map {
   std::vector<int> map;
+  std::size_t maxsize;
 
   index_map(std::size_t size){
+    maxsize = size;
     map = std::vector<int>(size);
   }
 
