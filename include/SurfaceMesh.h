@@ -65,6 +65,14 @@ struct Face : casc::Orientable, FaceProperties
     /**
      * @brief      Constructor
      *
+     * @param[in]  marker    The marker
+     * @param[in]  selected  The selected
+     */
+    Face(int orient, int marker, bool selected) : Face(Orientable{orient}, FaceProperties{marker, selected}) {}
+
+    /**
+     * @brief      Constructor
+     *
      * @param[in]  orient  Orientable object
      * @param[in]  prop    Properties of a face
      */
@@ -78,6 +86,15 @@ struct Face : casc::Orientable, FaceProperties
                 << ";sel:" << std::boolalpha << f.selected << ")";
         return output;
     }
+
+    std::string to_string() const{
+        std::ostringstream output;
+        output  << "Face(orient:" << orientation
+                << ";m:" << marker
+                << ";sel:" << std::boolalpha << selected << ")";
+        return output.str();
+    }
+
 };
 
 /**

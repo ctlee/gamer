@@ -47,20 +47,35 @@ using FaceID = SurfaceMesh::SimplexID<3>;
 // Wrap the unique_ptr
 wrap_unique_ptr(SMUniquePtr, SurfaceMesh);
 
-struct Face
-{
+struct Face {
   Face() {}
+  Face(int orient, int marker, bool selected) {}
   Face(int marker, bool selected) {} // Shadows full constructor
   int  marker;   /**< @brief Marker */
   bool selected; /**< @brief Selection flag */
 
-  %pythoncode %{
-    def __repr__(self):
-      output = "Face(m:" + str(self.marker) \
-          + ";sel:" + str(self.selected) + ")"
-      return output
-  %}
+  %extend{
+    const char* __repr__(){
+      return $self->to_string().c_str();
+    }
+  }
 };
+
+struct FaceID {
+public:
+  %extend {
+    const char* __repr__() {
+      std::ostringstream out;
+      out << *$self;
+      return out.str().c_str();
+    }
+
+    Face& data() {
+      return **$self;
+    }
+  }
+};
+
 
 %include "SurfaceMesh.h"
 %include "IteratorWrapper.i"
@@ -70,16 +85,6 @@ struct Face
 
 %template(FaceIDIT) IteratorWrapper<FaceID_Iterator, FaceID>;
 
-class FaceID {
-public:
-  %extend {
-    const char* __repr__() {
-      std::ostringstream out;
-      out << *$self;
-      return out.str().c_str();
-    }
-  }
-};
 
 
 // Class to shadow complicated alias
@@ -124,8 +129,16 @@ public:
       return $self->size<3>();
     }
 
-    std::array<int, 3> getFaceName(FaceID f){
-      return $self->get_name(f);
+    std::array<int, 1> getName(VertexID id){
+      return $self->get_name(id);
+    }
+
+    std::array<int, 2> getName(EdgeID id){
+      return $self->get_name(id);
+    }
+
+    std::array<int, 3> getName(FaceID id){
+      return $self->get_name(id);
     }
 
     IteratorWrapper<VertexData_Iterator, Vertex> getVertexIT(){

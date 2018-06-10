@@ -60,17 +60,7 @@
 		return (*($self))[index];
 	}
 
-
   const char* __repr__() {
     return $self->to_string().c_str();
   }
-  // %pythoncode %{
-  //   def __repr__(self):
-  //     output = "Vertex(x:" + str(self.getitem(0)) \
-  //         + ";y:" + str(self.getitem(1)) \
-  //         + ";z:" + str(self.getitem(2)) \
-  //         + ";m:" + str(self.marker)     \
-  //         + ";sel:" + str(self.selected) + ")"
-  //     return output
-  // %}
 }

@@ -11,7 +11,7 @@ from . import tetrahedralization
 # python imports
 import os
 import numpy as np
-
+import collections
 
 # we use per module class registration/unregistration
 def register():
@@ -531,16 +531,30 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
 
     # Transfer data from blender mesh to gamer mesh
     for face in faces:
-        if len(face.vertices) != 3:
+        vertices = collections.deque(face.vertices)
+        if len(vertices) != 3:
             # self.drawError(errormsg="expected mesh with only triangles in")
             print("expected a triangulated mesh")
             # self.waitingCursor(0)
             restoreInteractionMode(obj,editmode)
             return None, None
-        gmesh.insertFace(g.FaceKey(face.vertices), g.Face(indexMap[face.index], False))
+
+        # Get the orientation from Blender
+        max_val = max(vertices)
+        max_idx = vertices.index(max_val)
+        if max_idx != 2:
+            vertices.rotate(2-max_idx)
+        orientation = 1
+        if(vertices[0] < vertices[1]):
+            orientation = -1
+        gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, indexMap[face.index], False))
 
     # self.waitingCursor(0)
     # myprint(gmesh)
+
+    # Check the face orientations...
+    # g.compute_orientation(gmesh)
+
 
     # Restore editmode
     restoreInteractionMode(obj,editmode)
