@@ -68,7 +68,19 @@ struct Face
 %template(VertexIT) IteratorWrapper<VertexData_Iterator, Vertex>;
 %template(FaceIT) IteratorWrapper<FaceData_Iterator, Face>;
 
-%template(FaceIDIT) IDIteratorWrapper<FaceID_Iterator, FaceID>;
+%template(FaceIDIT) IteratorWrapper<FaceID_Iterator, FaceID>;
+
+class FaceID {
+public:
+  %extend {
+    const char* __repr__() {
+      std::ostringstream out;
+      out << *$self;
+      return out.str().c_str();
+    }
+  }
+};
+
 
 // Class to shadow complicated alias
 class SurfaceMesh{
@@ -88,6 +100,10 @@ public:
     }
     void insertFace(std::array<int, 3> &s) {
       $self->insert<3>(s);
+    }
+
+    FaceID getFaceID(std::array<int, 3> &s) {
+      return $self->get_simplex_up<3>(s);
     }
 
     Vertex& getVertex(std::array<int, 1> &s){
@@ -122,9 +138,9 @@ public:
       return IteratorWrapper<FaceData_Iterator, Face>(it.begin(), it.end());
     }
 
-    IDIteratorWrapper<FaceID_Iterator, FaceID> getFaceIT(){
+    IteratorWrapper<FaceID_Iterator, FaceID> getFaceIT(){
       auto it = $self->get_level_id<3>();
-      return IDIteratorWrapper<FaceID_Iterator, FaceID>(it.begin(), it.end());
+      return IteratorWrapper<FaceID_Iterator, FaceID>(it.begin(), it.end());
     }
   }
 
