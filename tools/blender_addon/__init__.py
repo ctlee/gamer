@@ -38,10 +38,10 @@ bl_info = {
 
 if "bpy" in locals():
     print("Reloading GAMer")
-    import imp
-    imp.reload(gamer_gui)
-    imp.reload(boundary_markers)
-    imp.reload(tetrahedralization)
+    import importlib
+    importlib.reload(gamer_gui)
+    importlib.reload(boundary_markers)
+    importlib.reload(tetrahedralization)
 else:
     print("Importing GAMer")
     from . import gamer_gui

@@ -111,11 +111,11 @@ public:
       return $self->get_simplex_up<3>(s);
     }
 
-    Vertex& getVertex(std::array<int, 1> &s){
+    Vertex getVertex(std::array<int, 1> &s){
       return *($self->get_simplex_up<1>(s));
     }
 
-    Face& getFace(std::array<int, 3> &s){
+    Face getFace(std::array<int, 3> &s){
       return *($self->get_simplex_up<3>(s));
     }
 
@@ -189,6 +189,11 @@ SurfaceMesh* ReadPDB_molsurf(const std::string & filename){
 SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float isovalue){
   return readPDB_gauss(filename, blobbyness, isovalue).release();
 }
+%}
+
+%pythoncode %{
+  def SmoothMesh(mesh):
+    return smoothMesh(mesh, 15, 165, 1, True);
 %}
 
 void writeOFF(const std::string &filename, const SurfaceMesh &mesh);

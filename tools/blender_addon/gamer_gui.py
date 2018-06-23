@@ -21,10 +21,6 @@ def register():
 def unregister():
     bpy.utils.unregister_module(__name__)
 
-def myprint ( s ):
-    print ( s )
-
-
 @persistent
 def gamer_load_post(context):
     """ Initialize GAMer add  """
@@ -482,7 +478,6 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     vertices, selected_vertices = getMeshVertices(obj, selected=True)
     vertices = getMeshVertices(obj)
 
-    # myprint("verts ",len(vertices), len(faces))
     # Get world location and offset each vertex with this value
     if create_new_mesh:
         translation = getTranslation(obj)
@@ -492,7 +487,7 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     # Init gamer mesh
     gmesh = g.SurfaceMesh()
 
-    def setVert(co, sel):
+    def addVertex(co, sel):
         gmesh.addVertex(g.Vertex(co[0] + translation[0],
                      co[1] + translation[1],
                      co[2] + translation[2],
@@ -511,7 +506,8 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         selection[selected_vertices] = 1
         selected_vertices = selection
 
-    [setVert(*args) for args in zip(vertices, selected_vertices)]
+    # Zip args and pass to addVertex functor
+    [addVertex(*args) for args in zip(vertices, selected_vertices)]
 
     # Transfer boundary information
     boundaries = obj.get('boundaries')
@@ -524,9 +520,8 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     # Iterate over the faces and transfer marker information
     for boundary in boundaries.values():
         indexMap.updatemap(boundary['marker'], boundary['faces'].values()[0].to_list())
-        # for face_ind in getBoundaryFaces(boundary):
-        #     gmesh.face(face_ind).m = boundary["marker"]
 
+    # Get list of faces
     faces = obj.data.polygons
 
     # Transfer data from blender mesh to gamer mesh
@@ -534,7 +529,7 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         vertices = collections.deque(face.vertices)
         if len(vertices) != 3:
             # self.drawError(errormsg="expected mesh with only triangles in")
-            print("expected a triangulated mesh")
+            print("Error: encountered a non-triangular face. Expected a triangulated mesh.")
             # self.waitingCursor(0)
             restoreInteractionMode(obj,editmode)
             return None, None
@@ -553,7 +548,7 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
     # myprint(gmesh)
 
     # Check the face orientations...
-    # g.compute_orientation(gmesh)
+    g.compute_orientation(gmesh)
 
 
     # Restore editmode

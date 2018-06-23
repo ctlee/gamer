@@ -658,9 +658,16 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         Vector nS = next - shared;
         nS /= std::sqrt(nS|nS);
 
-        // Bisector of the 'diamond'
+        // Bisector of the 'rhombus'
         Vector bisector = (pS + nS)/2;
-        bisector /= std::sqrt(bisector|bisector);
+        // TODO (0): Create a better method for catching divide by zeros
+
+        try {
+            normalize(bisector);
+        }
+        catch (std::runtime_error& e){
+            continue;
+        }
 
         // Get a reference vecter to shared which lies on the plane of interest.
         Vector disp = center - shared;
@@ -686,10 +693,10 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
 
         auto alpha = (pS|nS)+1; // keep the dot product positive
         sumWeights += alpha;
+
         newPos += alpha*(center.position - perp);
     }
     newPos /= sumWeights;
-
     /**
      * Project to move onto LST eigenvector space and scale by eigenvalues.
      *
@@ -758,7 +765,6 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
               << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
               << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
 
-
     // while not smoothed and not at maxiter perform one round of
     // weightedVertexSmooth + edgeflipping
     while (!smoothed && nIter < maxIter){
@@ -767,7 +773,6 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
         }
 
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
-
         // Get set of good, non-interfering edges to flip according to the
         // Angle based criteria.
         selectFlipEdges(mesh, preserveRidges, checkFlipAngle,
