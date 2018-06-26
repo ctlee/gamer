@@ -100,31 +100,31 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
   preserve_ridges = BoolProperty( name="Preserve ridges", default=False)
   new_mesh = BoolProperty( name="Create new mesh", default=False)
 
-  def coarse_dense ( self, context):
+  def coarse_dense (self, context):
       print("Calling coarse_dense")
-      gmesh, boundaries = blender_to_gamer(create_new_mesh=self.new_mesh)
+      gmesh, boundaries = blenderToGamer()
       gmesh.coarse_dense(rate=self.dense_rate, numiter=self.dense_iter)
       gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
-  def coarse_flat ( self, context):
+  def coarse_flat (self, context):
       print("Calling coarse_flat")
-      gmesh, boundaries = blender_to_gamer(create_new_mesh=self.new_mesh)
+      gmesh, boundaries = blenderToGamer()
       gmesh.coarse_flat(rate=self.flat_rate)
       gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
-  def smooth ( self, context):
+  def smooth (self, context):
       print("Calling smooth")
-      gmesh, boundaries = blender_to_gamer(create_new_mesh=self.new_mesh)
+      gmesh, boundaries = blenderToGamer()
       g.smoothMesh(gmesh, max_min_angle=self.max_min_angle, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
       # gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
-  def normal_smooth ( self, context):
+  def normal_smooth (self, context):
       print("Calling smooth")
-      gmesh, boundaries = blender_to_gamer(create_new_mesh=self.new_mesh)
+      gmesh, boundaries = blenderToGamer()
       gmesh.normal_smooth()
       gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
-  def draw_layout ( self, context, layout ):
+  def draw_layout (self, context, layout ):
       row = layout.row()
       col = row.column()
       col.operator("gamer.coarse_dense",icon="OUTLINER_OB_LATTICE")
@@ -369,7 +369,6 @@ def getSelectedMesh(errorreport=True):
     # myprint(obj)
     if not obj or obj.type != 'MESH':
         if errorreport:
-#            self.drawError(errormsg="expected a selected mesh")
             print("expected a selected mesh")
         return None
     return obj
@@ -399,10 +398,6 @@ def getMeshFaces( obj, selected = False):
         return faces
 
 
-def getTranslation(obj):
-    return obj.location#("worldspace")#[obj.LocX,obj.LocY,obj.LocZ]#obj.matrixWorld[3][0:3]
-
-
 def getBoundaryFaces(boundary):
     if not "faces" in boundary:
         return []
@@ -410,18 +405,6 @@ def getBoundaryFaces(boundary):
     for faces in list(boundary["faces"].values()):
         all_faces.extend(faces)
     return all_faces
-
-
-# def getBoundaryFaces(boundary, obj):
-# if not "faces" in boundary:
-#     return []
-# all_faces = []
-# for faces in list(boundary["faces"].values()):
-#     all_faces.extend(faces)
-# facetuples = []
-# for face in all_faces:
-#     facetuples.append(tuple(obj.data.polygons[face].vertices))
-# return facetuples
 
 
 def setBoundaryFaces(boundary, faces):
@@ -457,37 +440,23 @@ def createMesh(mesh_name, verts, faces, smooth=False, color=[0.8,0.8,0.8]):
 
 
 
-def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection=True):
+def blenderToGamer(obj=None, check_for_vertex_selection=True):
     "Transfer the active mesh to a GAMer surface mesh"
-    # Take the first one
-    #myprint("blender_to_gamer ", obj)
-
-    # Get selected mesh
+    # Get the selected mesh
     if obj is None:
         obj = getSelectedMesh()
-    #myprint("blender_to_gamer getSelectedMesh ", obj.name)
     if obj is None:
         return None, None
 
-    # Ensure editmode is off
-    editmode = setObjectMode(obj)
-
-    # self.waitingCursor(1)
-
+    editmode = setObjectMode(obj) # Ensure edit mode is off
     # Grab vertices
     vertices, selected_vertices = getMeshVertices(obj, selected=True)
-    vertices = getMeshVertices(obj)
-
     # Get world location and offset each vertex with this value
-    if create_new_mesh:
-        translation = getTranslation(obj)
-    else:
-        translation = [0., 0., 0.]
-
+    translation = obj.location
     # Init gamer mesh
     gmesh = g.SurfaceMesh()
 
-    def addVertex(co, sel):
+    def addVertex(co, sel): # functor to addVertices
         gmesh.addVertex(g.Vertex(co[0] + translation[0],
                      co[1] + translation[1],
                      co[2] + translation[2],
@@ -495,7 +464,7 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
 
     # Check we have vertices selected
     if check_for_vertex_selection and not selected_vertices:
-        myprint("No selected vertices")
+        print("blenderToGamer: There are no selected vertices.")
         return None, None
 
     # If all vertices are selected
@@ -503,9 +472,8 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
         selected_vertices = np.ones(len(vertices), dtype=bool)
     else:
         selection = np.zeros(len(vertices), dtype=bool)
-        selection[selected_vertices] = 1
+        selection[selected_vertices] = 1    # Set selected to True
         selected_vertices = selection
-
     # Zip args and pass to addVertex functor
     [addVertex(*args) for args in zip(vertices, selected_vertices)]
 
@@ -517,9 +485,9 @@ def blender_to_gamer(obj=None, create_new_mesh=False, check_for_vertex_selection
 
     # map of indices to marker
     indexMap = g.index_map(len(obj.data.polygons))
+    fillmap = lambda boundary: indexMap.updatemap(boundary['marker'], boundary['faces'].values()[0].to_list())
     # Iterate over the faces and transfer marker information
-    for boundary in boundaries.values():
-        indexMap.updatemap(boundary['marker'], boundary['faces'].values()[0].to_list())
+    map(fillmap, boundaries.values())
 
     # Get list of faces
     faces = obj.data.polygons
@@ -562,57 +530,71 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
     #myprint("gamer_to_blender ",gmesh)
     # Check arguments
     if not isinstance(gmesh, g.SurfaceMesh):
-#        self.drawError(errormsg="expected a GAMer SurfaceMesh")
+    # self.drawError(errormsg="expected a GAMer SurfaceMesh")
         print("expected a SurfaceMesh")
 
     # Get scene
     scn = bpy.context.scene
-#    self.waitingCursor(1)
+    # self.waitingCursor(1)
 
-    verts = [(gvert[0], gvert[1], gver[2]) for gvert in gmesh.vertices()]
-    un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices()) if not gvert.selected]
+    verts = []      # Array of vertex coordinates
+    idxMap = {}     # Dictionary of gamer indices to renumbered indices
+    un_selected_vertices = []
+    for i, vid in enumerate(gmesh.vertexIDs()):
+        v = vid.data()
+        verts.append((v[0], v[1], v[2]))
+        idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
+        if not v.selected:
+            un_selected_vertices.append(i)
 
-    # verts = [(gvert.x, gvert.y, gvert.z) for gvert in gmesh.vertices()]
-    # un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices())
-    #                         if not gvert.sel]
+    # verts = [(gvert[0], gvert[1], gver[2]) for gvert in gmesh.vertices()]
+    # un_selected_vertices = [i for i, gvert in enumerate(gmesh.vertices()) if not gvert.selected]
 
+    faces = []
+    markers = []
+    for i, fid in enumerate(gmesh.faceIDs()):
+        fName = gmesh.getName(fid)
+        face = fid.data()
 
-    # faces = [(gface.a, gface.b, gface.c) for gface in gmesh.faces()]
-    # markers = [(i, gface.m) for i, gface in enumerate(gmesh.faces()) \
-    #            if gface.m != -1]
+        if face.orientation == -1:
+            faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
+        else:
+            faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
+
+        if face.marker != -1:
+            markers.append((i,face.marker))
 
     # If we create a new mesh we copy the boundaries to a dict
-    if create_new_mesh:
-        new_boundaries = {}
-        for bnd_id in boundaries.keys():
-            boundary = boundaries[bnd_id]
-            new_boundaries[bnd_id] = dict(
-                marker=boundary["marker"], r=boundary["r"], g=boundary["g"], \
-                b=boundary["b"], faces={})
+    # if create_new_mesh:
+    #     new_boundaries = {}
+    #     for bnd_id in boundaries.keys():
+    #         boundary = boundaries[bnd_id]
+    #         new_boundaries[bnd_id] = dict(
+    #             marker=boundary["marker"], r=boundary["r"], g=boundary["g"], \
+    #             b=boundary["b"], faces={})
 
-        # Do not copy the faces information, grab that from the gamer mesh
-        boundaries = new_boundaries
+    #     # Do not copy the faces information, grab that from the gamer mesh
+    #     boundaries = new_boundaries
 
-    # Create marker to boundary map
-    face_markers = {}
-    for boundary in boundaries.values():
-        face_markers[boundary["marker"]] = []
+    # # Create marker to boundary map
+    # face_markers = {}
+    # for boundary in boundaries.values():
+    #     face_markers[boundary["marker"]] = []
 
-    # Gather all faces of a marker
-    for face, marker in markers:
-        if marker in face_markers:
-            face_markers[marker].append(face)
+    # # Gather all faces of a marker
+    # for face, marker in markers:
+    #     if marker in face_markers:
+    #         face_markers[marker].append(face)
 
-    # Set the faces of the corresponding boundary
-    for boundary in boundaries.values():
-        setBoundaryFaces(boundary, face_markers[boundary["marker"]])
+    # # Set the faces of the corresponding boundary
+    # for boundary in boundaries.values():
+    #     setBoundaryFaces(boundary, face_markers[boundary["marker"]])
 
     # Ensure editmode is off
-    obj = getSelectedMesh()
-    editmode = setObjectMode(obj)
+    # obj = getSelectedMesh()
+    # editmode = setObjectMode(obj)
 
     if create_new_mesh:
-
         # Create new object and mesh
         bmesh = createMesh(mesh_name, verts, faces, smooth=False, color=[0.8,0.8,0.8])
         obj = bpy.data.objects.new(mesh_name, bmesh)
@@ -637,10 +619,9 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
         # Set the property dictionary
         # FIXME: Is this safe? Is boundaries always something I can use?
 #        self.helper.setProperty(obj, "boundaries", boundaries)
-        obj['boundaries'] = boundaries
+        # obj['boundaries'] = boundaries
 
     else:
-
         orig_mesh = obj.data
         bmesh = createMesh('gamer_tmp', verts, faces, smooth=False, color=[0.8,0.8,0.8])
         obj.data = bmesh
@@ -656,6 +637,6 @@ def gamer_to_blender(gmesh, boundaries, create_new_mesh=False,
     # Repaint boundaries
     obj.gamer.repaint_boundaries(bpy.context)
 
-#    self.waitingCursor(0)
-#    self.updateViewer()
+    # self.waitingCursor(0)
+    # self.updateViewer()
 

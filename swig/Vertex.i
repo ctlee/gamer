@@ -56,7 +56,7 @@
 %include "Vertex.h"
 
 %extend Vertex{
-	const double& getitem(std::size_t index) const {
+	const double& __getitem__(std::size_t index) const {
 		return (*($self))[index];
 	}
 

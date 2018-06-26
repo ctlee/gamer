@@ -44,14 +44,30 @@ using FaceID = SurfaceMesh::SimplexID<3>;
 %template(EdgeKey) std::array<int,2>;
 %template(FaceKey) std::array<int, 3>;
 
-// Wrap the unique_ptr
+// Create the typemap for unique_ptr<SurfaceMesh>
 wrap_unique_ptr(SMUniquePtr, SurfaceMesh);
+
+struct VertexID {
+public:
+  %extend {
+    const char* __repr__() {
+      std::ostringstream out;
+      out << *$self;
+      return out.str().c_str();
+    }
+
+    Vertex& data() {
+      return **$self;
+    }
+  }
+};
 
 struct Face {
   Face() {}
   Face(int orient, int marker, bool selected) {}
   Face(int marker, bool selected) {} // Shadows full constructor
   int  marker;   /**< @brief Marker */
+  int orientation;
   bool selected; /**< @brief Selection flag */
 
   %extend{
@@ -83,6 +99,7 @@ public:
 %template(VertexIT) IteratorWrapper<VertexData_Iterator, Vertex>;
 %template(FaceIT) IteratorWrapper<FaceData_Iterator, Face>;
 
+%template(VertexIDIT) IteratorWrapper<VertexID_Iterator, VertexID>;
 %template(FaceIDIT) IteratorWrapper<FaceID_Iterator, FaceID>;
 
 
@@ -141,7 +158,7 @@ public:
       return $self->get_name(id);
     }
 
-    IteratorWrapper<VertexData_Iterator, Vertex> getVertexIT(){
+    IteratorWrapper<VertexData_Iterator, Vertex> getVertexDataIT(){
       auto it = $self->get_level<1>();
       return IteratorWrapper<VertexData_Iterator, Vertex>(it.begin(), it.end());
     }
@@ -149,6 +166,11 @@ public:
     IteratorWrapper<FaceData_Iterator, Face> getFaceDataIT(){
       auto it = $self->get_level<3>();
       return IteratorWrapper<FaceData_Iterator, Face>(it.begin(), it.end());
+    }
+
+    IteratorWrapper<VertexID_Iterator, VertexID> getVertexIT(){
+      auto it = $self->get_level_id<1>();
+      return IteratorWrapper<VertexID_Iterator, VertexID>(it.begin(), it.end());
     }
 
     IteratorWrapper<FaceID_Iterator, FaceID> getFaceIT(){
@@ -159,11 +181,15 @@ public:
 
   %pythoncode %{
     def vertices(self):
-      for v in self.getVertexIT():
+      for v in self.getVertexDataIT():
         yield v
 
     def faces(self):
       for f in self.getFaceDataIT():
+        yield f
+
+    def vertexIDs(self):
+      for f in self.getVertexIT():
         yield f
 
     def faceIDs(self):
