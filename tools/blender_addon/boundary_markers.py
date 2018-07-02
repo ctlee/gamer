@@ -361,12 +361,6 @@ class GAMerBoundaryMarkersPropertyGroup(bpy.types.PropertyGroup):
             obj['boundaries'][bnd_id] = {}
         if not obj['boundaries'][bnd_id].get('marker'):
             obj['boundaries'][bnd_id]['marker'] = self.marker
-#        if not obj['boundaries'][bnd_id].get('r'):
-#            obj['boundaries'][bnd_id]['r'] = self.color[0]
-#        if not obj['boundaries'][bnd_id].get('g'):
-#            obj['boundaries'][bnd_id]['g'] = self.color[1]
-#        if not obj['boundaries'][bnd_id].get('b'):
-#            obj['boundaries'][bnd_id]['b'] = self.color[2]
         if not obj['boundaries'][bnd_id].get('faces'):
             obj['boundaries'][bnd_id]['faces'] = {}
 
