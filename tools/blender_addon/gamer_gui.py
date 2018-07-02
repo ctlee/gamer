@@ -587,15 +587,11 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
         obj.select=True
 
 
-
-        if boundaries:
-          for bnd_id in boundaries.keys():
-              boundary = boundaries[bnd_id]
-              new_boundaries[bnd_id] = dict(marker=, faces={})
-
-        # Set the property dictionary
-        # FIXME: Is this safe? Is boundaries always something I can use?
-        obj['boundaries'] = boundaries
+        for marker, faceIndices in bdryDict.items():
+            obj.gamer.add_boundary(bpy.context)
+            bnd = obj.gamer.get_active_boundary()
+            bnd.marker = marker
+            bnd.set_boundary_faces(bpy.context, faceIndices)
     else:
         orig_mesh = obj.data
         bmesh = createMesh('gamer_tmp', verts, faces)
