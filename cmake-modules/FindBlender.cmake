@@ -23,7 +23,7 @@ if(APPLE)
                 string(REGEX REPLACE "^.*<string>(.*)</string>.*$" "\\1" bundle_executable "${line}")
                 set(line_is_main_executable 0)
             elseif(line_is_version)
-                string(REGEX REPLACE "^.*<string>(.*)</string>.*$" "\\1" BLENDER_VERSION "${line}")
+                string(REGEX REPLACE "^.*<string>([0-9]*[.][0-9]*).*</string>.*$" "\\1" BLENDER_VERSION "${line}")
                 break()
             endif()
 
@@ -57,31 +57,30 @@ if("${BLENDER_EXECUTABLE}" STREQUAL "")
         execute_process(COMMAND ${BLENDER_EXECUTABLE} -v
                         OUTPUT_VARIABLE blender_version_long
                         ERROR_QUIET
-                        OUTPUT_STRIP_TRAILING_WHITESPACE) 
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
         string(REGEX REPLACE "^.*Blender ([0-9]*.[0-9]*) \(.*\).*$" "\\1" BLENDER_VERSION "${blender_version_long}")
     else()
         message(FATAL_ERROR "Blender not found!")
     endif()
 endif()
 
-message(STATUS "Blender executable: ${BLENDER_EXECUTABLE}")
-message(STATUS "Blender version: ${BLENDER_VERSION}")
+message(STATUS "Found Blender: ${BLENDER_VERSION}")
 
 if(BLENDER_EXECUTABLE)
     # Get the python path and version from blender
     # This is kind of a hack... Is there a better way?
-    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b --factory-startup --python-expr "import sys;print(sys.path[1]);print('zz' + ';'.join([str(x) for x in sys.version_info[:3]]) + 'zz')"
+    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b --factory-startup --python-expr "import sys;print('zz' + ';'.join([str(x) for x in sys.version_info[:3]]) + 'zz')"
                     OUTPUT_VARIABLE blender_output
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    
+
     set(eol_char "E")
     string(REPLACE "\n" "${eol_char};" blender_output "${blender_output}")
     string(REPLACE "\r" "${eol_char};" blender_output "${blender_output}")
     string(REGEX REPLACE "^.*found bundled python: (.*python).*$" "\\1" BLENDER_PYTHON_ROOT "${blender_output}")
-    string(REGEX REPLACE "(.*)/addons.*$" "\\1" BLENDER_ADDON_PATH "${blender_output}")
+    # string(REGEX REPLACE "(.*)/addons.*$" "\\1" BLENDER_ADDON_PATH "${blender_output}")
     string(REGEX REPLACE "^.*zz(.*)zz.*$" "\\1" _VERSION "${blender_output}")
-    
+
     if(_VERSION)
         string(REPLACE ";" "." BLENDER_PYTHON_VERSION_STRING "${_VERSION}")
         list(GET _VERSION 0 BLENDER_PYTHON_VERSION_MAJOR)
@@ -92,8 +91,15 @@ if(BLENDER_EXECUTABLE)
             string(REGEX REPLACE "\\.0$" "" BLENDER_PYTHON_VERSION_STRING "${BLENDER_PYTHON_VERSION_STRING}")
         endif()
     endif()
+    if(APPLE)
+        set(BLENDER_ADDON_PATH "/Users/$ENV{USER}/Library/Application Support/Blender/${BLENDER_VERSION}/scripts/")
+    elseif(WIN32)
+        set(BLENDER_ADDON_PATH "%USERPROFILE%\\AppData\\Roaming\\Blender Foundation\\Blender\\${BLENDER_VERSION}\\")
+    elseif(UNIX)
+        set(BLENDER_ADDON_PATH "/usr/share/blender/${BLENDER_VERSION}/")
+    endif()
 endif()
 
-message(STATUS "Blender python path: ${BLENDER_PYTHON_ROOT}")
-message(STATUS "Blender python version: ${BLENDER_PYTHON_VERSION_STRING}")
-message(STATUS "Blender addon path: ${BLENDER_ADDON_PATH}")
+# message(STATUS "Blender python path: ${BLENDER_PYTHON_ROOT}")
+# message(STATUS "Blender python version: ${BLENDER_PYTHON_VERSION_STRING}")
+# message(STATUS "Blender sageddon path: ${BLENDER_ADDON_PATH}")
