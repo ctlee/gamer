@@ -27,7 +27,7 @@ bl_info = {
     "description": "GAMer: Geometry-preserving Adaptive Mesher",
     "author": "Christopher T. Lee, Zeyun Yu, Michael Holst, Johan Hake, and Tom Bartol",
     "version": (0,1,0),
-    "blender": (2, 7, 5),
+    "blender": (2, 7, 9),
     "api": 55057,
     "location": "View3D > Add > Mesh",
     "warning": "",
@@ -40,12 +40,12 @@ if "bpy" in locals():
     print("Reloading GAMer")
     import importlib
     importlib.reload(gamer_gui)
-    importlib.reload(boundary_markers)
+    importlib.reload(markers)
     importlib.reload(tetrahedralization)
 else:
     print("Importing GAMer")
     from . import gamer_gui
-    from . import boundary_markers
+    from . import markers
     from . import tetrahedralization
 
 # General import
@@ -68,23 +68,21 @@ def remove_handler ( handler_list, handler_function ):
 def register():
     print("Registering GAMer...")
     bpy.utils.register_module(__name__)
-
-    bpy.types.Scene.gamer = bpy.props.PointerProperty(
-        type=gamer_gui.GAMerPropertyGroup)
-    bpy.types.Object.gamer = bpy.props.PointerProperty(
-        type=boundary_markers.GAMerBoundaryMarkersListPropertyGroup)
-    bpy.types.Material.gamer = bpy.props.PointerProperty(
-        type=boundary_markers.GAMerBoundaryMaterialPropertyGroup)
+    T = bpy.types
+    PP = bpy.props.PointerProperty
+    T.Scene.gamer = PP(type=gamer_gui.GAMerPropertyGroup)
+    T.Object.gamer = PP(type=markers.GAMerBoundaryMarkersList)
+    T.Material.gamer = PP(type=markers.GAMerBoundaryMaterial)
 
     # Add the load_post handlers
     add_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
-    add_handler ( bpy.app.handlers.load_post, boundary_markers.boundary_markers_load_post )
+    add_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
 
     print("GAMer registered")
 
 
 def unregister():
-    remove_handler ( bpy.app.handlers.load_post, boundary_markers.boundary_markers_load_post )
+    remove_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
     remove_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
     bpy.utils.unregister_module(__name__)
 

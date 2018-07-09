@@ -24,8 +24,6 @@ def unregister():
 @persistent
 def gamer_load_post(context):
     """ Initialize GAMer add  """
-    print ( "load post handler: gamer_load_post() called"
-)
     if not context:
         context = bpy.context
     scn = bpy.context.scene
@@ -329,7 +327,7 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
     self.gamer_version = "0.1"
     self.boundary_id_counter = 0
 
-    if not bpy.data.materials.get('bnd_unset_mat') :
+    if 'bnd_unset_mat' not in bpy.data.materials:
       bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
       bnd_unset_mat.use_fake_user = True
       bnd_unset_mat.gamer.boundary_id = 'bnd_unset'
@@ -374,7 +372,6 @@ def getSelectedMesh(errorreport=True):
     return obj
 
 
-
 def getMeshVertices(obj, selected=False):
     """
     @brief      { item_description }
@@ -394,45 +391,45 @@ def getMeshVertices(obj, selected=False):
         return vertices
 
 
-def getMeshFaces( obj, selected = False):
-    mesh = obj.data
-    if selected :
-        mfaces_indices = [face.index for face in mesh.polygons
-                         if face.select and not face.hide]
-        faces = [mesh.polygons[fi].vertices for fi in mfaces_indices]
-        return faces, mfaces_indices
-    else :
-        faces = [f.vertices for f in mesh.polygons]
-        return faces
+# def getMeshFaces( obj, selected = False):
+#     mesh = obj.data
+#     if selected :
+#         mfaces_indices = [face.index for face in mesh.polygons
+#                          if face.select and not face.hide]
+#         faces = [mesh.polygons[fi].vertices for fi in mfaces_indices]
+#         return faces, mfaces_indices
+#     else :
+#         faces = [f.vertices for f in mesh.polygons]
+#         return faces
 
 
-def getBoundaryFaces(boundary):
-    if not "faces" in boundary:
-        return []
-    all_faces = []
-    for faces in list(boundary["faces"].values()):
-        all_faces.extend(faces)
-    return all_faces
+# def getBoundaryFaces(boundary):
+#     if not "faces" in boundary:
+#         return []
+#     all_faces = []
+#     for faces in list(boundary["faces"].values()):
+#         all_faces.extend(faces)
+#     return all_faces
 
 
-def setBoundaryFaces(boundary, faces):
-    "Set faces in boundary props"
-    if not "faces" in boundary:
-        return
-    # Maximal indices in a array prop in Blender is 32767
-    max_ind = 32767
-    num_sub_arrays = int(len(faces)/max_ind)+1
+# def setBoundaryFaces(boundary, faces):
+#     "Set faces in boundary props"
+#     if not "faces" in boundary:
+#         return
+#     # Maximal indices in a array prop in Blender is 32767
+#     max_ind = 32767
+#     num_sub_arrays = int(len(faces)/max_ind)+1
 
-    # If the faces already exist delete it and re attach it
-    if "faces" in boundary:
-        for key in boundary["faces"]:
-            del boundary["faces"][key]
-        del boundary["faces"]
+#     # If the faces already exist delete it and re attach it
+#     if "faces" in boundary:
+#         for key in boundary["faces"]:
+#             del boundary["faces"][key]
+#         del boundary["faces"]
 
-    boundary["faces"] = {}
-    for ind in range(num_sub_arrays):
-        boundary["faces"]["F%d"%ind] = faces[ind*max_ind: \
-                                             min((ind+1)*max_ind, len(faces))]
+#     boundary["faces"] = {}
+#     for ind in range(num_sub_arrays):
+#         boundary["faces"]["F%d"%ind] = faces[ind*max_ind: \
+#                                              min((ind+1)*max_ind, len(faces))]
 
 
 def createMesh(mesh_name, verts, faces):
