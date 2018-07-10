@@ -221,8 +221,8 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     def assign_boundary_faces(self, context):
         obj = context.active_object
         mesh = obj.data
-        if (mesh.total_face_sel > 0):
-            face_set = self.get_boundary_faces(context)
+        if mesh.total_face_sel > 0:
+            face_set = {}
             bpy.ops.object.mode_set(mode='OBJECT')
             for f in mesh.polygons:
                 if f.select:
@@ -231,15 +231,16 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
             mats = bpy.data.materials
             bnd_id = self.boundary_id
+
             bnd_mat = [ mat for mat in mats if mat.gamer.boundary_id == bnd_id ][0]
             act_mat_idx = obj.active_material_index
             bnd_mat_idx = obj.material_slots.find(bnd_mat.name)
+
             obj.active_material_index = bnd_mat_idx
             bpy.ops.object.material_slot_assign()
             obj.active_material_index = act_mat_idx
 
             self.set_boundary_faces(context, face_set)
-
         return {'FINISHED'}
 
 
@@ -259,25 +260,28 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     def remove_boundary_faces(self, context):
         obj = context.active_object
         mesh = obj.data
+        ml = getMarkerLayer(obj)
+
         if (mesh.total_face_sel > 0):
             face_set = self.get_boundary_faces(context)
             bpy.ops.object.mode_set(mode='OBJECT')
             for f in mesh.polygons:
                 if f.select:
                     if f.index in face_set:
-                        face_set.remove(f.index)
+                        ml[f.index] = unsetMarker
             bpy.ops.object.mode_set(mode='EDIT')
 
             mats = bpy.data.materials
             bnd_unset_id = 'bnd_unset'
             bnd_unset_mat = [ mat for mat in mats if mat.gamer.boundary_id == bnd_unset_id ][0]
+
             act_mat_idx = obj.active_material_index
             bnd_unset_mat_idx = obj.material_slots.find(bnd_unset_mat.name)
             obj.active_material_index = bnd_unset_mat_idx
-            bpy.ops.object.material_slot_assign()
-            obj.active_material_index = act_mat_idx
+            bpy.ops.object.material_slot_assign()       # Assign selected material to selected
+            obj.active_material_index = act_mat_idx     # Reset active material index
 
-            self.set_boundary_faces(context, face_set)
+            # self.set_boundary_faces(context, face_set)
         return {'FINISHED'}
 
 
