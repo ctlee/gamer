@@ -278,35 +278,26 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
             obj.active_material_index = act_mat_idx
 
             self.set_boundary_faces(context, face_set)
-
         return {'FINISHED'}
 
 
     def select_boundary_faces(self, context):
         mesh = context.active_object.data
         face_set = self.get_boundary_faces(context)
-#       msm = context.scene.tool_settings.mesh_select_mode[0:3]
-#       context.scene.tool_settings.mesh_select_mode = (True, True, True)
         bpy.ops.object.mode_set(mode='OBJECT')
         for f in face_set:
             mesh.polygons[f].select = True
         bpy.ops.object.mode_set(mode='EDIT')
-#       context.scene.tool_settings.mesh_select_mode = msm
-
         return {'FINISHED'}
 
 
     def deselect_boundary_faces(self, context):
         mesh = context.active_object.data
         face_set = self.get_boundary_faces(context)
-#       msm = context.scene.tool_settings.mesh_select_mode[0:3]
-#       context.scene.tool_settings.mesh_select_mode = (True, True, True)
         bpy.ops.object.mode_set(mode='OBJECT')
         for f in face_set:
             mesh.polygons[f].select = False
         bpy.ops.object.mode_set(mode='EDIT')
-#       context.scene.tool_settings.mesh_select_mode = msm
-
         return {'FINISHED'}
 
 
@@ -319,13 +310,6 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
             obj["boundaries"][bnd_id]['faces'][seg_id] = []
         obj["boundaries"][bnd_id].clear()
         obj["boundaries"].pop(bnd_id)
-
-
-    def face_in_boundary(self, context, face_index):
-        """Return True if face is in this boundary"""
-        mesh = context.active_object.data
-        bnd_faces = self.get_boundary_faces(context)
-        return face_index in bnd_faces
 
 
     def init_boundary(self, context, bnd_name, bnd_id, bnd_marker):
@@ -373,50 +357,41 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
 
     def get_boundary_faces(self, context):
-        """Given return the set of boundary face indices for this boundary"""
+        """
+        Given return the set of boundary face indices for this boundary
 
+        @param      self     The object
+        @param      context  The context
+
+        @return     The boundary faces.
+        """
         obj = context.active_object
         bnd_id = self.boundary_id
+        ml = getMarkerLayer(obj)
 
-        face_list = []
-        for seg_id in obj["boundaries"][bnd_id]['faces'].keys():
-          face_list.extend(obj["boundaries"][bnd_id]['faces'][seg_id].to_list())
-        if (len(face_list) > 0):
-            face_set = set(face_list)
-        else:
-            face_set = set([])
-
+        face_set = set()
+        for i, marker in enumerate(ml):
+            if marker.value == bnd_id:
+                face_set.add(i)
         return face_set
 
 
     def set_boundary_faces(self, context, face_set):
-        """Set the faces of a given boundary on object, given a set of faces """
+        """
+        Set the faces of a given boundary on object, given a set of faces
 
+        @param      self      The object
+        @param      context   The context
+        @param      face_set  The face set
+
+        @return     { description_of_the_return_value }
+        """
         obj = context.active_object
         bnd_id = self.boundary_id
-        face_list = list(face_set)
-        face_list.sort()
+        ml = getMarkerLayer(obj)
 
-        # Clear existing faces from this id boundary
-        obj["boundaries"][bnd_id]["faces"].clear()
-
-        # segment face_list into pieces <= max_len (i.e. <= 32767)
-        #   and assign these segments to the id boundary
-        max_len = 32767
-        seg_list = face_list
-        len_list = len(seg_list)
-        seg_idx = 0
-        while len_list > 0:
-          if len_list <= 32767:
-            obj["boundaries"][bnd_id]["faces"]["F"+str(seg_idx)] = seg_list
-            len_list = 0
-          else:
-            obj["boundaries"][bnd_id]["faces"]["F"+str(seg_idx)] = seg_list[0:max_len]
-            tmp_list = seg_list[max_len:]
-            seg_list = tmp_list
-            len_list = len(seg_list)
-          seg_idx += 1
-
+        for face in face_set:
+            ml[face] = bnd_id
 
 
 class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
