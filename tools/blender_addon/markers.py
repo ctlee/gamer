@@ -31,7 +31,7 @@ import gamer.pygamer as g
 import os
 import re
 
-unsetMarker = 0
+UNSETMARKER = 0
 
 # we use per module class registration/unregistration
 def register():
@@ -215,6 +215,9 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     def boundary_marker_update(self, context):
         obj = context.active_object
         bnd_id = self.boundary_id
+
+
+        obj['boundaries'][bnd_marker] = bnd_id
         obj['boundaries'][bnd_id]['marker'] = self.marker
 
 
@@ -268,7 +271,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
             for f in mesh.polygons:
                 if f.select:
                     if f.index in face_set:
-                        ml[f.index] = unsetMarker
+                        ml[f.index] = UNSETMARKER
             bpy.ops.object.mode_set(mode='EDIT')
 
             mats = bpy.data.materials
@@ -307,13 +310,14 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
     def destroy_boundary(self, context):
         """Remove boundary data from obj"""
-        bnd_id = self.boundary_id
-
         obj = context.active_object
-        for seg_id in obj["boundaries"][bnd_id]['faces'].keys():
-            obj["boundaries"][bnd_id]['faces'][seg_id] = []
-        obj["boundaries"][bnd_id].clear()
-        obj["boundaries"].pop(bnd_id)
+        bnd_id = self.boundary_id
+        ml = getMarkerLayer(obj)
+
+        for marker in ml:
+            if marker.value == self.marker:
+                value = UNSERMARKER
+        obj['boundaries'].pop(str(self.marker))
 
 
     def init_boundary(self, context, bnd_name, bnd_id, bnd_marker):
@@ -336,10 +340,11 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
             obj['boundaries'] = dict()      # Initialize boundary object
 
         boundaries = obj['boundaries']
-        if bnd_marker in boundaries:
+
+        if str(bnd_marker) in boundaries:
             raise RuntimeError('Marker value already exists!')
 
-        obj['boundaries'][bnd_marker] = bnd_id
+        obj['boundaries'][str(bnd_marker)] = bnd_id
 
         mats = bpy.data.materials               # Get list of materials
         if len(obj.material_slots) == 0:
@@ -399,7 +404,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
 
 class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
-    boundary_list = CollectionProperty(type=GAMerBoundaryMarkerPropertyGroup, name="Boundary List")
+    boundary_list = CollectionProperty(type=GAMerBoundaryMarker, name="Boundary List")
     active_bnd_index = IntProperty(name="Active Boundary Index", default=0)
     include = BoolProperty(name="Include Domain in Model", default=False)
 
@@ -438,7 +443,7 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         @return     { description_of_the_return_value }
         """
         bnd_marker, bnd_id = self.allocate_boundary_id(context)
-        bnd_name = "Boundary_%d" % (bnd_id_counter)
+        bnd_name = "Boundary_%d" % (bnd_marker)
         new_bnd = self.boundary_list.add()      # Create new GamerBoundary obj
 
         new_bnd.init_boundary(context, bnd_name, bnd_id, bnd_marker)
