@@ -30,6 +30,7 @@ import gamer.pygamer as g
 # python imports
 import os
 import re
+from collections import deque
 
 UNSETMARKER = 0
 
@@ -165,9 +166,11 @@ def boundary_marker_update(self, context):
 
 
 def getMarkerLayer(obj):
+    bpy.ops.object.mode_set(mode='OBJECT')  # Force object mode...
     markerLayer = obj.data.polygon_layers_int.get('marker')
     if not markerLayer:
         markerLayer = obj.data.polygon_layers_int.new('marker')
+    # bpy.ops.object.mode_set(mode='EDIT')
     return markerLayer.data
 
 
@@ -213,19 +216,33 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
 
     def boundary_marker_update(self, context):
+
         obj = context.active_object
-        bnd_id = self.boundary_id
+        # Save current mode 'object/edit'
+        current_mode = obj.mode
 
+        # get old marker and update
+        oldMarker = obj['boundaries'][self.boundary_id]
+        obj['boundaries'][self.boundary_id] = self.marker
 
-        obj['boundaries'][bnd_marker] = bnd_id
-        obj['boundaries'][bnd_id]['marker'] = self.marker
-
+        if self.marker != oldMarker:
+            # Update data values
+            ml = getMarkerLayer(obj)
+            for marker in ml:
+                if marker.value == oldMarker:
+                    marker.value = self.marker
+        # Restore original mode
+        bpy.ops.object.mode_set(mode=current_mode)
 
     def assign_boundary_faces(self, context):
         obj = context.active_object
         mesh = obj.data
+
+        # Save current mode 'object/edit'
+        current_mode = obj.mode
+
         if mesh.total_face_sel > 0:
-            face_set = {}
+            face_set = set()
             bpy.ops.object.mode_set(mode='OBJECT')
             for f in mesh.polygons:
                 if f.select:
@@ -238,12 +255,15 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
             bnd_mat = [ mat for mat in mats if mat.gamer.boundary_id == bnd_id ][0]
             act_mat_idx = obj.active_material_index
             bnd_mat_idx = obj.material_slots.find(bnd_mat.name)
-
             obj.active_material_index = bnd_mat_idx
             bpy.ops.object.material_slot_assign()
+
             obj.active_material_index = act_mat_idx
 
             self.set_boundary_faces(context, face_set)
+
+        # Restore original mode
+        bpy.ops.object.mode_set(mode=current_mode)
         return {'FINISHED'}
 
 
@@ -263,28 +283,21 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     def remove_boundary_faces(self, context):
         obj = context.active_object
         mesh = obj.data
-        ml = getMarkerLayer(obj)
 
         if (mesh.total_face_sel > 0):
             face_set = self.get_boundary_faces(context)
-            bpy.ops.object.mode_set(mode='OBJECT')
+            ml = getMarkerLayer(obj)
             for f in mesh.polygons:
                 if f.select:
                     if f.index in face_set:
-                        ml[f.index] = UNSETMARKER
+                        ml[f.index].value = UNSETMARKER
+                    else:   # Remove selection from set to not mess up materials
+                        f.select = False
             bpy.ops.object.mode_set(mode='EDIT')
 
-            mats = bpy.data.materials
-            bnd_unset_id = 'bnd_unset'
-            bnd_unset_mat = [ mat for mat in mats if mat.gamer.boundary_id == bnd_unset_id ][0]
-
-            act_mat_idx = obj.active_material_index
-            bnd_unset_mat_idx = obj.material_slots.find(bnd_unset_mat.name)
+            bnd_unset_mat_idx = obj.material_slots.find('bnd_unset_mat')
             obj.active_material_index = bnd_unset_mat_idx
             bpy.ops.object.material_slot_assign()       # Assign selected material to selected
-            obj.active_material_index = act_mat_idx     # Reset active material index
-
-            # self.set_boundary_faces(context, face_set)
         return {'FINISHED'}
 
 
@@ -308,16 +321,46 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         return {'FINISHED'}
 
 
-    def destroy_boundary(self, context):
-        """Remove boundary data from obj"""
+    def delete_boundary(self, context):
+        """
+        Remove boundary data from obj
+
+        @param      self     The object
+        @param      context  The context
+
+        @return     { description_of_the_return_value }
+        """
         obj = context.active_object
-        bnd_id = self.boundary_id
+        mesh = obj.data
         ml = getMarkerLayer(obj)
 
-        for marker in ml:
+        # Collect faces and reset marker
+        faces = []
+        for i, marker in enumerate(ml):
             if marker.value == self.marker:
-                value = UNSERMARKER
-        obj['boundaries'].pop(str(self.marker))
+                marker.value = UNSETMARKER
+                faces.append(i)
+
+        idx = 0
+        for i in range(0,len(mesh.polygons)):
+            if idx <= len(faces)-1:
+                if i == faces[idx]:
+                    mesh.polygons[i].select = True
+                    idx += 1
+                else:
+                    mesh.polygons[i].select = False
+            else:
+                mesh.polygons[i].select = False
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        mats = bpy.data.materials
+        # Assign unset material to members
+        bnd_unset_mat_idx = obj.material_slots.find('bnd_unset_mat')
+        obj.active_material_index = bnd_unset_mat_idx
+        bpy.ops.object.material_slot_assign()       # Assign selected material to selected
+
+        # Remove the boundary object
+        obj['boundaries'].pop(self.boundary_id)
 
 
     def init_boundary(self, context, bnd_name, bnd_id, bnd_marker):
@@ -330,24 +373,21 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         @param      bnd_id      String Boundary ID token ('bnd_id_%d')
         @param      bnd_marker  Int boundary marker value
         """
-        self.boundary_id = bnd_id
-        self.marker = bnd_marker
-        self.name = bnd_name
-
         obj = context.active_object
+        ml = getMarkerLayer(obj)
 
         if not 'boundaries' in obj:
             obj['boundaries'] = dict()      # Initialize boundary object
 
         boundaries = obj['boundaries']
 
-        if str(bnd_marker) in boundaries:
-            raise RuntimeError('Marker value already exists!')
+        # if str(bnd_marker) in boundaries:
+        #     raise RuntimeError('Marker value already exists!')
 
-        obj['boundaries'][str(bnd_marker)] = bnd_id
+        obj['boundaries'][bnd_id] = bnd_marker
 
         mats = bpy.data.materials               # Get list of materials
-        if len(obj.material_slots) == 0:
+        if 'bnd_unset_mat' not in obj.material_slots:
             bpy.ops.object.material_slot_add()  # Add new material slot
             obj.material_slots[0].material = mats['bnd_unset_mat']
 
@@ -364,6 +404,10 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         bpy.ops.object.material_slot_add()
         obj.material_slots[-1].material = bnd_mat
 
+        self.boundary_id = bnd_id
+        self.marker = bnd_marker
+        self.name = bnd_name
+
 
     def get_boundary_faces(self, context):
         """
@@ -374,13 +418,11 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
         @return     The boundary faces.
         """
-        obj = context.active_object
-        bnd_id = self.boundary_id
-        ml = getMarkerLayer(obj)
+        ml = getMarkerLayer(context.active_object)
 
         face_set = set()
         for i, marker in enumerate(ml):
-            if marker.value == bnd_id:
+            if marker.value == self.marker:
                 face_set.add(i)
         return face_set
 
@@ -396,11 +438,9 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         @return     { description_of_the_return_value }
         """
         obj = context.active_object
-        bnd_id = self.boundary_id
         ml = getMarkerLayer(obj)
-
         for face in face_set:
-            ml[face] = bnd_id
+            ml[face].value = self.marker
 
 
 class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
@@ -442,17 +482,22 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
 
         @return     { description_of_the_return_value }
         """
+        # Save current mode 'object/edit'
+        current_mode = context.object.mode
+
         bnd_marker, bnd_id = self.allocate_boundary_id(context)
         bnd_name = "Boundary_%d" % (bnd_marker)
-        new_bnd = self.boundary_list.add()      # Create new GamerBoundary obj
 
+        new_bnd = self.boundary_list.add()      # Create new GamerBoundary obj
         new_bnd.init_boundary(context, bnd_name, bnd_id, bnd_marker)
         idx = self.boundary_list.find(bnd_name)
         self.active_bnd_index = idx             # Set active index to new bdry
 
+        # Restore original mode
+        bpy.ops.object.mode_set(mode=current_mode)
+
 
     def repaint_boundaries(self, context):
-
         for bnd in self.boundary_list:
           bnd.repaint_boundary_faces(context)
 
@@ -464,29 +509,36 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
 
 
     def remove_all_boundaries(self, context):
+        current_mode = context.object.mode
         for i in range(len(self.boundary_list)):
             # First remove boundary data from mesh:
             bnd = self.boundary_list[0]
-            bnd.destroy_boundary(context)
+            bnd.delete_boundary(context)
 
             # Now remove the boundary from the object
             self.boundary_list.remove(0)
 
         self.active_bnd_index = 0
+        # Restore original mode
+        bpy.ops.object.mode_set(mode=current_mode)
 
 
     def remove_boundary(self, context):
+        current_mode = context.object.mode
 
         # First remove ID prop boundary data from object:
         bnd = self.get_active_boundary()
         if bnd:
-            bnd.destroy_boundary(context)
+            bnd.delete_boundary(context)
 
             # Now remove the RNA boundary from the object
             self.boundary_list.remove(self.active_bnd_index)
             self.active_bnd_index -= 1
             if (self.active_bnd_index < 0):
                 self.active_bnd_index = 0
+
+        # Restore original mode
+        bpy.ops.object.mode_set(mode=current_mode)
 
 
     def boundary_name_update(self, context):
@@ -496,8 +548,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
             bnd = self.get_active_boundary()
             bnd.check_boundary_name(self.boundary_list.keys())
             self.sort_boundary_list()
-
-        return
 
 
     def sort_boundary_list(self):
@@ -511,8 +561,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
 
         act_i = self.boundary_list.find(act_bnd_name)
         self.active_bnd_index = act_i
-
-        return
 
 
     def inplace_quicksort(self, v, beg, end):  # collection array, int, int
@@ -539,7 +587,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
                 v.move(j-1, beg)
             self.inplace_quicksort(v, beg, j-1)
             self.inplace_quicksort(v, j+1, end)
-        return
 
 
     def draw_panel(self, context, panel):
