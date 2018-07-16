@@ -66,7 +66,7 @@ def remove_handler ( handler_list, handler_function ):
 
 
 def register():
-    print("Registering GAMer...")
+    # print("Registering GAMer...")
     bpy.utils.register_module(__name__)
     T = bpy.types
     PP = bpy.props.PointerProperty
@@ -77,16 +77,14 @@ def register():
     # Add the load_post handlers
     add_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
     add_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
-
-    print("GAMer registered")
+    # print("GAMer registered")
 
 
 def unregister():
     remove_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
     remove_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
     bpy.utils.unregister_module(__name__)
-
-    print("GAMer unregistered")
+    # print("GAMer unregistered")
 
 
 # for testing

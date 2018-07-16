@@ -320,8 +320,7 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
 
   def allocate_boundary_id ( self ):
     self.boundary_id_counter += 1
-    boundary_id = "bnd_id_%d" % (self.boundary_id_counter)
-    return self.boundary_id_counter, boundary_id
+    return self.boundary_id_counter
 
   def init_properties ( self ):
     self.gamer_version = "0.1"

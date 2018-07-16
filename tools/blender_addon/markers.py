@@ -132,6 +132,17 @@ class GAMER_OT_deselect_boundary_faces(bpy.types.Operator):
             bnd.deselect_boundary_faces(context)
         return {'FINISHED'}
 
+class GAMER_OT_select_all_boundary_faces(bpy.types.Operator):
+    bl_idname = "gamer.select_all_boundary_faces"
+    bl_label = "Select All Faces of Selected Boundary"
+    bl_description = "Select all faces of selected boundary"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        for bnd in context.object.gamer.boundary_list:
+            bnd.select_boundary_faces(context)
+        return {'FINISHED'}
+
 
 # Object Boundary Panel:
 class GAMER_UL_check_boundary(bpy.types.UIList):
@@ -466,12 +477,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         return bnd
 
 
-    def allocate_boundary_id(self, context):
-        """ Return a unique boundary ID for a new boundary """
-        bnd_id_counter, bnd_id = context.scene.gamer.allocate_boundary_id()
-        return bnd_id_counter, bnd_id
-
-
     def add_boundary(self, context):
         """
         Add a new boundary to the list of boundaries and set as the active
@@ -485,11 +490,12 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         # Save current mode 'object/edit'
         current_mode = context.object.mode
 
-        bnd_marker, bnd_id = self.allocate_boundary_id(context)
-        bnd_name = "Boundary_%d" % (bnd_marker)
+        bnd_id = context.scene.gamer.allocate_boundary_id()
 
         new_bnd = self.boundary_list.add()      # Create new GamerBoundary obj
-        new_bnd.init_boundary(context, bnd_name, bnd_id, bnd_marker)
+        bnd_name = "Boundary_%d" % (bnd_id)
+        new_bnd.init_boundary(context, bnd_name, bnd_id, bnd_id)    # name, id, marker
+
         idx = self.boundary_list.find(bnd_name)
         self.active_bnd_index = idx             # Set active index to new bdry
 
@@ -543,7 +549,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
 
     def boundary_name_update(self, context):
         """Performs checks and sorts boundary list after update of boundary names"""
-
         if self.boundary_list:
             bnd = self.get_active_boundary()
             bnd.check_boundary_name(self.boundary_list.keys())
@@ -551,10 +556,11 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
 
 
     def sort_boundary_list(self):
-        """Sorts boundary list"""
+        """
+        Sorts boundary list alphabetically by name
+        """
 
-        act_bnd = self.get_active_boundary()
-        act_bnd_name = act_bnd.name
+        act_bnd_name = self.get_active_boundary().name
 
         # Sort the boundary list
         self.inplace_quicksort(self.boundary_list, 0, len(self.boundary_list)-1)
@@ -568,7 +574,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
           Sorts a collection array, v, in place.
           Sorts according values in v[i].name
         """
-
         if ((end - beg) > 0):  # only perform quicksort if we are dealing with > 1 values
             pivot = v[beg].name  # we set the first item as our initial pivot
             i, j = beg, end
@@ -636,6 +641,8 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
                 sub = row.row(align=True)
                 sub.operator("gamer.assign_boundary_faces", text="Assign")
                 sub.operator("gamer.remove_boundary_faces", text="Remove")
+
                 sub = row.row(align=True)
                 sub.operator("gamer.select_boundary_faces", text="Select")
                 sub.operator("gamer.deselect_boundary_faces", text="Deselect")
+                sub.operator("gamer.select_all_boundary_faces", text="Select All")
