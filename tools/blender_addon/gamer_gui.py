@@ -5,7 +5,7 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
 from bpy.app.handlers import persistent
 import gamer.pygamer as g
 
-from . import boundary_markers
+from . import markers
 from . import tetrahedralization
 
 # python imports
@@ -324,12 +324,12 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
 
   def init_properties ( self ):
     self.gamer_version = "0.1"
-    self.boundary_id_counter = 0
+    self.boundary_id_counter = 0 # Start counting at 0
 
     if 'bnd_unset_mat' not in bpy.data.materials:
       bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
       bnd_unset_mat.use_fake_user = True
-      bnd_unset_mat.gamer.boundary_id = 'bnd_unset'
+      bnd_unset_mat.gamer.boundary_id = markers.UNSETID
 
     self.initialized = True
 
