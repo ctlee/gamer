@@ -1,7 +1,7 @@
 # ***************************************************************************
 # This file is part of the GAMer software.
 # Copyright (C) 2016-2017
-# by Tom Bartol, Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+# by Christopher Lee, Tom Bartol, John Moody, Rommie Amaro, J. Andrew McCammon,
 #    and Michael Holst
 
 # This library is free software; you can redistribute it and/or
@@ -27,12 +27,16 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
 from bpy.app.handlers import persistent
 import gamer.pygamer as g
 
+from . import util
+ObjectMode = util.ObjectMode
+
 # python imports
 import os
 import re
 from collections import deque
 
-UNSETID= 0
+UNSETID = 0
+UNSETMARKER = -1
 
 # we use per module class registration/unregistration
 def register():
@@ -161,18 +165,6 @@ class GAMER_UL_check_boundary(bpy.types.UIList):
         col.prop(bnd_mat, 'diffuse_color', text='')
 
 
-class ObjectMode():
-    def __init__(self, context):
-        self.context = context
-
-    def __enter__(self):
-        self.mode = self.context.active_object.mode
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-    def __exit__(self, type, value, traceback):
-        bpy.ops.object.mode_set(mode=self.mode)
-
-
 # Boundary Callbacks:
 #
 def boundary_name_update(self, context):
@@ -247,7 +239,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
         if mesh.total_face_sel > 0:
             face_set = set()
-            with ObjectMode(context):
+            with ObjectMode():
                 for f in mesh.polygons:
                     if f.select:
                         face_set.add(f.index)
@@ -285,7 +277,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         if (mesh.total_face_sel > 0):
             face_set = self.get_boundary_faces(context)
 
-            with ObjectMode(context):
+            with ObjectMode():
                 ml = getMarkerLayer(obj)
                 for f in mesh.polygons:
                     if f.select:
@@ -302,7 +294,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     def select_boundary_faces(self, context):
         mesh = context.active_object.data
         face_set = self.get_boundary_faces(context)
-        with ObjectMode(context):
+        with ObjectMode():
             for f in face_set:
                 mesh.polygons[f].select = True
         return {'FINISHED'}
@@ -311,7 +303,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     def deselect_boundary_faces(self, context):
         mesh = context.active_object.data
         face_set = self.get_boundary_faces(context)
-        with ObjectMode(context):
+        with ObjectMode():
             for f in face_set:
                 mesh.polygons[f].select = False
         return {'FINISHED'}
@@ -329,7 +321,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         obj = context.active_object
         mesh = obj.data
 
-        with ObjectMode(context):
+        with ObjectMode():
             ml = getMarkerLayer(obj)
 
             # Collect faces and reset marker value
@@ -371,11 +363,12 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         @param      bnd_marker  Int boundary marker value
         """
         obj = context.active_object
-        with ObjectMode(context):
+        with ObjectMode():
             ml = getMarkerLayer(obj)
 
         if not 'boundaries' in obj:
             obj['boundaries'] = dict()      # Initialize boundary object
+            obj['boundaries'][str(UNSETID)] = UNSETMARKER      # UNSETID always maps to 0
         obj['boundaries'][str(bnd_id)] = bnd_marker
 
         mats = bpy.data.materials               # Get list of materials
@@ -411,7 +404,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         @return     The boundary faces.
         """
         face_set = set()
-        with ObjectMode(context):
+        with ObjectMode():
             ml = getMarkerLayer(context.active_object)
             for i, marker in enumerate(ml):
                 if marker.value == self.boundary_id:
@@ -429,7 +422,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         """
         obj = context.active_object
 
-        with ObjectMode(context):
+        with ObjectMode():
             ml = getMarkerLayer(obj)
             for face in face_set:
                 ml[face].value = self.boundary_id

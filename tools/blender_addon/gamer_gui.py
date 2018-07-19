@@ -5,6 +5,7 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
 from bpy.app.handlers import persistent
 import gamer.pygamer as g
 
+from . import util
 from . import markers
 from . import tetrahedralization
 
@@ -101,13 +102,13 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
   def coarse_dense (self, context):
       print("Calling coarse_dense")
       gmesh, boundaries = blenderToGamer()
-      gmesh.coarse_dense(rate=self.dense_rate, numiter=self.dense_iter)
+      gamer.coarse_dense(gmesh, rate=self.dense_rate, numiter=self.dense_iter)
       gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
   def coarse_flat (self, context):
       print("Calling coarse_flat")
       gmesh, boundaries = blenderToGamer()
-      gmesh.coarse_flat(rate=self.flat_rate)
+      gmesh.coarse_flat(gmesh, rate=self.flat_rate)
       gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
 
   def smooth (self, context):
@@ -448,7 +449,6 @@ def createMesh(mesh_name, verts, faces):
     return mesh
 
 
-
 def blenderToGamer(obj=None, check_for_vertex_selection=True):
     """
     @brief      Transfer active mesh to GAMer format
@@ -464,75 +464,69 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True):
     if obj is None:
         return None, None
 
-    editmode = setObjectMode(obj) # Ensure edit mode is off
-    # Grab vertices
-    vertices, selected_vertices = getMeshVertices(obj, selected=True)
-    # Get world location and offset each vertex with this value
-    translation = obj.location
-    gmesh = g.SurfaceMesh()   # Init Gamer SurfaceMesh
+    with ObjectMode():
+        editmode = setObjectMode(obj) # Ensure edit mode is off
+        # Grab vertices
+        vertices, selected_vertices = getMeshVertices(obj, selected=True)
+        # Get world location and offset each vertex with this value
+        translation = obj.location
+        gmesh = g.SurfaceMesh()   # Init GAMer SurfaceMesh
 
-    def addVertex(co, sel): # functor to addVertices
-        gmesh.addVertex(g.Vertex(co[0] + translation[0],
-                     co[1] + translation[1],
-                     co[2] + translation[2],
-            0, bool(sel)))
+        def addVertex(co, sel): # functor to addVertices
+            gmesh.addVertex(g.Vertex(co[0] + translation[0],
+                         co[1] + translation[1],
+                         co[2] + translation[2],
+                0, bool(sel)))
 
-    # Check we have vertices selected
-    if check_for_vertex_selection and not selected_vertices:
-        print("blenderToGamer: There are no selected vertices.")
-        return None, None
-
-    # If all vertices are selected
-    if len(selected_vertices) == len(vertices):
-        selected_vertices = np.ones(len(vertices), dtype=bool)
-    else:
-        selection = np.zeros(len(vertices), dtype=bool)
-        selection[selected_vertices] = 1    # Set selected to True
-        selected_vertices = selection
-    # Zip args and pass to addVertex functor
-    [addVertex(*args) for args in zip(vertices, selected_vertices)]
-
-    # Transfer boundary information
-    boundaries = obj.get('boundaries')
-    if not boundaries:
-        obj['boundaries'] = {}
-        boundaries = obj['boundaries']  # TODO (9): This line might be redundant CTL
-
-    # map of indices to marker
-    indexMap = g.index_map(len(obj.data.polygons))
-    fillmap = lambda boundary: indexMap.updatemap(boundary['marker'], boundary['faces'].values()[0].to_list())
-    # Iterate over the faces and transfer marker information
-    map(fillmap, boundaries.values())
-
-    # Get list of faces
-    faces = obj.data.polygons
-
-    # Transfer data from blender mesh to gamer mesh
-    for face in faces:
-        vertices = collections.deque(face.vertices)
-        if len(vertices) != 3:
-            # self.drawError(errormsg="expected mesh with only triangles in")
-            print("Error: encountered a non-triangular face. Expected a triangulated mesh.")
-            # self.waitingCursor(0)
-            restoreInteractionMode(obj,editmode)
+        # Check we have vertices selected
+        if check_for_vertex_selection and not selected_vertices:
+            print("blenderToGamer: There are no selected vertices.")
             return None, None
 
-        # Get the orientation from Blender
-        max_val = max(vertices)
-        max_idx = vertices.index(max_val)
-        if max_idx != 2:
-            vertices.rotate(2-max_idx)
-        orientation = 1
-        if(vertices[0] < vertices[1]):
-            orientation = -1
-        gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, indexMap[face.index], False))
+        # If all vertices are selected
+        if len(selected_vertices) == len(vertices):
+            selected_vertices = np.ones(len(vertices), dtype=bool)
+        else:
+            selection = np.zeros(len(vertices), dtype=bool)
+            selection[selected_vertices] = 1    # Set selected to True
+            selected_vertices = selection
+        # Zip args and pass to addVertex functor
+        [addVertex(*args) for args in zip(vertices, selected_vertices)]
+
+        # Transfer boundary information
+        bdryMap = obj.get('boundaries') # Map(bnd_id, marker)
+        if not bdryMap:
+            bdryMap = {str(markers.UNSETID): markers.UNSETMARKER}
+        boundaries = [bdryMap[str(item.value)] for item in ml.values()]
+
+        # Get list of faces
+        faces = obj.data.polygons
+
+        # Transfer data from blender mesh to gamer mesh
+        for face in faces:
+            vertices = collections.deque(face.vertices)
+            if len(vertices) != 3:
+                # self.drawError(errormsg="expected mesh with only triangles in")
+                print("Error: encountered a non-triangular face. Expected a triangulated mesh.")
+                # self.waitingCursor(0)
+                restoreInteractionMode(obj, editmode)
+                return None, None
+
+            # Get the orientation from Blender
+            max_val = max(vertices)
+            max_idx = vertices.index(max_val)
+            if max_idx != 2:
+                vertices.rotate(2-max_idx)
+            orientation = 1
+            if(vertices[0] < vertices[1]):
+                orientation = -1
+            gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, indexMap[face.index], False))
 
     # Ensure all face orientations are set
     g.compute_orientation(gmesh)
 
     # Restore editmode
-    restoreInteractionMode(obj,editmode)
-    return gmesh, boundaries
+    return gmesh
 
 
 
