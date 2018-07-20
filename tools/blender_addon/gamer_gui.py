@@ -449,7 +449,7 @@ def createMesh(mesh_name, verts, faces):
     return mesh
 
 
-def blenderToGamer(obj=None, check_for_vertex_selection=True):
+def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=False):
     """
     @brief      Transfer active mesh to GAMer format
 
@@ -494,10 +494,13 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True):
         [addVertex(*args) for args in zip(vertices, selected_vertices)]
 
         # Transfer boundary information
-        bdryMap = obj.get('boundaries') # Map(bnd_id, marker)
-        if not bdryMap:
-            bdryMap = {str(markers.UNSETID): markers.UNSETMARKER}
-        boundaries = [bdryMap[str(item.value)] for item in ml.values()]
+        if map_boundaries:
+            bdryMap = obj.get('boundaries') # Map(bnd_id, marker)
+            if not bdryMap:
+                bdryMap = {str(markers.UNSETID): markers.UNSETMARKER}
+            boundaries = [bdryMap[str(item.value)] for item in ml.values()]
+        else:
+            boundaries = [item.value for item in ml.values()]
 
         # Get list of faces
         faces = obj.data.polygons
@@ -520,8 +523,7 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True):
             orientation = 1
             if(vertices[0] < vertices[1]):
                 orientation = -1
-            gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, indexMap[face.index], False))
-
+            gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, boundaries[face.index], False))
     # Ensure all face orientations are set
     g.compute_orientation(gmesh)
 
@@ -537,63 +539,57 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
     # self.drawError(errormsg="expected a GAMer SurfaceMesh")
         print("expected a SurfaceMesh")
 
-    # Get scene
-    scn = bpy.context.scene
-    # self.waitingCursor(1)
+    with ObjectMode():
+        verts = []      # Array of vertex coordinates
+        idxMap = {}     # Dictionary of gamer indices to renumbered indices
+        un_selected_vertices = []
+        for i, vid in enumerate(gmesh.vertexIDs()):
+            v = vid.data()
+            verts.append((v[0], v[1], v[2]))
+            idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
+            if not v.selected:
+                un_selected_vertices.append(i)
 
-    verts = []      # Array of vertex coordinates
-    idxMap = {}     # Dictionary of gamer indices to renumbered indices
-    un_selected_vertices = []
-    for i, vid in enumerate(gmesh.vertexIDs()):
-        v = vid.data()
-        verts.append((v[0], v[1], v[2]))
-        idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
-        if not v.selected:
-            un_selected_vertices.append(i)
+        faces = []
+        bdryDict = dict()   # Dictionary of marker to list of face indices
+        for i, fid in enumerate(gmesh.faceIDs()):
+            fName = gmesh.getName(fid)
+            face = fid.data()
 
-    faces = []
-    bdryDict = dict()   # Dictionary of marker to list of face indices
-    for i, fid in enumerate(gmesh.faceIDs()):
-        fName = gmesh.getName(fid)
-        face = fid.data()
-
-        if face.orientation == -1:
-            faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
-        else:
-            faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
-        if face.marker != -1:
-            if face.marker not in bndryDict:
-                bdryDict[face.marker] = [face.marker]
+            if face.orientation == -1:
+                faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
             else:
-                bdryDict[face.marker].append(face.marker)
+                faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
+            if face.marker != -1:
+                if face.marker not in bndryDict:
+                    bdryDict[face.marker] = [face.marker]
+                else:
+                    bdryDict[face.marker].append(face.marker)
 
-    if create_new_mesh:
-        # Create new object and mesh
-        bmesh = createMesh(mesh_name, verts, faces)
-        obj = bpy.data.objects.new(mesh_name, bmesh)
+        if create_new_mesh:
+            # Create new object and mesh
+            bmesh = createMesh(mesh_name, verts, faces)
+            obj = bpy.data.objects.new(mesh_name, bmesh)
 
-        scn.objects.link(obj)
-        bpy.ops.object.select_all(action='DESELECT')
-        obj.select=True
+            bpy.context.objects.link(obj)
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select=True
 
 
-        for marker, faceIndices in bdryDict.items():
-            obj.gamer.add_boundary(bpy.context)
-            bnd = obj.gamer.get_active_boundary()
-            bnd.marker = marker
-            bnd.set_boundary_faces(bpy.context, faceIndices)
-    else:
-        orig_mesh = obj.data
-        bmesh = createMesh('gamer_tmp', verts, faces)
-        obj.data = bmesh
-        bpy.data.meshes.remove(orig_mesh)
-        bmesh.name = mesh_name
+            for marker, faceIndices in bdryDict.items():
+                obj.gamer.add_boundary(bpy.context)
+                bnd = obj.gamer.get_active_boundary()
+                bnd.marker = marker
+                bnd.set_boundary_faces(bpy.context, faceIndices)
+        else:
+            orig_mesh = obj.data
+            bmesh = createMesh('gamer_tmp', verts, faces)
+            obj.data = bmesh
+            bpy.data.meshes.remove(orig_mesh)
+            bmesh.name = mesh_name
 
-    #myprint("un_selected_vertices ", len(un_selected_vertices))
-    [toggle(v.select,False) for v in bmesh.vertices if v.index in un_selected_vertices]
+        [toggle(v.select,False) for v in bmesh.vertices if v.index in un_selected_vertices]
 
-    # Restore editmode
-    restoreInteractionMode(obj,editmode)
 
     # Repaint boundaries
     obj.gamer.repaint_boundaries(bpy.context)
