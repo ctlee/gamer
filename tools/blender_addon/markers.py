@@ -33,6 +33,7 @@ ObjectMode = util.ObjectMode
 # python imports
 import os
 import re
+import copy
 from collections import deque
 
 UNSETID = 0
@@ -352,7 +353,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         obj['boundaries'].pop(str(self.boundary_id))
 
 
-    def init_boundary(self, context, bnd_name, bnd_id, bnd_marker):
+    def init_boundary(self, obj, bnd_name, bnd_id, bnd_marker):
         """
         Initialize new boundary object
 
@@ -362,7 +363,6 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         @param      bnd_id      String Boundary ID token ('bnd_id_%d')
         @param      bnd_marker  Int boundary marker value
         """
-        obj = context.active_object
         with ObjectMode():
             ml = getMarkerLayer(obj)
 
@@ -428,6 +428,14 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
                 ml[face].value = self.boundary_id
 
 
+def copyBoundaries(self, fromObject, toObject):
+    """
+    Copy boundary metadata from boundaries into object
+    """
+    for bdry in fromObject.gamer.boundary_list:
+        toObject.gamer.copyBoundary(toObject, bdry)
+
+
 class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
     boundary_list = CollectionProperty(type=GAMerBoundaryMarker, name="Boundary List")
     active_bnd_index = IntProperty(name="Active Boundary Index", default=0)
@@ -448,6 +456,13 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         return bnd
 
 
+    def copyBoundary(self, bdry):
+        newBdry = self.boundary_list.add()
+        newBdry.init_boundary(bdry.name, bdry.boundary_id, bdry.marker)
+        idx = self.boundary_list.find(bnd_name)     # Find index of new boundary
+        self.active_bnd_index = idx                 # Set active index to new bdry
+
+
     def add_boundary(self, context):
         """
         Add a new boundary to the list of boundaries and set as the active
@@ -458,9 +473,10 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         bnd_id = context.scene.gamer.allocate_boundary_id()
         bnd_name = 'Boundary_%d'%(bnd_id)
 
-        new_bnd = self.boundary_list.add()                  # Create new GamerBoundaryMarker obj
+        new_bnd = self.boundary_list.add() # Create new GamerBoundaryMarker
+
         # Name, Boundary ID, Marker
-        new_bnd.init_boundary(context, bnd_name, bnd_id, bnd_id)
+        new_bnd.init_boundary(context.object, bnd_name, bnd_id, bnd_id)
 
         idx = self.boundary_list.find(bnd_name)     # Find index of new boundary
         self.active_bnd_index = idx                 # Set active index to new bdry

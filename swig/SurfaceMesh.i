@@ -218,8 +218,26 @@ SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float 
 %}
 
 %pythoncode %{
-  def SmoothMesh(mesh):
-    return smoothMesh(mesh, 15, 165, 1, True);
+  def smooth(mesh, max_min_angle=15, min_max_angle=150,
+             max_iter=6, preserve_ridges=False):
+    "Smooth the mesh"
+    return smoothMesh(mesh, max_min_angle, min_max_angle,
+            max_iter, preserve_ridges)
+
+
+  def coarse_flat(mesh, rate=0.016):
+    "Coarse flat areas"
+    coarse(mesh, rate, 1, 0)
+
+
+  def coarse_dense(mesh, rate=1.6, numiter=1):
+    "Coarse dense areas"
+    if not isinstance(rate, (int, float)) or rate <= 0:
+      raise TypeError("expected a positive scalar for the 'rate' argument")
+    if not isinstance(numiter, int) or numiter < 1:
+      raise TypeError("expected a positive scalar for the 'numiter' argument")
+    for i in range(numiter):
+      coarse(mesh, rate, 0, 10)
 %}
 
 void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
@@ -236,19 +254,3 @@ double getArea(const SurfaceMesh &mesh);
 void print(const SurfaceMesh &mesh);
 
 void compute_orientation(SurfaceMesh& F); // Currently force return to void
-
-
-%pythoncode %{
-  def coarse_dense(self, mesh, rate=1.6, numiter=1):
-    "Coarse flat areas"
-    if not isinstance(rate, (int, float)) or rate <= 0:
-      raise TypeError("expected a positive scalar for the 'rate' argument")
-    if not isinstance(numiter, int) or numiter < 1:
-      raise TypeError("expected a positive scalar for the 'numiter' argument")
-    for i in range(numiter):
-      coarse(self, rate, 0, 10) # coarse rate, flat rate, dense rate
-
-  def coarse_flat(self, mesh, rate=0.016):
-    "Coarse flat areas"
-    coarse(self, mesh, rate, 1, 0) # coarse rate, flat rate, dense rate
-%}
