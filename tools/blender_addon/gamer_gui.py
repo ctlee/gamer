@@ -25,10 +25,12 @@ def unregister():
 @persistent
 def gamer_load_post(context):
     """ Initialize GAMer add  """
+    # print("GAMER_LOAD_POST")
     if not context:
         context = bpy.context
     scn = bpy.context.scene
     if not scn.gamer.initialized:
+      # print('Initializing GAMer Properties')
       scn.gamer.init_properties()
 
 
@@ -340,7 +342,7 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
 
 
     def init_properties ( self ):
-        self.gamer_version = "0.1"
+        self.gamer_version = "2.0"
         self.boundary_id_counter = 0 # Start counting at 0
 
         if 'bnd_unset_mat' not in bpy.data.materials:

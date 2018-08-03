@@ -372,6 +372,11 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         obj['boundaries'][str(bnd_id)] = bnd_marker
 
         mats = bpy.data.materials               # Get list of materials
+        if 'bnd_unset_mat' not in mats:
+            bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
+            bnd_unset_mat.use_fake_user = True
+            bnd_unset_mat.gamer.boundary_id = UNSETID
+
         if 'bnd_unset_mat' not in obj.material_slots:
             bpy.ops.object.material_slot_add()  # Add new material slot
             obj.material_slots[0].material = mats['bnd_unset_mat']
