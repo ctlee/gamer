@@ -42,11 +42,13 @@ if "bpy" in locals():
     importlib.reload(gamer_gui)
     importlib.reload(markers)
     importlib.reload(tetrahedralization)
+    importlib.reload(util)
 else:
     print("Importing GAMer")
     from . import gamer_gui
     from . import markers
     from . import tetrahedralization
+    from . import util
 
 # General import
 import bpy
@@ -77,10 +79,12 @@ def register():
     # Add the load_post handlers
     add_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
     add_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
+    # bpy.utils.register_class(util.GAMerDialogOperator)
     # print("GAMer registered")
 
 
 def unregister():
+    # bpy.utils.unregister_class(util.GAMerDialogOperator)
     remove_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
     remove_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
     bpy.utils.unregister_module(__name__)

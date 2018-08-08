@@ -591,15 +591,22 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             auto f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
             auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
             auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
-            if (areaFlip/area > 1.01) continue;
+            if (areaFlip/area > 1.01) continue; // If area changes by a lot then continue
 
             // Check the flip using user function
             if (checkFlip(mesh, edgeID))
             {
                 *iter++ = edgeID;   // Insert into edges to flip
-                // The local topology will be changed. Don't flip neighbors
-                // which share a common face.
-                neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
+
+                casc::NodeSet<SurfaceMesh::SimplexID<2> > tmpIgnored;
+                neighbors_up(mesh, edgeID, std::inserter(tmpIgnored, tmpIgnored.end()));
+
+                // The local topology will be changed by edge flip.
+                // Don't flip edges which share a common face.
+                // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
+                for (auto eid : tmpIgnored){
+                    neighbors(mesh, eid, std::inserter(ignoredEdges, ignoredEdges.end()));
+                }
             }
         }
     }

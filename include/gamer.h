@@ -29,7 +29,7 @@
 #include "tensor.h"
 
 // The number of rings to use to compute local structure tensor
-#define RINGS 3
+#define RINGS 2
 
 /** @brief Blurring blobyness used in conversion from PDB/PQR to 3D volumes */
 #define BLOBBYNESS        -0.2f

@@ -27,4 +27,22 @@ class ObjectMode():
         bpy.ops.object.mode_set(mode='OBJECT')
 
     def __exit__(self, type, value, traceback):
+        # print("Changing to %s mode"%(self.mode))
         bpy.ops.object.mode_set(mode=self.mode)
+
+
+# class GAMerDialogOperator(bpy.types.Operator):
+#     bl_idname = "object.printGAMerError"
+#     bl_label = "Print Error Message"
+#     message = "Test Message"
+
+#     def setMessage(self, msg):
+#         self.message = msg
+
+#     def execute(self, context):
+#         self.report({'ERROR'}, self.message)
+#         return {'FINISHED'}
+
+#     def invoke(self, context, event):
+#         wm = context.window_manager
+#         return wm.invoke_props_dialog(self)

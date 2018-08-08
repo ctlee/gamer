@@ -108,9 +108,13 @@ public:
 class SurfaceMesh{
 public:
   %extend {
-    void addVertex(const Vertex &data){
-      $self->add_vertex(data);
+    // void addVertex(const Vertex &data){
+    //   $self->add_vertex(data);
+    // }
+    void addVertex(double x, double y, double z, size_t marker, bool sel){
+      $self->add_vertex(Vertex(x,y,z,marker,sel));
     }
+
     void insertVertex(std::array<int, 1> &s, const Vertex &data) {
       $self->insert<1>(s, data);
     }
@@ -246,6 +250,7 @@ void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
+void normalSmooth(SurfaceMesh &mesh);
 void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
 double getVolume(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh);
@@ -253,4 +258,6 @@ double getArea(const SurfaceMesh &mesh);
 %rename(printMesh) print(const SurfaceMesh &mesh);
 void print(const SurfaceMesh &mesh);
 
+void init_orientation(SurfaceMesh& F);
+void check_orientation(SurfaceMesh& F);
 void compute_orientation(SurfaceMesh& F); // Currently force return to void

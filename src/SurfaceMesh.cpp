@@ -780,7 +780,9 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
         for(auto edgeID : edgesToFlip){
             edgeFlip(mesh, edgeID);
         }
-        compute_orientation(mesh);
+        init_orientation(mesh);
+        check_orientation(mesh);
+        //compute_orientation(mesh);
 
         // Mark for flipping by edge valence.
         // edgesToFlip.clear();
@@ -1198,16 +1200,6 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
                                 if(edge0.orientation*node0.orientation + edge1.orientation*node1.orientation != 0)
                                 {
                                     orientable = false;
-
-                                    // std::cout << "+++++" << std::endl;
-                                    // std::cout << s0 << " : " << s1 << std::endl;
-                                    // std::cout << edge0.orientation << " : " << node0.orientation << std::endl;
-                                    // std::cout << edge1.orientation << " : " << node1.orientation << std::endl;
-                                    // std::cout << "-----"
-                                    //           << std::endl;
-                                    // std::cout << "Non-Orientable: "
-                                    //           << edge0.orientation*node0.orientation + edge1.orientation*node1.orientation
-                                    //           << std::endl;
                                 }
                             }
                         }

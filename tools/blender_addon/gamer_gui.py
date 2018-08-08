@@ -71,15 +71,15 @@ class GAMER_OT_smooth(bpy.types.Operator):
         return {'FINISHED'}
 
 
-# class GAMER_OT_normal_smooth(bpy.types.Operator):
-#     bl_idname = "gamer.normal_smooth"
-#     bl_label = "Normal Smooth Surf"
-#     bl_description = "Smooth facet normals of selected faces of the mesh"
-#     bl_options = {'REGISTER', 'UNDO'}
+class GAMER_OT_normal_smooth(bpy.types.Operator):
+    bl_idname = "gamer.normal_smooth"
+    bl_label = "Normal Smooth Surf"
+    bl_description = "Smooth facet normals of selected faces of the mesh"
+    bl_options = {'REGISTER', 'UNDO'}
 
-#     def execute(self, context):
-#         context.scene.gamer.mesh_improve_panel.normal_smooth(context)
-#         return {'FINISHED'}
+    def execute(self, context):
+        context.scene.gamer.mesh_improve_panel.normal_smooth(context)
+        return {'FINISHED'}
 
 
 class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
@@ -87,7 +87,7 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
       name="CD_Rate", default=2.5, min=0.001, max=4.0, precision=4,
       description="The rate for coarsening dense areas")
   dense_iter = IntProperty(
-      name="CD_Iter", default=1, min=1, max=15,
+      name="CD_Iter", default=5, min=1, max=15,
       description="The number of iterations for coarsening dense areas")
   flat_rate = FloatProperty(
       name="CF_Rate", default=0.016, min=0.00001, max=0.5, precision=4,
@@ -96,34 +96,42 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
       name="Max_Min_Angle", default=15, min=10, max=20,
       description="The maximal minumum angle for smoothing")
   smooth_iter = IntProperty(
-      name="S_Iter", default=6, min=1, max=50,
+      name="S_Iter", default=10, min=1, max=50,
       description="The number of iterations for coarsening dense areas")
   preserve_ridges = BoolProperty( name="Preserve ridges", default=False)
   new_mesh = BoolProperty( name="Create new mesh", default=False)
 
   def coarse_dense (self, context):
-      print("Calling coarse_dense")
+      print("Coarse Dense: Starting")
       gmesh = blenderToGamer()
-      g.coarse_dense(gmesh, rate=self.dense_rate, numiter=self.dense_iter)
-      gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+      if gmesh:
+          g.coarse_dense(gmesh, rate=self.dense_rate, numiter=self.dense_iter)
+          gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+          print("Coarse Dense: Done")
 
   def coarse_flat (self, context):
-      print("Calling coarse_flat")
+      print("Coarse Flat: Starting")
       gmesh = blenderToGamer()
-      g.coarse_flat(gmesh, rate=self.flat_rate)
-      gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+      if gmesh:
+          g.coarse_flat(gmesh, rate=self.flat_rate)
+          gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+          print("Coarse Flat: Done")
 
   def smooth (self, context):
-      print("Calling smooth")
+      print("Smooth: Starting")
       gmesh = blenderToGamer()
-      g.smooth(gmesh, max_min_angle=self.max_min_angle, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
-      gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+      if gmesh:
+          g.smooth(gmesh, max_min_angle=self.max_min_angle, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
+          gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+          print("Smooth: Done")
 
-  # def normal_smooth (self, context):
-  #     print("Calling smooth")
-  #     gmesh, boundaries = blenderToGamer()
-  #     gmesh.normal_smooth()
-  #     gamer_to_blender(gmesh, boundaries, create_new_mesh=self.new_mesh)
+  def normal_smooth (self, context):
+      print("Normal Smooth: Starting")
+      gmesh = blenderToGamer()
+      if gmesh:
+          g.normal_smooth(gmesh)
+          gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
+          print("Normal Smooth: Done")
 
   def draw_layout (self, context, layout ):
       row = layout.row()
@@ -354,12 +362,15 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
 
 def getSelectedMesh(verbose=True):
     "Returns the selected mesh"
-    objs = bpy.context.selected_objects
+    # objs = bpy.context.selected_objects
+    # This is a safe way to get objects. Context can be dependent upon
+    # many things...
+    objs = [ o for o in bpy.context.scene.objects if o.select ]
     obj = objs[0] if len(objs) else None
     # myprint(obj)
     if not obj or obj.type != 'MESH':
         if verbose:
-            print("expected a selected mesh")
+            print("getSelectedMesh: Expected a selected mesh")
         return None
     return obj
 
@@ -389,12 +400,9 @@ def getMeshVertices(obj, selected=False):
     mesh = obj.data
     vertToVec = lambda v : [v[0], v[1], v[2]]
     if selected:
-        vert_indices = [v.index for v in mesh.vertices if v.select and not v.hide]
-        vertices = [vertToVec(mesh.vertices[vi].co) for vi in vert_indices]
-        return vertices, vert_indices
-    else:
-        vertices = [vertToVec(v.co) for v in mesh.vertices]
-        return vertices
+        selected_indices = [v.index for v in mesh.vertices if v.select and not v.hide]
+    vertices = [vertToVec(v.co) for v in mesh.vertices]
+    return vertices, selected_indices
 
 
 def createMesh(mesh_name, verts, faces):
@@ -414,7 +422,7 @@ def createMesh(mesh_name, verts, faces):
     return mesh
 
 
-def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=False):
+def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=False):
     """
     @brief      Transfer active mesh to GAMer format
 
@@ -427,7 +435,7 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=Fal
     if obj is None:
         obj = getSelectedMesh()
     if obj is None:
-        return None, None
+        return None
 
     with util.ObjectMode():
         # Grab vertices
@@ -437,15 +445,18 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=Fal
         gmesh = g.SurfaceMesh()   # Init GAMer SurfaceMesh
 
         def addVertex(co, sel): # functor to addVertices
-            gmesh.addVertex(g.Vertex(co[0] + translation[0],
-                         co[1] + translation[1],
-                         co[2] + translation[2],
-                0, bool(sel)))
+            gmesh.addVertex(
+                co[0] + translation[0],   # x position
+                co[1] + translation[1],   # y position
+                co[2] + translation[2],   # z position
+                0,                        # marker
+                bool(sel)                 # selected flag
+            )
 
         # Check we have vertices selected
         if check_for_vertex_selection and not selected_vertices:
             print("blenderToGamer: There are no selected vertices.")
-            return None, None
+            return None
 
         # If all vertices are selected
         if len(selected_vertices) == len(vertices):
@@ -454,6 +465,7 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=Fal
             selection = np.zeros(len(vertices), dtype=bool)
             selection[selected_vertices] = 1    # Set selected to True
             selected_vertices = selection
+
         # Zip args and pass to addVertex functor
         [addVertex(*args) for args in zip(vertices, selected_vertices)]
 
@@ -478,7 +490,7 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=Fal
                 print("Error: encountered a non-triangular face. Expected a triangulated mesh.")
                 # self.waitingCursor(0)
                 restoreInteractionMode(obj, editmode)
-                return None, None
+                return None
 
             # Get the orientation from Blender
             max_val = max(vertices)
@@ -490,8 +502,8 @@ def blenderToGamer(obj=None, check_for_vertex_selection=True, map_boundaries=Fal
                 orientation = -1
             gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, boundaries[face.index], False))
     # Ensure all face orientations are set
-    g.compute_orientation(gmesh)
-
+    g.init_orientation(gmesh)
+    g.check_orientation(gmesh)
     return gmesh
 
 
@@ -500,7 +512,7 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
     # Check arguments
     if not isinstance(gmesh, g.SurfaceMesh):
     # self.drawError(errormsg="expected a GAMer SurfaceMesh")
-        print("expected a SurfaceMesh")
+        print("Expected a SurfaceMesh")
 
     currObj = getActiveMesh()
 
@@ -520,6 +532,9 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
         for i, fid in enumerate(gmesh.faceIDs()):
             fName = gmesh.getName(fid)
             face = fid.data()
+
+            if face.orientation == 0:
+                print("gamerToBlender: Found face with no orientation...")
             if face.orientation == -1:
                 faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
             else:
@@ -552,5 +567,6 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
             vert = val
 
         [toggle(v.select,False) for v in bmesh.vertices if v.index in un_selected_vertices]
+        currObj.select = True
     # Repaint boundaries
     currObj.gamer.repaint_boundaries(bpy.context)
