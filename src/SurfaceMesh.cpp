@@ -488,7 +488,7 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
 
     auto            p = (*vertexID).position;
     Eigen::Vector4d pos_e;
-    pos_e << p[0], p[1], p[2], 1;
+    pos_e << p[0], p[1], p[2], 1;   // 4D for affine3D
     Eigen::Vector4d newPos_e;
     newPos_e << 0, 0, 0, 0;
 
@@ -511,11 +511,10 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
         for (auto face : faces)
         {
             auto inorm = getNormal(mesh, face);
+            inorm /= std::sqrt(inorm|inorm);
             avgNorm += inorm;
         }
-        avgNorm /= 3;                          // each triangle has 3 incident
-                                               // faces
-        avgNorm /= std::sqrt(avgNorm|avgNorm); // get unit normal
+        avgNorm /= 3;
 
         // Compute the edge (axis) to rotate about.
         auto edge = mesh.get_simplex_down(faceID, name);
@@ -754,7 +753,7 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
     bool smoothed;
     double minAngle, maxAngle;
     int nSmall, nLarge;
-    int nIter = 0;
+    int nIter = 1;
 
     // Check if we are smoothed already
     smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
@@ -767,9 +766,10 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
 
     // while not smoothed and not at maxiter perform one round of
     // weightedVertexSmooth + edgeflipping
-    while (!smoothed && nIter < maxIter){
+    while (!smoothed && nIter <= maxIter){
         for(auto vertex : mesh.get_level_id<1>()){
             weightedVertexSmooth(mesh, vertex, RINGS);
+            //barycenterVertexSmooth(mesh, vertex);
         }
 
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
@@ -782,7 +782,6 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
         }
         init_orientation(mesh);
         check_orientation(mesh);
-        //compute_orientation(mesh);
 
         // Mark for flipping by edge valence.
         // edgesToFlip.clear();
@@ -791,7 +790,8 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
         // for(auto edgeID : edgesToFlip){
         //     edgeFlip(mesh, edgeID);
         // }
-        // compute_orientation(mesh);
+        // init_orientation(mesh);
+        // check_orientation(mesh);
 
         std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
         std::cout << "Iteration " << nIter << ":" << std::endl;

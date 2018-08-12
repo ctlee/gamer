@@ -84,7 +84,7 @@ class GAMER_OT_normal_smooth(bpy.types.Operator):
 
 class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
   dense_rate = FloatProperty(
-      name="CD_Rate", default=2.5, min=0.001, max=4.0, precision=4,
+      name="CD_Rate", default=1, min=0.001, max=4.0, precision=4,
       description="The rate for coarsening dense areas")
   dense_iter = IntProperty(
       name="CD_Iter", default=5, min=1, max=15,
@@ -129,7 +129,7 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
       print("Normal Smooth: Starting")
       gmesh = blenderToGamer()
       if gmesh:
-          g.normal_smooth(gmesh)
+          g.normalSmooth(gmesh)
           gamerToBlender(gmesh, create_new_mesh=self.new_mesh)
           print("Normal Smooth: Done")
 
@@ -159,9 +159,9 @@ class GAMerMeshImprovementPropertyGroup(bpy.types.PropertyGroup):
       row = layout.row()
       row.prop(self, "preserve_ridges" )
 
-      # row = layout.row()
-      # col = row.column()
-      # col.operator("gamer.normal_smooth",icon="SMOOTHCURVE")
+      row = layout.row()
+      col = row.column()
+      col.operator("gamer.normal_smooth",icon="SMOOTHCURVE")
 
 #      row = layout.row()
 #      row.prop(self, "new_mesh" )

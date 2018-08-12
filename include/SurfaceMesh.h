@@ -543,8 +543,8 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             // The mesh is not a surface mesh...
             if (up.size() > 2)
             {
-                // std::cerr << "This edge participates in more than 2 faces. "
-                //           << "Returning..." << std::endl;
+                std::cerr << "This edge participates in more than 2 faces. "
+                          << "Returning..." << std::endl;
                 continue;
             }
             else if (up.size() < 2) // Edge is a boundary
@@ -598,15 +598,13 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             {
                 *iter++ = edgeID;   // Insert into edges to flip
 
-                casc::NodeSet<SurfaceMesh::SimplexID<2> > tmpIgnored;
-                neighbors_up(mesh, edgeID, std::inserter(tmpIgnored, tmpIgnored.end()));
 
                 // The local topology will be changed by edge flip.
                 // Don't flip edges which share a common face.
+                std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
+                kneighbors(mesh, edgeID, 2, tmpIgnored);
+                ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
                 // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
-                for (auto eid : tmpIgnored){
-                    neighbors(mesh, eid, std::inserter(ignoredEdges, ignoredEdges.end()));
-                }
             }
         }
     }

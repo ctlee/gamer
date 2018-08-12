@@ -31,10 +31,10 @@ int  main(int argc, char *argv[])
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
     }
-    auto mesh = readOFF(argv[1]);
+    // auto mesh = readOFF(argv[1]);
     // auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
     // auto mesh = readPDB_distgrid(argv[1], 1.4);
-    // auto mesh = readPDB_molsurf(argv[1]);
+    auto mesh = readPDB_molsurf(argv[1]);
 
     if(mesh == nullptr){
         std::cout << "Something bad happened..." << std::endl;
@@ -47,141 +47,117 @@ int  main(int argc, char *argv[])
     std::cout << "# Edges: " << mesh->size<2>() << std::endl;
     std::cout << "# Faces: " << mesh->size<3>() << std::endl;
 
-    // auto mesh = cube(2);
-    // compute_orientation(*mesh);
-    // if(getVolume(*mesh) < 0){
-    //     for(auto &face : mesh->get_level<3>())
-    //         face.orientation *= -1;
-    // }
-
-    for(auto face : mesh->get_level_id<3>()){
-        std::cout << face << "  " << *face << std::endl;
+    compute_orientation(*mesh);
+    if(getVolume(*mesh) < 0){
+        for(auto &face : mesh->get_level<3>())
+            face.orientation *= -1;
     }
 
-    // coarseIT(*mesh, 0.016, 1, 0);
-    // coarseIT(*mesh, 2.5, 0, 10);
 
-    // smoothMesh(*mesh, 15, 165, 5, true);
-    // writeOFF("test.off", *mesh);
+    coarseIT(*mesh, 0.016, 1, 0);
+    coarseIT(*mesh, 2.5, 0, 10);
+    smoothMesh(*mesh, 15, 165, 5, true);
 
+    for(auto &face : mesh->get_level<3>())
+        face.marker = 23;
 
-    // auto it = mesh->get_level_id<1>();
+    auto &global = *mesh->get_simplex_up();
+    global.closed = true;
+    global.ishole = true;
+    global.marker = -1;
 
-    // std::cout << "decltype(i) is " << type_name<decltype(mesh->get_level_id<1>())>() << '\n';
-    // std::cout << "decltype(SurfaceMesh) is " << type_name<decltype(*mesh)>() << std::endl;
+    auto box = cube(5);
 
+    for(auto &face : box->get_level<3>())
+        face.marker = 50;
 
+    auto &global2 = *box->get_simplex_up();
+    global2.closed = true;
+    global2.ishole = false;
+    global2.marker = 5;
 
+    Vector center;
+    double radius;
+    std::tie(center, radius) = getCenterRadius(*mesh);
+    scale(*box, radius*2);
 
-    // for(auto &face : mesh->get_level<3>())
-    //     face.marker = 23;
+    std::cout << "General box statistics: " << std::endl;
+    std::cout << "# Vertices: " << box->size<1>() << std::endl;
+    std::cout << "# Edges: " << box->size<2>() << std::endl;
+    std::cout << "# Faces: " << box->size<3>() << std::endl;
 
-    // // coarseIT(*mesh, 0.016, 1, 0);
-    // // coarseIT(*mesh, 2.5, 0, 10);
+    std::vector<std::unique_ptr<SurfaceMesh>> meshes;
 
+    std::cout << "Volume of mesh: " << getVolume(*mesh) << std::endl;
+    std::cout << "Volume of box: " << getVolume(*box) << std::endl;
 
-    // // writeOFF("tmp.off", *mesh);
+    meshes.push_back(std::move(mesh));
+    meshes.push_back(std::move(box));
 
-    // auto &global = *mesh->get_simplex_up();
-    // global.closed = true;
-    // global.ishole = true;
-    // global.marker = -1;
+    std::cout << "\n\n\nBEGINNING TETRAHEDRALIZATION..." << std::endl;
+    auto tetmesh = makeTetMesh(meshes, "pq1.4zYAQ");
 
+    std::cout << "Done Tetrahedralizing" << std::endl;
 
-    // auto box = cube(5);
+    std::cout << "General TetMesh statistics: " << std::endl;
+    std::cout << "# Vertices: " << tetmesh->size<1>() << std::endl;
+    std::cout << "# Edges: " << tetmesh->size<2>() << std::endl;
+    std::cout << "# Faces: " << tetmesh->size<3>() << std::endl;
+    std::cout << "# Cells: " << tetmesh->size<4>() << std::endl;
 
-    // for(auto &face : box->get_level<3>())
-    //     face.marker = 50;
-
-    // auto &global2 = *box->get_simplex_up();
-    // global2.closed = true;
-    // global2.ishole = false;
-    // global2.marker = 5;
-
-    // Vector center;
-    // double radius;
-    // std::tie(center, radius) = getCenterRadius(*mesh);
-    // scale(*box, radius*2);
-
-    // std::cout << "General box statistics: " << std::endl;
-    // std::cout << "# Vertices: " << box->size<1>() << std::endl;
-    // std::cout << "# Edges: " << box->size<2>() << std::endl;
-    // std::cout << "# Faces: " << box->size<3>() << std::endl;
-
-    // std::vector<std::unique_ptr<SurfaceMesh>> meshes;
-
-    // std::cout << "Volume of mesh: " << getVolume(*mesh) << std::endl;
-    // std::cout << "Volume of box: " << getVolume(*box) << std::endl;
-
-    // meshes.push_back(std::move(mesh));
-    // meshes.push_back(std::move(box));
-
-    // std::cout << "\n\n\nBEGINNING TETRAHEDRALIZATION..." << std::endl;
-    // auto tetmesh = makeTetMesh(meshes, "pq1.4zYAQ");
-
-    // writeVTK("output.vtk", *tetmesh);
-
-    // std::cout << "General TetMesh statistics: " << std::endl;
-    // std::cout << "# Vertices: " << tetmesh->size<1>() << std::endl;
-    // std::cout << "# Edges: " << tetmesh->size<2>() << std::endl;
-    // std::cout << "# Faces: " << tetmesh->size<3>() << std::endl;
-    // std::cout << "# Cells: " << tetmesh->size<4>() << std::endl;
-
-    // int cnt = 0;
-    // int cnt2 = 0;
-    // for (auto face : tetmesh->get_level<3>()){
-    //     if (face.marker == 23)
-    //         cnt++;
-    //     else if (face.marker == 50)
-    //         cnt2++;
-    // }
-    // std::cout << "There are " << cnt << " faces with marker 23." << std::endl;
-    // std::cout << "There are " << cnt2 << " faces with marker 50." << std::endl;
+    int cnt = 0;
+    int cnt2 = 0;
+    for (auto face : tetmesh->get_level<3>()){
+        if (face.marker == 23)
+            cnt++;
+        else if (face.marker == 50)
+            cnt2++;
+    }
+    std::cout << "There are " << cnt << " faces with marker 23." << std::endl;
+    std::cout << "There are " << cnt2 << " faces with marker 50." << std::endl;
 
 
-    // SurfaceMesh protein, boxE, jnk;
+    writeVTK("output.vtk", *tetmesh);
+    writeDolfin("output.xml", *tetmesh);
 
-    // for(auto face : tetmesh->get_level_id<3>()){
-    //     auto fdata = *face;
-    //     if (fdata.marker == 23){
-    //         auto name = tetmesh->get_name(face);
-    //         protein.insert(name);
-    //         auto vertices = tetmesh->down(std::move(tetmesh->down(face)));
 
-    //         for (auto vertex : vertices){
-    //             auto &data  = *(protein.get_simplex_up(tetmesh->get_name(vertex)));
-    //             data = *vertex;
-    //         }
+    SurfaceMesh protein, boxE;
 
-    //     } else if (fdata.marker == 50){
-    //         auto name = tetmesh->get_name(face);
-    //         boxE.insert(name);
-    //         auto vertices = tetmesh->down(std::move(tetmesh->down(face)));
+    for(auto face : tetmesh->get_level_id<3>()){
+        auto fdata = *face;
+        if (fdata.marker == 23){
+            auto name = tetmesh->get_name(face);
+            protein.insert(name);
+            auto vertices = tetmesh->down(std::move(tetmesh->down(face)));
 
-    //         for (auto vertex : vertices){
-    //             auto &data = *(boxE.get_simplex_up(tetmesh->get_name(vertex)));
-    //             data = *vertex;
-    //         }
-    //     } else{
-    //         // std::cout << fdata.marker << std::endl;
-    //         // auto tets = tetmesh->up(face);
-    //         // for (auto tet : tets){
-    //         //     std::cout << (*tet).marker << std::endl;
-    //         // }
-    //     }
-    // }
+            for (auto vertex : vertices){
+                auto &data  = *(protein.get_simplex_up(tetmesh->get_name(vertex)));
+                data = *vertex;
+            }
 
-    // compute_orientation(protein);
-    // compute_orientation(boxE);
+        } else if (fdata.marker == 50){
+            auto name = tetmesh->get_name(face);
+            boxE.insert(name);
+            auto vertices = tetmesh->down(std::move(tetmesh->down(face)));
 
-    // writeOFF("proteinExtracted.off", protein);
-    // writeOFF("boxExtracted.off", boxE);
-    // writeOFF("jnk.off", jnk);
+            for (auto vertex : vertices){
+                auto &data = *(boxE.get_simplex_up(tetmesh->get_name(vertex)));
+                data = *vertex;
+            }
+        } else{
+            // std::cout << fdata.marker << std::endl;
+            // auto tets = tetmesh->up(face);
+            // for (auto tet : tets){
+            //     std::cout << (*tet).marker << std::endl;
+            // }
+        }
+    }
 
-    // writeOFF("test.off", *mesh);
-    // auto oldmesh = SurfaceMeshOld::readOFF(argv[1]);
-    // //oldmesh->coarse(0.016,1,0,-1);
-    // oldmesh->coarse(2.5,0,10,-1);
-    //
+    compute_orientation(protein);
+    compute_orientation(boxE);
+
+    writeOFF("proteinExtracted.off", protein);
+    writeOFF("boxExtracted.off", boxE);
+
     std::cout << "EOF" << std::endl;
 }

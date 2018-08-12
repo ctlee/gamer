@@ -40,7 +40,7 @@
 #include "TetMesh.h"
 
 std::unique_ptr<TetMesh> makeTetMesh(
-        const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes, 
+        const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes,
         std::string tetgen_params){
 
     // Create new tetmesh object
@@ -185,30 +185,37 @@ std::unique_ptr<TetMesh> makeTetMesh(
             // std::cout << "Region marker: " << metadata.marker << std::endl;
 
             if(metadata.useVolumeConstraint){
-                in.regionlist[idx+4]    = metadata.volumeConstraint; 
+                in.regionlist[idx+4]    = metadata.volumeConstraint;
             }
             else{
-                in.regionlist[idx+4]    = -1; 
+                in.regionlist[idx+4]    = -1;
             }
-            ++nRegions; 
+            ++nRegions;
         }
     } // endif for surfmesh :surfmeshes
 
-    // Add oundary marker on each node
+    // Add boundary marker on each node
     // TODO: Why? aren't the markers set on the generated mesh? (from old notes)
     in.pointmarkerlist = new int[in.numberofpoints];
     for (int i = 0; i < in.numberofpoints; ++i){
         in.pointmarkerlist[i] = 1;
     }
-   
+
     // Casting away const is an evil thing to do, however, tetgen has not yet
-    // conformed... 
+    // conformed...
     auto plc = const_cast<char*>("plc");
     in.save_nodes(plc);
     in.save_poly(plc);
 
     // Call TetGen
-    tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
+    try {
+        tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr <<  "Something bad happened with TetGen!" << std::endl;
+        exit(1);
+    }
 
     auto result = const_cast<char*>("result");
     out.save_nodes(result);
@@ -231,7 +238,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
 
     // Check for higher order cells
     const bool higher_order = tetio.numberofcorners == 10;
-   
+
     metadata.higher_order = higher_order;
 
     std::set<int> vertices;
@@ -245,7 +252,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
         // Set marker
         int marker = 0;
 
-        if(tetio.numberoftetrahedronattributes > 0) 
+        if(tetio.numberoftetrahedronattributes > 0)
             marker = (int) tetio.tetrahedronattributelist[i * tetio.numberoftetrahedronattributes];
 
         // Get vertex id's
@@ -255,7 +262,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
 
         // TODO: (0) Do we need to set the orientation?
         // std::cout << casc::to_string(std::array<int,4>({ptr[0], ptr[1], ptr[2], ptr[3]})) << std::endl;
-        mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]}, 
+        mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]},
                 tetmesh::Cell(casc::Orientable{0}, tetmesh::CellProperties{marker, 0, 0}));
     }
 
@@ -274,6 +281,10 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
             // std::cout << casc::to_string(std::array<double,3>({ptr[0],ptr[1],ptr[2]})) << std::endl;
             vdata = Vertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
         }
+    }
+
+    for (auto &fdata : mesh->get_level<3>()){
+        fdata.marker = 0;   // Initialize markers
     }
 
     // Go over faces and copy over marker information
@@ -299,7 +310,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
 
             if (higher_order){
                 double *pos = &tetio.pointlist[tetio.o2edgelist[i]*3];
-                edata.position = Vector({pos[0], pos[1], pos[2]});                
+                edata.position = Vector({pos[0], pos[1], pos[2]});
             }
         }
     }
@@ -311,9 +322,9 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
     std::ofstream fout(filename);
     if(!fout.is_open())
     {
-        std::cerr   << "File '" << filename 
+        std::cerr   << "File '" << filename
                     << "' could not be writen to." << std::endl;
-        exit(1); 
+        exit(1);
     }
 
     fout << "# vtk DataFile Version 2.0\n"
@@ -330,7 +341,7 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
         sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto vertex = *vertexID;
         fout    << std::setprecision(17) << vertex[0] << " "
-                << vertex[1] << " " 
+                << vertex[1] << " "
                 << vertex[2] << "\n";
     }
     fout << "\n";
@@ -343,22 +354,22 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
         auto orientation = (*cellID).orientation;
 
         if (orientation == 1){
-            fout << "4 " << std::setw(4) << sigma[w[3]] << " " 
-                         << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[2]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[3]] << " "
+                         << std::setw(4) << sigma[w[1]] << " "
+                         << std::setw(4) << sigma[w[2]] << " "
                          << std::setw(4) << sigma[w[0]] << "\n";
         }
         else if(orientation == -1){
-            fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
-                         << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[2]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[0]] << " "
+                         << std::setw(4) << sigma[w[1]] << " "
+                         << std::setw(4) << sigma[w[2]] << " "
                          << std::setw(4) << sigma[w[3]] << "\n";
         }
         else{
             orientationError = true;
-            fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
-                         << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[2]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[0]] << " "
+                         << std::setw(4) << sigma[w[1]] << " "
+                         << std::setw(4) << sigma[w[2]] << " "
                          << std::setw(4) << sigma[w[3]] << "\n";
         }
     }
@@ -381,7 +392,7 @@ void writeVTK(const std::string& filename, const TetMesh &mesh){
 
     if(orientationError){
         std::cerr << "WARNING(writeVTK): The orientation of one or more faces "
-                  << "is not defined. Did you run compute_orientation()?" 
+                  << "is not defined. Did you run compute_orientation()?"
                   << std::endl;
     }
     fout.close();
@@ -391,27 +402,27 @@ void writeOFF(const std::string& filename, const TetMesh &mesh){
     std::ofstream fout(filename);
     if(!fout.is_open())
     {
-        std::cerr   << "File '" << filename 
+        std::cerr   << "File '" << filename
                     << "' could not be writen to." << std::endl;
-        exit(1); 
+        exit(1);
     }
 
     fout << "OFF\n";
-    fout << mesh.size<1>() << " " 
-         << mesh.size<4>() << " " 
+    fout << mesh.size<1>() << " "
+         << mesh.size<4>() << " "
          << mesh.size<2>() << "\n";
 
     std::map<typename TetMesh::KeyType,typename TetMesh::KeyType> sigma;
     typename TetMesh::KeyType cnt = 0;
 
-    fout.precision(10); 
+    fout.precision(10);
     for(const auto vertexID : mesh.get_level_id<1>()){
         sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto vertex = *vertexID;
 
         fout    << vertex[0] << " "
-                << vertex[1] << " " 
-                << vertex[2] << " " 
+                << vertex[1] << " "
+                << vertex[2] << " "
                 << "\n";
     }
 
@@ -422,31 +433,125 @@ void writeOFF(const std::string& filename, const TetMesh &mesh){
         auto orientation = (*cellID).orientation;
 
         if (orientation == 1){
-            fout << "4 " << std::setw(4) << sigma[w[3]] << " " 
-                         << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[2]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[3]] << " "
+                         << std::setw(4) << sigma[w[1]] << " "
+                         << std::setw(4) << sigma[w[2]] << " "
                          << std::setw(4) << sigma[w[0]] << "\n";
         }
         else if(orientation == -1){
-            fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
-                         << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[2]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[0]] << " "
+                         << std::setw(4) << sigma[w[1]] << " "
+                         << std::setw(4) << sigma[w[2]] << " "
                          << std::setw(4) << sigma[w[3]] << "\n";
         }
         else{
             orientationError = true;
-            fout << "4 " << std::setw(4) << sigma[w[0]] << " " 
-                         << std::setw(4) << sigma[w[1]] << " " 
-                         << std::setw(4) << sigma[w[2]] << " " 
+            fout << "4 " << std::setw(4) << sigma[w[0]] << " "
+                         << std::setw(4) << sigma[w[1]] << " "
+                         << std::setw(4) << sigma[w[2]] << " "
                          << std::setw(4) << sigma[w[3]] << "\n";
         }
     }
 
     if(orientationError){
         std::cerr << "WARNING(writeOFF): The orientation of one or more cells "
-                  << "is not defined. Did you run compute_orientation()?" 
+                  << "is not defined. Did you run compute_orientation()?"
                   << std::endl;
     }
     fout.close();
 }
+
+void writeDolfin(const std::string &filename, const TetMesh &mesh){
+
+    if((*mesh.get_simplex_up()).higher_order == true){
+        std::cerr   << "Dolfin output does not support higher order mesh..." << std::endl;
+        exit(1);
+    }
+
+    std::ofstream fout(filename);
+    if(!fout.is_open())
+    {
+        std::cerr   << "File '" << filename
+                    << "' could not be writen to." << std::endl;
+        exit(1);
+    }
+
+    fout    << "<?xml version=\"1.0\"?>\n"
+            << "<dolfin xmlns:dolfin=\"http://fenicsproject.org\">\n"
+            << "  <mesh celltype=\"tetrahedron\" dim=\"3\">\n"
+            << "    <vertices size=\"" << mesh.size<1>() <<  "\">\n";
+
+    std::map<typename TetMesh::KeyType,typename TetMesh::KeyType> sigma;
+    size_t cnt = 0;
+
+    // Print out Vertices
+    // std::cout << "Printing Vertices" << std::endl;
+    fout.precision(6);
+    for(const auto vertexID : mesh.get_level_id<1>()){
+        size_t idx = cnt;
+        sigma[mesh.get_name(vertexID)[0]] = cnt++;
+        auto vertex = *vertexID;
+
+        fout    << "      <vertex index=\"" << idx << "\" "
+                << "x=\"" << vertex[0] << "\" "
+                << "y=\"" << vertex[1] << "\" "
+                << "z=\"" << vertex[2] << "\" />\n";
+    }
+    fout    << "    </vertices>\n";
+
+
+    // Print out Tetrahedra
+    // std::cout << "Printing Tetrahedra" << std::endl;
+    cnt = 0;
+    std::vector<std::array<std::size_t, 3> > faceMarkerList;
+    std::vector<std::array<std::size_t, 2> > cellMarkerList;
+
+    fout    << "    <cells size=\"" << mesh.size<4>() << "\">\n";
+    for (const auto tetID :  mesh.get_level_id<4>()){
+        std::size_t idx = cnt++;
+        auto tet = mesh.get_name(tetID);
+        fout    << "      <tetrahedron index=\"" << idx << "\" "
+                << "v0=\"" << sigma[tet[0]] << "\" "
+                << "v1=\"" << sigma[tet[1]] << "\" "
+                << "v2=\"" << sigma[tet[2]] << "\" "
+                << "v3=\"" << sigma[tet[3]] << "\" />\n";
+
+        auto faceIDs = mesh.down(tetID);
+        auto faceIDIT = faceIDs.cbegin();
+        for (std::size_t i = 0; i < 4; ++i){
+            std::size_t mark = faceIDIT->data().marker;
+            // std::cout << mark << std::endl;
+            std::cout << casc::to_string(mesh.get_name(*faceIDIT)) << " " << i << std::endl;
+            ++faceIDIT;
+            if(mark != 0) faceMarkerList.push_back({idx, i, mark});
+        }
+        cellMarkerList.push_back({idx, static_cast<std::size_t>((*tetID).marker)});
+    }
+    fout << "    </cells>\n";
+    fout << "    <domains>\n";
+
+    fout << "      <mesh_value_collection name=\"m\" type=\"uint\" dim=\"2\" size=\"" << faceMarkerList.size() << "\">\n";
+    for (const auto marker : faceMarkerList){
+        fout    << "        <value cell_index=\"" << marker[0] << "\" "
+                << " local_entity=\"" << marker[1] << "\" "
+                << " value=\"" << marker[2] << "\" />\n";
+    }
+
+    fout << "      </mesh_value_collection>\n";
+    fout << "      <mesh_value_collection name=\"m\" type=\"uint\" dim=\"3\" size=\"" << mesh.size<4>() << "\">\n";
+
+    for (const auto marker : cellMarkerList){
+        fout    << "        <value cell_index=\"" << marker[0] << "\" "
+                << " local_entity=\"0\" "
+                << " value=\"" << marker[1] << "\" />\n";
+    }
+    fout << "      </mesh_value_collection>\n";
+    fout << "    </domains>\n";
+    fout << "  </mesh>\n";
+    fout << "</dolfin>\n";
+
+    fout.close();
+}
+
+
 
