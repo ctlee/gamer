@@ -27,6 +27,8 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Print all build flags
 # message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
 # message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
