@@ -96,7 +96,7 @@ if(BLENDER_EXECUTABLE)
     elseif(WIN32)
         set(BLENDER_ADDON_PATH "%USERPROFILE%\\AppData\\Roaming\\Blender Foundation\\Blender\\${BLENDER_VERSION}\\")
     elseif(UNIX)
-        set(BLENDER_ADDON_PATH "/usr/share/blender/${BLENDER_VERSION}/")
+        set(BLENDER_ADDON_PATH "$ENV{HOME}/.config/blender/${BLENDER_VERSION}/scripts")
     endif()
 endif()
 
