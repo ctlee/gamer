@@ -62,6 +62,7 @@ public:
   }
 };
 
+
 struct Face {
   Face() {}
   Face(int orient, int marker, bool selected) {}
@@ -92,7 +93,7 @@ public:
   }
 };
 
-
+%rename(printMesh) print(const SurfaceMesh &mesh);
 %include "SurfaceMesh.h"
 %include "IteratorWrapper.i"
 
@@ -138,6 +139,10 @@ public:
 
     Face getFace(std::array<int, 3> &s){
       return *($self->get_simplex_up<3>(s));
+    }
+
+    Global& getRoot(){
+      return *($self->get_simplex_up());
     }
 
     int sizeVertices(){
@@ -219,6 +224,35 @@ SurfaceMesh* ReadPDB_molsurf(const std::string & filename){
 SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float isovalue){
   return readPDB_gauss(filename, blobbyness, isovalue).release();
 }
+
+SurfaceMesh* meshSphere(int order){
+  return sphere(order).release();
+}
+
+SurfaceMesh* meshCube(int order){
+  return cube(order).release();
+}
+
+Vector getCenter(SurfaceMesh &mesh){
+  Vector center;
+  double radius;
+  std::tie(center, radius) = getCenterRadius(mesh);
+  return center;
+}
+
+double getRadius(SurfaceMesh &mesh){
+  Vector center;
+  double radius;
+  std::tie(center, radius) = getCenterRadius(mesh);
+  return radius;
+}
+
+void correctNormals(SurfaceMesh &mesh){
+  if(getVolume(mesh) < 0){
+    for(auto &face : mesh.get_level<3>())
+      face.orientation *= -1;
+  }
+}
 %}
 
 %pythoncode %{
@@ -243,20 +277,6 @@ SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float 
     for i in range(numiter):
       coarse(mesh, rate, 0, 10)
 %}
-
-void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
-void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
-
-bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
-void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
-void normalSmooth(SurfaceMesh &mesh);
-void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
-double getVolume(const SurfaceMesh &mesh);
-double getArea(const SurfaceMesh &mesh);
-
-%rename(printMesh) print(const SurfaceMesh &mesh);
-void print(const SurfaceMesh &mesh);
 
 void init_orientation(SurfaceMesh& F);
 void check_orientation(SurfaceMesh& F);

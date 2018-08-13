@@ -40,7 +40,7 @@
 #include "Vertex.h"
 #include "SurfaceMesh.h"
 
-
+#ifndef SWIG
 namespace tetmesh
 {
 /**
@@ -112,23 +112,31 @@ struct complex_traits
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable, casc::Orientable>;
 };
-}
+} // END namespace tetmesh
+#endif //SWIG
+
 
 using TetMesh = casc::simplicial_complex<tetmesh::complex_traits>;
 
+
+#ifndef SWIG
 /// Forward class declaration
 class tetgenio;
 
 std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
 
 std::unique_ptr<TetMesh> makeTetMesh(
-        const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes,
+        const std::vector<SurfaceMesh*> &surfmeshes,
         std::string tetgen_params);
+#endif //SWIG
+
 
 void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
 
-// void writeMCSF(const std::string &filename, const TetMesh &mesh);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
+
+
+// void writeMCSF(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack
 //void writeCARP

@@ -20,21 +20,23 @@
 
 // ***************************************************************************
 
-
-%module (package="pygamer") pygamer
-
 %{
-#include "gamer.h"
+#include <iostream>
+#include "TetMesh.h"
+#include "SurfaceMesh.h"
 %}
 
-%include <std_string.i>
-%include <std_vector.i>
 
-%include "typemaps.i"
-%include "exceptions.i"
-%include "std_unique_ptr.i"
+// Create the typemap for unique_ptr<SurfaceMesh>
+wrap_unique_ptr(TMUniquePtr, TetMesh);
 
-%include "Vertex.i"
-%include "SurfaceMesh.i"
-%include "TetMesh.i"
-%include "index_map.i"
+%template(VectorSM) std::vector<SurfaceMesh*>;
+
+%include "TetMesh.h"
+
+
+%inline %{
+TetMesh* MakeTetMesh(const std::vector<SurfaceMesh*> &surfmeshes, std::string tetgen_params){
+  return makeTetMesh(surfmeshes, tetgen_params).release();
+}
+%}

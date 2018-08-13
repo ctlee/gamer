@@ -40,7 +40,7 @@
 #include "TetMesh.h"
 
 std::unique_ptr<TetMesh> makeTetMesh(
-        const std::vector<std::unique_ptr<SurfaceMesh>> &surfmeshes,
+        const std::vector<SurfaceMesh*> &surfmeshes,
         std::string tetgen_params){
 
     // Create new tetmesh object
@@ -213,7 +213,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
     }
     catch (const std::exception& e)
     {
-        std::cerr <<  "Something bad happened with TetGen!" << std::endl;
+        std::cerr << "Caught TetGen Error: " << e.what() << std::endl;
         exit(1);
     }
 
@@ -509,20 +509,20 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh){
     fout    << "    <cells size=\"" << mesh.size<4>() << "\">\n";
     for (const auto tetID :  mesh.get_level_id<4>()){
         std::size_t idx = cnt++;
-        auto tet = mesh.get_name(tetID);
+        auto tetName = mesh.get_name(tetID);
         fout    << "      <tetrahedron index=\"" << idx << "\" "
-                << "v0=\"" << sigma[tet[0]] << "\" "
-                << "v1=\"" << sigma[tet[1]] << "\" "
-                << "v2=\"" << sigma[tet[2]] << "\" "
-                << "v3=\"" << sigma[tet[3]] << "\" />\n";
+                << "v0=\"" << sigma[tetName[0]] << "\" "
+                << "v1=\"" << sigma[tetName[1]] << "\" "
+                << "v2=\"" << sigma[tetName[2]] << "\" "
+                << "v3=\"" << sigma[tetName[3]] << "\" />\n";
+        // std::cout << casc::to_string(tetName) << std::endl;
 
-        auto faceIDs = mesh.down(tetID);
-        auto faceIDIT = faceIDs.cbegin();
+        // First face = vertices 2,3,4
+        // Second face = vertices 1,3,4 etc...
         for (std::size_t i = 0; i < 4; ++i){
-            std::size_t mark = faceIDIT->data().marker;
-            // std::cout << mark << std::endl;
-            std::cout << casc::to_string(mesh.get_name(*faceIDIT)) << " " << i << std::endl;
-            ++faceIDIT;
+            auto faceID = mesh.get_simplex_down(tetID, tetName[i]);
+            std::size_t mark = (*faceID).marker;
+            // std::cout << casc::to_string(mesh.get_name(faceID)) << " " << i << std::endl;
             if(mark != 0) faceMarkerList.push_back({idx, i, mark});
         }
         cellMarkerList.push_back({idx, static_cast<std::size_t>((*tetID).marker)});

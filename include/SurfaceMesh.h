@@ -96,6 +96,7 @@ struct Face : casc::Orientable, FaceProperties
     }
 
 };
+#endif //SWIG
 
 /**
  * @brief      Type for containing root metadata
@@ -120,6 +121,7 @@ struct Global
     bool  ishole;
 };
 
+#ifndef SWIG
 /**
  * @brief      A helper struct containing the traits/types in the simplicial
  *             complex
@@ -138,7 +140,6 @@ struct complex_traits
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
 
-#ifndef SWIG
 /**
  * @brief      Reads in a GeomView OFF file.
  *
@@ -156,6 +157,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
  */
 void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
 
+
 // Wavefront OBJ
 std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
@@ -168,6 +170,8 @@ double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 double getVolume(const SurfaceMesh &mesh);
 int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
+
+#ifndef SWIG
 /**
  * @brief      Terminal case
  *
@@ -341,6 +345,8 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  * @return     Returns a Vector normal to the face.
  */
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+#endif //SWIG
+
 
 // These exist for the a potential python interface
 void translate(SurfaceMesh &mesh, Vector v);
@@ -348,13 +354,16 @@ void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
 void scale(SurfaceMesh &mesh, Vector v);
 void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
 void scale(SurfaceMesh &mesh, double s);
-std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
 void centeralize(SurfaceMesh &mesh);
+
+#ifndef SWIG
+std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
 
 tensor<double,3,2> computeLocalStructureTensor(
         const SurfaceMesh &mesh,
         const SurfaceMesh::SimplexID<1> vertexID,
         const int rings);
+#endif //SWIG
 
 /**
  * @brief      Smooth the surface mesh
@@ -372,6 +381,7 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
+#ifndef SWIG
 template <typename InsertIter>
 void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &boundary,
@@ -630,6 +640,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  *             otherwise.
  */
 bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
+#endif //SWIG
 
 void normalSmooth(SurfaceMesh &mesh);
 void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
@@ -643,5 +654,4 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
 
 std::unique_ptr<SurfaceMesh> sphere(int order);
 std::unique_ptr<SurfaceMesh> cube(int order);
-#endif //SWIG
 

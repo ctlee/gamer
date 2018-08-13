@@ -86,13 +86,13 @@ int  main(int argc, char *argv[])
     std::cout << "# Edges: " << box->size<2>() << std::endl;
     std::cout << "# Faces: " << box->size<3>() << std::endl;
 
-    std::vector<std::unique_ptr<SurfaceMesh>> meshes;
+    std::vector<SurfaceMesh*> meshes;
 
     std::cout << "Volume of mesh: " << getVolume(*mesh) << std::endl;
     std::cout << "Volume of box: " << getVolume(*box) << std::endl;
 
-    meshes.push_back(std::move(mesh));
-    meshes.push_back(std::move(box));
+    meshes.push_back(std::move(mesh.get()));
+    meshes.push_back(std::move(box.get()));
 
     std::cout << "\n\n\nBEGINNING TETRAHEDRALIZATION..." << std::endl;
     auto tetmesh = makeTetMesh(meshes, "pq1.4zYAQ");
