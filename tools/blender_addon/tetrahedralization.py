@@ -184,9 +184,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
   ho_mesh = BoolProperty ( name="Higher order mesh generation", default=False, description="Higher order mesh generation" )
 
   dolfin = BoolProperty ( name="DOLFIN", default=False, description="Generate DOLFIN output", update=check_formats_callback )
-  # diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
-  # carp = BoolProperty ( name="Carp", default=False, description="Generate Carp output", update=check_formats_callback )
-  # fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
+  diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
+  carp = BoolProperty ( name="Carp", default=False, description="Generate Carp output", update=check_formats_callback )
+  fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
 
   status = StringProperty ( name="status", default="" )
 
@@ -345,8 +345,10 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
           #    mesh_formats.append("mcsf")
 
           # Get gamer mesh
-          gmeshes = []
-          boundary_markers = []
+          # gmeshes = []
+          # boundary_markers = []
+
+          gmeshes = g.VectorSM();
 
           for (obj_name,tet_domain) in [ (d.object_name,d) for d in self.domain_list ]:
               print ( "obj_name = " + obj_name + ", tet_domain = " + str(tet_domain) )
@@ -356,62 +358,61 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
           for obj_name in current_domain_names:
               obj = bpy.data.objects[obj_name]
               if obj.gamer.include:
-                  gmesh, boundaries = gamer_addon.gamer_gui.blender_to_gamer(obj=obj, create_new_mesh=False, check_for_vertex_selection=True)
+                  gmesh = gamer_addon.gamer_gui.blenderToGamer(obj=obj, map_boundaries=True)
                   if gmesh == None:
-                      print ( "blender_to_gamer returned a gmesh of None" )
+                      print ( "blenderToGamer returned a gmesh of None" )
                   else:
-                      # Collect boundary information
-                      for boundary_name, boundary in zip(boundaries.keys(), boundaries.values()):
-                          boundary_markers.append((boundary["marker"], boundary_name))
+                      # # Collect boundary information
+                      # for boundary_name, boundary in zip(boundaries.keys(), boundaries.values()):
+                      #     boundary_markers.append((boundary["marker"], boundary_name))
 
-                      print ("\nMesh %s: num verts: %d numfaces: %d" % (obj_name, gmesh.num_vertices, gmesh.num_faces))
+                      print ("\nMesh %s: num verts: %d numfaces: %d" % (obj_name, gmesh.sizeVertices(), gmesh.sizeFaces()))
 
                       # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
-                      gmesh.as_hole = tet_domain.is_hole
-                      gmesh.marker = tet_domain.marker
-                      gmesh.use_volume_constraint = tet_domain.constrain_vol
-                      gmesh.volume_constraint = tet_domain.vol_constraint
+                      globalInfo = gmesh.getRoot()
+
+                      globalInfo.ishole = tet_domain.is_hole
+                      globalInfo.marker = tet_domain.marker
+                      globalInfo.useVolumeConstraint = tet_domain.constrain_vol
+                      globalInfo.volumeConstraint = tet_domain.vol_constraint
 
                       # Write surface mesh to file for debug
-                      gmesh.write_off("surfmesh_%s.off" % obj_name)
+                      g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
 
                       # Add the mesh
-                      gmeshes.append(gmesh)
-
+                      gmeshes.push_back(gmesh)
 
           # Tetrahedralize mesh
           if len(gmeshes) > 0:
 
               quality_str = "q%.1fqq%.1faA"%(self.max_aspect_ratio,self.min_dihedral)
-
               quality_str += "o2" if self.ho_mesh else ""
 
               print("TetGen quality string: " + quality_str)
 
               # Do the tetrahedralization
-
-              gem_mesh = gamer.GemMesh(gmeshes, quality_str)
+              tetmesh = g.MakeTetMesh(gmeshes, quality_str)
 
               # Store mesh to files
-
               tetmesh_formats  = ["dolfin", "mcsf", "diffpack",  "carp"]
               tetmesh_suffices = [  ".xml",   ".m",    ".grid", ".carp"]
 
               for fmt in mesh_formats:
-
                   try:
-
                       suffix = tetmesh_suffices[tetmesh_formats.index(fmt)]
                       print ( "Writing to " + fmt + " file: " + filename + suffix )
 
-                      # If the format is diffpack or carp we need to add boundary names
-                      if fmt in ["diffpack", "carp"]:
-                          boundary_names = [b[1] for b in sorted(boundary_markers)]
-                          print ( "Boundary names = " + str(boundary_names) )
-                          ### This doesn't work for some reason ... RuntimeError: Expected a list of strings as second argument.
-                          getattr(gem_mesh, "write_%s"%fmt)(filename+suffix, boundary_names)
-                      else:
-                          getattr(gem_mesh, "write_%s"%fmt)(filename+suffix)
+                      if fmt == 'dolfin':
+                          g.writeDolfin(filename+suffix, tetmesh)
+
+                      # # If the format is diffpack or carp we need to add boundary names
+                      # if fmt in ["diffpack", "carp"]:
+                      #     boundary_names = [b[1] for b in sorted(boundary_markers)]
+                      #     print ( "Boundary names = " + str(boundary_names) )
+                      #     ### This doesn't work for some reason ... RuntimeError: Expected a list of strings as second argument.
+                      #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix, boundary_names)
+                      # else:
+                      #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix)
 
                   except Exception as ex:
 

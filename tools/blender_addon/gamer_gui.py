@@ -489,7 +489,7 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
                 # self.drawError(errormsg="expected mesh with only triangles in")
                 print("Error: encountered a non-triangular face. Expected a triangulated mesh.")
                 # self.waitingCursor(0)
-                restoreInteractionMode(obj, editmode)
+                # restoreInteractionMode(obj, editmode)
                 return None
 
             # Get the orientation from Blender

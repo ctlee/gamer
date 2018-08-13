@@ -57,5 +57,5 @@ SWIG_LINK_LIBRARIES(pygamer gamerstatic)
 install(TARGETS _pygamer DESTINATION lib/site-packages)
 install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 
-install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)
-install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/modules/gamer)
+install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/addons/modules/gamer)
+install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/addons/modules/gamer)
