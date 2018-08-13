@@ -1,6 +1,4 @@
-
-# Copied from RegexUtil from Eigen package
-#########################
+# REGEX UTILS
 function(escape_string_as_regex _str_out _str_in)
   STRING(REGEX REPLACE "\\\\" "\\\\\\\\" FILETEST2 "${_str_in}")
   STRING(REGEX REPLACE "([.$+*?|-])" "\\\\\\1" FILETEST2 "${FILETEST2}")
@@ -20,7 +18,7 @@ function(test_escape_string_as_regex)
 	message("Error in the escape_string_for_regex function : \n   ${test1} was escaped as ${test2}, should be ${testRef}")
   endif(NOT test2 STREQUAL testRef)
 endfunction()
-########################
+# COPIED FROM REGEX UTILS
 
 test_escape_string_as_regex()
 
@@ -36,7 +34,7 @@ endforeach(f ${Eigen_directory_files})
 
 install(FILES
   ${Eigen_directory_files_to_install}
-  DESTINATION include/Eigen COMPONENT Devel
+  DESTINATION ${INCLUDE_INSTALL_DIR}/Eigen COMPONENT Devel
   )
 
-install(DIRECTORY src DESTINATION include/Eigen COMPONENT Devel FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY src DESTINATION ${INCLUDE_INSTALL_DIR}/Eigen COMPONENT Devel FILES_MATCHING PATTERN "*.h")
