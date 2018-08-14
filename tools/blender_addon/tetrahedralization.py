@@ -166,7 +166,7 @@ def check_formats_callback(self, context):
 
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
-  tet_path = StringProperty ( name="tet_path", default="", description="Path and file prefix for tetrahedralization output files" )
+  tet_path = StringProperty ( name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files" )
 
   generic_float = FloatProperty( name="Generic Float", default=123.456, min=0.0, max=1000, precision=4, description="A Generic Float Value")
   generic_int = IntProperty( name="Generic Int", default=5, min=1, max=10, description="A Generic Int Value")
@@ -185,13 +185,13 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
   dolfin = BoolProperty ( name="DOLFIN", default=False, description="Generate DOLFIN output", update=check_formats_callback )
   diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
-  carp = BoolProperty ( name="Carp", default=False, description="Generate Carp output", update=check_formats_callback )
+  paraview = BoolProperty ( name="Paraview", default=False, description="Generate Paraview output", update=check_formats_callback )
   fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
 
   status = StringProperty ( name="status", default="" )
 
   def check_formats_callback(self, context):
-      if self.dolfin or self.diffpack or self.carp or self.fetk:
+      if self.dolfin or self.diffpack or self.paraview or self.fetk:
           self.status = ""
 
   def draw_layout ( self, context, layout ):
@@ -251,18 +251,18 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
               row = sbox.row()
               col = row.column()
               col.prop ( self, "dolfin" )
-              # col = row.column()
-              # col.prop ( self, "diffpack" )
+              col = row.column()
+              col.prop ( self, "paraview" )
 
               # row = sbox.row()
               # col = row.column()
-              # col.prop ( self, "carp" )
+              # col.prop ( self, "diffpack" )
               # col = row.column()
               # col.prop ( self, "fetk" )
 
           row = layout.row()
           icon = 'PROP_OFF'
-          if self.dolfin or self.diffpack or self.carp or self.fetk:
+          if self.dolfin or self.diffpack or self.paraview or self.fetk:
               icon = 'COLOR_RED'
           row.operator ( "gamer.tetrahedralize", text="Tetrahedralize", icon=icon )
           if len(self.status) > 0:
@@ -324,7 +324,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
       print ( "######################## Begin Tetrahedralize ########################" )
 
       filename = self.tet_path
-      if not (self.dolfin or self.diffpack or self.carp or self.fetk):
+      if not (self.dolfin or self.diffpack or self.paraview or self.fetk):
           self.status = "Please select an output format in Tetrahedralization Settings"
           print ( self.status )
       else:
@@ -335,8 +335,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
               mesh_formats.append("dolfin")
           if self.diffpack:
               mesh_formats.append("diffpack")
-          if self.carp:
-              mesh_formats.append("carp")
+          if self.paraview:
+              mesh_formats.append("paraview")
           if self.fetk:
               mesh_formats.append("mcsf")
 
@@ -371,6 +371,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                       # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
                       globalInfo = gmesh.getRoot()
 
+                      globalInfo.closed = True
                       globalInfo.ishole = tet_domain.is_hole
                       globalInfo.marker = tet_domain.marker
                       globalInfo.useVolumeConstraint = tet_domain.constrain_vol
@@ -394,16 +395,17 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
               tetmesh = g.MakeTetMesh(gmeshes, quality_str)
 
               # Store mesh to files
-              tetmesh_formats  = ["dolfin", "mcsf", "diffpack",  "carp"]
-              tetmesh_suffices = [  ".xml",   ".m",    ".grid", ".carp"]
+              tetmesh_formats  = ["dolfin", "mcsf", "diffpack", "paraview"]
+              tetmesh_suffices = [  ".xml",   ".m",    ".grid", ".vtk"]
 
               for fmt in mesh_formats:
                   try:
                       suffix = tetmesh_suffices[tetmesh_formats.index(fmt)]
                       print ( "Writing to " + fmt + " file: " + filename + suffix )
-
                       if fmt == 'dolfin':
                           g.writeDolfin(filename+suffix, tetmesh)
+                      if fmt == 'paraview':
+                          g.writeVTK(filename+suffix, tetmesh)
 
                       # # If the format is diffpack or carp we need to add boundary names
                       # if fmt in ["diffpack", "carp"]:

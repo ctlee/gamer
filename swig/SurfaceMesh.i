@@ -265,7 +265,7 @@ void correctNormals(SurfaceMesh &mesh){
 
   def coarse_flat(mesh, rate=0.016):
     "Coarse flat areas"
-    coarse(mesh, rate, 1, 0)
+    coarse(mesh, rate, 0.5, 0)
 
 
   def coarse_dense(mesh, rate=1.6, numiter=1):
