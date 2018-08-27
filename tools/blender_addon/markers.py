@@ -235,6 +235,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         context.active_object['boundaries'][str(self.boundary_id)] = self.marker
 
     def assign_boundary_faces(self, context):
+        # TODO: Remove context from this function...
         obj = context.active_object
         mesh = obj.data
 
@@ -262,13 +263,22 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
     def repaint_boundary_faces(self, context):
         obj = context.active_object
-        mesh = obj.data
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode='OBJECT')
-        self.init_boundary(context, self.name, self.boundary_id, self.marker)
+        self.init_boundary(obj, self.name, self.boundary_id, self.marker)
         self.select_boundary_faces(context)
-        self.assign_boundary_faces(context)
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        mats = bpy.data.materials
+        bnd_id = self.boundary_id
+
+        bnd_mat = [ mat for mat in mats if mat.gamer.boundary_id == bnd_id ][0]
+        act_mat_idx = obj.active_material_index
+        bnd_mat_idx = obj.material_slots.find(bnd_mat.name)
+        obj.active_material_index = bnd_mat_idx
+        bpy.ops.object.material_slot_assign()
+        obj.active_material_index = act_mat_idx
 
 
     def remove_boundary_faces(self, context):

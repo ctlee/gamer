@@ -528,7 +528,7 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
                 un_selected_vertices.append(i)
 
         faces = []
-        markers = []
+        markersList = []
         for i, fid in enumerate(gmesh.faceIDs()):
             fName = gmesh.getName(fid)
             face = fid.data()
@@ -539,7 +539,7 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
                 faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
             else:
                 faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
-            markers.append(face.marker)
+            markersList.append(face.marker)
 
         if create_new_mesh:
             # Create new object and mesh
@@ -552,21 +552,28 @@ def gamerToBlender(gmesh, create_new_mesh=False, mesh_name="gamer_improved"):
             obj.select=True
 
             ml = markers.getMarkerLayer(obj)
-            for i, marker in enumerate(markers):
+            for i, marker in enumerate(markersList):
                 ml[i].value = marker
             markers.copyBoundaries(currObj, obj)
             currObj = obj
+            print("Create_new_mesh = False")
         else:
             orig_mesh = currObj.data
             bmesh = createMesh('gamer_tmp', verts, faces)
             currObj.data = bmesh
+            ml = markers.getMarkerLayer(currObj)
+            for i, marker in enumerate(markersList):
+                ml[i].value = marker
+
             bpy.data.meshes.remove(orig_mesh)
             bmesh.name = mesh_name
+
 
         def toggle(vert, val):
             vert = val
 
         [toggle(v.select,False) for v in bmesh.vertices if v.index in un_selected_vertices]
         currObj.select = True
+
     # Repaint boundaries
     currObj.gamer.repaint_boundaries(bpy.context)
