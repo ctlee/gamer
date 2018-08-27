@@ -46,10 +46,9 @@ SWIG_ADD_LIBRARY(pygamer LANGUAGE python SOURCES pygamer.i)
 
 # Handle some problems with Anaconda dylib linking in OSX
 if(APPLE)
-    swig_link_libraries(pygamer ${swigpy_LINK_LIBRARIES})
     set_target_properties(${SWIG_MODULE_pygamer_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-else()
-    swig_link_libraries(pygamer ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
+# else()
+#     swig_link_libraries(pygamer ${PYTHON_LIBRARIES})
 endif()
 
 SWIG_LINK_LIBRARIES(pygamer gamerstatic)
@@ -57,5 +56,5 @@ SWIG_LINK_LIBRARIES(pygamer gamerstatic)
 install(TARGETS _pygamer DESTINATION lib/site-packages)
 install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 
-install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer/)
+install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
 install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
