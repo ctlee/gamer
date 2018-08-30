@@ -47,8 +47,10 @@ SWIG_ADD_LIBRARY(pygamer LANGUAGE python SOURCES pygamer.i)
 # Handle some problems with Anaconda dylib linking in OSX
 if(APPLE)
     set_target_properties(${SWIG_MODULE_pygamer_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-# else()
-#     swig_link_libraries(pygamer ${PYTHON_LIBRARIES})
+elseif(WIN32)
+    swig_link_libraries(pygamer ${PYTHON_LIBRARIES})
+else()
+    # Nothing yet
 endif()
 
 SWIG_LINK_LIBRARIES(pygamer gamerstatic)
