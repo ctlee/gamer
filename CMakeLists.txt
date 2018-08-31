@@ -33,7 +33,7 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.c
 #####################################################################
 # Project GAMer
 #####################################################################
-set(PRELEASE ON)
+set(PRERELEASE ON)
 set(PRE_VERSION alpha)
 project(GAMer VERSION 2.0.0)
 
