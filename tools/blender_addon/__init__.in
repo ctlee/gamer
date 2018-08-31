@@ -23,13 +23,13 @@
 bl_info = {
     "name": "GAMer",
     "description": "GAMer: Geometry-preserving Adaptive Mesher",
-    "author": "Christopher T. Lee, Zeyun Yu, Michael Holst, Johan Hake, and Tom Bartol",
-    "version": (0,1,0),
+    "author": "Chris Lee, John Moody, Zeyun Yu, Tom Bartol, Johan Hake, and Michael Holst",
+    "version": (@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@),
     "blender": (2, 7, 9),
     "api": 55057,
     "location": "View3D > Add > Mesh",
     "warning": "",
-    "wiki_url": "http://www.fetk.org/codes/gamer",
+    "wiki_url": "https://github.com/ctlee/gamer/wiki",
     "tracker_url": "https://github.com/ctlee/gamer/issues",
     "category": "Mesh"}
 

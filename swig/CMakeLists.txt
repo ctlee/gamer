@@ -68,11 +68,22 @@ SWIG_LINK_LIBRARIES(pygamer gamerstatic)
 install(TARGETS _pygamer DESTINATION lib/site-packages)
 install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 
+
 #####################################################################
 # Have CMake install Blender...
 #####################################################################
-if(BLENDER_PLUGIN_INSTALL)
-    find_package(Blender REQUIRED)
-    install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
-    install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
-endif()
+add_custom_target(stage_files
+    COMMAND ${CMAKE_COMMAND} -E make_directory plugin/gamer
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/swig/__init__.py plugin/gamer/
+    COMMAND ${CMAKE_COMMAND} -E copy swig/pygamer.py plugin/gamer/
+    COMMAND ${CMAKE_COMMAND} -E copy lib/_pygamer.so plugin/gamer/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ./plugin/gamer_addon
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gamer_gui.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/tetrahedralization.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/markers.py
+    COMMENT "Staging the GAMer Blender addon files"
+    VERBATIM
+)
+add_dependencies(stage_files _pygamer)

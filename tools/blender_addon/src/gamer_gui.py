@@ -32,7 +32,7 @@ from . import markers
 from . import tetrahedralization
 
 # python imports
-import os
+import os, sys
 import numpy as np
 import collections
 
@@ -372,7 +372,7 @@ class GAMerPropertyGroup(bpy.types.PropertyGroup):
 
 
     def init_properties ( self ):
-        self.gamer_version = "2.0"
+        self.gamer_version = str(sys.modules['gamer_addon'].bl_info.get('version', (-1, -1, -1)))
         self.boundary_id_counter = 0 # Start counting at 0
 
         if 'bnd_unset_mat' not in bpy.data.materials:

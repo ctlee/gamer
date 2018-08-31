@@ -33,6 +33,8 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.c
 #####################################################################
 # Project GAMer
 #####################################################################
+set(PRELEASE ON)
+set(PRE_VERSION alpha)
 project(GAMer VERSION 2.0.0)
 
 # Require c++14 and standard libraries
@@ -125,7 +127,48 @@ if(BUILD_BLENDER OR BUILD_PYTHONEXT)
     add_subdirectory(swig)
 endif()
 
-add_subdirectory(tools)
+if(BUILD_BLENDER)
+    # Generate the name of the build
+    set(ZIPNAME "gamer_addon-${GAMer_VERSION}-")
+    if(PRERELEASE)
+        string(CONCAT ZIPNAME ${ZIPNAME} "${PRE_VERSION}-")
+    endif()
+    string(CONCAT ZIPNAME ${ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        if(WIN32)
+            string(CONCAT ZIPNAME ${ZIPNAME} "64")
+        elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+            string(CONCAT ZIPNAME ${ZIPNAME} "-x86_64")
+        endif()
+    else()
+        if(WIN32)
+            string(CONCAT ZIPNAME ${ZIPNAME} "32")
+        elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+            string(CONCAT ZIPNAME ${ZIPNAME} "-i686")
+        endif()
+    endif()
+    string(CONCAT ZIPNAME ${ZIPNAME} ".zip")
+
+    configure_file(${CMAKE_SOURCE_DIR}/tools/blender_addon/__init__.in
+                ${CMAKE_BINARY_DIR}/plugin/gamer_addon/__init__.py @ONLY)
+    add_custom_target(zip_plugin
+        ALL
+        COMMAND ${CMAKE_COMMAND} -E tar "cfv"
+            ../${ZIPNAME} --format=zip
+            ./gamer ./gamer_addon
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/plugin
+        COMMENT "Zipping up addon components"
+        VERBATIM
+    )
+    add_dependencies(zip_plugin stage_files)
+
+    # Have CMake install Blender...
+    if(BLENDER_PLUGIN_INSTALL)
+        find_package(Blender REQUIRED)
+        install(DIRECTORY ${CMAKE_BINARY_DIR}/plugin/ DESTINATION ${BLENDER_ADDON_PATH}/addons PATTERN "*")
+    endif()
+endif()
 
 if(BUILD_TESTS)
     add_subdirectory(tests)
@@ -139,10 +182,10 @@ if(DOXYGEN_FOUND)
     # message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
     message(STATUS "Build the GAMer documentation using `make docs`")
     # Parse Doxyfile.in and replace CMake @macros@.
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
     add_custom_target(docs
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 else()
