@@ -52,6 +52,9 @@ option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
 option(BLENDER_PLUGIN_INSTALL "Have CMake install the plugin" OFF)
 option(BUILD_TESTS "Build the GAMer googletest tests" OFF)
 
+# Add -fPIC to all targets
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Set build type to Release if none was defined
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -61,7 +64,6 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
