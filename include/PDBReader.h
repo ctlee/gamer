@@ -1,11 +1,9 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2017
+ * Copyright (C) 2016-2018
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
- *
- * Copyright (C) 1994-- Michael Holst and Zeyun Yu
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

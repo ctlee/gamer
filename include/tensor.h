@@ -1,7 +1,7 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2017
+ * Copyright (C) 2016-2018
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
  *
@@ -21,9 +21,6 @@
  *
  * ***************************************************************************
  */
-
-
-
 
 #pragma once
 
@@ -235,9 +232,9 @@ public:
 */
 	tensor() { _data.fill(0); }
 
-	tensor(const ElemType (&s)[total_dimension]) 
-	{ 
-		std::copy(std::begin(s), std::end(s), std::begin(_data)); 
+	tensor(const ElemType (&s)[total_dimension])
+	{
+		std::copy(std::begin(s), std::end(s), std::begin(_data));
 	}
 
 	tensor(const tensor& x) : _data(x._data) {}
@@ -250,7 +247,7 @@ public:
 		return _dimensions;
 	}
 */
-	template <typename NumType, 
+	template <typename NumType,
 			typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
 			typename = std::enable_if_t<std::is_arithmetic<ElemType>::value>>
 	operator tensor<NumType, _vector_dimension, _index_dimension>() const {
@@ -265,7 +262,7 @@ public:
 		for(auto curr = t.index_begin(); curr != t.index_end(); ++curr){
 			if(first) {output << "{"; first = false;}
 			else output << "; {";
-			
+
 			bool first2 = true;
 			for(auto x : (*curr)){
 				if(first2) {output << x; first2 = false;}
@@ -318,7 +315,7 @@ public:
 	}
 
     bool operator==(const tensor& rhs) const
-    {   
+    {
         auto rhs_curr = rhs.begin();
         for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
         {
@@ -556,7 +553,7 @@ tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<Ele
 }
 
 /**
- * @brief      Elementwise sum 
+ * @brief      Elementwise sum
  *
  * @param[in]  A         { parameter_description }
  * @param[in]  B         { parameter_description }

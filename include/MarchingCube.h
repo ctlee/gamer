@@ -1,11 +1,9 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2017
+ * Copyright (C) 2016-2018
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
- * 
- * Copyright (C) 1994-- Michael Holst and Zeyun Yu
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +21,7 @@
  *
  * ***************************************************************************
  */
+
 
 #include <algorithm>
 #include <bitset>
@@ -331,7 +330,7 @@ template <typename NumType, typename = std::enable_if_t<std::is_arithmetic<NumTy
 std::unique_ptr<SurfaceMesh> marchingCubes(
 		NumType* dataset,
 		NumType maxval,
-		const i3Vector& dim, 
+		const i3Vector& dim,
 		const f3Vector& span,
 		NumType isovalue,
 		Inserter holelist
@@ -353,21 +352,21 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 		for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
 			for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]-1); ++j){
 				for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
-					if((dataset[Vect2Index(i,j,k,dim)] < isovalue) 
+					if((dataset[Vect2Index(i,j,k,dim)] < isovalue)
 							&& !mask[Vect2Index(i,j,k,dim)]){
 						mask[Vect2Index(i,j,k,dim)] = true;
 						visit.push_back(i3Vector({i,j,k}));
-					}	
+					}
 				}
 			}
 		}
-	}	
+	}
 
 	// Find internal holes
 	for (int n = 0; n < dim[2]; n++){
 		for (int m = 0; m < dim[1]; m++){
 			for (int l = 0; l < dim[0]; l++){
-				if((dataset[Vect2Index(l,m,n,dim)] < isovalue) 
+				if((dataset[Vect2Index(l,m,n,dim)] < isovalue)
 						&& !mask[Vect2Index(l,m,n,dim)]){
 					int holesize = 1;
 					visit.push_back(i3Vector({l,m,n}));
@@ -382,7 +381,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						for(int i = std::max(tmp[0]-1, 0); i <= std::min(tmp[0]+1, dim[0]-1); ++i){
 							for(int j = std::max(tmp[1]-1, 0); j <= std::min(tmp[1]+1, dim[1]-1); ++j){
 								for(int k = std::max(tmp[2]-1, 0); k <= std::min(tmp[2]+1, dim[2]-1); ++k){
-									if((dataset[Vect2Index(i,j,k,dim)] < isovalue) 
+									if((dataset[Vect2Index(i,j,k,dim)] < isovalue)
 											&& !mask[Vect2Index(i,j,k,dim)]){
 										int idx = Vect2Index(i,j,k,dim);
 										holevoxels.push_back(idx);
@@ -390,7 +389,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 										mask[idx] = true;
 										visit.push_back(i3Vector({i,j,k}));
 										holesize++;
-									}	
+									}
 								}
 							}
 						}
@@ -410,7 +409,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 						*holelist++ = v;
 						std::cout << v << std::endl;
 					}
-				}		
+				}
 			}
 		}
 	}
@@ -453,12 +452,12 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	//	  v7/____|_____e6_______/v6	 |
 	//		|	 |              |	 |
 	//	 	|  v0|______e0______|____|v1
-	//	e11 |	/        		|   / 	
-	//		|  /			e10	|  / 
+	//	e11 |	/        		|   /
+	//		|  /			e10	|  /
 	//		| /	e3				| / e1
 	//		|/					|/
 	//	  v3/_________e2________/v2
-	//            
+	//
     for(int i = 0; i < dim[0]-1; i++){
         for(int j = 0; j < dim[1]-1; j++){
             for(int k = 0; k < dim[2]-1; k++){
@@ -466,8 +465,8 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
             	// List of vertices for the current cell
             	int cellVertices[12];
             	std::fill_n(cellVertices, 12, -1);
-            
-            	// Table of integer indices to overall dataset array	
+
+            	// Table of integer indices to overall dataset array
             	int indexTable[8];
             	indexTable[0] = Vect2Index(i,j,k,dim);
             	indexTable[1] = Vect2Index(i,j+1,k,dim);
@@ -589,7 +588,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     			}
 
     			if (edgeTable[cellIndex] & (1 << 5)){
-	    			auto& edgeIdx = edges[indexTable[5]][0];	
+	    			auto& edgeIdx = edges[indexTable[5]][0];
 					if (edgeIdx == -1){
 						den1 = dataset[indexTable[5]];
 						den2 = dataset[indexTable[6]];
@@ -609,7 +608,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     			}
 
     			if (edgeTable[cellIndex] & (1 << 6)){
-	    			auto& edgeIdx = edges[indexTable[7]][1];	
+	    			auto& edgeIdx = edges[indexTable[7]][1];
 					if (edgeIdx == -1){
 						den1 = dataset[indexTable[7]];
 						den2 = dataset[indexTable[6]];
@@ -629,7 +628,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     			}
 
 				if (edgeTable[cellIndex] & (1 << 7)){
-					auto& edgeIdx = edges[indexTable[4]][0];	
+					auto& edgeIdx = edges[indexTable[4]][0];
 					if (edgeIdx == -1){
 						den1 = dataset[indexTable[4]];
 						den2 = dataset[indexTable[7]];
@@ -689,7 +688,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     			}
 
     			if (edgeTable[cellIndex] & (1 << 10)){
-    				auto& edgeIdx = edges[indexTable[2]][2];	
+    				auto& edgeIdx = edges[indexTable[2]][2];
 					if (edgeIdx == -1){
 						den1 = dataset[indexTable[2]];
 						den2 = dataset[indexTable[6]];

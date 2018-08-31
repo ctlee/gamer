@@ -1,47 +1,72 @@
+# ***************************************************************************
+# This file is part of the GAMer software.
+# Copyright (C) 2016-2018
+# by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+#    and Michael Holst
+
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# ***************************************************************************
+
 cmake_minimum_required(VERSION 3.0)
+# Disable in source builds
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-project(GAMer VERSION 1.0.0)
+# Add path to custom modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
+# Override rules for compiler flags
+set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
+
+#####################################################################
+# Project GAMer
+#####################################################################
+project(GAMer VERSION 2.0.0)
+
+# Require c++14 and standard libraries
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
-if(MSVC)
-    set(CMAKE_C_FLAGS_DEBUG_INIT "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1")
-    set(CMAKE_C_FLAGS_MINSIZEREL_INIT     "/MT /O1 /Ob1 /D NDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE_INIT        "/MT /O2 /Ob2 /D NDEBUG")
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2 /Ob1 /D NDEBUG")
-
-    set(CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "/MT /O1 /Ob1 /D NDEBUG")
-    set(CMAKE_CXX_FLAGS_RELEASE_INIT        "/MT /O2 /Ob2 /D NDEBUG")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2 /Ob1 /D NDEBUG")
-endif()
-
+#####################################################################
+# Options
+#####################################################################
+option(SINGLE "Use single precision floating point numbers" OFF)
+option(BUILD_TETGEN_BIN "Build tetgen binaries" OFF)
 option(BUILD_STATIC_LIB "Build static libraries" OFF)
-# BUILD_BLENDER will build static libraries as well
+option(BUILD_PYTHONEXT "Build GAMer python extension" OFF)
 option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
+option(BLENDER_PLUGIN_INSTALL "Have CMake install the plugin" OFF)
+option(BUILD_TESTS "Build the GAMer googletest tests" OFF)
 
-# Compile the test suite
-option(BUILD_TESTS "Build the test scripts" OFF)
-
-if(BUILD_TESTS)
-    enable_testing()
-endif(BUILD_TESTS)
-
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-  message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt. ")
-endif()
-
-if (NOT CMAKE_BUILD_TYPE)
+# Set build type to Release if none was defined
+if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+if(BUILD_TESTS)
+    enable_testing()
+endif()
 
-# Print all build flags
+# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
+## Print debug flags
 # message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
 # message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
 # message(STATUS "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
@@ -53,8 +78,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO is: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 # message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL is: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 # message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-
-#MESSAGE( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
+# message(STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE})
 
 # Define where to put the libraries and binaries
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -66,31 +90,13 @@ add_subdirectory(libraries)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# List the include directories...
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-foreach(dir ${dirs})
-    message(STATUS "GAMer include_dir='${dir}'")
-endforeach()
+# List the include directories for debugging
+# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+# foreach(dir ${dirs})
+#     message(STATUS "GAMer include_dir='${dir}'")
+# endforeach()
 
-# Change this to not use GLOB
-#file(GLOB SOURCES "src/*.C")
 list(APPEND SOURCES
-    # "src/CorrectNormals.C"
-    # "src/GemMesh.C"
-    # "src/GenerateSphereMesh.C"
-    # "src/MarchingCubeOld.C"
-    # "src/PDB2Mesh.C"
-    # "src/PDB2Volume.C"
-    # "src/ReadLattice.C"
-    # "src/ReadWriteMesh.C"
-    # "src/RegionGrowing.C"
-    # "src/SurfaceMeshOld.C"
-    # "src/SurfExtract.C"
-    # "src/SurfRefine.C"
-    # "src/SurfSmooth.C"
-    # "src/Triangulate.C"
-    # "src/WrapSurfaceMesh.C"
-
     "src/OFF_SurfaceMesh.cpp"
     "src/OBJ_SurfaceMesh.cpp"
     "src/SurfaceMesh.cpp"
@@ -101,37 +107,36 @@ list(APPEND SOURCES
 )
 
 add_library(gamershared SHARED ${SOURCES})
-message(STATUS "SOURCES: ${SOURCES}")
+#message(STATUS "GAMer sources: ${SOURCES}")
 
-target_link_libraries(gamershared tetshared trishared)
-# TODO: populate the list of headers to install...
-#install(FILES gamer.h DESTINATION include/gamer)
-install(TARGETS gamershared DESTINATION lib/gamer)
+target_link_libraries(gamershared tetshared)
+install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
+install(TARGETS gamershared DESTINATION lib)
 
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
+    target_link_libraries(gamerstatic tetstatic)
+    install(TARGETS gamerstatic DESTINATION lib)
+endif()
 
-    target_link_libraries(gamerstatic tetstatic tristatic)
-    install(TARGETS gamerstatic DESTINATION lib/gamer)
-endif(BUILD_BLENDER OR BUILD_STATIC_LIB)
-
-if(BUILD_BLENDER)
-    # build swig wrapper for python
+if(BUILD_BLENDER OR BUILD_PYTHONEXT)
     add_subdirectory(swig)
-endif(BUILD_BLENDER)
+endif()
 
 add_subdirectory(tools)
 
 if(BUILD_TESTS)
     add_subdirectory(tests)
-endif(BUILD_TESTS)
+endif()
 
-# add a target to generate API documentation with Doxygen
+#####################################################################
+# Target to generate Doxygen documentation
+#####################################################################
 find_package(Doxygen)
-
 if(DOXYGEN_FOUND)
-    message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
-    message(STATUS "Build the documentation using `make docs`")
+    # message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
+    message(STATUS "Build the GAMer documentation using `make docs`")
+    # Parse Doxyfile.in and replace CMake @macros@.
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
     add_custom_target(docs
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile

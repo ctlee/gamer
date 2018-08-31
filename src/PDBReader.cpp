@@ -1,7 +1,7 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2017
+ * Copyright (C) 2016-2018
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
  *
@@ -58,7 +58,7 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
         return mesh;
     }
     std::cout << "Atoms: " << atoms.size() << std::endl;
-    f3Vector min, max;    
+    f3Vector min, max;
     getMinMax(atoms.cbegin(), atoms.cend(), min, max, [&radius](const float atomRadius)->float {return DIM_SCALE*(atomRadius + radius);});
 
     float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
@@ -109,15 +109,15 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
     gridSES(SASverts.begin(), SASverts.end(), dim, dataset, radius);
     // for(int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
     //     std::cout << dataset[i] << std::endl;
-    // } 
+    // }
 
     mesh = std::move(marchingCubes(dataset, 5.0f, dim, span, 0.0f, std::back_inserter(holelist)));
     delete[] dataset;
-    
+
     // Translate back to the original position from the positive octant
     for(auto& v : mesh->get_level<1>()){
         v += min;
-    } 
+    }
     return mesh;
 }
 
@@ -130,8 +130,8 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
  *
  * @return     { description_of_the_return_value }
  */
-std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, 
- 		    const float blobbyness, 
+std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
+ 		    const float blobbyness,
 			float isovalue){
 	std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
@@ -145,12 +145,12 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
 
     std::cout << "Atoms: " << atoms.size() << std::endl;
 
-    f3Vector min, max;    
-    getMinMax(atoms.cbegin(), atoms.cend(), min, max, 
+    f3Vector min, max;
+    getMinMax(atoms.cbegin(), atoms.cend(), min, max,
             [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);});
 
     float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
-   
+
     std::cout << "Min Dimension: " << min_dimension << std::endl;
 
     i3Vector dim;
@@ -199,7 +199,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
         isovalue = data_isoval;
     }
     std::cout << "Isovalue: " << isovalue << std::endl;
- 
+
     std::vector<Vertex> holelist;
     mesh = std::move(marchingCubes(dataset, maxval, dim, span, isovalue, std::back_inserter(holelist)));
     delete[] dataset;
@@ -207,7 +207,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
     // Translate back to the original position from the positive octant
     for(auto& v : mesh->get_level<1>()){
         v += min;
-    } 
+    }
     // TODO: (0) What to do with holelist...
     return mesh;
 }

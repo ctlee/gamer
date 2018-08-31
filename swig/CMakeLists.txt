@@ -1,48 +1,58 @@
-cmake_minimum_required(VERSION 3.0)
+# ***************************************************************************
+# This file is part of the GAMer software.
+# Copyright (C) 2016-2018
+# by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+#    and Michael Holst
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# ***************************************************************************
 
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 # First find the python interpreter
 find_package(PythonInterp REQUIRED)
-message(STATUS "Found Python binary: ${PYTHON_EXECUTABLE}")
-message(STATUS "Python Version String: ${PYTHON_VERSION_STRING}")
+# message(STATUS "Found Python binary: ${PYTHON_EXECUTABLE}")
+# message(STATUS "Python Version String: ${PYTHON_VERSION_STRING}")
 
 # Then use it to inform pythonlibs
 find_package(PythonLibs REQUIRED)
-message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
-message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
-message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
-
-# find_package(Numpy REQUIRED)
+# message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
+# message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
+# message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
 
 if(NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
     message(FATAL_ERROR "Python interpreter and libs versions do not match")
 endif()
 
-find_package(Blender REQUIRED)
-
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 # List the include directories...
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-foreach(dir ${dirs})
-    message(STATUS "SWIG include_dir='${dir}'")
-endforeach()
-
-SET(CMAKE_SWIG_FLAGS "")
-# SET(SWIG_MODULE_gamer_EXTRA_DEPS "../include/WrapSurfaceMesh.h" "../src/WrapSurfaceMesh.C")
-SET(SWIG_MODULE_pygamer_EXTRA_DEPS "")
+# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+# foreach(dir ${dirs})
+#     message(STATUS "SWIG include_dir='${dir}'")
+# endforeach()
 
 SET_SOURCE_FILES_PROPERTIES(pygamer.i PROPERTIES CPLUSPLUS ON)
 SET_SOURCE_FILES_PROPERTIES(pygamer.i PROPERTIES SWIG_FLAGS "-O")
-# SET_SOURCE_FILES_PROPERTIES(pygamer.i PROPERTIES SWIG_FLAGS "-builtin")
 
-
-# SWIG_ADD_MODULE(pygamer python pygamer.i)
-SWIG_ADD_LIBRARY(pygamer LANGUAGE python SOURCES pygamer.i)
+if(CMAKE_VERSION VERSION_LESS 3.8.0)
+    SWIG_ADD_MODULE(pygamer python pygamer.i)
+else()
+    SWIG_ADD_LIBRARY(pygamer LANGUAGE python SOURCES pygamer.i)
+endif()
 
 # Handle some problems with Anaconda dylib linking in OSX
 if(APPLE)
@@ -58,5 +68,11 @@ SWIG_LINK_LIBRARIES(pygamer gamerstatic)
 install(TARGETS _pygamer DESTINATION lib/site-packages)
 install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 
-install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
-install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
+#####################################################################
+# Have CMake install Blender...
+#####################################################################
+if(BLENDER_PLUGIN_INSTALL)
+    find_package(Blender REQUIRED)
+    install(TARGETS _pygamer DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
+    install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer)
+endif()

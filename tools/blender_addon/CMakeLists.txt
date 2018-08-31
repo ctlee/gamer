@@ -1,8 +1,28 @@
-cmake_minimum_required(VERSION 3.0)
+# ***************************************************************************
+# This file is part of the GAMer software.
+# Copyright (C) 2016-2018
+# by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+#    and Michael Holst
 
-if(BUILD_BLENDER)
-  find_package(Blender REQUIRED)
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
 
-  # message(STATUS "I'm currently looking at the blender python installation")
-  install(DIRECTORY . DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer_addon FILES_MATCHING PATTERN "*.py")
-endif(BUILD_BLENDER)
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# ***************************************************************************
+
+#####################################################################
+# Have CMake install Blender...
+#####################################################################
+if(BLENDER_PLUGIN_INSTALL)
+    find_package(Blender REQUIRED)
+    install(DIRECTORY . DESTINATION ${BLENDER_ADDON_PATH}/addons/gamer_addon FILES_MATCHING PATTERN "*.py")
+endif()

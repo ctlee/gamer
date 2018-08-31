@@ -1,7 +1,7 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2017
+ * Copyright (C) 2016-2018
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
  *
@@ -39,12 +39,6 @@
 
 /** @brief The minimal volumes (in voxels) of islands to be removed */
 #define MIN_VOLUME        333333
-
-
-// // Other definitions and data structures
-// /** @brief Other definition */
-// #define _LITTLE_ENDIAN   1
-
 
 using Vector = tensor<double,3,1>;
 using f3Vector = tensor<float,3,1>;

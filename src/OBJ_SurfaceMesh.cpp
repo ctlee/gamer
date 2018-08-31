@@ -1,3 +1,28 @@
+/*
+ * ***************************************************************************
+ * This file is part of the GAMer software.
+ * Copyright (C) 2016-2018
+ * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+ *    and Michael Holst
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * ***************************************************************************
+ */
+
+
 
 #include <cmath>
 #include <fstream>
@@ -74,10 +99,10 @@ std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename)
         	}
 	    	// again we're going to ignore textures and normals
 	    	for(auto it = arr.begin(); it != arr.end(); ++it){
-	    		*it = stringutil::split(*it, {'/'})[0];	
-	    	}   	
+	    		*it = stringutil::split(*it, {'/'})[0];
+	    	}
 	    	mesh->insert<3>({
-	    		std::stoi(arr[1]), 
+	    		std::stoi(arr[1]),
 	    		std::stoi(arr[2]),
 	    		std::stoi(arr[3])});
 	    }
@@ -91,9 +116,9 @@ void writeOBJ(const std::string& filename, const SurfaceMesh& mesh){
   	std::ofstream fout(filename);
     if(!fout.is_open())
     {
-        std::cerr   << "File '" << filename 
+        std::cerr   << "File '" << filename
                     << "' could not be writen to." << std::endl;
-        exit(1); 
+        exit(1);
     }
 
     std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
@@ -103,13 +128,13 @@ void writeOBJ(const std::string& filename, const SurfaceMesh& mesh){
         sigma[mesh.get_name(x)[0]] = cnt++;
     }
 
-    fout.precision(10); 
-    // Get the vertex data directly 
+    fout.precision(10);
+    // Get the vertex data directly
     for(const auto& vertex : mesh.get_level<1>()){
         fout    << "v "
         		<< vertex[0] << " "
-                << vertex[1] << " " 
-                << vertex[2] << " " 
+                << vertex[1] << " "
+                << vertex[2] << " "
                 << "\n";
     }
 

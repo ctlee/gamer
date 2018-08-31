@@ -1,11 +1,8 @@
-
 # ***************************************************************************
 # This file is part of the GAMer software.
-# Copyright (C) 2016-2017
-# by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+# Copyright (C) 2016-2018
+# by Christopher Lee, Tom Bartol, John Moody, Rommie Amaro, J. Andrew McCammon,
 #    and Michael Holst
-# Copyright (C) 2010-2014
-# by Zeyun Yu, Michael Holst, Johan Hake, and Tom Bartol
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,6 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
+#
 
 bl_info = {
     "name": "GAMer",
