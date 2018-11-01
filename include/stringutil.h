@@ -29,6 +29,7 @@
 #include <cctype>
 #include <functional>
 #include <string>
+#include <vector>
 
 // TODO: (2) Do we need this stringutil for gamer?
 namespace stringutil
