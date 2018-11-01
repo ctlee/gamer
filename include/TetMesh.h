@@ -131,9 +131,9 @@ std::unique_ptr<TetMesh> makeTetMesh(
 #endif //SWIG
 
 
+void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
-
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
 
 

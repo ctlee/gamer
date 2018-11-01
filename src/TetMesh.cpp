@@ -553,5 +553,31 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh){
     fout.close();
 }
 
+void smoothMesh(TetMesh &mesh){
+    std::set<TetMesh::SimplexID<1>> vertexIDs;
+
+    for (auto faceID : mesh.get_level_id<3>()){
+        if(mesh.up(faceID).size() == 1){
+            auto bdryVertices = mesh.down(mesh.down(faceID)); // Set of vertices
+            vertexIDs.insert(bdryVertices.begin(), bdryVertices.end());
+        }
+    }
+
+    for (auto vID :  mesh.get_level_id<1>()){
+        if (vertexIDs.find(vID) == vertexIDs.end()){
+            std::set<TetMesh::SimplexID<1>> nbhd;
+            neighbors_up(mesh, vID, std::inserter(nbhd, nbhd.end()));
+
+            Vector barycenter;
+            for(auto nbor : nbhd){
+                barycenter += *nbor;
+            }
+            barycenter /= nbhd.size();
+            auto& pos  = *vID;
+            pos = barycenter;
+        }
+    }
+}
+
 
 
