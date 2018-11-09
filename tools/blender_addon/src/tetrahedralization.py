@@ -405,13 +405,19 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
           # Tetrahedralize mesh
           if len(gmeshes) > 0:
 
-              quality_str = "q%.1fqq%.1faA"%(self.max_aspect_ratio,self.min_dihedral)
+              quality_str = "q%.4f/%.4fO3/7AYVC"%(self.max_aspect_ratio,self.min_dihedral)
+
+              # a%.8f volume constraint..
               quality_str += "o2" if self.ho_mesh else ""
 
               print("TetGen quality string: " + quality_str)
 
               # Do the tetrahedralization
               tetmesh = g.MakeTetMesh(gmeshes, quality_str)
+
+              for i in range(0,5):
+                  print("Laplacian smooth iteration.")
+                  g.smoothMesh(tetmesh)
 
               # Store mesh to files
               tetmesh_formats  = ["dolfin", "mcsf", "diffpack", "paraview"]
