@@ -48,6 +48,9 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
     size_t nVertices = 0, nFaces = 0, nRegions = 0, nHoles = 0;
     int i = 0;
+    for (auto &surfmesh : surfmeshes){
+        print(*surfmesh);
+    }
 
     for (auto &surfmesh : surfmeshes){
         size_t nverts = surfmesh->template size<1>();
@@ -157,9 +160,9 @@ std::unique_ptr<TetMesh> makeTetMesh(
         normal /= std::sqrt(normal|normal);
 
         auto fname = surfmesh->get_name(faceID);
-        Vertex a = *surfmesh->get_simplex_up({fname[0]});
-        Vertex b = *surfmesh->get_simplex_up({fname[1]});
-        Vertex c = *surfmesh->get_simplex_up({fname[2]});
+        auto a = *surfmesh->get_simplex_up({fname[0]});
+        auto b = *surfmesh->get_simplex_up({fname[1]});
+        auto c = *surfmesh->get_simplex_up({fname[2]});
 
         Vector d = a-b;
         double weight = std::sqrt(d|d);
@@ -279,7 +282,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
         if (vertex != nullptr){
             auto &vdata = *vertex;
             // std::cout << casc::to_string(std::array<double,3>({ptr[0],ptr[1],ptr[2]})) << std::endl;
-            vdata = Vertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
+            vdata = tetmesh::TetVertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
         }
     }
 
@@ -551,6 +554,63 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh){
     fout << "</dolfin>\n";
 
     fout.close();
+}
+
+void writeTriangle(const std::string &filename, const TetMesh &mesh){
+    std::ofstream fout(filename + ".node");
+    if(!fout.is_open())
+    {
+        std::cerr   << "File '" << filename + ".node"
+                    << "' could not be writen to." << std::endl;
+        exit(1);
+    }
+
+    std::map<typename TetMesh::KeyType,typename TetMesh::KeyType> sigma;
+    size_t cnt = 1;
+
+    // Print out Vertices
+    // std::cout << "Printing Vertices" << std::endl;
+    // nVertices, dimension, nattributes, nmarkers
+    fout << mesh.size<1>() << " 3 " << " 0 " << " 1\n";
+
+    fout.precision(6);
+    for(const auto vertexID : mesh.get_level_id<1>()){
+        size_t idx = cnt;
+        sigma[mesh.get_name(vertexID)[0]] = cnt++;
+        auto vertex = *vertexID;
+
+        fout    << idx << " "
+                << vertex[0] << " "
+                << vertex[1] << " "
+                << vertex[2] << " "
+                << (*vertexID).marker << "\n";
+    }
+    fout.close(); // Close .node file
+
+
+    // Open file filename.ele
+    std::ofstream foutEle(filename + ".ele");
+    if (!foutEle.is_open())
+    {
+        std::cerr   << "File '" << filename + ".ele"
+                    << "' could not be writen to." << std::endl;
+        exit(1);
+    }
+
+    // nTetrahedra, nodes per tet, nAttributes
+    foutEle << mesh.size<4>() << " 4 1\n";
+    cnt = 1;
+    for (const auto tetID :  mesh.get_level_id<4>()){
+        std::size_t idx = cnt++;
+        auto tetName = mesh.get_name(tetID);
+        foutEle << idx << " "
+                << sigma[tetName[0]] << " "
+                << sigma[tetName[1]] << " "
+                << sigma[tetName[2]] << " "
+                << sigma[tetName[3]] << " "
+                << (*tetID).marker << "\n";
+    }
+    foutEle.close(); // Close .ele file
 }
 
 void smoothMesh(TetMesh &mesh){

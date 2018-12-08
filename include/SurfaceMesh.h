@@ -111,12 +111,6 @@ struct Global
     float volumeConstraint;
     /// flag that determines if the volume constraint is used.
     bool  useVolumeConstraint;
-    /// Minimum coordinate of vertices
-    float min[3];
-    /// Max coordinate of vertices
-    float max[3];
-    /// Average edge length
-    float avglen;
     /// Flag that determines if the mesh represents a hole or not
     bool  ishole;
 };
