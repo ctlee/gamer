@@ -34,7 +34,6 @@ wrap_unique_ptr(TMUniquePtr, TetMesh);
 
 %include "TetMesh.h"
 
-
 %inline %{
 TetMesh* MakeTetMesh(const std::vector<SurfaceMesh*> &surfmeshes, std::string tetgen_params){
   return makeTetMesh(surfmeshes, tetgen_params).release();

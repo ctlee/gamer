@@ -49,10 +49,6 @@ std::unique_ptr<TetMesh> makeTetMesh(
     size_t nVertices = 0, nFaces = 0, nRegions = 0, nHoles = 0;
     int i = 0;
     for (auto &surfmesh : surfmeshes){
-        print(*surfmesh);
-    }
-
-    for (auto &surfmesh : surfmeshes){
         size_t nverts = surfmesh->template size<1>();
         size_t nfaces = surfmesh->template size<3>();
 

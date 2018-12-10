@@ -454,7 +454,6 @@ def copyBoundaries(self, fromObject, toObject):
 class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
     boundary_list = CollectionProperty(type=GAMerBoundaryMarker, name="Boundary List")
     active_bnd_index = IntProperty(name="Active Boundary Index", default=0)
-    include = BoolProperty(name="Include Domain in Model", default=False)
     get_boundary_info = BoolProperty(
         name="Toggle to enable/disable boundary_info", default=False)
 
