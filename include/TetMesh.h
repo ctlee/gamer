@@ -99,6 +99,14 @@ struct Global
     bool higher_order;
 };
 
+struct TetVertex : Vertex
+{
+    using Vertex::Vertex; // Inherit constructor from Vertex
+    TetVertex() {}
+    TetVertex(Vertex v) : Vertex(v) {}
+    double error = 0;
+};
+
 /**
  * @brief      A helper struct containing the traits/types in the simplicial
  *             complex
@@ -108,7 +116,7 @@ struct complex_traits
     /// The index type
     using KeyType = int;
     /// The types of each node
-    using NodeTypes = util::type_holder<Global, Vertex, Edge, Face, Cell>;
+    using NodeTypes = util::type_holder<Global, TetVertex, Edge, Face, Cell>;
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable, casc::Orientable>;
 };
@@ -131,11 +139,11 @@ std::unique_ptr<TetMesh> makeTetMesh(
 #endif //SWIG
 
 
+void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
-
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
-
+void writeTriangle(const std::string &filename, const TetMesh &mesh);
 
 // void writeMCSF(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack

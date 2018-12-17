@@ -184,261 +184,267 @@ def check_formats_callback(self, context):
     return
 
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
+    tet_path = StringProperty ( name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files" )
+    generic_float = FloatProperty( name="Generic Float", default=123.456, min=0.0, max=1000, precision=4, description="A Generic Float Value")
+    generic_int = IntProperty( name="Generic Int", default=5, min=1, max=10, description="A Generic Int Value")
+    generic_boolean = BoolProperty( name="Generic Bool", default=False, description="A Generic Boolean Value")
 
-  tet_path = StringProperty ( name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files" )
+    domain_list = CollectionProperty(type=GAMerTetDomainPropertyGroup, name="Domain List")
+    active_domain_index = IntProperty(name="Active Domain Index", default=0)
+    next_id = IntProperty(name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization
 
-  generic_float = FloatProperty( name="Generic Float", default=123.456, min=0.0, max=1000, precision=4, description="A Generic Float Value")
-  generic_int = IntProperty( name="Generic Int", default=5, min=1, max=10, description="A Generic Int Value")
-  generic_boolean = BoolProperty( name="Generic Bool", default=False, description="A Generic Boolean Value")
+    show_settings = BoolProperty( name="Tetrahedralization Settings", default=False, description="Show more detailed settings")
 
-  domain_list = CollectionProperty(type=GAMerTetDomainPropertyGroup, name="Domain List")
-  active_domain_index = IntProperty(name="Active Domain Index", default=0)
-  next_id = IntProperty(name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization
+    min_dihedral = FloatProperty ( name="Min Dihedral", default=10.0, description="Minimum Dihedral in Degrees" )
+    max_aspect_ratio = FloatProperty ( name="Max Aspect Ratio", default=1.3, description="Maximum Aspect Ratio" )
 
-  show_settings = BoolProperty( name="Tetrahedralization Settings", default=False, description="Show more detailed settings")
+    ho_mesh = BoolProperty ( name="Higher order mesh generation", default=False, description="Higher order mesh generation" )
 
-  min_dihedral = FloatProperty ( name="Min Dihedral", default=10.0, description="Minimum Dihedral in Degrees" )
-  max_aspect_ratio = FloatProperty ( name="Max Aspect Ratio", default=1.3, description="Maximum Aspect Ratio" )
+    dolfin = BoolProperty ( name="DOLFIN", default=False, description="Generate DOLFIN output", update=check_formats_callback )
+    diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
+    paraview = BoolProperty ( name="Paraview", default=False, description="Generate Paraview output", update=check_formats_callback )
+    fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
 
-  ho_mesh = BoolProperty ( name="Higher order mesh generation", default=False, description="Higher order mesh generation" )
+    status = StringProperty ( name="status", default="" )
 
-  dolfin = BoolProperty ( name="DOLFIN", default=False, description="Generate DOLFIN output", update=check_formats_callback )
-  diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
-  paraview = BoolProperty ( name="Paraview", default=False, description="Generate Paraview output", update=check_formats_callback )
-  fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
+    def check_formats_callback(self, context):
+        if self.dolfin or self.diffpack or self.paraview or self.fetk:
+            self.status = ""
 
-  status = StringProperty ( name="status", default="" )
+    def draw_layout ( self, context, layout ):
 
-  def check_formats_callback(self, context):
-      if self.dolfin or self.diffpack or self.paraview or self.fetk:
-          self.status = ""
+        row = layout.row()
+        row.label ( "Domains" )
 
-  def draw_layout ( self, context, layout ):
+        row = layout.row()
+        col = row.column()
 
-      row = layout.row()
-      row.label ( "Domains" )
+        col.template_list("GAMer_UL_domain", "",
+                          self, "domain_list",
+                          self, "active_domain_index",
+                          rows=2)
 
-      row = layout.row()
-      col = row.column()
+        col = row.column(align=True)
+        col.operator("gamer.tet_domain_add", icon='ZOOMIN', text="")
+        col.operator("gamer.tet_domain_remove", icon='ZOOMOUT', text="")
+        col.operator("gamer.tet_domain_remove_all", icon='X', text="")
 
-      col.template_list("GAMer_UL_domain", "",
-                        self, "domain_list",
-                        self, "active_domain_index",
-                        rows=2)
+        if len(self.domain_list) > 0:
+            domain = self.domain_list[self.active_domain_index]
 
-      col = row.column(align=True)
-      col.operator("gamer.tet_domain_add", icon='ZOOMIN', text="")
-      col.operator("gamer.tet_domain_remove", icon='ZOOMOUT', text="")
-      col.operator("gamer.tet_domain_remove_all", icon='X', text="")
+            row = layout.row()
+            row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
 
-      if len(self.domain_list) > 0:
-          domain = self.domain_list[self.active_domain_index]
+            domain.draw_layout ( layout )
 
-          row = layout.row()
-          row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
+            box = layout.box()
+            row = box.row(align=True)
+            row.alignment = 'LEFT'
+            if not self.show_settings:
+                row.prop(self, "show_settings", icon='TRIA_RIGHT', emboss=False)
+            else:
+                row.prop(self, "show_settings", icon='TRIA_DOWN', emboss=False)
 
-          domain.draw_layout ( layout )
+                row = box.row()
+                row.operator("gamer.set_tet_path", text="Set Output File Prefix", icon='FILESEL')
+                row = box.row()
+                row.label ( self.tet_path )
 
-          box = layout.box()
-          row = box.row(align=True)
-          row.alignment = 'LEFT'
-          if not self.show_settings:
-              row.prop(self, "show_settings", icon='TRIA_RIGHT', emboss=False)
-          else:
-              row.prop(self, "show_settings", icon='TRIA_DOWN', emboss=False)
+                row = box.row()
+                col = row.column()
+                col.prop ( self, "min_dihedral" )
+                col = row.column()
+                col.prop ( self, "max_aspect_ratio" )
 
-              row = box.row()
-              row.operator("gamer.set_tet_path", text="Set Output File Prefix", icon='FILESEL')
-              row = box.row()
-              row.label ( self.tet_path )
+                row = box.row()
+                row.prop ( self, "ho_mesh" )
 
-              row = box.row()
-              col = row.column()
-              col.prop ( self, "min_dihedral" )
-              col = row.column()
-              col.prop ( self, "max_aspect_ratio" )
+                row = box.row()
+                row.label ( "Output Formats:" )
 
-              row = box.row()
-              row.prop ( self, "ho_mesh" )
+                row = box.row()
+                sbox = row.box()
 
-              row = box.row()
-              row.label ( "Output Formats:" )
+                row = sbox.row()
+                col = row.column()
+                col.prop ( self, "dolfin" )
+                col = row.column()
+                col.prop ( self, "paraview" )
 
-              row = box.row()
-              sbox = row.box()
+                # row = sbox.row()
+                # col = row.column()
+                # col.prop ( self, "diffpack" )
+                # col = row.column()
+                # col.prop ( self, "fetk" )
 
-              row = sbox.row()
-              col = row.column()
-              col.prop ( self, "dolfin" )
-              col = row.column()
-              col.prop ( self, "paraview" )
-
-              # row = sbox.row()
-              # col = row.column()
-              # col.prop ( self, "diffpack" )
-              # col = row.column()
-              # col.prop ( self, "fetk" )
-
-          row = layout.row()
-          icon = 'PROP_OFF'
-          if self.dolfin or self.diffpack or self.paraview or self.fetk:
-              icon = 'COLOR_RED'
-          row.operator ( "gamer.tetrahedralize", text="Tetrahedralize", icon=icon )
-          if len(self.status) > 0:
-              row = layout.row()
-              row.label ( self.status, icon="ERROR" )
+            row = layout.row()
+            icon = 'PROP_OFF'
+            if self.dolfin or self.diffpack or self.paraview or self.fetk:
+                icon = 'COLOR_RED'
+            row.operator ( "gamer.tetrahedralize", text="Tetrahedralize", icon=icon )
+            if len(self.status) > 0:
+                row = layout.row()
+                row.label ( self.status, icon="ERROR" )
 
 
-  def add_tet_domain ( self, context):
-      print("Adding a Tet Domain")
-      """ Add a new tet domain to the list of tet domains for each selected object """
-      #mcell = context.scene.mcell
+    def add_tet_domain ( self, context):
+        print("Adding a Tet Domain")
+        """ Add a new tet domain to the list of tet domains for each selected object """
+        #mcell = context.scene.mcell
 
-      # From the list of selected objects, only add MESH objects.
-      objs = [obj for obj in context.selected_objects if obj.type == 'MESH']
-      if len(objs) > 0:
-          for obj in objs:
-              # Check by name to see if it's already listed
-              current_domain_names = [ d.object_name for d in self.domain_list ]
-              print ( "Current domains = " + str(current_domain_names) )
-              if not (obj.name in current_domain_names):
-                  new_id = self.allocate_available_id()  # Do this first to check for empty list before adding
-                  obj.gamer.include = True
-                  new_dom = self.domain_list.add()
-                  new_dom.domain_id = new_id
-                  new_dom.marker = new_id
-                  new_dom.object_name = obj.name
-                  self.active_domain_index = len(self.domain_list)-1
+        # From the list of selected objects, only add MESH objects.
+        objs = [obj for obj in context.selected_objects if obj.type == 'MESH']
+        if len(objs) > 0:
+            for obj in objs:
+                # Check by name to see if it's already listed
+                current_domain_names = [ d.object_name for d in self.domain_list ]
+                print ( "Current domains = " + str(current_domain_names) )
+                if not (obj.name in current_domain_names):
+                    new_id = self.allocate_available_id()  # Do this first to check for empty list before adding
+                    new_dom = self.domain_list.add()
+                    new_dom.domain_id = new_id
+                    new_dom.marker = new_id
+                    new_dom.object_name = obj.name
+                    self.active_domain_index = len(self.domain_list)-1
 
-  def remove_active_tet_domain ( self, context):
-      print("Removing active Tet Domain")
-      """ Remove the active tet domain from the list of domains """
-      self.domain_list.remove ( self.active_domain_index )
-      self.active_domain_index -= 1
-      if self.active_domain_index < 0:
-          self.active_domain_index = 0
+    def remove_active_tet_domain ( self, context):
+        print("Removing active Tet Domain")
+        """ Remove the active tet domain from the list of domains """
+        self.domain_list.remove ( self.active_domain_index )
+        self.active_domain_index -= 1
+        if self.active_domain_index < 0:
+            self.active_domain_index = 0
 
-  def remove_all_tet_domains ( self, context):
-      print("Removing All Tet Domains")
-      """ Remove all tet domains from the list of domains """
-      while len(self.domain_list) > 0:
-          self.domain_list.remove ( 0 )
-      self.active_domain_index = 0
+    def remove_all_tet_domains ( self, context):
+        print("Removing All Tet Domains")
+        """ Remove all tet domains from the list of domains """
+        while len(self.domain_list) > 0:
+            self.domain_list.remove ( 0 )
+        self.active_domain_index = 0
 
 
-  def allocate_available_id ( self ):
-      """ Return a unique domain ID for a new domain """
-      print ( "Next ID is " + str(self.next_id) )
-      if len(self.domain_list) <= 0:
-          # Reset the ID to 1 when there are no more molecules
-          self.next_id = 1
-      self.next_id += 1
-      return ( self.next_id - 1 )
+    def allocate_available_id ( self ):
+        """ Return a unique domain ID for a new domain """
+        print ( "Next ID is " + str(self.next_id) )
+        if len(self.domain_list) <= 0:
+            # Reset the ID to 1 when there are no more molecules
+            self.next_id = 1
+        self.next_id += 1
+        return ( self.next_id - 1 )
 
-  def draw_panel ( self, context, panel ):
-      layout = panel.layout
-      self.draw_layout ( context, layout )
+    def draw_panel ( self, context, panel ):
+        layout = panel.layout
+        self.draw_layout ( context, layout )
 
-  def tetrahedralize ( self ):
-      print ( "######################## Begin Tetrahedralize ########################" )
+    def tetrahedralize ( self ):
+        print ( "######################## Begin Tetrahedralize ########################" )
 
-      filename = self.tet_path
-      if not (self.dolfin or self.diffpack or self.paraview or self.fetk):
-          self.status = "Please select an output format in Tetrahedralization Settings"
-          print ( self.status )
-      else:
-          self.status = ""
-          mesh_formats = []
+        filename = self.tet_path
+        if not (self.dolfin or self.diffpack or self.paraview or self.fetk):
+            self.status = "Please select an output format in Tetrahedralization Settings"
+            print ( self.status )
+        else:
+            self.status = ""
+            mesh_formats = []
 
-          if self.dolfin:
-              mesh_formats.append("dolfin")
-          if self.diffpack:
-              mesh_formats.append("diffpack")
-          if self.paraview:
-              mesh_formats.append("paraview")
-          if self.fetk:
-              mesh_formats.append("mcsf")
+            if self.dolfin:
+                mesh_formats.append("dolfin")
+            if self.diffpack:
+                mesh_formats.append("diffpack")
+            if self.paraview:
+                mesh_formats.append("paraview")
+            if self.fetk:
+                mesh_formats.append("mcsf")
 
-          # What is this? It doesn't show up in the GAMer panel.
-          #if self.getVal(self.tetparams["mcsf_format"]):
-          #    mesh_formats.append("mcsf")
+            # What is this? It doesn't show up in the GAMer panel.
+            #if self.getVal(self.tetparams["mcsf_format"]):
+            #    mesh_formats.append("mcsf")
 
-          # Get gamer mesh
-          # gmeshes = []
-          # boundary_markers = []
+            # Get gamer mesh
+            # gmeshes = []
+            # boundary_markers = []
 
-          gmeshes = g.VectorSM();
+            gmeshes = g.VectorSM()
 
-          for (obj_name,tet_domain) in [ (d.object_name,d) for d in self.domain_list ]:
-              print ( "obj_name = " + obj_name + ", tet_domain = " + str(tet_domain) )
+            for (obj_name,tet_domain) in [ (d.object_name,d) for d in self.domain_list ]:
+                print ( "obj_name = " + obj_name + ", tet_domain = " + str(tet_domain) )
 
-          current_domain_names = [ d.object_name for d in self.domain_list ]
-          print ( "Current domains = " + str(current_domain_names) )
-          for obj_name in current_domain_names:
-              obj = bpy.data.objects[obj_name]
-              if obj.gamer.include:
-                  gmesh = gamer_addon.gamer_gui.blenderToGamer(obj=obj, map_boundaries=True)
-                  if gmesh == None:
-                      print ( "blenderToGamer returned a gmesh of None" )
-                  else:
-                      # # Collect boundary information
-                      # for boundary_name, boundary in zip(boundaries.keys(), boundaries.values()):
-                      #     boundary_markers.append((boundary["marker"], boundary_name))
+            current_domain_names = [ d.object_name for d in self.domain_list ]
+            print ( "Current domains = " + str(current_domain_names) )
 
-                      print ("\nMesh %s: num verts: %d numfaces: %d" % (obj_name, gmesh.sizeVertices(), gmesh.sizeFaces()))
+            for d in self.domain_list:
+                obj = bpy.data.objects[d.object_name]
+                gmesh = gamer_addon.gamer_gui.blenderToGamer(obj=obj, map_boundaries=True)
+                if gmesh == None:
+                    print( "blenderToGamer returned a gmesh of None" )
+                else:
+                    # Necessary to prevent garbage collection of gmesh when
+                    # passing into GAMer
+                    gmesh.thisown = 0;
+                    # # Collect boundary information
+                    # for boundary_name, boundary in zip(boundaries.keys(), boundaries.values()):
+                    #     boundary_markers.append((boundary["marker"], boundary_name))
 
-                      # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
-                      globalInfo = gmesh.getRoot()
+                    print("Mesh %s: num verts: %d numfaces: %d" %(obj_name, gmesh.sizeVertices(), gmesh.sizeFaces()))
+                    # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
+                    print("Closed: %d; Marker: %d"%(d.is_hole, d.marker))
 
-                      globalInfo.closed = True
-                      globalInfo.ishole = tet_domain.is_hole
-                      globalInfo.marker = tet_domain.marker
-                      globalInfo.useVolumeConstraint = tet_domain.constrain_vol
-                      globalInfo.volumeConstraint = tet_domain.vol_constraint
+                    globalInfo = gmesh.getRoot()
+                    globalInfo.closed = True
+                    globalInfo.ishole = d.is_hole
+                    globalInfo.marker = d.marker
+                    globalInfo.useVolumeConstraint = d.constrain_vol
+                    globalInfo.volumeConstraint = d.vol_constraint
+                    # Write surface mesh to file for debug
+                    g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
 
-                      # Write surface mesh to file for debug
-                      g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
+                    # Add the mesh
+                    gmeshes.push_back(gmesh)
 
-                      # Add the mesh
-                      gmeshes.push_back(gmesh)
+            # Tetrahedralize mesh
+            if len(gmeshes) > 0:
 
-          # Tetrahedralize mesh
-          if len(gmeshes) > 0:
+                quality_str = "q%.4f/%.4fO3/7AYVC"%(self.max_aspect_ratio,self.min_dihedral)
 
-              quality_str = "q%.1fqq%.1faA"%(self.max_aspect_ratio,self.min_dihedral)
-              quality_str += "o2" if self.ho_mesh else ""
+                # a%.8f volume constraint..
+                quality_str += "o2" if self.ho_mesh else ""
 
-              print("TetGen quality string: " + quality_str)
+                print("========================================")
+                print("TetGen quality string: " + quality_str)
+                print("========================================")
+                # Do the tetrahedralization
+                tetmesh = g.MakeTetMesh(gmeshes, quality_str)
 
-              # Do the tetrahedralization
-              tetmesh = g.MakeTetMesh(gmeshes, quality_str)
+                for i in range(0,5):
+                    print("Laplacian smooth iteration.")
+                    g.smoothMesh(tetmesh)
 
-              # Store mesh to files
-              tetmesh_formats  = ["dolfin", "mcsf", "diffpack", "paraview"]
-              tetmesh_suffices = [  ".xml",   ".m",    ".grid", ".vtk"]
+                # Store mesh to files
+                tetmesh_formats  = ["dolfin", "mcsf", "diffpack", "paraview"]
+                tetmesh_suffices = [  ".xml",   ".m",    ".grid", ".vtk"]
 
-              for fmt in mesh_formats:
-                  try:
-                      suffix = tetmesh_suffices[tetmesh_formats.index(fmt)]
-                      print ( "Writing to " + fmt + " file: " + filename + suffix )
-                      if fmt == 'dolfin':
-                          g.writeDolfin(filename+suffix, tetmesh)
-                      if fmt == 'paraview':
-                          g.writeVTK(filename+suffix, tetmesh)
+                for fmt in mesh_formats:
+                    try:
+                        suffix = tetmesh_suffices[tetmesh_formats.index(fmt)]
+                        print ( "Writing to " + fmt + " file: " + filename + suffix )
+                        if fmt == 'dolfin':
+                            g.writeDolfin(filename+suffix, tetmesh)
+                        if fmt == 'paraview':
+                            g.writeVTK(filename+suffix, tetmesh)
 
-                      # # If the format is diffpack or carp we need to add boundary names
-                      # if fmt in ["diffpack", "carp"]:
-                      #     boundary_names = [b[1] for b in sorted(boundary_markers)]
-                      #     print ( "Boundary names = " + str(boundary_names) )
-                      #     ### This doesn't work for some reason ... RuntimeError: Expected a list of strings as second argument.
-                      #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix, boundary_names)
-                      # else:
-                      #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix)
+                        # # If the format is diffpack or carp we need to add boundary names
+                        # if fmt in ["diffpack", "carp"]:
+                        #     boundary_names = [b[1] for b in sorted(boundary_markers)]
+                        #     print ( "Boundary names = " + str(boundary_names) )
+                        #     ### This doesn't work for some reason ... RuntimeError: Expected a list of strings as second argument.
+                        #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix, boundary_names)
+                        # else:
+                        #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix)
 
-                  except Exception as ex:
+                    except Exception as ex:
 
-                      print ( "Error: Unable to write to " + fmt + " file: " + filename + suffix )
-                      print ( "   " + str(ex) )
+                        print ( "Error: Unable to write to " + fmt + " file: " + filename + suffix )
+                        print ( "   " + str(ex) )
 
-      print ( "######################## End Tetrahedralize ########################" )
+        print ( "######################## End Tetrahedralize ########################" )
 
