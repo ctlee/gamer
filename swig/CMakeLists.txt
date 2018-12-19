@@ -33,7 +33,7 @@ find_package(PythonLibs REQUIRED)
 # message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
 # message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
 
-if(NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
+if(NOT ${PYTHON_VERSION_STRING} VERSION_EQUAL ${PYTHONLIBS_VERSION_STRING})
     message(FATAL_ERROR "Python interpreter and libs versions do not match")
 endif()
 
