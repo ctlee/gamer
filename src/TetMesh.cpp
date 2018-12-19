@@ -25,17 +25,16 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
-#include <map>
-#include <set>
-#include <vector>
-#include <string>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <fstream>
+#include <map>
 #include <ostream>
+#include <set>
+#include <string>
+#include <vector>
 
 #include <libraries/casc/casc>
-//#include <libraries/casc/include/typetraits.h>
 
 #include "TetMesh.h"
 

@@ -86,8 +86,8 @@ double angle(const Vector& AB, const Vector& CB){
     double lenAB = magnitude(ab);
     double lenCB = magnitude(cb);
     if (lenAB == 0 || lenCB == 0){
-        std::cerr << "Some length == 0, can't compute angle." << std::endl;
-        return -1;
+        // std::cerr << "Some length == 0, can't compute angle." << std::endl;
+        throw std::runtime_error("Some length == 0, cannot compute angle.");
     }
     ab /= lenAB;
     cb /= lenCB;

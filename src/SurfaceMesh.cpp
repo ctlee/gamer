@@ -28,15 +28,13 @@
 #include <cmath>
 #include <iomanip>
 #include <map>
+#include <stdexcept>
 #include <vector>
 
-#include <libraries/casc/include/CASCFunctions.h>
-#include <libraries/casc/include/CASCTraversals.h>
-#include <libraries/casc/include/stringutil.h>
+#include <libraries/casc/casc>
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
 
-#include <libraries/casc/include/typetraits.h>
 #include "SurfaceMesh.h"
 #include "Vertex.h"
 
@@ -172,9 +170,14 @@ std::tuple<double, double, int, int> getMinMaxAngles(
         auto b = *mesh.get_simplex_up({name[1]});
         auto c = *mesh.get_simplex_up({name[2]});
         std::array<double, 3> angles;
-        angles[0] = angle(a,b,c);
-        angles[1] = angle(b,a,c);
-        angles[2] = angle(a,c,b);
+        try{
+            angles[0] = angle(a,b,c);
+            angles[1] = angle(b,a,c);
+            angles[2] = angle(a,c,b);
+        }
+        catch (std::runtime_error& e){
+            throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area. Try running degenerate dissolve in Blender and ensure manifoldness.");
+        }
 
         for(double angle : angles){
             if (angle < minAngle){
@@ -347,7 +350,12 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
             {
                 std::rotate(triangle.begin(), triangle.begin()+i, triangle.end());
                 auto it = triangle.begin();
-                tmp = angle(*it, *(it+1), *(it+2));
+                try{
+                    tmp = angle(*it, *(it+1), *(it+2));
+                }
+                catch (std::runtime_error& e){
+                    throw std::runtime_error("Angle is undefined for face with zero area. Try running degenerate dissolve in Blender and ensure manifoldness.");
+                }
                 if (tmp < minAngle)
                     minAngle = tmp;
             }
@@ -610,9 +618,9 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
     }
     else
     {
-        std::cerr << "ERROR(getNormal): Orientation undefined, cannot compute "
-                  << "normal. Did you call compute_orientation()?" << std::endl;
-        std::exit(EXIT_FAILURE);
+        // std::cerr << "ERROR(getNormal): Orientation undefined, cannot compute "
+                  // << "normal. Did you call compute_orientation()?" << std::endl;
+        throw std::runtime_error("ERROR(getNormal): Orientation undefined, cannot compute normal. Did you call compute_orientation()?");
     }
     return norm;
 }
@@ -661,11 +669,11 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         // Bisector of the 'rhombus'
         Vector bisector = (pS + nS)/2;
         // TODO (0): Create a better method for catching divide by zeros
-
         try {
             normalize(bisector);
         }
         catch (std::runtime_error& e){
+            std::cerr << "Bisector has no length..." << std::endl;
             continue;
         }
 
@@ -681,6 +689,13 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         //auto perpPlane = tanNorm^bisector;
         //auto perpNorm = getNormalFromTangent(perpPlane);
         auto perpNorm = cross(tanNorm, bisector);
+        try {
+            normalize(perpNorm);
+        }
+        catch (std::runtime_error& e){
+            std::cerr << "PerpNorm has no length..." << std::endl;
+            continue;
+        }
         perpNorm /= std::sqrt(perpNorm|perpNorm);
 
         auto perpProj = perpNorm*perpNorm; // tensor product

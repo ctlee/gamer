@@ -25,16 +25,17 @@
 #pragma once
 
 #include <iostream>
-#include <libraries/casc/casc>
-
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
-#include <memory>
+#include <stdexcept>
 #include <string>
+#include <memory>
 #include <unordered_set>
 #include <utility>
-#include "Vertex.h"
 
+#include <libraries/casc/casc>
+#include <libraries/Eigen/Dense>
+#include <libraries/Eigen/Eigenvalues>
+
+#include "Vertex.h"
 
 #ifndef SWIG
 /**
@@ -547,9 +548,9 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             // The mesh is not a surface mesh...
             if (up.size() > 2)
             {
-                std::cerr << "This edge participates in more than 2 faces. "
-                          << "Returning..." << std::endl;
-                continue;
+                // std::cerr << "This edge participates in more than 2 faces. "
+                //           << "Returning..." << std::endl;
+                throw std::runtime_error("SurfaceMesh is not pseudomanifold. Found an edge connected to more than 2 faces.");
             }
             else if (up.size() < 2) // Edge is a boundary
             {
@@ -587,6 +588,7 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                 }
             }
 
+            // TODO: (1) Change to check link condition
             // Check if the triangles make a wedge shape. Flipping this can
             // cause knife faces.
             auto f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
