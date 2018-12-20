@@ -662,44 +662,35 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         Vertex next = *mesh.get_simplex_up({up[1]});
 
         Vector pS = prev - shared;
-        pS  /= std::sqrt(pS|pS);
+        normalize(pS);
         Vector nS = next - shared;
-        nS /= std::sqrt(nS|nS);
+        normalize(nS);
 
         // Bisector of the 'rhombus'
-        Vector bisector = (pS + nS)/2;
-        // TODO (0): Create a better method for catching divide by zeros
-        try {
-            normalize(bisector);
+        Vector bisector = pS + nS;
+        Vector perpNorm;
+
+        // TODO: Check if pS and nS face same direction...
+        // Check if vertices are colinear
+        if (magnitude(bisector) == 0){
+            perpNorm = pS;
+            normalize(perpNorm);
         }
-        catch (std::runtime_error& e){
-            std::cerr << "Bisector has no length..." << std::endl;
-            continue;
+        else {
+            normalize(bisector);
+            // Normal of tangent plane
+            Vector tanNorm = cross(pS, nS);
+            // Get the perpendicular plane made up of plane normal of bisector
+            perpNorm = cross(tanNorm, bisector);
+            normalize(perpNorm);
         }
 
         // Get a reference vecter to shared which lies on the plane of interest.
         Vector disp = center - shared;
         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
-        // Normal of tangent plane
-        //auto tanNorm = getNormalFromTangent(pS^nS);
-        Vector tanNorm = cross(pS, nS);
-
-        // Get the perpendicular plane made up of plane normal of bisector
-        //auto perpPlane = tanNorm^bisector;
-        //auto perpNorm = getNormalFromTangent(perpPlane);
-        auto perpNorm = cross(tanNorm, bisector);
-        try {
-            normalize(perpNorm);
-        }
-        catch (std::runtime_error& e){
-            std::cerr << "PerpNorm has no length..." << std::endl;
-            continue;
-        }
-        perpNorm /= std::sqrt(perpNorm|perpNorm);
-
+        // Perpendicular projector
         auto perpProj = perpNorm*perpNorm; // tensor product
-
         // Compute perpendicular component
         Vector perp;
         Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
