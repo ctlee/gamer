@@ -134,6 +134,9 @@ struct complex_traits
 
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
+namespace surfacemesh_detail{
+    double getMeanEdgeLength(SurfaceMesh& mesh);
+}
 
 /**
  * @brief      Reads in a GeomView OFF file.
@@ -373,70 +376,44 @@ tensor<double,3,2> computeLocalStructureTensor(
  */
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
 
+void coarseH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+/**
+ * @brief      Coarsens the mesh by selecting vertices first.
+ *
+ * @param      mesh         The mesh
+ * @param[in]  coarseRate   The coarse rate
+ * @param[in]  flatRate     The flat rate
+ * @param[in]  denseWeight  The dense weight
+ */
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
+
+/**
+ * @brief      Coarsen the mesh in one loop. Faster but uses more memory.
+ *
+ * @param      mesh         The mesh
+ * @param[in]  coarseRate   The coarse rate
+ * @param[in]  flatRate     The flat rate
+ * @param[in]  denseWeight  The dense weight
+ */
 void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
+
 #ifndef SWIG
-template <typename InsertIter>
+
+/**
+ * @brief      Recursively triangulate hole by connecting lowest valence
+ *             vertices.
+ *
+ * @param      mesh      Surface mesh
+ * @param      boundary  List of boundary edges
+ * @param[in]  fdata     Data to store on each face
+ * @param[in]  iter      Back inserter to store new edges and boundary edges
+ */
 void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &boundary,
         const Face &fdata,
-        InsertIter iter){
-    // Terminal case
-    if(boundary.size() == 3){
-        // create the face
-        auto a = mesh.get_name(boundary[0])[0];
-        auto b = mesh.get_name(boundary[1])[0];
-        auto c = mesh.get_name(boundary[2])[0];
-        mesh.insert({a,b,c}, fdata);
-        return;
-    }
-
-    // Construct a sorted vector of pairs... (valence, vertexID)
-    std::vector<std::pair<int, SurfaceMesh::SimplexID<1>>> list;
-    for(auto vertexID : boundary){
-        list.push_back(std::make_pair(getValence(mesh, vertexID), vertexID));
-    }
-    std::sort(list.begin(), list.end(), [](
-                const std::pair<int, SurfaceMesh::SimplexID<1>> &lhs,
-                const std::pair<int, SurfaceMesh::SimplexID<1>> &rhs){
-            return lhs.first < rhs.first;
-        });
-
-    SurfaceMesh::SimplexID<1> v1, v2;
-    v1 = list[0].second;
-
-    // Find v1 and rotate so that it is first for easy splitting later
-    auto v1it =  std::find(boundary.begin(), boundary.end(), v1);
-    std::rotate(boundary.begin(), v1it, boundary.end());
-
-    // Get the next lowest valence vertex
-    for(auto it = ++list.begin(); it != list.end(); ++it){
-        v2 = (*it).second;
-        // Check that it is not already connected to v1
-        if(v2 != boundary[1] && v2 != boundary.back()){
-            break;
-        }
-    }
-    // Insert new edge
-    auto a = mesh.get_name(v1)[0];
-    auto b = mesh.get_name(v2)[0];
-    mesh.insert({a,b});
-    // TODO: (0) Get the simplex from insert.
-    *iter++ = mesh.get_simplex_up({a,b});
-
-    auto v2it =  std::find(boundary.begin(), boundary.end(), v2);
-    std::vector<SurfaceMesh::SimplexID<1>> other;
-    other.push_back(v2);
-    std::move(v2it+1, boundary.end(), std::back_inserter(other));
-    boundary.erase(v2it+1, boundary.end());
-
-    other.push_back(v1);
-
-    // Recurse to fill sub-holes
-    triangulateHole(mesh, boundary, fdata, iter);
-    triangulateHole(mesh, other, fdata, iter);
-}
+        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> iter);
 
 template <class K>
 struct orientHoleHelper {};
@@ -588,7 +565,7 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                 }
             }
 
-            // TODO: (1) Change to check link condition
+            // TODO: (5) Change to check link condition
             // Check if the triangles make a wedge shape. Flipping this can
             // cause knife faces.
             auto f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
@@ -648,6 +625,23 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  */
 std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
 
+/**
+ * @brief      Create a triangulated octahedron
+ *
+ * @param[in]  order  Number of times to subdivide octahedron
+ *
+ * @return     Pointer to resulting mesh
+ */
 std::unique_ptr<SurfaceMesh> sphere(int order);
+
+
+/**
+ * @brief      Create a triangulated cube
+ *
+ * @param[in]  order  Number of times to subdivide cube
+ *
+ * @return     Pointer to resulting mesh
+ */
 std::unique_ptr<SurfaceMesh> cube(int order);
+
 

@@ -265,7 +265,7 @@ void correctNormals(SurfaceMesh &mesh){
 
   def coarse_flat(mesh, rate=0.016):
     "Coarse flat areas"
-    coarse(mesh, rate, 0.5, 0)
+    coarseIT(mesh, rate, 0.5, 0)
 
 
   def coarse_dense(mesh, rate=1.6, numiter=1):
@@ -275,7 +275,7 @@ void correctNormals(SurfaceMesh &mesh){
     if not isinstance(numiter, int) or numiter < 1:
       raise TypeError("expected a positive scalar for the 'numiter' argument")
     for i in range(numiter):
-      coarse(mesh, rate, 0, 10)
+      coarseIT(mesh, rate, 0, 10)
 %}
 
 void init_orientation(SurfaceMesh& F);
