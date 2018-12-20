@@ -657,22 +657,28 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
 
         // Get the vertices connected to adjacent edge by face
         auto up   = mesh.get_cover(edge);
-
         Vertex prev = *mesh.get_simplex_up({up[0]});
         Vertex next = *mesh.get_simplex_up({up[1]});
 
-        Vector pS = prev - shared;
-        normalize(pS);
-        Vector nS = next - shared;
-        normalize(nS);
+        Vector pS, nS;
+        try{
+            pS = prev - shared;
+            normalize(pS);
+            nS = next - shared;
+            normalize(nS);
+        }
+        catch(std::exception& e){
+            throw std::runtime_error("ERROR: Zero length edge found. "
+                "weightedVertexSmooth expects no zero length edges.");
+        }
 
         // Bisector of the 'rhombus'
         Vector bisector = pS + nS;
         Vector perpNorm;
+        double alpha = (pS|nS) + 1;
 
-        // TODO: Check if pS and nS face same direction...
         // Check if vertices are colinear
-        if (magnitude(bisector) == 0){
+        if (magnitude(bisector) == 0 || alpha == 0 || alpha == 2){
             perpNorm = pS;
             normalize(perpNorm);
         }
@@ -697,7 +703,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
         perp_e = perpProj_e*disp_e; // matrix (3x3) * vector = vector
 
-        auto alpha = (pS|nS)+1; // keep the dot product positive
+        // auto alpha = (pS|nS)+1; // keep the dot product positive
         sumWeights += alpha;
 
         newPos += alpha*(center.position - perp);
