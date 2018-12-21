@@ -104,6 +104,7 @@ list(APPEND SOURCES
     "src/OFF_SurfaceMesh.cpp"
     "src/OBJ_SurfaceMesh.cpp"
     "src/SurfaceMesh.cpp"
+    "src/SurfaceMeshDetail.cpp"
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"

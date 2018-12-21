@@ -134,42 +134,89 @@ struct complex_traits
 
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
-namespace surfacemesh_detail{
-    double getMeanEdgeLength(SurfaceMesh& mesh);
-}
-
+#ifndef SWIG
 /**
- * @brief      Reads in a GeomView OFF file.
+ * @brief      Compute the tangent to a vertex.
  *
- * @param[in]  filename  The filename.
+ * The vertex normal is defined as the mean of incident triangle normals as
+ * follows,
+ * \f$ \mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}
+ * n_t\f$.
+ * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of
+ * incident
+ * faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
  *
- * @return     Returns a unique_ptr to the SurfaceMesh.
- */
-std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
-
-/**
- * @brief      Write the SurfaceMesh to file in OFF format.
- *
- * @param[in]  filename  The filename to write to.
  * @param[in]  mesh      SurfaceMesh of interest.
+ * @param[in]  vertexID  SimplexID of the vertex to get the tangent of.
+ *
+ * @return     Returns a 2-tensor representing the tangent plane.
  */
-void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
+tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
+/**
+ * @brief      Compute the tangent of a face.
+ *
+ * This function gets the tangent by computing the sum of oriented wedge
+ * products.
+ *
+ * @param[in]  mesh    SurfaceMesh of interest.
+ * @param[in]  faceID  SimplexID of the face to get the tangent of.
+ *
+ * @return     Returns a 2-tensor representing the tangent plane.
+ */
+tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
-// Wavefront OBJ
-std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
-void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
-void print(const SurfaceMesh &mesh);
-void generateHistogram(const SurfaceMesh &mesh);
-std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
-    int maxMinAngle, int minMaxAngle);
-double getArea(const SurfaceMesh &mesh);
-double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
-double getVolume(const SurfaceMesh &mesh);
-int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+/**
+ * @brief      Gets the normal vector from the tangent.
+ *
+ * @param[in]  tangent  2-tensor representing the tangent plane.
+ *
+ * @return     The normal Vector.
+ */
+Vector getNormalFromTangent(const tensor<double, 3, 2> tangent);
+
+/**
+ * @brief      Gets the normal of a vertex.
+ *
+ * The vertex normal is defined as the mean of incident triangle normals as
+ * follows,
+ * \f$\mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}n_t\f$.
+ * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of
+ * incident faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
+ *
+ * @param[in]  mesh      SurfaceMesh of interest.
+ * @param[in]  vertexID  SimplexID of the vertex to get the normal of.
+ *
+ * @return     Returns the Vector normal to the vertex.
+ */
+Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+/**
+ * @brief      Compute the normal of a face.
+ *
+ * This function computes the normal as the cross product with respect to the
+ * orientation. See also getTangent() and getNormalFromTangent().
+ *
+ * @param[in]  mesh    SurfaceMesh of interest.
+ * @param[in]  faceID  SimplexID of the face to get the tangent of.
+ *
+ * @return     Returns a Vector normal to the face.
+ */
+Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+#endif //SWIG
+
 
 
 #ifndef SWIG
+namespace surfacemesh_detail{
+double getMeanEdgeLength(SurfaceMesh& mesh);
+void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+tensor<double,3,2> computeLocalStructureTensor(
+        const SurfaceMesh &mesh,
+        const SurfaceMesh::SimplexID<1> vertexID,
+        const int rings);
+
 /**
  * @brief      Terminal case
  *
@@ -275,131 +322,6 @@ auto getTangentF(const SurfaceMesh &mesh,
     return rval/cover.size();
 }
 
-/**
- * @brief      Comupute the tangent to a vertex.
- *
- * The vertex normal is defined as the mean of incident triangle normals as
- * follows,
- * \f$ \mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}
- * n_t\f$.
- * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of
- * incident
- * faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
- *
- * @param[in]  mesh      SurfaceMesh of interest.
- * @param[in]  vertexID  SimplexID of the vertex to get the tangent of.
- *
- * @return     Returns a 2-tensor representing the tangent plane.
- */
-tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
-
-/**
- * @brief      Compute the tangent of a face.
- *
- * This function gets the tangent by computing the sum of oriented wedge
- * products.
- *
- * @param[in]  mesh    SurfaceMesh of interest.
- * @param[in]  faceID  SimplexID of the face to get the tangent of.
- *
- * @return     Returns a 2-tensor representing the tangent plane.
- */
-tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
-
-/**
- * @brief      Gets the normal vector from the tangent.
- *
- * @param[in]  tangent  2-tensor representing the tangent plane.
- *
- * @return     The normal Vector.
- */
-Vector getNormalFromTangent(const tensor<double, 3, 2> tangent);
-
-/**
- * @brief      Gets the normal of a vertex.
- *
- * The vertex normal is defined as the mean of incident triangle normals as
- * follows,
- * \f$\mathbf{n} = \frac{1}{N} \sum_{i=0}^{N, \textrm{incident triangle}}n_t\f$.
- * where \f$\mathbf{n}\f$ is the vertex normal, \f$N\f$ is the number of
- * incident faces, and \f$n_i\f$ is the normal of incident triangle \f$i\f$.
- *
- * @param[in]  mesh      SurfaceMesh of interest.
- * @param[in]  vertexID  SimplexID of the vertex to get the normal of.
- *
- * @return     Returns the Vector normal to the vertex.
- */
-Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
-
-/**
- * @brief      Compute the normal of a face.
- *
- * This function computes the normal as the cross product with respect to the
- * orientation. See also getTangent() and getNormalFromTangent().
- *
- * @param[in]  mesh    SurfaceMesh of interest.
- * @param[in]  faceID  SimplexID of the face to get the tangent of.
- *
- * @return     Returns a Vector normal to the face.
- */
-Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
-#endif //SWIG
-
-
-// These exist for the a potential python interface
-void translate(SurfaceMesh &mesh, Vector v);
-void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
-void scale(SurfaceMesh &mesh, Vector v);
-void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
-void scale(SurfaceMesh &mesh, double s);
-void centeralize(SurfaceMesh &mesh);
-
-#ifndef SWIG
-std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
-
-tensor<double,3,2> computeLocalStructureTensor(
-        const SurfaceMesh &mesh,
-        const SurfaceMesh::SimplexID<1> vertexID,
-        const int rings);
-#endif //SWIG
-
-/**
- * @brief      Smooth the surface mesh
- *
- * @param      mesh            The mesh
- * @param[in]  maxMinAngle     The maximum minimum angle
- * @param[in]  minMaxAngle     The minimum maximum angle
- * @param[in]  maxIter         The maximum iterator
- * @param[in]  preserveRidges  The preserve ridges
- *
- * @return     { description_of_the_return_value }
- */
-bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
-
-void coarseH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
-
-/**
- * @brief      Coarsens the mesh by selecting vertices first.
- *
- * @param      mesh         The mesh
- * @param[in]  coarseRate   The coarse rate
- * @param[in]  flatRate     The flat rate
- * @param[in]  denseWeight  The dense weight
- */
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
-
-/**
- * @brief      Coarsen the mesh in one loop. Faster but uses more memory.
- *
- * @param      mesh         The mesh
- * @param[in]  coarseRate   The coarse rate
- * @param[in]  flatRate     The flat rate
- * @param[in]  denseWeight  The dense weight
- */
-void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
-
-
-#ifndef SWIG
 
 /**
  * @brief      Recursively triangulate hole by connecting lowest valence
@@ -474,6 +396,7 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
  * @return     Returns an Eigen::SelfAdjointEigenSolver containing the results
  */
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat);
+
 
 /**
  * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
@@ -581,7 +504,6 @@ void selectFlipEdges(const SurfaceMesh &mesh,
             {
                 *iter++ = edgeID;   // Insert into edges to flip
 
-
                 // The local topology will be changed by edge flip.
                 // Don't flip edges which share a common face.
                 std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
@@ -613,10 +535,87 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  *             otherwise.
  */
 bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
-#endif //SWIG
+
+void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+
+} // end namespace surfacemesh_detail
+#endif
+
+/**
+ * @brief      Reads in a GeomView OFF file.
+ *
+ * @param[in]  filename  The filename.
+ *
+ * @return     Returns a unique_ptr to the SurfaceMesh.
+ */
+std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
+
+/**
+ * @brief      Write the SurfaceMesh to file in OFF format.
+ *
+ * @param[in]  filename  The filename to write to.
+ * @param[in]  mesh      SurfaceMesh of interest.
+ */
+void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
+
+// Wavefront OBJ
+std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
+void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
+
+void print(const SurfaceMesh &mesh);
+void generateHistogram(const SurfaceMesh &mesh);
+std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
+    int maxMinAngle, int minMaxAngle);
+double getArea(const SurfaceMesh &mesh);
+double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+double getVolume(const SurfaceMesh &mesh);
+int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+
+
+// These exist for the a potential python interface
+void translate(SurfaceMesh &mesh, Vector v);
+void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
+void scale(SurfaceMesh &mesh, Vector v);
+void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
+void scale(SurfaceMesh &mesh, double s);
+
+std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
+void centeralize(SurfaceMesh &mesh);
+
+/**
+ * @brief      Smooth the surface mesh
+ *
+ * @param      mesh            The mesh
+ * @param[in]  maxMinAngle     The maximum minimum angle
+ * @param[in]  minMaxAngle     The minimum maximum angle
+ * @param[in]  maxIter         The maximum iterator
+ * @param[in]  preserveRidges  The preserve ridges
+ *
+ * @return     { description_of_the_return_value }
+ */
+bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
+
+/**
+ * @brief      Coarsens the mesh by selecting vertices first.
+ *
+ * @param      mesh         The mesh
+ * @param[in]  coarseRate   The coarse rate
+ * @param[in]  flatRate     The flat rate
+ * @param[in]  denseWeight  The dense weight
+ */
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
+
+/**
+ * @brief      Coarsen the mesh in one loop. Faster but uses more memory.
+ *
+ * @param      mesh         The mesh
+ * @param[in]  coarseRate   The coarse rate
+ * @param[in]  flatRate     The flat rate
+ * @param[in]  denseWeight  The dense weight
+ */
+void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
 void normalSmooth(SurfaceMesh &mesh);
-void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
 /**
  * @brief      Refine the mesh by quadrisection of faces
@@ -643,5 +642,3 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
  * @return     Pointer to resulting mesh
  */
 std::unique_ptr<SurfaceMesh> cube(int order);
-
-
