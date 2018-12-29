@@ -97,7 +97,7 @@ struct Face : casc::Orientable, FaceProperties
     }
 
 };
-#endif //SWIG
+#endif // IFNDEF SWIG
 
 /**
  * @brief      Type for containing root metadata
@@ -203,13 +203,26 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  * @return     Returns a Vector normal to the face.
  */
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
-#endif //SWIG
-
-
+#endif // IFNDEF SWIG
 
 #ifndef SWIG
 namespace surfacemesh_detail{
+
+/**
+ * @brief      Gets the mean edge length.
+ *
+ * @param      mesh  Surface mesh of interest
+ *
+ * @return     The mean edge length.
+ */
 double getMeanEdgeLength(SurfaceMesh& mesh);
+
+/**
+ * @brief      Remove a vertex form mesh and triangulate the resulting hole.
+ *
+ * @param      mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ */
 void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
 tensor<double,3,2> computeLocalStructureTensor(
@@ -337,12 +350,27 @@ void triangulateHole(SurfaceMesh &mesh,
         const Face &fdata,
         std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> iter);
 
+/**
+ * @brief      General template
+ *
+ * @tparam     K     { description }
+ */
 template <class K>
 struct orientHoleHelper {};
 
 template <std::size_t k>
 struct orientHoleHelper<std::integral_constant<std::size_t, k>>
 {
+    /**
+     * @brief      Set the orientation of a filled hole
+     *
+     * @param      mesh       Simplicial complex
+     * @param[in]  names      Names of participant vertices
+     * @param[in]  begin      Begin iterator of simplices to traverse
+     * @param[in]  end        Past the end iterator of simplices to traverse
+     *
+     * @tparam     Iterator   Typename of the iterator
+     */
     template <typename Iterator>
     static void apply(SurfaceMesh & mesh,
             const std::set<int> &&names,
@@ -352,15 +380,17 @@ struct orientHoleHelper<std::integral_constant<std::size_t, k>>
         std::vector<SurfaceMesh::SimplexID<k+1>> next;
         for(auto curr = begin; curr != end; ++curr)
         {
-            for(auto a : mesh.get_cover(*curr))
+            auto currSimplexID = *curr;
+            for(auto a : mesh.get_cover(currSimplexID))
             {
+                // Look for key a in names
                 auto find = names.find(a);
                 if(find != names.end())
                 {
-                    next.push_back(mesh.get_simplex_up(*curr, a));
+                    next.push_back(mesh.get_simplex_up(currSimplexID, a));
 
                     int orient = 1;
-                    for(auto b : mesh.get_name(*curr)){
+                    for(auto b : mesh.get_name(currSimplexID)){
                         if(a > b){
                             if(a > b)
                             {
@@ -372,7 +402,7 @@ struct orientHoleHelper<std::integral_constant<std::size_t, k>>
                         }
                     }
                     //std::cout << casc::to_string(mesh.get_name(*curr)) << " " << a << " " << orient << std::endl;
-                    (*mesh.get_edge_up(*curr,a)).orientation = orient;
+                    (*mesh.get_edge_up(currSimplexID,a)).orientation = orient;
                 }
             }
         }
@@ -386,6 +416,14 @@ struct orientHoleHelper<std::integral_constant<std::size_t, SurfaceMesh::topLeve
     static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){}
 };
 
+/**
+ * @brief      Calculates the orientation of simplices of a hole
+ *
+ * @param      mesh       The mesh
+ * @param[in]  <unnamed>  { parameter_description }
+ *
+ * @return     The hole orientation.
+ */
 bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList);
 
 /**
@@ -396,7 +434,6 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
  * @return     Returns an Eigen::SelfAdjointEigenSolver containing the results
  */
 Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat);
-
 
 /**
  * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
@@ -538,8 +575,33 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
 
 void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
+/**
+ * @brief      Traverse mesh and find holes
+ *
+ * @param[in]  mesh      SurfaceMesh
+ * @param      holeList  List of list of edge rings to store holes in
+ */
+void findHoles(const SurfaceMesh& mesh,
+    std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList);
+
+/**
+ * @brief      Recursive DFS of edges defining hole ring.
+ *
+ * @param[in]  mesh                SurfaceMesh of interest
+ * @param      unvisitedBdryEdges  Set of unvisited boundary edges
+ * @param      bdryRing            Stack of ordered boundary edges
+ *
+ * @return     True if hole ring found. False otherwise.
+ */
+bool findHoleHelper(const SurfaceMesh&mesh,
+        std::set<SurfaceMesh::SimplexID<2>>& unvisitedBdryEdges,
+        std::vector<SurfaceMesh::SimplexID<2>>& bdryRing);
+
+
 } // end namespace surfacemesh_detail
-#endif
+#endif // IFNDEF SWIG
+
+// std::tuple<a,b,c> checkMesh(const SurfaceMesh& mesh);
 
 /**
  * @brief      Reads in a GeomView OFF file.

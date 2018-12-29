@@ -78,9 +78,12 @@ double getMeanEdgeLength(SurfaceMesh& mesh){
 }
 
 void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
+    // TODO: (10) Come up with a better scheme
+    // Pick an arbitrary face's data
     auto fdata = **mesh.up(std::move(mesh.up(vertexID))).begin();
     fdata.orientation = 0; // Reset the orientation accordingly
 
+    // Compute and backup ring of vertices prior to vertex removal
     std::set<SurfaceMesh::SimplexID<1> > boundary;
     casc::neighbors_up(mesh, vertexID, std::inserter(boundary, boundary.end()));
     std::set<SurfaceMesh::SimplexID<1>> backupBoundary(boundary);
@@ -88,29 +91,30 @@ void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
     // Remove the vertex
     mesh.remove(vertexID);
 
-    // Sort vertices into ring order
+    // Sort vertices into 'ring' order
     std::vector<SurfaceMesh::SimplexID<1>> sortedVerts;
     std::set<int> bNames; // boundary names
     std::vector<SurfaceMesh::SimplexID<2>> edgeList;
 
     auto it = boundary.begin();
     int firstName = mesh.get_name(*it)[0];
-    int n1;
-
     while(boundary.size() > 0)
     {
         std::vector<SurfaceMesh::SimplexID<1>> nbors;
-        auto currID = *it;
+        auto currID = *it; // Get SimplexID
 
-        n1 = mesh.get_name(currID)[0];
-        bNames.insert(n1);
+        int currName = mesh.get_name(currID)[0];
+        bNames.insert(currName);
 
-        bool success = false;
+        bool success = false; // Flag to track success
+        // Push current into list of sorted vertices.
         std::move(it, std::next(it), std::back_inserter(sortedVerts));
-        boundary.erase(it);
+        boundary.erase(it); // Erase current from boundary
 
+        // If nothing is left in the boundary, check that the current
+        // vertex has an edge to the first vertex.
         if(boundary.size() == 0){
-            if(mesh.exists({n1,firstName})){
+            if(mesh.exists({currName,firstName})){
                 edgeList.push_back(mesh.get_simplex_up(currID, firstName));
                 break; // Break out of while loop
             }
@@ -122,12 +126,12 @@ void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
                 auto result = boundary.find(nbor);
                 if(result != boundary.end()){
                     // Check that the edge is a boundary
-                    auto tmp = mesh.get_simplex_up(*result, n1);
+                    auto tmp = mesh.get_simplex_up(*result, currName);
                     if(mesh.get_cover(tmp).size() == 1){
                         it = result;
                         edgeList.push_back(tmp);
                         success = true;
-                        break;
+                        break; // leave for loop
                     }
                 }
             }
@@ -216,7 +220,9 @@ void triangulateHole(SurfaceMesh &mesh,
     triangulateHole(mesh, other, fdata, iter);
 }
 
-bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList){
+bool computeHoleOrientation(SurfaceMesh &mesh,
+        const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList)
+{
     std::deque<SurfaceMesh::SimplexID<2> > frontier;
     std::set<SurfaceMesh::SimplexID<2> > visited;
     bool orientable = true;
@@ -582,8 +588,7 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
     neighbors_up(mesh, vertexID, std::back_inserter(vertices));
     // compute the average position
     Vector avgPos;
-    for (auto vertex : vertices)
-    {
+    for (auto vertex : vertices) {
         avgPos += (*vertex).position;
     }
     avgPos /= vertices.size();
@@ -618,4 +623,67 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
     (*vertexID).position = (*vertexID).position + parallel;
 }
 
+void findHoles(const SurfaceMesh& mesh,
+    std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList)
+{
+    std::set<SurfaceMesh::SimplexID<2>> unvisitedBdryEdges;
+
+    // Collect all of the boundary edges into boundarySet
+    for(auto edgeID : mesh.get_level_id<2>()){
+        auto cover = mesh.get_cover(edgeID);
+        if (cover.size() == 1){
+            unvisitedBdryEdges.insert(edgeID);
+        }
+    }
+
+    // Connect the edges into rings...
+    while(unvisitedBdryEdges.size() > 0){
+        std::vector<SurfaceMesh::SimplexID<2>> bdryRing;
+        auto it = unvisitedBdryEdges.begin();
+        auto firstEdge = *it;
+        bdryRing.push_back(firstEdge);
+        unvisitedBdryEdges.erase(it);
+        if(!findHoleHelper(mesh, unvisitedBdryEdges, bdryRing)){
+            throw std::runtime_error("Couldn't connect ring");
+        }
+        holeList.push_back(bdryRing);
+    }
 }
+
+bool findHoleHelper(const SurfaceMesh&mesh,
+        std::set<SurfaceMesh::SimplexID<2>>& unvisitedBdryEdges,
+        std::vector<SurfaceMesh::SimplexID<2>>& bdryRing)
+{
+    auto firstEdge = bdryRing.front();
+    auto currEdge = bdryRing.back();
+
+    std::vector<SurfaceMesh::SimplexID<2>> nbors;
+    neighbors(mesh,currEdge, std::back_inserter(nbors));
+
+    // Look for connected unvisited boundary edge
+    for (auto nbor : nbors){
+        auto result = unvisitedBdryEdges.find(nbor);
+        if (result != unvisitedBdryEdges.end()){
+            auto tmpEdge = *result;
+            bdryRing.push_back(tmpEdge);
+            unvisitedBdryEdges.erase(result);
+            if(findHoleHelper(mesh, unvisitedBdryEdges, bdryRing)){
+                return true;
+            }
+        }
+    }
+
+    // No next edge found. Check if ring is complete
+    for (auto nbor : nbors){
+        if (nbor == firstEdge){
+            return true;
+        }
+    }
+
+    // Ring isn't complete. Backtrack...
+    unvisitedBdryEdges.insert(currEdge);
+    bdryRing.pop_back();
+    return false;
+}
+
+} // END namespace surfacemesh_detail
