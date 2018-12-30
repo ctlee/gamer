@@ -633,6 +633,24 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
     std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 }
 
+void fillHoles(SurfaceMesh &mesh){
+    std::vector<std::vector<SurfaceMesh::SimplexID<2>>> holeList;
+    surfacemesh_detail::findHoles(mesh, holeList);
+
+    for(auto& holeEdges : holeList){
+        std::vector<SurfaceMesh::SimplexID<1>> sortedVertices;
+        surfacemesh_detail::edgeRingToVertices(mesh, holeEdges, std::back_inserter(sortedVertices));
+
+        surfacemesh_detail::triangulateHole(mesh, sortedVertices, Face(), holeEdges);
+    }
+}
+
+void flipNormals(SurfaceMesh &mesh){
+    for(auto& fdata : mesh.get_level<3>()){
+        fdata.orientation *= -1;
+    }
+}
+
 std::unique_ptr<SurfaceMesh> sphere(int order){
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 

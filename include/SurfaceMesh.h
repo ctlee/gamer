@@ -203,11 +203,10 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  * @return     Returns a Vector normal to the face.
  */
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
-#endif // IFNDEF SWIG
 
-#ifndef SWIG
+
+
 namespace surfacemesh_detail{
-
 /**
  * @brief      Gets the mean edge length.
  *
@@ -335,21 +334,6 @@ auto getTangentF(const SurfaceMesh &mesh,
     return rval/cover.size();
 }
 
-
-/**
- * @brief      Recursively triangulate hole by connecting lowest valence
- *             vertices.
- *
- * @param      mesh      Surface mesh
- * @param      boundary  List of boundary edges
- * @param[in]  fdata     Data to store on each face
- * @param[in]  iter      Back inserter to store new edges and boundary edges
- */
-void triangulateHole(SurfaceMesh &mesh,
-        std::vector<SurfaceMesh::SimplexID<1>> &boundary,
-        const Face &fdata,
-        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> iter);
-
 /**
  * @brief      General template
  *
@@ -424,7 +408,7 @@ struct orientHoleHelper<std::integral_constant<std::size_t, SurfaceMesh::topLeve
  *
  * @return     The hole orientation.
  */
-bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList);
+bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
 
 /**
  * @brief      Compute the eigenvalues of a 3x3 matrix.
@@ -581,7 +565,7 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  * @param[in]  mesh      SurfaceMesh
  * @param      holeList  List of list of edge rings to store holes in
  */
-void findHoles(const SurfaceMesh& mesh,
+void findHoles(const SurfaceMesh &mesh,
     std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList);
 
 /**
@@ -593,10 +577,33 @@ void findHoles(const SurfaceMesh& mesh,
  *
  * @return     True if hole ring found. False otherwise.
  */
-bool findHoleHelper(const SurfaceMesh&mesh,
+bool findHoleHelper(const SurfaceMesh &mesh,
         std::set<SurfaceMesh::SimplexID<2>>& unvisitedBdryEdges,
+        std::vector<SurfaceMesh::SimplexID<1>>& visitedVerts,
         std::vector<SurfaceMesh::SimplexID<2>>& bdryRing);
 
+void edgeRingToVertices(const SurfaceMesh &mesh,
+        std::vector<SurfaceMesh::SimplexID<2>>& edgeRing,
+        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<1>>> iter);
+
+void triangulateHoleHelper(SurfaceMesh &mesh,
+        std::vector<SurfaceMesh::SimplexID<1>> &boundary,
+        const Face &fdata,
+        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> iter);
+
+/**
+ * @brief      Recursively triangulate hole by connecting lowest valence
+ *             vertices.
+ *
+ * @param      mesh      Surface mesh
+ * @param      boundary  List of boundary edges
+ * @param[in]  fdata     Data to store on each face
+ * @param[in]  iter      Back inserter to store new edges and boundary edges
+ */
+void triangulateHole(SurfaceMesh &mesh,
+        std::vector<SurfaceMesh::SimplexID<1>> &sortedVerts,
+        const Face &fdata,
+        std::vector<SurfaceMesh::SimplexID<2>>  &edgeList);
 
 } // end namespace surfacemesh_detail
 #endif // IFNDEF SWIG
@@ -679,6 +686,10 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
 
 void normalSmooth(SurfaceMesh &mesh);
 
+void fillHoles(SurfaceMesh &mesh);
+
+void flipNormals(SurfaceMesh &mesh);
+
 /**
  * @brief      Refine the mesh by quadrisection of faces
  *
@@ -704,3 +715,4 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
  * @return     Pointer to resulting mesh
  */
 std::unique_ptr<SurfaceMesh> cube(int order);
+

@@ -143,16 +143,7 @@ void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
         }
     }
 
-    triangulateHole(mesh, sortedVerts, fdata, std::back_inserter(edgeList));
-
-    // Set the orientation of each edge
-    // TODO: (0) Make orientation automatic
-    orientHoleHelper<std::integral_constant<std::size_t,1>>::apply(mesh, std::move(bNames), backupBoundary.begin(), backupBoundary.end());
-
-    // Compute the face orientations
-    if(!computeHoleOrientation(mesh, std::move(edgeList))){
-        throw std::runtime_error("ERROR(coarse): Mesh became non-orientable");
-    }
+    triangulateHole(mesh, sortedVerts, fdata, edgeList);
 
     // Smooth vertices around the filled hole
     for(auto v : backupBoundary){
@@ -160,10 +151,10 @@ void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
     }
 }
 
-void triangulateHole(SurfaceMesh &mesh,
+void triangulateHoleHelper(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &boundary,
         const Face &fdata,
-        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> iter){
+        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> edgeListIT){
     // Terminal case
     if(boundary.size() == 3){
         // create the face
@@ -205,7 +196,7 @@ void triangulateHole(SurfaceMesh &mesh,
     auto b = mesh.get_name(v2)[0];
     mesh.insert({a,b});
     // TODO: (0) Get the simplex from insert.
-    *iter++ = mesh.get_simplex_up({a,b});
+    *edgeListIT++ = mesh.get_simplex_up({a,b});
 
     auto v2it =  std::find(boundary.begin(), boundary.end(), v2);
     std::vector<SurfaceMesh::SimplexID<1>> other;
@@ -216,12 +207,34 @@ void triangulateHole(SurfaceMesh &mesh,
     other.push_back(v1);
 
     // Recurse to fill sub-holes
-    triangulateHole(mesh, boundary, fdata, iter);
-    triangulateHole(mesh, other, fdata, iter);
+    triangulateHoleHelper(mesh, boundary, fdata, edgeListIT);
+    triangulateHoleHelper(mesh, other, fdata, edgeListIT);
+}
+
+void triangulateHole(SurfaceMesh &mesh,
+        std::vector<SurfaceMesh::SimplexID<1>> &sortedVerts,
+        const Face &fdata,
+        std::vector<SurfaceMesh::SimplexID<2>> &holeEdges){
+    // backup sortedVerts
+    std::vector<SurfaceMesh::SimplexID<1>> backupVerts = sortedVerts;
+
+    // Triangulate the hole
+    triangulateHoleHelper(mesh, sortedVerts, fdata, std::back_inserter(holeEdges));
+
+    std::set<int> keys;
+    for (auto vertexID : backupVerts){
+        keys.insert(mesh.get_name(vertexID)[0]);
+    }
+
+    orientHoleHelper<std::integral_constant<size_t, 1>>::apply(mesh, std::move(keys), backupVerts.begin(), backupVerts.end());
+
+    if(!computeHoleOrientation(mesh, holeEdges)){
+        throw std::runtime_error("ERROR(triangulateHole): Mesh became non-orientable");
+    }
 }
 
 bool computeHoleOrientation(SurfaceMesh &mesh,
-        const std::vector<SurfaceMesh::SimplexID<2> > &&edgeList)
+        const std::vector<SurfaceMesh::SimplexID<2> > &edgeList)
 {
     std::deque<SurfaceMesh::SimplexID<2> > frontier;
     std::set<SurfaceMesh::SimplexID<2> > visited;
@@ -624,26 +637,33 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
 }
 
 void findHoles(const SurfaceMesh& mesh,
-    std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList)
+        std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList)
 {
-    std::set<SurfaceMesh::SimplexID<2>> unvisitedBdryEdges;
+    // TODO: (1) Update this to return a pair of edge ring and vertex ring
+    std::set<SurfaceMesh::SimplexID<2>> bdryEdges;
 
     // Collect all of the boundary edges into boundarySet
     for(auto edgeID : mesh.get_level_id<2>()){
         auto cover = mesh.get_cover(edgeID);
         if (cover.size() == 1){
-            unvisitedBdryEdges.insert(edgeID);
+            bdryEdges.insert(edgeID);
         }
     }
 
     // Connect the edges into rings...
-    while(unvisitedBdryEdges.size() > 0){
+    while(bdryEdges.size() > 0){
+        // Container to store ring
         std::vector<SurfaceMesh::SimplexID<2>> bdryRing;
-        auto it = unvisitedBdryEdges.begin();
+        // Pop first edge from remaining edges
+        auto it = bdryEdges.begin();
         auto firstEdge = *it;
         bdryRing.push_back(firstEdge);
-        unvisitedBdryEdges.erase(it);
-        if(!findHoleHelper(mesh, unvisitedBdryEdges, bdryRing)){
+        bdryEdges.erase(it);
+
+        std::vector<SurfaceMesh::SimplexID<1>> visitedVerts;
+        mesh.down(firstEdge, std::back_inserter(visitedVerts));
+
+        if(!findHoleHelper(mesh, bdryEdges, visitedVerts, bdryRing)){
             throw std::runtime_error("Couldn't connect ring");
         }
         holeList.push_back(bdryRing);
@@ -652,10 +672,12 @@ void findHoles(const SurfaceMesh& mesh,
 
 bool findHoleHelper(const SurfaceMesh&mesh,
         std::set<SurfaceMesh::SimplexID<2>>& unvisitedBdryEdges,
+        std::vector<SurfaceMesh::SimplexID<1>>& visitedVerts,
         std::vector<SurfaceMesh::SimplexID<2>>& bdryRing)
 {
     auto firstEdge = bdryRing.front();
     auto currEdge = bdryRing.back();
+    auto currVert = visitedVerts.back();
 
     std::vector<SurfaceMesh::SimplexID<2>> nbors;
     neighbors(mesh,currEdge, std::back_inserter(nbors));
@@ -664,26 +686,88 @@ bool findHoleHelper(const SurfaceMesh&mesh,
     for (auto nbor : nbors){
         auto result = unvisitedBdryEdges.find(nbor);
         if (result != unvisitedBdryEdges.end()){
-            auto tmpEdge = *result;
-            bdryRing.push_back(tmpEdge);
-            unvisitedBdryEdges.erase(result);
-            if(findHoleHelper(mesh, unvisitedBdryEdges, bdryRing)){
+            auto nextEdge = *result;
+            std::array<SurfaceMesh::SimplexID<1>, 2> verts;
+            mesh.down(nextEdge, verts.begin());
+            int found = 0;
+            for( ; found < 2; ++found){
+                if(verts[found] == currVert)
+                    break;
+            }
+
+            SurfaceMesh::SimplexID<1> nextVert;
+
+            if (found == 0){
+                nextVert = verts[1];
+            }
+            else if (found == 1){
+                nextVert = verts[0];
+            }
+            else{
+                continue;
+            }
+
+            // If this closes the ring...
+            if(nextVert == visitedVerts.front()){
+                bdryRing.push_back(nextEdge);
+                unvisitedBdryEdges.erase(result);
                 return true;
             }
-        }
-    }
 
-    // No next edge found. Check if ring is complete
-    for (auto nbor : nbors){
-        if (nbor == firstEdge){
-            return true;
+            // Check if we have visited the next vertex already
+            auto visited = std::find(visitedVerts.begin(), visitedVerts.end(), nextVert);
+            if(visited == visitedVerts.end()){
+                visitedVerts.push_back(nextVert);
+                bdryRing.push_back(nextEdge);
+                unvisitedBdryEdges.erase(result);
+
+                if(findHoleHelper(mesh, unvisitedBdryEdges, visitedVerts, bdryRing)){
+                    return true;
+                }
+            }
         }
     }
 
     // Ring isn't complete. Backtrack...
     unvisitedBdryEdges.insert(currEdge);
+    visitedVerts.pop_back();
     bdryRing.pop_back();
     return false;
+}
+
+void edgeRingToVertices(const SurfaceMesh &mesh,
+        std::vector<SurfaceMesh::SimplexID<2>>& edgeRing,
+        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<1>>> iter){
+    auto edgeRingIT = edgeRing.begin();
+    std::array<SurfaceMesh::SimplexID<1>, 2> first, next;
+    SurfaceMesh::SimplexID<1> prevVertex;
+
+    mesh.down(*edgeRingIT++, first.begin());
+    mesh.down(*edgeRingIT, next.begin());
+
+    // Set the first edge
+    if(first[0] != next[0] && first[0] != next[1]){
+        *iter++ = first[0];
+        *iter++ = first[1];
+        prevVertex = first[1];
+    }else{
+        *iter++ = first[1];
+        *iter++ = first[0];
+        prevVertex = first[0];
+    }
+
+    // Go through remaining Edges
+    for( ; edgeRingIT != edgeRing.end()-1; ++edgeRingIT){
+        mesh.down(*edgeRingIT, next.begin());
+        if(next[0] == prevVertex){
+            *iter++ = next[1];
+            prevVertex = next[1];
+        }
+        else{
+            *iter++ = next[0];
+            prevVertex = next[0];
+        }
+    }
 }
 
 } // END namespace surfacemesh_detail
