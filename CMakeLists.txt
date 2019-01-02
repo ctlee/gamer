@@ -35,7 +35,7 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.c
 #####################################################################
 set(PRERELEASE ON)
 set(PRE_VERSION alpha)
-project(GAMer VERSION 2.0.0)
+project(GAMer VERSION 2.0.1)
 
 # Require c++14 and standard libraries
 set(CMAKE_CXX_STANDARD 14)

@@ -68,7 +68,7 @@ struct Face {
   Face(int orient, int marker, bool selected) {}
   Face(int marker, bool selected) {} // Shadows full constructor
   int  marker;   /**< @brief Marker */
-  int orientation;
+  int  orientation;
   bool selected; /**< @brief Selection flag */
 
   %extend{
@@ -258,18 +258,23 @@ void correctNormals(SurfaceMesh &mesh){
 %pythoncode %{
   def smooth(mesh, max_min_angle=15, min_max_angle=150,
              max_iter=6, preserve_ridges=False):
-    "Smooth the mesh"
+    """Smooth the mesh"""
     return smoothMesh(mesh, max_min_angle, min_max_angle,
             max_iter, preserve_ridges)
 
 
-  def coarse_flat(mesh, rate=0.016):
-    "Coarse flat areas"
-    coarseIT(mesh, rate, 0.5, 0)
+  def coarse_flat(mesh, rate=0.016, numiter=1):
+    """Coarse flat areas"""
+    if not isinstance(rate, (int, float)) or rate <= 0:
+      raise TypeError("expected a positive scalar for the 'rate' argument")
+    if not isinstance(numiter, int) or numiter < 1:
+      raise TypeError("expected a positive scalar for the 'numiter' argument")
+    for i in range(numiter):
+      coarseIT(mesh, rate, 0.5, 0)
 
 
   def coarse_dense(mesh, rate=1.6, numiter=1):
-    "Coarse dense areas"
+    """Coarse dense areas"""
     if not isinstance(rate, (int, float)) or rate <= 0:
       raise TypeError("expected a positive scalar for the 'rate' argument")
     if not isinstance(numiter, int) or numiter < 1:

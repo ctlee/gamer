@@ -26,6 +26,7 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
 import gamer.pygamer as g
 import gamer_addon.gamer_gui
 
+from gamer_addon.util import *
 # python imports
 import os
 import numpy as np
@@ -66,6 +67,7 @@ class GAMER_OT_tet_domain_add(bpy.types.Operator):
 
     def execute(self, context):
         context.scene.gamer.tet_group.add_tet_domain(context)
+        self.report({'INFO'}, "Added a new Tet domain")
         return {'FINISHED'}
 
 class GAMER_OT_tet_domain_remove(bpy.types.Operator):
@@ -374,7 +376,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
             for d in self.domain_list:
                 obj = bpy.data.objects[d.object_name]
-                gmesh = gamer_addon.gamer_gui.blenderToGamer(obj=obj, map_boundaries=True)
+                result, gmesh = blenderToGamer(obj=obj, map_boundaries=True)
                 if gmesh == None:
                     print( "blenderToGamer returned a gmesh of None" )
                 else:

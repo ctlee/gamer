@@ -80,9 +80,13 @@ add_custom_target(stage_files
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ./plugin/gamer_addon
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gamer_gui.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gameraddon_main.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/tetrahedralization.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/markers.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/versions.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/surfacemesh_ops.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/ui.py
     COMMENT "Staging the GAMer Blender addon files"
     VERBATIM
 )

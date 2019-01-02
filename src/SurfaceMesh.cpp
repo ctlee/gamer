@@ -411,6 +411,8 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
     return norm;
 }
 
+
+// TODO: (0) Allow for smoothing of specific regions.
 bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges){
     bool smoothed;
     double minAngle, maxAngle;
