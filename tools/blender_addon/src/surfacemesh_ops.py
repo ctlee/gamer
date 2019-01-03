@@ -121,6 +121,20 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
             self.report({"ERROR"}, result)
             return {'CANCELLED'}
 
+class GAMER_OT_refine_mesh(bpy.types.Operator):
+    bl_idname = "gamer.refine_mesh"
+    bl_label = "Quadrisect mesh"
+    bl_description = "Refine the mesh by quadisction"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        success, result = context.scene.gamer.surfmesh_procs.refine_mesh(context)
+        if success:
+            self.report({"INFO"}, "GAMer: Refine Mesh complete")
+            return {'FINISHED'}
+        else:
+            self.report({"ERROR"}, result)
+            return {'CANCELLED'}
 
 class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     dense_rate = FloatProperty(
@@ -192,6 +206,16 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         if success:
             try:
                 g.fillHoles(result)
+            except Exception as e:
+                return (False, str(e))
+            return gamerToBlender(result)
+        return (success, result)
+
+    def refine_mesh(self, context):
+        success, result = blenderToGamer()
+        if success:
+            try:
+                g.refine_mesh(result)
             except Exception as e:
                 return (False, str(e))
             return gamerToBlender(result)

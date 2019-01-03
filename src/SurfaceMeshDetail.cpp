@@ -639,7 +639,7 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
 void findHoles(const SurfaceMesh& mesh,
         std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList)
 {
-    // TODO: (1) Update this to return a pair of edge ring and vertex ring
+    // TODO: (25) Update this to return a pair of edge ring and vertex ring
     std::set<SurfaceMesh::SimplexID<2>> bdryEdges;
 
     // Collect all of the boundary edges into boundarySet

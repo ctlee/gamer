@@ -87,6 +87,13 @@ class MESH_OT_MeshStats_Info_Volume(Operator):
     bl_idname = "mesh.meshstats_info_volume"
     bl_label = "MeshStats Info Volume"
 
+    @staticmethod
+    def main_check(obj,info):
+        bm = bmesh_copy_from_object(obj, apply_modifiers=True)
+        volume = bm.calc_volume()
+        bm.free()
+        info.append(("Volume: %s" % clean_float("%.8f" % volume), None))
+
     def execute(self, context):
         scene = context.scene
         obj = context.active_object
@@ -96,7 +103,7 @@ class MESH_OT_MeshStats_Info_Volume(Operator):
         bm.free()
 
         info = []
-        info.append(("Volume: %s³" % clean_float("%.8f" % volume), None))
+        info.append(("Volume: %s" % clean_float("%.8f" % volume), None))
 
         report.update(*info)
         return {'FINISHED'}
@@ -107,10 +114,17 @@ class MESH_OT_MeshStats_Info_Area(Operator):
     bl_idname = "mesh.meshstats_info_area"
     bl_label = "MeshStats Info Area"
 
+    @staticmethod
+    def main_check(obj, info):
+        bm = bmesh_copy_from_object(obj, apply_modifiers=True)
+        area = bmesh_calc_area(bm)
+        bm.free()
+        info.append(("Area: %s" % clean_float("%.8f" % area), None))
+
+
     def execute(self, context):
         scene = context.scene
         unit = scene.unit_settings
-        scale = 1.0 if unit.system == 'NONE' else unit.scale_length
         obj = context.active_object
 
         bm = bmesh_copy_from_object(obj, apply_modifiers=True)
@@ -118,12 +132,7 @@ class MESH_OT_MeshStats_Info_Area(Operator):
         bm.free()
 
         info = []
-        if unit.system == 'METRIC':
-            info.append(("Area: %s cm²" % clean_float("%.4f" % ((area * (scale ** 2.0)) / (0.01 ** 2.0))), None))
-        elif unit.system == 'IMPERIAL':
-            info.append(("Area: %s \"²" % clean_float("%.4f" % ((area * (scale ** 2.0)) / (0.0254 ** 2.0))), None))
-        else:
-            info.append(("Area: %s²" % clean_float("%.8f" % area), None))
+        info.append(("Area: %s" % clean_float("%.8f" % area), None))
 
         report.update(*info)
         return {'FINISHED'}
@@ -203,18 +212,20 @@ class MESH_OT_MeshStats_Check_Degenerate(Operator):
         import array
 
         scene = bpy.context.scene
-        print_3d = scene.print_3d
-        threshold = print_3d.threshold_zero
+        threshold = 0.0001
+        # TODO: (0) Update this to store locally in GAMer
+        # print_3d = scene.print_3d
+        # threshold = print_3d.threshold_zero
 
         bm = bmesh_copy_from_object(obj, transform=False, triangulate=False)
 
         faces_zero = array.array('i', (i for i, ele in enumerate(bm.faces) if ele.calc_area() <= threshold))
         edges_zero = array.array('i', (i for i, ele in enumerate(bm.edges) if ele.calc_length() <= threshold))
 
-        info.append(("Zero Faces: %d" % len(faces_zero),
+        info.append(("Zero Area Faces: %d" % len(faces_zero),
                     (bmesh.types.BMFace, faces_zero)))
 
-        info.append(("Zero Edges: %d" % len(edges_zero),
+        info.append(("Zero Len. Edges: %d" % len(edges_zero),
                     (bmesh.types.BMEdge, edges_zero)))
 
         bm.free()
@@ -231,6 +242,8 @@ class MESH_OT_MeshStats_Check_All(Operator):
     bl_label = "MeshStats Check All"
 
     check_cls = (
+        MESH_OT_MeshStats_Info_Volume,
+        MESH_OT_MeshStats_Info_Area,
         MESH_OT_MeshStats_Check_Solid,
         MESH_OT_MeshStats_Check_Intersections,
         MESH_OT_MeshStats_Check_Degenerate,
@@ -240,6 +253,7 @@ class MESH_OT_MeshStats_Check_All(Operator):
         obj = context.active_object
 
         info = []
+
         for cls in self.check_cls:
             cls.main_check(obj, info)
 

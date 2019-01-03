@@ -99,11 +99,13 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
         smprops = context.scene.gamer.surfmesh_procs
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
-            row = layout.row()
-            row.label(text="GAMer mesh operations")
+            col = layout.column()
+            col.label(text="GAMer mesh operations")
+            col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
+            col.operator("gamer.fill_holes", icon='BORDER_LASSO')
+            # col.operator("gamer.refine_mesh", icon='BORDER_LASSO')
 
             col = layout.column(align=True)
-            col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
             rowsub = col.row(align=True)
             rowsub.operator("gamer.coarse_dense",icon='OUTLINER_OB_LATTICE')
             rowsub.prop(smprops, "dense_rate")
@@ -113,21 +115,18 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
             rowsub.prop(smprops, "flat_rate")
             rowsub.prop(smprops, "flat_iter")
 
-            rowsub = col.row(align=True)
-            rowsub.operator("gamer.smooth", icon='OUTLINER_OB_MESH')
-            rowsub.prop(smprops, "preserve_ridges", expand=True)
-            rowsub.prop(smprops, "max_min_angle")
-            rowsub.prop(smprops, "smooth_iter")
-
-            row = layout.row()
-            row.operator("gamer.fill_holes", icon='BORDER_LASSO')
+            row = layout.row(align = True)
+            row.operator("gamer.smooth", icon='OUTLINER_OB_MESH')
+            row.prop(smprops, "preserve_ridges", expand=True)
+            row.prop(smprops, "max_min_angle")
+            row.prop(smprops, "smooth_iter")
 
             col = layout.column()
-            col.operator("mesh.meshstats_check_all", text="Check Mesh Stats")
+            col.operator("mesh.meshstats_check_all", text="Generate Mesh Report")
 
             GAMER_PT_surfacemesh.draw_report(layout, context)
         else:
-            layout.label(text="Select a mesh object to use GAMer boundary marking features", icon='HAND')
+            layout.label(text="Select a mesh object to use GAMer mesh processing features", icon='HAND')
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):
     bl_label = "Boundary Marking"
@@ -181,7 +180,11 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
                 # Row to update marker value
                 row = layout.row()
                 row.label(text="Marker:")
-                row.prop(active_bnd, "marker", text="") # suppress defaul txt
+                row.prop(active_bnd, "marker", text="") # suppress default txt
+
+                row = layout.row()
+                if active_obj.mode == 'OBJECT':
+                    row.label(text="Change to Edit Mode to enable boundary assignment", icon='INFO')
 
             if active_obj.mode == 'EDIT' and active_bnd:
                 row = layout.row()

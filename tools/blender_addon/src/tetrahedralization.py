@@ -41,22 +41,22 @@ def unregister():
     bpy.utils.unregister_module(__name__)
 
 
-# Tetrahedralization Operators:
-class GAMER_OT_set_tet_path(bpy.types.Operator):
-    bl_idname = "gamer.set_tet_path"
-    bl_label = "Set Tetrahedralization Path"
-    bl_description = ("Set Tetrahedralization Path")
-    bl_options = {'REGISTER'}
+# # Tetrahedralization Operators:
+# class GAMER_OT_set_tet_path(bpy.types.Operator):
+#     bl_idname = "gamer.set_tet_path"
+#     bl_label = "Set Tetrahedralization Path"
+#     bl_description = ("Set Tetrahedralization Path")
+#     bl_options = {'REGISTER'}
 
-    filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
+#     filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
 
-    def execute(self, context):
-        context.scene.gamer.tet_group.tet_path = self.filepath
-        return {'FINISHED'}
+#     def execute(self, context):
+#         context.scene.gamer.tet_group.tet_path = self.filepath
+#         return {'FINISHED'}
 
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
+#     def invoke(self, context, event):
+#         context.window_manager.fileselect_add(self)
+#         return {'RUNNING_MODAL'}
 
 
 class GAMER_OT_tet_domain_add(bpy.types.Operator):
@@ -174,7 +174,17 @@ def check_formats_callback(self, context):
     return
 
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
-    tet_path = StringProperty ( name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files" )
+    export_path = StringProperty(
+        name="Export Directory",
+        description="Path to directory where files will be created",
+        default="./", maxlen=1024, subtype='DIR_PATH'
+        )
+    export_filebase = StringProperty(
+        name="Filename",
+        description="Base name of the files to export",
+        default="gamertetmesh", maxlen=1024, subtype='FILE_NAME'
+        )
+    # tet_path = StringProperty(name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files")
     domain_list = CollectionProperty(type=GAMerTetDomainPropertyGroup, name="Domain List")
     active_domain_index = IntProperty(name="Active Domain Index", default=0)
     next_id = IntProperty(name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization
@@ -232,9 +242,12 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 row.prop(self, "show_settings", icon='TRIA_DOWN', emboss=False)
 
                 row = box.row()
-                row.operator("gamer.set_tet_path", text="Set Output File Prefix", icon='FILESEL')
+                row.prop(self, "export_path")
                 row = box.row()
-                row.label ( self.tet_path )
+                row.prop(self, "export_filebase")
+                # row.operator("gamer.set_tet_path", text="Set Output File Prefix", icon='FILESEL')
+                # row = box.row()
+                # row.label ( self.tet_path )
 
                 row = box.row()
                 col = row.column()
@@ -242,8 +255,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 col = row.column()
                 col.prop ( self, "max_aspect_ratio" )
 
-                row = box.row()
-                row.prop ( self, "ho_mesh" )
+                # row = box.row()
+                # row.prop ( self, "ho_mesh" )
 
                 row = box.row()
                 row.label ( "Output Formats:" )
@@ -325,7 +338,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     def tetrahedralize ( self ):
         print ( "######################## Begin Tetrahedralize ########################" )
 
-        filename = self.tet_path
+        # filename = self.tet_path
+        filename = self.export_path + self.export_filebase
         if not (self.dolfin or self.diffpack or self.paraview or self.fetk):
             self.status = "Please select an output format in Tetrahedralization Settings"
             print ( self.status )

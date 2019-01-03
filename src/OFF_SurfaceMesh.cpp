@@ -190,7 +190,8 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         # v[0] ... v[Nv-1]: vertex indices
         #       in range 0..NVertices-1
 
-        TODO: This should parse the number of vertices in each face (0)
+        TODO: This should parse the number of vertices in each face (10)
+        TODO: (10) Get orientation from the OFF file
     */
     for(int i = 0; i < numFaces; i++){
         getline(fin, line);
@@ -199,8 +200,6 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
             std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
             mesh.reset();
             return mesh;
-            // CTL THIS NEXT THING IS A TEMP HACK...
-            //mesh->insert<2>({std::stoi(arr[1]), std::stoi(arr[2])});
         }
         else if(arr.size() == dimension+1){
             auto v0 = std::stoi(arr[1]);
@@ -272,10 +271,10 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
         auto orientation = (*faceNodeID).orientation;
         if (orientation == 1){
-            fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[0]] << "\n";
+            fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
         else if(orientation == -1){
-            fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
+            fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[1]] << "\n";
 
         }
         else{

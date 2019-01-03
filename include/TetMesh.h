@@ -49,7 +49,7 @@ namespace tetmesh
 struct FaceProperties
 {
     int  marker;   /**< @brief Marker */
-    bool selected; /**< @brief Selection flag */
+    // bool selected; /**< @brief Selection flag */
 };
 
 /**
@@ -59,26 +59,21 @@ struct Face : FaceProperties
 {
     /// Default constructor
     Face() {}
-    /**
-     * @brief      Constructor
-     *
-     * @param[in]  prop    Properties of a face
-     */
-    Face(FaceProperties prop)
-        : FaceProperties(prop)
-    {}
+    Face(int marker) : Face(FaceProperties{marker}) {}
+    Face(FaceProperties prop) : FaceProperties(prop) {}
 };
 
 struct CellProperties
 {
     int marker;
-    int grpID;
-    int material;
+    // int grpID;
+    // int material;
 };
 
 struct Cell : casc::Orientable, CellProperties
 {
     Cell() {}
+    Cell(int orient, int marker) : Cell(Orientable{orient}, CellProperties{marker}) {}
     Cell(Orientable orient, CellProperties prop)
         : Orientable(orient), CellProperties(prop)
     {}

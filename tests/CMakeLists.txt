@@ -63,7 +63,7 @@ add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTes
 target_link_libraries(objecttests gamershared libgtest)
 add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
 
-add_executable(scratchtest scratchtest.cpp)
-target_link_libraries(scratchtest gamershared)
+# add_executable(scratchtest scratchtest.cpp)
+# target_link_libraries(scratchtest gamershared)
 # # Profiling with gperftools
 # # target_link_libraries(scratchtest gamershared profiler)

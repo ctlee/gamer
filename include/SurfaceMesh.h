@@ -619,6 +619,7 @@ void triangulateHole(SurfaceMesh &mesh,
  */
 std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
 
+
 /**
  * @brief      Write the SurfaceMesh to file in OFF format.
  *
@@ -638,6 +639,8 @@ std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
 double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 double getVolume(const SurfaceMesh &mesh);
+bool hasHole(const SurfaceMesh &mesh);
+
 int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 

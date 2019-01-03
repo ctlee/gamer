@@ -176,7 +176,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
             angles[2] = angle(a,c,b);
         }
         catch (std::runtime_error& e){
-            throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area. Try running degenerate dissolve in Blender and ensure manifoldness.");
+            throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area.");
         }
 
         for(double angle : angles){
@@ -232,14 +232,14 @@ double getVolume(const SurfaceMesh &mesh)
 
         Vector norm;
         double tmp;
-        if ((*faceID).orientation == -1)
+        if ((*faceID).orientation == 1)
         {
             // a->b->c
             norm = cross(b, c);
             tmp  = dot(a, norm);
 
         }
-        else if ((*faceID).orientation == 1)
+        else if ((*faceID).orientation == -1)
         {
             // c->b->a
             norm = cross(b, a);
@@ -250,7 +250,10 @@ double getVolume(const SurfaceMesh &mesh)
             orientError = true;
         }
 
-        // Far less efficient but cooler way...
+        // * Probably less efficient way #1
+        // tmp = dot(a, getNormal(mesh, faceID));
+
+        // * Less efficient way #2
         // norm = getNormalFromTangent(getTangent(mesh, faceID));
         // auto wedge = a^b^c;
         // tmp = std::sqrt(wedge|wedge);
@@ -394,11 +397,11 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
     auto b = *mesh.get_simplex_up({name[1]});
     auto c = *mesh.get_simplex_up({name[2]});
 
-    if ((*faceID).orientation == -1)
+    if ((*faceID).orientation == 1)
     {
         norm = cross(c-b, a-b);
     }
-    else if ((*faceID).orientation == 1)
+    else if ((*faceID).orientation == -1)
     {
         norm = cross(a-b, c-b);
     }
@@ -651,6 +654,16 @@ void flipNormals(SurfaceMesh &mesh){
     for(auto& fdata : mesh.get_level<3>()){
         fdata.orientation *= -1;
     }
+}
+
+bool hasHole(const SurfaceMesh &mesh){
+    for(auto eID : mesh.get_level_id<2>()){
+        auto cover = mesh.get_cover(eID);
+        if(cover.size() != 2){
+            return true;
+        }
+    }
+    return false;
 }
 
 std::unique_ptr<SurfaceMesh> sphere(int order){

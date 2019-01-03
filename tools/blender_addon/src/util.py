@@ -180,15 +180,17 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
             max_idx = vertices.index(max_val)
             if max_idx != 2:
                 vertices.rotate(2-max_idx)
-            orientation = 1
+            orientation = -1    # 1 < 0 < 2
+            # 0 < 1 < 2
             if(vertices[0] < vertices[1]):
-                orientation = -1
+                orientation = 1
             gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, boundaries[face.index], False))
     # Ensure all face orientations are set
     g.init_orientation(gmesh)
     g.check_orientation(gmesh)
     vol = g.getVolume(gmesh)
-    print(vol)
+    if vol < 0:
+        return (False, "Mesh has negative volume. Recompute normals to be outward facing.")
     return (True, gmesh)
 
 
@@ -224,7 +226,7 @@ def gamerToBlender(gmesh,
 
             if face.orientation == 0:
                 return (False, "gamerToBlender: Found face with undefined orientation")
-            if face.orientation == -1:
+            if face.orientation == 1:
                 faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
             else:
                 faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
