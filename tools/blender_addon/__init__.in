@@ -37,20 +37,20 @@ if "bpy" in locals():
     import importlib
     importlib.reload(gameraddon_main)
     importlib.reload(ui)
-    importlib.reload(util)
     importlib.reload(surfacemesh_ops)
     importlib.reload(markers)
-    # importlib.reload(tetrahedralization)
+    importlib.reload(tetrahedralization)
     importlib.reload(versions)
+    improtlib.reload(meshstats)
 else:
     from . import (
             gameraddon_main,
             ui,
-            util,
             markers,
-            # tetrahedralization,
+            tetrahedralization,
             surfacemesh_ops,
             versions,
+            meshstats,
             )
 
 # General import

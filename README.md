@@ -95,4 +95,6 @@ complex data structure.
 
 * GAMer uses [GoogleTest](https://github.com/google/googletest) to handle testing.
 
+* Mesh checks in the GAMer Blender addon are inspired or borrowed from 3D Print Toolbox by Campbell Barton and Meshalyzer from CellBlender.
+
 * [Triangle](https://www.cs.cmu.edu/~quake/triangle.html) is also bundled with GAMer but not currently used.

@@ -20,10 +20,14 @@
 # ***************************************************************************
 
 import bpy
+import bmesh
+
 import numpy as np
 from collections import deque
 
 import gamer.pygamer as g
+
+# bpy.context.tool_settings.mesh_select_mode = (True, False, False)
 
 # DEFINITIONS
 UNSETID = 0
@@ -59,14 +63,22 @@ def getSelectedMesh():
     """
     Returns the first selected mesh
     """
+
     obj = bpy.context.active_object
-    if obj and obj.type == 'MESH':
-        if obj.select:
-            return (True, obj)
+    if obj:
+        if obj.type == 'MESH':
+             # Auto select object if in EDIT mode
+            # This prevents being 'selected' in EDIT mode but really unselected
+            if obj.mode == 'EDIT':
+                obj.select = True
+            if obj.select:
+                return (True, obj)
+            else:
+                return (False, "Object is not selected! Select a MESH to use this feature.")
         else:
-            return (False, "No object selected! Select a MESH to use this feature.")
+            return (False, "Active object is not a MESH. Please select a MESH to use this feature.")
     else:
-        return (False, "No active object or object is not a MESH.")
+        return (False, "No active object! Please select a MESH to use this feature.")
 
 
 def getMeshVertices(obj, get_selected_vertices=False):
@@ -117,14 +129,14 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
         # Grab vertices
         vertices, selected_vertices = getMeshVertices(obj, get_selected_vertices = True)
         # Get world location and offset each vertex with this value
-        translation = obj.location
+        # translation = obj.location # Not needed after transform.apply
         gmesh = g.SurfaceMesh()   # Init GAMer SurfaceMesh
 
         def addVertex(co, sel): # functor to addVertices
             gmesh.addVertex(
-                co[0] + translation[0],   # x position
-                co[1] + translation[1],   # y position
-                co[2] + translation[2],   # z position
+                co[0],   # x position
+                co[1],   # y position
+                co[2],   # z position
                 0,                        # marker
                 bool(sel)                 # selected flag
             )
@@ -143,8 +155,6 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
 
         # Zip args and pass to addVertex functor
         [addVertex(*args) for args in zip(vertices, selected_vertices)]
-
-
 
         ml = getMarkerLayer(obj)
         # Transfer boundary information
@@ -177,6 +187,8 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
     # Ensure all face orientations are set
     g.init_orientation(gmesh)
     g.check_orientation(gmesh)
+    vol = g.getVolume(gmesh)
+    print(vol)
     return (True, gmesh)
 
 
@@ -255,3 +267,106 @@ def gamerToBlender(gmesh,
     # Repaint boundaries
     obj.gamer.repaint_boundaries(bpy.context)
     return (True, None)
+
+
+
+## Following functions are from 3D Print Addon
+def clean_float(text):
+    # strip trailing zeros: 0.000 -> 0.0
+    index = text.rfind(".")
+    if index != -1:
+        index += 2
+        head, tail = text[:index], text[index:]
+        tail = tail.rstrip("0")
+        text = head + tail
+    return text
+
+def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifiers=False):
+    """
+    Returns a transformed, triangulated copy of the mesh
+    """
+
+    assert obj.type == 'MESH'
+
+    if apply_modifiers and obj.modifiers:
+        import bpy
+        me = obj.to_mesh(depsgraph=bpy.context.depsgraph, apply_modifiers=True)
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+        del bpy
+    else:
+        me = obj.data
+        if obj.mode == 'EDIT':
+            bm_orig = bmesh.from_edit_mesh(me)
+            bm = bm_orig.copy()
+        else:
+            bm = bmesh.new()
+            bm.from_mesh(me)
+
+    # TODO. remove all customdata layers.
+    # would save ram
+
+    if transform:
+        bm.transform(obj.matrix_world)
+
+    if triangulate:
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+
+    return bm
+
+
+def bmesh_from_object(obj):
+    """
+    Object/Edit Mode get mesh, use bmesh_to_object() to write back.
+    """
+    me = obj.data
+    is_editmode = (obj.mode == 'EDIT')
+    if is_editmode:
+        bm = bmesh.from_edit_mesh(me)
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(me)
+    return bm
+
+
+def bmesh_to_object(obj, bm):
+    """
+    Object/Edit Mode update the object.
+    """
+    me = obj.data
+    is_editmode = (obj.mode == 'EDIT')
+    if is_editmode:
+        bmesh.update_edit_mesh(me, True)
+    else:
+        bm.to_mesh(me)
+    # grr... cause an update
+    if me.vertices:
+        me.vertices[0].co[0] = me.vertices[0].co[0]
+
+
+def bmesh_calc_area(bm):
+    """
+    Calculate the surface area.
+    """
+    return sum(f.calc_area() for f in bm.faces)
+
+
+def bmesh_check_self_intersect_object(obj):
+    """
+    Check if any faces self intersect
+
+    returns an array of edge index values.
+    """
+    import array
+    import mathutils
+
+    if not obj.data.polygons:
+        return array.array('i', ())
+
+    bm = bmesh_copy_from_object(obj, transform=False, triangulate=False)
+    tree = mathutils.bvhtree.BVHTree.FromBMesh(bm, epsilon=0.00001)
+    overlap = tree.overlap(tree)
+    faces_error = {i for i_pair in overlap for i in i_pair}
+
+    return array.array('i', faces_error)

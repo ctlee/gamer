@@ -24,9 +24,9 @@ from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
 import gamer.pygamer as g
-import gamer_addon.gamer_gui
 
 from gamer_addon.util import *
+
 # python imports
 import os
 import numpy as np
@@ -70,6 +70,7 @@ class GAMER_OT_tet_domain_add(bpy.types.Operator):
         self.report({'INFO'}, "Added a new Tet domain")
         return {'FINISHED'}
 
+
 class GAMER_OT_tet_domain_remove(bpy.types.Operator):
     bl_idname = "gamer.tet_domain_remove"
     bl_label = "Remove a Tet Domain"
@@ -81,6 +82,7 @@ class GAMER_OT_tet_domain_remove(bpy.types.Operator):
         self.report({'INFO'}, "Deleted Active Tet Group")
         return {'FINISHED'}
 
+
 class GAMER_OT_tet_domain_remove_all(bpy.types.Operator):
     bl_idname = "gamer.tet_domain_remove_all"
     bl_label = "Remove a Tet Domain"
@@ -91,20 +93,6 @@ class GAMER_OT_tet_domain_remove_all(bpy.types.Operator):
         context.scene.gamer.tet_group.remove_all_tet_domains(context)
         self.report({'INFO'}, "Deleted Active Tet Group")
         return {'FINISHED'}
-
-
-class GAMER_OT_generic_button(bpy.types.Operator):
-    bl_idname = "gamer.generic_button"
-    bl_label = "Generic Button"
-    bl_description = ("Generic Button")
-    bl_options = {'REGISTER'}
-
-    def execute(self, context):
-        print ( "Executed" )
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        return self.execute(context)
 
 
 class GAMER_OT_tetrahedralize(bpy.types.Operator):
@@ -187,10 +175,6 @@ def check_formats_callback(self, context):
 
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     tet_path = StringProperty ( name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files" )
-    generic_float = FloatProperty( name="Generic Float", default=123.456, min=0.0, max=1000, precision=4, description="A Generic Float Value")
-    generic_int = IntProperty( name="Generic Int", default=5, min=1, max=10, description="A Generic Int Value")
-    generic_boolean = BoolProperty( name="Generic Bool", default=False, description="A Generic Boolean Value")
-
     domain_list = CollectionProperty(type=GAMerTetDomainPropertyGroup, name="Domain List")
     active_domain_index = IntProperty(name="Active Domain Index", default=0)
     next_id = IntProperty(name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization

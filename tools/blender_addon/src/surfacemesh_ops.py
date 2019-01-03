@@ -45,14 +45,14 @@ def unregister():
 
 class GAMER_OT_coarse_dense(bpy.types.Operator):
     bl_idname = "gamer.coarse_dense"
-    bl_label = "Coarse Dense Tris"
+    bl_label = "Coarse Dense"
     bl_description = "Decimate selected dense areas of the mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         success, result = context.scene.gamer.surfmesh_procs.coarse_dense(context)
         if success:
-            self.report({"INFO"}, "Coarse Dense complete")
+            self.report({"INFO"}, "GAMer: Coarse Dense complete")
             return {'FINISHED'}
         else:
             self.report({"ERROR"}, result)
@@ -61,14 +61,14 @@ class GAMER_OT_coarse_dense(bpy.types.Operator):
 
 class GAMER_OT_coarse_flat(bpy.types.Operator):
     bl_idname = "gamer.coarse_flat"
-    bl_label = "Coarse Flat Tris"
+    bl_label = "Coarse Flat"
     bl_description = "Decimate selected flat areas of the mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         success, result = context.scene.gamer.surfmesh_procs.coarse_flat(context)
         if success:
-            self.report({"INFO"}, "Coarse Flat complete")
+            self.report({"INFO"}, "GAMer: Coarse Flat complete")
             return {'FINISHED'}
         else:
             self.report({"ERROR"}, result)
@@ -77,14 +77,14 @@ class GAMER_OT_coarse_flat(bpy.types.Operator):
 
 class GAMER_OT_smooth(bpy.types.Operator):
     bl_idname = "gamer.smooth"
-    bl_label = "Smooth Tris"
+    bl_label = "Smooth"
     bl_description = "Smooth selected vertices of the mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         success, result = context.scene.gamer.surfmesh_procs.smooth(context)
         if success:
-            self.report({"INFO"}, "Smooth complete")
+            self.report({"INFO"}, "GAMer: Smooth complete")
             return {'FINISHED'}
         else:
             self.report({"ERROR"}, result)
@@ -93,14 +93,29 @@ class GAMER_OT_smooth(bpy.types.Operator):
 
 class GAMER_OT_normal_smooth(bpy.types.Operator):
     bl_idname = "gamer.normal_smooth"
-    bl_label = "Normal Smooth Surf"
+    bl_label = "Normal Smooth"
     bl_description = "Smooth facet normals of selected faces of the mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         success, result = context.scene.gamer.surfmesh_procs.normal_smooth(context)
         if success:
-            self.report({"INFO"}, "Normal Smooth complete")
+            self.report({"INFO"}, "GAMer: Normal Smooth complete")
+            return {'FINISHED'}
+        else:
+            self.report({"ERROR"}, result)
+            return {'CANCELLED'}
+
+class GAMER_OT_fill_holes(bpy.types.Operator):
+    bl_idname = "gamer.fill_holes"
+    bl_label = "Fill Holes"
+    bl_description = "Triangulate holes"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        success, result = context.scene.gamer.surfmesh_procs.fill_holes(context)
+        if success:
+            self.report({"INFO"}, "GAMer: Fill Holes complete")
             return {'FINISHED'}
         else:
             self.report({"ERROR"}, result)
@@ -172,5 +187,12 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         return (success, result)
 
 
-
-
+    def fill_holes(self, context):
+        success, result = blenderToGamer()
+        if success:
+            try:
+                g.fillHoles(result)
+            except Exception as e:
+                return (False, str(e))
+            return gamerToBlender(result)
+        return (success, result)

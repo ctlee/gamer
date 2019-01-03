@@ -20,7 +20,10 @@
 # ***************************************************************************
 
 import bpy
-from gamer_addon.util import UNSETID
+import bmesh
+
+import gamer_addon.report as report
+from gamer_addon.util import UNSETMARKER
 
 # we use per module class registration/unregistration
 def register():
@@ -56,10 +59,37 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
     bl_category = "GAMer"
     bl_options = {'DEFAULT_CLOSED'}
 
+    _type_to_icon = {
+        bmesh.types.BMVert: 'VERTEXSEL',
+        bmesh.types.BMEdge: 'EDGESEL',
+        bmesh.types.BMFace: 'FACESEL',
+        }
+
     # Panel will be drawn if this returns True
     @classmethod
     def poll(cls, context):
         return (context.scene is not None)
+
+    ## This method is from 3D Print Addon
+    @staticmethod
+    def draw_report(layout, context):
+        """Display Reports"""
+        info = report.info()
+        if info:
+            obj = context.edit_object
+
+            layout.label(text="Mesh Stats Report:")
+            box = layout.box()
+            col = box.column(align=False)
+            # box.alert = True
+            for i, (text, data) in enumerate(info):
+                if obj and data and data[1]:
+                    bm_type, bm_array = data
+                    col.operator("mesh.meshstats_select_report",
+                                 text=text,
+                                 icon=GAMER_PT_surfacemesh._type_to_icon[bm_type]).index = i
+                else:
+                    col.label(text=text)
 
     def draw_header(self, context):
         self.layout.label(text="", icon='OUTLINER_DATA_MESH')
@@ -70,42 +100,32 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
             row = layout.row()
-            col = row.column()
-            col.operator("gamer.coarse_dense",icon="OUTLINER_OB_LATTICE")
-            col = row.column()
-            col.prop(smprops, "dense_rate")
-            col = row.column()
-            col.prop(smprops, "dense_iter")
+            row.label(text="GAMer mesh operations")
 
-            # layout.separator()
+            col = layout.column(align=True)
+            col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
+            rowsub = col.row(align=True)
+            rowsub.operator("gamer.coarse_dense",icon='OUTLINER_OB_LATTICE')
+            rowsub.prop(smprops, "dense_rate")
+            rowsub.prop(smprops, "dense_iter")
+            rowsub = col.row(align=True)
+            rowsub.operator("gamer.coarse_flat",icon='MOD_TRIANGULATE')
+            rowsub.prop(smprops, "flat_rate")
+            rowsub.prop(smprops, "flat_iter")
 
-            row = layout.row()
-            col = row.column()
-            col.operator("gamer.coarse_flat",icon="MOD_TRIANGULATE")
-            col = row.column()
-            col.prop(smprops, "flat_rate")
-            col = row.column()
-            col.prop(smprops, "flat_iter")
-
-            # layout.separator()
-
-            row = layout.row()
-            col = row.column()
-            col.operator("gamer.smooth",icon="OUTLINER_OB_MESH")
-            col = row.column()
-            col.prop(smprops, "max_min_angle")
-            col = row.column()
-            col.prop(smprops, "smooth_iter")
+            rowsub = col.row(align=True)
+            rowsub.operator("gamer.smooth", icon='OUTLINER_OB_MESH')
+            rowsub.prop(smprops, "preserve_ridges", expand=True)
+            rowsub.prop(smprops, "max_min_angle")
+            rowsub.prop(smprops, "smooth_iter")
 
             row = layout.row()
-            row.prop(smprops, "preserve_ridges", expand=True)
+            row.operator("gamer.fill_holes", icon='BORDER_LASSO')
 
-            # layout.separator()
+            col = layout.column()
+            col.operator("mesh.meshstats_check_all", text="Check Mesh Stats")
 
-            row = layout.row()
-            col = row.column()
-            col.operator("gamer.normal_smooth",icon="SMOOTHCURVE")
-
+            GAMER_PT_surfacemesh.draw_report(layout, context)
         else:
             layout.label(text="Select a mesh object to use GAMer boundary marking features", icon='HAND')
 
@@ -129,7 +149,7 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
             row = layout.row()
-            row.label("Unmarked marker value = %d"%(UNSETID))
+            row.label("Unmarked marker value = %d"%(UNSETMARKER))
             row = layout.row()
             row.prop(bpy.data.materials['bnd_unset_mat'], 'diffuse_color', text = "Unmarked boundary color")
 
