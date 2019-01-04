@@ -29,12 +29,21 @@ find_package(PythonInterp REQUIRED)
 
 # Then use it to inform pythonlibs
 find_package(PythonLibs REQUIRED)
-# message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
-# message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
-# message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
+message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
+message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
+message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
 
 if(NOT ${PYTHON_VERSION_STRING} VERSION_EQUAL ${PYTHONLIBS_VERSION_STRING})
     message(FATAL_ERROR "Python interpreter and libs versions do not match")
+endif()
+
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import sys; print(sys.maxsize > 2**32)"
+    OUTPUT_VARIABLE is_interp_x64
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if(NOT ${is_interp_x64})
+    message(FATAL_ERROR "Python interpreter is not 64bits.")
 endif()
 
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
