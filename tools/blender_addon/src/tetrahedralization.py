@@ -23,8 +23,8 @@ import bpy
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, \
     FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, \
     PointerProperty, StringProperty, BoolVectorProperty
-import gamer.pygamer as g
 
+import gamer_addon.pygamer as g
 from gamer_addon.util import *
 
 # python imports

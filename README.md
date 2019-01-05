@@ -45,9 +45,10 @@ For Windows, we support building using Microsoft Visual Studio (MSVS) through th
 mkdir build64
 cd build64
 cmake -DBUILD_BLENDER=TRUE -G "Visual Studio 15 2017 Win64" ..
-cd ..
-cmake --build build64 --config Release
+cmake --build . --config Release
 ```
+If you get an `ImportError: DLL load failed` you are likely linking a different python library version than Blender's bundled python.
+We recommend using Anaconda to obtain a python version matching Blender.
 
 ### Additional Options
 To enable these options append the flags to your initial CMake function call

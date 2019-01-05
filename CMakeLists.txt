@@ -157,7 +157,7 @@ if(BUILD_BLENDER)
         ALL
         COMMAND ${CMAKE_COMMAND} -E tar "cfv"
             ../${ZIPNAME} --format=zip
-            ./gamer ./gamer_addon
+            ./gamer_addon
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/plugin
         COMMENT "Zipping up addon components"
         VERBATIM

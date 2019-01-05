@@ -25,7 +25,7 @@ import bmesh
 import numpy as np
 from collections import deque
 
-import gamer.pygamer as g
+import gamer_addon.pygamer as g
 
 # bpy.context.tool_settings.mesh_select_mode = (True, False, False)
 
