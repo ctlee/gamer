@@ -20,14 +20,13 @@
 # ***************************************************************************
 
 import bpy
+import bmesh
 from bpy.props import (
         BoolProperty, CollectionProperty, EnumProperty,
         FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty,
         PointerProperty, StringProperty, BoolVectorProperty)
 
-from gamer_addon.util import (ObjectMode, getMarkerLayer,
-    UNSETID, UNSETMARKER, materialNamer, getBoundaryMaterial)
-
+from gamer_addon.util import *
 
 # we use per module class registration/unregistration
 def register():
@@ -351,20 +350,27 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
 
     def select_boundary_faces(self, context):
-        mesh = context.active_object.data
+        obj = context.active_object
         face_set = self.get_boundary_faces(context)
-        with ObjectMode():
-            for f in face_set:
-                mesh.polygons[f].select = True
+
+        bm = bmesh_from_object(obj)
+        bm.faces.ensure_lookup_table()
+        for f in face_set:
+            bm.faces[f].select_set(True)
+
+        bmesh_to_object(obj, bm)
 
 
     def deselect_boundary_faces(self, context):
-        mesh = context.active_object.data
-        face_set = self.get_boundary_faces(context)
-        with ObjectMode():
-            for f in face_set:
-                mesh.polygons[f].select = False
+        obj = context.active_object
 
+        face_set = self.get_boundary_faces(context)
+        bm = bmesh_from_object(obj)
+        bm.faces.ensure_lookup_table()
+        for f in face_set:
+            bm.faces[f].select_set(False)
+
+        bmesh_to_object(obj,bm)
 
     def get_boundary_faces(self, context):
         """
@@ -408,8 +414,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     #         toObject.gamer.copyBoundary(toObject, bdry)
 
     # TODO: (10) Enforce MCell boundary naming conventions
-    def check_boundary_name(self, bnd_name_list):
-        pass
+    # def check_boundary_name(self, bnd_name_list):
     #     status = ""
     #     # Check for duplicate boundary name
     #     if bnd_name_list.count(self.name) > 1:

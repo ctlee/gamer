@@ -32,6 +32,7 @@ def register():
 def unregister():
     bpy.utils.unregister_module(__name__)
 
+
 class GAMER_PT_versionerror(bpy.types.Panel):
     bl_label = "GAMer Version Mismatch"
     bl_space_type = 'VIEW_3D'

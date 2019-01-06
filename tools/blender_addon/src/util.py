@@ -30,7 +30,7 @@ import gamer_addon.pygamer as g
 # bpy.context.tool_settings.mesh_select_mode = (True, False, False)
 
 # DEFINITIONS
-UNSETID = 0
+UNSETID = 0     # Default should match MeshPolygonIntProperty default
 UNSETMARKER = -1
 materialNamer = lambda bnd_id: "%s_mat"%(bnd_id)
 ##
@@ -54,16 +54,16 @@ def getMarkerLayer(obj):
     if obj.mode != 'OBJECT':
         raise RuntimeError("Blender Layers (Markers) can only be accessed in 'OBJECT' mode.")
     markerLayer = obj.data.polygon_layers_int.get('marker')
+    # If the layer doesn't exist yet, create it!
     if not markerLayer:
         markerLayer = obj.data.polygon_layers_int.new('marker')
     return markerLayer.data
 
 
-def getSelectedMesh():
+def getSelectedMesh(report):
     """
-    Returns the first selected mesh
+    Returns the active object if it is a mesh or None
     """
-
     obj = bpy.context.active_object
     if obj:
         if obj.type == 'MESH':
@@ -72,13 +72,14 @@ def getSelectedMesh():
             if obj.mode == 'EDIT':
                 obj.select = True
             if obj.select:
-                return (True, obj)
+                return obj
             else:
-                return (False, "Object is not selected! Select a MESH to use this feature.")
+                report({'ERROR'}, "Object is not selected! Select a MESH to use this feature.")
         else:
-            return (False, "Active object is not a MESH. Please select a MESH to use this feature.")
+            report({'ERROR'}, "Active object is not a MESH. Please select a MESH to use this feature.")
     else:
-        return (False, "No active object! Please select a MESH to use this feature.")
+        report({'ERROR'}, "No active object! Please select a MESH to use this feature.")
+    return None
 
 
 def getMeshVertices(obj, get_selected_vertices=False):
@@ -108,28 +109,26 @@ def createMesh(mesh_name, verts, faces):
     return mesh
 
 
-def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=False):
+def blenderToGamer(report, obj=None, map_boundaries=False):
     """
     Convert object to GAMer mesh.
 
-    check_for_vertex_selection: True if selected vertices should be checked
     map_boundaries: True if boundary values should be mapped to markers
                     instead of boundary_id
+
+    @Returns    gamer.SurfaceMesh object or None
     """
-    success = True
     # Get the selected mesh
     if not obj:
-        success, obj = getSelectedMesh()
-    if not success:
-        # If error, forward string along
-        return (success, obj)
+        obj = getSelectedMesh(report)
+        # Ensure object is good
+        if not obj:
+            return False
 
     with ObjectMode():
-        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         # Grab vertices
         vertices, selected_vertices = getMeshVertices(obj, get_selected_vertices = True)
         # Get world location and offset each vertex with this value
-        # translation = obj.location # Not needed after transform.apply
         gmesh = g.SurfaceMesh()   # Init GAMer SurfaceMesh
 
         def addVertex(co, sel): # functor to addVertices
@@ -137,13 +136,9 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
                 co[0],   # x position
                 co[1],   # y position
                 co[2],   # z position
-                0,                        # marker
+                0,
                 bool(sel)                 # selected flag
             )
-
-        # Check we have vertices selected
-        if check_for_vertex_selection and not selected_vertices:
-            return (False, "No vertices are selected.")
 
         # If all vertices are selected
         if len(selected_vertices) == len(vertices):
@@ -173,7 +168,8 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
         for face in faces:
             vertices = deque(face.vertices)
             if len(vertices) != 3:
-                return (False, "Encountered a non-triangular face. GAMer only works with triangulated meshes.")
+                report({'ERROR'}, "Encountered a non-triangular face. GAMer only works with triangulated meshes.")
+                return None
 
             # Get the orientation from Blender
             max_val = max(vertices)
@@ -190,22 +186,23 @@ def blenderToGamer(obj=None, check_for_vertex_selection=False, map_boundaries=Fa
     g.check_orientation(gmesh)
     vol = g.getVolume(gmesh)
     if vol < 0:
-        return (False, "Mesh has negative volume. Recompute normals to be outward facing.")
-    return (True, gmesh)
+        report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
+        return None
+    return  gmesh
 
 
-def gamerToBlender(gmesh,
+def gamerToBlender(report, gmesh,
         obj = None,
         mesh_name="gamer_improved"):
     # Check arguments
     if not isinstance(gmesh, g.SurfaceMesh):
-        return (False, "gamerToBlender expected a SurfaceMesh")
+        report({'ERROR'}, "gamerToBlender expected a pygamer.surfacemesh object")
+        return False
 
     if not obj:
-        success, obj = getSelectedMesh()
-    if not success:
-        # If error, forward string along
-        return (success, obj)
+        obj = getSelectedMesh(report)
+        if not obj:
+            return False
 
     with ObjectMode():
         verts = []      # Array of vertex coordinates
@@ -225,7 +222,8 @@ def gamerToBlender(gmesh,
             face = fid.data()
 
             if face.orientation == 0:
-                return (False, "gamerToBlender: Found face with undefined orientation")
+                report({'ERROR'}, "gamerToBlender: Found face with undefined orientation")
+                return False
             if face.orientation == 1:
                 faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
             else:
@@ -249,26 +247,27 @@ def gamerToBlender(gmesh,
         #     currObj = obj
         #     print("Create_new_mesh = False")
 
-        orig_mesh = obj.data
-        bmesh = createMesh('gamer_tmp', verts, faces)
-        obj.data = bmesh
+        # Save old mesh data...
+        # Can't delete yet or object goes out of context
+        oldmesh = obj.data
+        # Create new mesh and delete old
+        newmesh = createMesh(mesh_name, verts, faces)
+        obj.data = newmesh
+        bpy.data.meshes.remove(oldmesh)
+
         ml = getMarkerLayer(obj)
         for i, marker in enumerate(markersList):
             ml[i].value = marker
 
-        bpy.data.meshes.remove(orig_mesh)
-        bmesh.name = mesh_name
-
-
         def toggle(vert, val):
             vert = val
 
-        [toggle(v.select,False) for v in bmesh.vertices if v.index in un_selected_vertices]
+        [toggle(v.select,False) for v in newmesh.vertices if v.index in un_selected_vertices]
         obj.select = True
 
     # Repaint boundaries
     obj.gamer.repaint_boundaries(bpy.context)
-    return (True, None)
+    return True
 
 
 
@@ -292,7 +291,7 @@ def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifier
 
     if apply_modifiers and obj.modifiers:
         import bpy
-        me = obj.to_mesh(depsgraph=bpy.context.depsgraph, apply_modifiers=True)
+        me = obj.to_mesh(bpy.context.scene, apply_modifiers=True, settings='PREVIEW')
         bm = bmesh.new()
         bm.from_mesh(me)
         bpy.data.meshes.remove(me)

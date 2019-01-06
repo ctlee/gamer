@@ -104,8 +104,6 @@ struct Face : casc::Orientable, FaceProperties
  */
 struct Global
 {
-    /// Is the SurfaceMesh closed or not.
-    bool  closed;
     /// Domain marker to be used when tetrahedralizing.
     int   marker;
     /// Volume constraint of the tetrahedralized domain.

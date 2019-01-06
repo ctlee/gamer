@@ -500,10 +500,18 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     // Assuming that the mesh is manifold and edge has been vetted for flipping
     auto name = mesh.get_name(edgeID);
     auto up   = mesh.get_cover(edgeID);
+
+    std::array<SurfaceMesh::SimplexID<3>, 2> faces;
+    mesh.up(edgeID, faces.begin());
+
+    auto fdata = Face();
+    if((*faces[0]).marker == (*faces[1]).marker){
+        fdata.marker = (*faces[0]).marker;
+    }
+
     mesh.remove<2>({name[0], name[1]});
-    mesh.insert<3>({name[0], up[0], up[1]});
-    mesh.insert<3>({name[1], up[0], up[1]});
-    // TODO: this gets rid of boundary markings...
+    mesh.insert<3>({name[0], up[0], up[1]}, fdata);
+    mesh.insert<3>({name[1], up[0], up[1]}, fdata);
 }
 
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)

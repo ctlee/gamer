@@ -75,10 +75,6 @@ class MESH_OT_MeshStats_Select_Report(Operator):
         except:
             # possible arrays are out of sync
             self.report({'WARNING'}, "Report is out of date, re-run check")
-
-        # cool, but in fact annoying
-        # bpy.ops.view3d.view_selected(use_all_regions=False)
-
         return {'FINISHED'}
 
 
