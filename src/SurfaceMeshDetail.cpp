@@ -504,7 +504,8 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     std::array<SurfaceMesh::SimplexID<3>, 2> faces;
     mesh.up(edgeID, faces.begin());
 
-    auto fdata = Face();
+    // Assume flipped edges are always selected
+    auto fdata = Face(0, true);
     if((*faces[0]).marker == (*faces[1]).marker){
         fdata.marker = (*faces[0]).marker;
     }
@@ -512,6 +513,7 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     mesh.remove<2>({name[0], name[1]});
     mesh.insert<3>({name[0], up[0], up[1]}, fdata);
     mesh.insert<3>({name[1], up[0], up[1]}, fdata);
+    (*mesh.get_simplex_up({up[0], up[1]})).selected = true;
 }
 
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)

@@ -99,6 +99,13 @@ struct Face : casc::Orientable, FaceProperties
 };
 #endif // IFNDEF SWIG
 
+struct Edge{
+    bool selected;
+    // Default constructor
+    Edge() : Edge(0) {}
+    Edge(bool select) : selected(select) {}
+};
+
 /**
  * @brief      Type for containing root metadata
  */
@@ -124,7 +131,7 @@ struct complex_traits
     /// The index type
     using KeyType = int;
     /// The types of each node
-    using NodeTypes = util::type_holder<Global, Vertex, void, Face>;
+    using NodeTypes = util::type_holder<Global, Vertex, Edge, Face>;
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable>;
 };
@@ -461,74 +468,76 @@ void selectFlipEdges(const SurfaceMesh &mesh,
 
     for (auto edgeID : mesh.get_level_id<2>())
     {
-        if (!ignoredEdges.count(edgeID))
-        {
-            auto up = mesh.get_cover(edgeID);
-            // The mesh is not a surface mesh...
-            if (up.size() > 2)
+        if ((*edgeID).selected == true){
+            if (!ignoredEdges.count(edgeID))
             {
-                // std::cerr << "This edge participates in more than 2 faces. "
-                //           << "Returning..." << std::endl;
-                throw std::runtime_error("SurfaceMesh is not pseudomanifold. Found an edge connected to more than 2 faces.");
-            }
-            else if (up.size() < 2) // Edge is a boundary
-            {
-                // std::cerr << "This edge participates in fewer than 2 faces. "
-                //           << "Returning..." << std::endl;
-                continue;
-            }
-            auto name = mesh.get_name(edgeID);
-            std::pair<Vertex, Vertex> shared;
-            shared.first  = *mesh.get_simplex_up({name[0]});
-            shared.second = *mesh.get_simplex_up({name[1]});
-
-
-            std::pair<Vertex, Vertex> notShared;
-            notShared.first  = *mesh.get_simplex_up({up[0]});
-            notShared.second = *mesh.get_simplex_up({up[1]});
-
-            // Check if the edge is a part of a tetrahedron.
-            if (mesh.exists<2>({up[0], up[1]}))
-            {
-                // std::cerr << "Found a tetrahedron cannot edge flip."
-                //           << std::endl;
-                continue;
-            }
-
-            // Check if we're on a ridge. This prevents folding also.
-            if (preserveRidges)
-            {
-                auto a   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[0]));
-                auto b   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[1]));
-                auto val = angle(a, b);
-                if (val > 60)
+                auto up = mesh.get_cover(edgeID);
+                // The mesh is not a surface mesh...
+                if (up.size() > 2)
                 {
+                    // std::cerr << "This edge participates in more than 2 faces. "
+                    //           << "Returning..." << std::endl;
+                    throw std::runtime_error("SurfaceMesh is not pseudomanifold. Found an edge connected to more than 2 faces.");
+                }
+                else if (up.size() < 2) // Edge is a boundary
+                {
+                    // std::cerr << "This edge participates in fewer than 2 faces. "
+                    //           << "Returning..." << std::endl;
                     continue;
                 }
-            }
+                auto name = mesh.get_name(edgeID);
+                std::pair<Vertex, Vertex> shared;
+                shared.first  = *mesh.get_simplex_up({name[0]});
+                shared.second = *mesh.get_simplex_up({name[1]});
 
-            // TODO: (5) Change to check link condition
-            // Check if the triangles make a wedge shape. Flipping this can
-            // cause knife faces.
-            auto f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
-            auto f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
-            auto f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
-            auto f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
-            auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
-            auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
-            if (areaFlip/area > 1.01) continue; // If area changes by a lot then continue
 
-            // Check the flip using user function
-            if (checkFlip(mesh, edgeID))
-            {
-                *iter++ = edgeID;   // Insert into edges to flip
+                std::pair<Vertex, Vertex> notShared;
+                notShared.first  = *mesh.get_simplex_up({up[0]});
+                notShared.second = *mesh.get_simplex_up({up[1]});
 
-                // The local topology will be changed by edge flip.
-                // Don't flip edges which share a common face.
-                std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
-                kneighbors(mesh, edgeID, 2, tmpIgnored);
-                ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
-                // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
+                // Check if the edge is a part of a tetrahedron.
+                if (mesh.exists<2>({up[0], up[1]}))
+                {
+                    // std::cerr << "Found a tetrahedron cannot edge flip."
+                    //           << std::endl;
+                    continue;
+                }
+
+                // Check if we're on a ridge. This prevents folding also.
+                if (preserveRidges)
+                {
+                    auto a   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[0]));
+                    auto b   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[1]));
+                    auto val = angle(a, b);
+                    if (val > 60)
+                    {
+                        continue;
+                    }
+                }
+
+                // TODO: (5) Change to check link condition
+                // Check if the triangles make a wedge shape. Flipping this can
+                // cause knife faces.
+                auto f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
+                auto f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
+                auto f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
+                auto f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
+                auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
+                auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
+                if (areaFlip/area > 1.01) continue; // If area changes by a lot then continue
+
+                // Check the flip using user function
+                if (checkFlip(mesh, edgeID))
+                {
+                    *iter++ = edgeID;   // Insert into edges to flip
+
+                    // The local topology will be changed by edge flip.
+                    // Don't flip edges which share a common face.
+                    std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
+                    kneighbors(mesh, edgeID, 2, tmpIgnored);
+                    ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
+                    // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
+                }
             }
         }
     }
@@ -656,14 +665,11 @@ void centeralize(SurfaceMesh &mesh);
  * @brief      Smooth the surface mesh
  *
  * @param      mesh            The mesh
- * @param[in]  maxMinAngle     The maximum minimum angle
- * @param[in]  minMaxAngle     The minimum maximum angle
  * @param[in]  maxIter         The maximum iterator
  * @param[in]  preserveRidges  The preserve ridges
- *
- * @return     { description_of_the_return_value }
+ * @param[in]  verbose         The verbose
  */
-bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges);
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose);
 
 /**
  * @brief      Coarsens the mesh by selecting vertices first.
@@ -697,6 +703,7 @@ void flipNormals(SurfaceMesh &mesh);
  * @param      mesh  The mesh
  */
 std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
+
 
 /**
  * @brief      Create a triangulated octahedron

@@ -41,7 +41,7 @@ class ObjectMode():
         bpy.ops.object.mode_set(mode='OBJECT')
 
     def __exit__(self, type, value, traceback):
-        # print("Changing to %s mode"%(self.mode))
+        print("Changing to %s mode"%(self.mode))
         bpy.ops.object.mode_set(mode=self.mode)
 
 def getBoundaryMaterial(boundary_id):
@@ -104,12 +104,13 @@ def createMesh(mesh_name, verts, faces):
     """
     mesh = bpy.data.meshes.new(mesh_name)
     mesh.from_pydata(verts, [], faces)
+    # mesh.validate(verbose=True)
     mesh.update()
     mesh.calc_normals()
     return mesh
 
 
-def blenderToGamer(report, obj=None, map_boundaries=False):
+def blenderToGamer(report, obj=None, map_boundaries=False, auto_fix_normals=True):
     """
     Convert object to GAMer mesh.
 
@@ -161,6 +162,10 @@ def blenderToGamer(report, obj=None, map_boundaries=False):
         else:
             boundaries = [item.value for item in ml.values()]
 
+        edges = obj.data.edges
+        for edge in edges:
+            gmesh.insertEdge(g.EdgeKey(edge.vertices), g.Edge(bool(edge.select)))
+
         # Get list of faces
         faces = obj.data.polygons
 
@@ -177,17 +182,20 @@ def blenderToGamer(report, obj=None, map_boundaries=False):
             if max_idx != 2:
                 vertices.rotate(2-max_idx)
             orientation = -1    # 1 < 0 < 2
-            # 0 < 1 < 2
             if(vertices[0] < vertices[1]):
+                # 0 < 1 < 2
                 orientation = 1
-            gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, boundaries[face.index], False))
+            gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, boundaries[face.index], bool(face.select)))
     # Ensure all face orientations are set
     g.init_orientation(gmesh)
     g.check_orientation(gmesh)
     vol = g.getVolume(gmesh)
     if vol < 0:
-        report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
-        return None
+        if auto_fix_normals:
+            g.flipNormals(gmesh)
+        else:
+            report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
+            return None
     return  gmesh
 
 
@@ -204,49 +212,30 @@ def gamerToBlender(report, gmesh,
         if not obj:
             return False
 
+    verts = []      # Array of vertex coordinates
+    idxMap = {}     # Dictionary of gamer indices to renumbered indices
+    for i, vid in enumerate(gmesh.vertexIDs()):
+        v = vid.data()
+        verts.append((v[0], v[1], v[2]))
+        idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
+
+    faces = []
+    selectedFaces = []
+    markersList = []
+    for i, fid in enumerate(gmesh.faceIDs()):
+        fName = gmesh.getName(fid)
+        face = fid.data()
+
+        if face.selected:
+            selectedFaces.append(i)
+
+        if face.orientation == 1:
+            faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
+        else:
+            faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
+        markersList.append(face.marker)
+
     with ObjectMode():
-        verts = []      # Array of vertex coordinates
-        idxMap = {}     # Dictionary of gamer indices to renumbered indices
-        un_selected_vertices = []
-        for i, vid in enumerate(gmesh.vertexIDs()):
-            v = vid.data()
-            verts.append((v[0], v[1], v[2]))
-            idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
-            if not v.selected:
-                un_selected_vertices.append(i)
-
-        faces = []
-        markersList = []
-        for i, fid in enumerate(gmesh.faceIDs()):
-            fName = gmesh.getName(fid)
-            face = fid.data()
-
-            if face.orientation == 0:
-                report({'ERROR'}, "gamerToBlender: Found face with undefined orientation")
-                return False
-            if face.orientation == 1:
-                faces.append((idxMap[fName[0]], idxMap[fName[1]], idxMap[fName[2]]))
-            else:
-                faces.append((idxMap[fName[2]], idxMap[fName[1]], idxMap[fName[0]]))
-            markersList.append(face.marker)
-
-        # if create_new_mesh:
-        #     # Create new object and mesh
-        #     bmesh = createMesh(mesh_name, verts, faces)
-        #     obj = bpy.data.objects.new(mesh_name, bmesh)
-
-        #     bpy.context.scene.objects.link(obj) # link object to scene
-
-        #     bpy.ops.object.select_all(action='DESELECT')
-        #     obj.select=True
-
-        #     ml = markers.getMarkerLayer(obj)
-        #     for i, marker in enumerate(markersList):
-        #         ml[i].value = marker
-        #     markers.copyBoundaries(currObj, obj)
-        #     currObj = obj
-        #     print("Create_new_mesh = False")
-
         # Save old mesh data...
         # Can't delete yet or object goes out of context
         oldmesh = obj.data
@@ -259,14 +248,19 @@ def gamerToBlender(report, gmesh,
         for i, marker in enumerate(markersList):
             ml[i].value = marker
 
-        def toggle(vert, val):
-            vert = val
-
-        [toggle(v.select,False) for v in newmesh.vertices if v.index in un_selected_vertices]
-        obj.select = True
-
     # Repaint boundaries
     obj.gamer.repaint_boundaries(bpy.context)
+    # Deselect all first
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+    bm = bmesh_from_object(obj)
+    bm.faces.ensure_lookup_table()
+    for f in selectedFaces:
+        bm.faces[f].select_set(True)
+    bmesh_to_object(obj, bm)
+
     return True
 
 

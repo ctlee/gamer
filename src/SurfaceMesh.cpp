@@ -415,27 +415,26 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 }
 
 
-// TODO: (0) Allow for smoothing of specific regions.
-bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter, bool preserveRidges){
-    bool smoothed;
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose){
+    double maxMinAngle = 15;
+    double minMaxAngle = 165;
     double minAngle, maxAngle;
     int nSmall, nLarge;
     int nIter = 1;
 
-    // Check if we are smoothed already
-    smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
+    if(verbose){
+        std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
+        std::cout << "Initial Quality: Min Angle = " << minAngle << ", "
+                  << "Max Angle = " << maxAngle << ", "
+                  << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
+                  << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
+    }
 
-    std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
-    std::cout << "Initial Quality: Min Angle = " << minAngle << ", "
-              << "Max Angle = " << maxAngle << ", "
-              << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
-              << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
-
-    // while not smoothed and not at maxiter perform one round of
-    // weightedVertexSmooth + edgeflipping
-    while (!smoothed && nIter <= maxIter){
+    for (int nIter = 1; nIter <= maxIter; ++nIter){
         for(auto vertex : mesh.get_level_id<1>()){
-            surfacemesh_detail::weightedVertexSmooth(mesh, vertex, RINGS);
+            if((*vertex).selected == true){
+                surfacemesh_detail::weightedVertexSmooth(mesh, vertex, RINGS);
+            }
             //barycenterVertexSmooth(mesh, vertex);
         }
 
@@ -460,17 +459,15 @@ bool smoothMesh(SurfaceMesh &mesh, int maxMinAngle, int minMaxAngle, int maxIter
         // init_orientation(mesh);
         // check_orientation(mesh);
 
-        std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
-        std::cout << "Iteration " << nIter << ":" << std::endl;
-        std::cout << "Min Angle = " << minAngle << ", "
-                  << "Max Angle = " << maxAngle << ", "
-                  << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
-                  << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
-
-        smoothed = minAngle > maxMinAngle && maxAngle < minMaxAngle;
-        ++nIter;
+        if (verbose){
+            std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
+            std::cout << "Iteration " << nIter << ":" << std::endl;
+            std::cout << "Min Angle = " << minAngle << ", "
+                      << "Max Angle = " << maxAngle << ", "
+                      << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
+                      << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
+        }
     }
-    return smoothed;
 }
 
 /**

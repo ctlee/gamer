@@ -62,7 +62,6 @@ public:
   }
 };
 
-
 struct Face {
   Face() {}
   Face(int orient, int marker, bool selected) {}
@@ -121,6 +120,9 @@ public:
     }
     void insertEdge(std::array<int, 2> &s) {
       $self->insert<2>(s);
+    }
+    void insertEdge(std::array<int, 2> &s, const Edge &data) {
+      $self->insert<2>(s, data);
     }
     void insertFace(std::array<int, 3> &s, const Face &data) {
       $self->insert<3>(s, data);
@@ -256,11 +258,9 @@ void correctNormals(SurfaceMesh &mesh){
 %}
 
 %pythoncode %{
-  def smooth(mesh, max_min_angle=15, min_max_angle=150,
-             max_iter=6, preserve_ridges=False):
+  def smooth(mesh, max_iter=6, preserve_ridges=False):
     """Smooth the mesh"""
-    return smoothMesh(mesh, max_min_angle, min_max_angle,
-            max_iter, preserve_ridges)
+    return smoothMesh(mesh, max_iter, preserve_ridges, True)
 
 
   def coarse_flat(mesh, rate=0.016, numiter=1):

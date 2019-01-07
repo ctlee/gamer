@@ -138,13 +138,18 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     flat_iter = IntProperty(
         name="CF_Iter", default=1, min=1, max=15,
         description="The number of iterations for coarsening flat areas")
-    max_min_angle = IntProperty(
-        name="Max_Min_Angle", default=15, min=10, max=20,
-        description="The maximal minumum angle for smoothing")
     smooth_iter = IntProperty(
         name="S_Iter", default=10, min=1, max=50,
         description="The number of iterations for coarsening dense areas")
-    preserve_ridges = BoolProperty( name="Preserve ridges", default=False)
+    preserve_ridges = BoolProperty(
+        name="Preserve ridges", default=False,
+        description="Don't flip edges which lie on ridges")
+    advanced_options = BoolProperty(name="Advanced options", default=False,
+        description="Show additional surface mesh improvement options")
+    auto_fix_normals = BoolProperty(name="Automatically fix normals", default=True,
+        description="Auto fix inconsistent normals")
+    verbose = BoolProperty(name="Verbose", default=False,
+        description="Print information to console")
 
     def coarse_dense(self, context, report):
         gmesh = blenderToGamer(report)
@@ -174,7 +179,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report)
         if gmesh:
             try:
-                g.smooth(gmesh, max_min_angle=self.max_min_angle, max_iter=self.smooth_iter,   preserve_ridges=self.preserve_ridges)
+                g.smooth(gmesh, max_iter=self.smooth_iter,   preserve_ridges=self.preserve_ridges)
             except Exception as e:
                 return (False, str(e))
             return gamerToBlender(report, gmesh)

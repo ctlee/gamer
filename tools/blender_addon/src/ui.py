@@ -100,29 +100,43 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
         smprops = context.scene.gamer.surfmesh_procs
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
+            box = layout.box()
+            col = box.column(align=True)
+            if not smprops.advanced_options:
+                col.prop(smprops, "advanced_options", icon='TRIA_RIGHT', emboss=False)
+            else:
+                col.prop(smprops, "advanced_options", icon='TRIA_DOWN', emboss=False)
+                col.prop(smprops, "verbose")
+
+
             col = layout.column()
-            col.label(text="GAMer mesh operations")
+            col.label(text="Global mesh operations:")
             col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
             col.operator("gamer.fill_holes", icon='BORDER_LASSO')
-            # col.operator("gamer.refine_mesh", icon='BORDER_LASSO')
+            col.operator("gamer.refine_mesh", icon='OUTLINER_OB_LATTICE')
 
-            col = layout.column(align=True)
-            rowsub = col.row(align=True)
-            rowsub.operator("gamer.coarse_dense",icon='OUTLINER_OB_LATTICE')
-            rowsub.prop(smprops, "dense_rate")
-            rowsub.prop(smprops, "dense_iter")
-            rowsub = col.row(align=True)
-            rowsub.operator("gamer.coarse_flat",icon='MOD_TRIANGULATE')
-            rowsub.prop(smprops, "flat_rate")
-            rowsub.prop(smprops, "flat_iter")
+            if active_obj.mode == 'EDIT':
+                col = layout.column(align=True)
+                col.label(text="Local operations (applied to selection only): ")
+                rowsub = col.row(align=True)
+                rowsub.operator("gamer.coarse_dense",icon='OUTLINER_OB_LATTICE')
+                rowsub.prop(smprops, "dense_rate")
+                rowsub.prop(smprops, "dense_iter")
+                rowsub = col.row(align=True)
+                rowsub.operator("gamer.coarse_flat",icon='MOD_TRIANGULATE')
+                rowsub.prop(smprops, "flat_rate")
+                rowsub.prop(smprops, "flat_iter")
 
-            row = layout.row(align = True)
-            row.operator("gamer.smooth", icon='OUTLINER_OB_MESH')
-            row.prop(smprops, "preserve_ridges", expand=True)
-            row.prop(smprops, "max_min_angle")
-            row.prop(smprops, "smooth_iter")
+                row = layout.row(align = True)
+                row.operator("gamer.smooth", icon='OUTLINER_OB_MESH')
+                row.prop(smprops, "smooth_iter")
+                row.prop(smprops, "preserve_ridges", expand=True)
+            else:
+                col = layout.column()
+                col.label(text="Change to Edit Mode to enable local improvement options", icon='INFO')
 
             col = layout.column()
+            col.label(text="Mesh analysis:")
             col.operator("mesh.meshstats_check_all", text="Generate Mesh Report")
 
             GAMER_PT_surfacemesh.draw_report(layout, context)
@@ -235,7 +249,7 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
         return (context.scene is not None)
 
     def draw_header(self, context):
-        self.layout.label(text="", icon='TPAINT_HLT')
+        self.layout.label(text="", icon='MESH_ICOSPHERE')
 
     def draw(self, context):
         context.scene.gamer.tet_group.draw_layout(context, self.layout)
