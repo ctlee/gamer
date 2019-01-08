@@ -106,6 +106,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
                 col.prop(smprops, "advanced_options", icon='TRIA_RIGHT', emboss=False)
             else:
                 col.prop(smprops, "advanced_options", icon='TRIA_DOWN', emboss=False)
+                col.prop(smprops, "autocorrect_normals")
                 col.prop(smprops, "verbose")
 
 
@@ -113,7 +114,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
             col.label(text="Global mesh operations:")
             col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
             col.operator("gamer.fill_holes", icon='BORDER_LASSO')
-            col.operator("gamer.refine_mesh", icon='OUTLINER_OB_LATTICE')
+            # col.operator("gamer.refine_mesh", icon='OUTLINER_OB_LATTICE')
 
             if active_obj.mode == 'EDIT':
                 col = layout.column(align=True)

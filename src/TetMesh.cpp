@@ -210,13 +210,16 @@ std::unique_ptr<TetMesh> makeTetMesh(
     // in.save_poly(plc);
 
     // Call TetGen
-    tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
-
+    try{
+        tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
+    }
+    catch (int e){
+        std::cout << "Caught TetGen Error " << e << std::endl;
+    }
     // auto result = const_cast<char*>("result");
     // out.save_nodes(result);
     // out.save_elements(result);
     // out.save_faces(result);
-
     return tetgenioToTetMesh(out);
 }
 

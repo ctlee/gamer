@@ -112,18 +112,18 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
-class GAMER_OT_refine_mesh(bpy.types.Operator):
-    bl_idname = "gamer.refine_mesh"
-    bl_label = "Quadrisect mesh"
-    bl_description = "Refine the mesh by quadisction"
-    bl_options = {'REGISTER', 'UNDO'}
+# class GAMER_OT_refine_mesh(bpy.types.Operator):
+#     bl_idname = "gamer.refine_mesh"
+#     bl_label = "Quadrisect mesh"
+#     bl_description = "Refine the mesh by quadisction"
+#     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.refine_mesh(context, self.report):
-            self.report({'INFO'}, "GAMer: Refine Mesh complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
+#     def execute(self, context):
+#         if context.scene.gamer.surfmesh_procs.refine_mesh(context, self.report):
+#             self.report({'INFO'}, "GAMer: Refine Mesh complete")
+#             return {'FINISHED'}
+#         else:
+#             return {'CANCELLED'}
 
 class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     dense_rate = FloatProperty(
@@ -146,13 +146,13 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         description="Don't flip edges which lie on ridges")
     advanced_options = BoolProperty(name="Advanced options", default=False,
         description="Show additional surface mesh improvement options")
-    auto_fix_normals = BoolProperty(name="Automatically fix normals", default=True,
+    autocorrect_normals = BoolProperty(name="Autocorrect normals", default=True,
         description="Auto fix inconsistent normals")
     verbose = BoolProperty(name="Verbose", default=False,
         description="Print information to console")
 
     def coarse_dense(self, context, report):
-        gmesh = blenderToGamer(report)
+        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
                 g.coarse_dense(gmesh, rate=self.dense_rate, numiter=self.dense_iter)
@@ -164,7 +164,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
 
 
     def coarse_flat(self, context, report):
-        gmesh = blenderToGamer(report)
+        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
                 g.coarse_flat(gmesh, rate=self.flat_rate)
@@ -176,10 +176,10 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
 
 
     def smooth(self, context, report):
-        gmesh = blenderToGamer(report)
+        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                g.smooth(gmesh, max_iter=self.smooth_iter,   preserve_ridges=self.preserve_ridges)
+                g.smooth(gmesh, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
             except Exception as e:
                 return (False, str(e))
             return gamerToBlender(report, gmesh)
@@ -187,7 +187,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
 
 
     def normal_smooth(self, context, report):
-        gmesh = blenderToGamer(report)
+        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
                 g.normalSmooth(gmesh)
@@ -198,7 +198,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
 
 
     def fill_holes(self, context, report):
-        gmesh = blenderToGamer(report)
+        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
                 g.fillHoles(gmesh)
@@ -207,12 +207,12 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             return gamerToBlender(report, gmesh)
         return False
 
-    def refine_mesh(self, context, report):
-        gmesh = blenderToGamer(report)
-        if gmesh:
-            try:
-                g.refine_mesh(gmesh)
-            except Exception as e:
-                return (False, str(e))
-            return gamerToBlender(report, gmesh)
-        return False
+    # def refine_mesh(self, context, report):
+    #     gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
+    #     if gmesh:
+    #         try:
+    #             g.refine_mesh(gmesh)
+    #         except Exception as e:
+    #             return (False, str(e))
+    #         return gamerToBlender(report, gmesh)
+    #     return False

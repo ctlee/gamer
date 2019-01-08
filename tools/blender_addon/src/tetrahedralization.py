@@ -41,24 +41,6 @@ def unregister():
     bpy.utils.unregister_module(__name__)
 
 
-# # Tetrahedralization Operators:
-# class GAMER_OT_set_tet_path(bpy.types.Operator):
-#     bl_idname = "gamer.set_tet_path"
-#     bl_label = "Set Tetrahedralization Path"
-#     bl_description = ("Set Tetrahedralization Path")
-#     bl_options = {'REGISTER'}
-
-#     filepath = bpy.props.StringProperty(subtype='FILE_PATH', default="")
-
-#     def execute(self, context):
-#         context.scene.gamer.tet_group.tet_path = self.filepath
-#         return {'FINISHED'}
-
-#     def invoke(self, context, event):
-#         context.window_manager.fileselect_add(self)
-#         return {'RUNNING_MODAL'}
-
-
 class GAMER_OT_tet_domain_add(bpy.types.Operator):
     bl_idname = "gamer.tet_domain_add"
     bl_label = "Add a Tet Domain"
@@ -91,7 +73,7 @@ class GAMER_OT_tet_domain_remove_all(bpy.types.Operator):
 
     def execute(self, context):
         context.scene.gamer.tet_group.remove_all_tet_domains(context)
-        self.report({'INFO'}, "Deleted Active Tet Group")
+        self.report({'INFO'}, "Deleted Active Tet Groups")
         return {'FINISHED'}
 
 
@@ -102,7 +84,7 @@ class GAMER_OT_tetrahedralize(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def execute(self, context):
-        context.scene.gamer.tet_group.tetrahedralize()
+        context.scene.gamer.tet_group.tetrahedralize(self.report)
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -111,37 +93,49 @@ class GAMER_OT_tetrahedralize(bpy.types.Operator):
 
 class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     # name = StringProperty()  # This is a reminder that "name" is already defined for all subclasses of PropertyGroup
-    domain_id = IntProperty ( name="ID", default=-1, description="Domain ID" )
-    object_name = StringProperty ( name="ObjName", default="", description="Object Name" )
-    marker = IntProperty ( name="Marker", default=-1, description="Domain Marker Integer" )
-    is_hole = BoolProperty ( name="Hole", default=False, description="Use this domain as a hole" )
-    constrain_vol  = BoolProperty ( name="Constrain Volume", default=False, description="Constrain Volume" )
-    vol_constraint = FloatProperty ( name="Vol Constraint", default=10.0, description="Volume Constraint" )
+    domain_id = IntProperty(
+            name="ID", default=-1,
+            description="Domain ID")
+    object_name = StringProperty(
+            name="ObjName", default="",
+            description="Object Name")
+    marker = IntProperty(
+            name="Marker", default=-1,
+            description="Domain Marker Integer")
+    is_hole = BoolProperty(
+            name="Hole", default=False,
+            description="Use this domain as a hole")
+    constrain_vol  = BoolProperty(
+            name="Constrain Volume", default=False,
+            description="Constrain Volume")
+    vol_constraint = FloatProperty(
+            name="Vol Constraint", default=10.0,
+            description="Volume Constraint")
 
-    def draw_layout ( self, layout ):
+    def draw_layout(self, layout):
         row = layout.row()
         col = row.column()
-        col.prop ( self, "is_hole", text="Use Domain as a Hole" )
+        col.prop(self, "is_hole", text="Use Domain as a Hole")
         if not self.is_hole:
             col = row.column()
-            col.prop ( self, "marker" )
+            col.prop(self, "marker")
             row = layout.row()
             col = row.column()
-            col.prop ( self, "constrain_vol" )
+            col.prop(self, "constrain_vol")
             if self.constrain_vol:
                 col = row.column()
-                col.prop ( self, "vol_constraint" )
+                col.prop(self, "vol_constraint")
 
     def draw_item_in_row ( self, row ):
         col = row.column()
-        col.label ( str(self.object_name) )
+        col.label(str(self.object_name))
         col = row.column()
-        col.label ( "Domain ID: " + str(self.domain_id) )
+        col.label("Domain ID: " + str(self.domain_id))
         col = row.column()
         if self.is_hole:
-            col.label ( "Hole" )
+            col.label("Hole")
         else:
-            col.label ( "Domain Marker: " + str(self.marker) )
+            col.label("Domain Marker: " + str(self.marker))
 
 
 class GAMer_UL_domain(bpy.types.UIList):
@@ -162,7 +156,7 @@ class GAMer_UL_domain(bpy.types.UIList):
         # The item will be a GAMerTetDomainPropertyGroup
         # Let it draw itself in a new row:
 
-        item.draw_item_in_row ( layout.row() )
+        item.draw_item_in_row(layout.row())
 
 
 
@@ -175,42 +169,53 @@ def check_formats_callback(self, context):
 
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     export_path = StringProperty(
-        name="Export Directory",
-        description="Path to directory where files will be created",
-        default="./", maxlen=1024, subtype='DIR_PATH'
-        )
+            name="Export Directory",
+            description="Path to directory where files will be created",
+            default="./", maxlen=1024, subtype='DIR_PATH'
+            )
     export_filebase = StringProperty(
-        name="Filename",
-        description="Base name of the files to export",
-        default="gamertetmesh", maxlen=1024, subtype='FILE_NAME'
-        )
-    # tet_path = StringProperty(name="tet_path", default="tetmeshFromBlender", description="Path and file prefix for tetrahedralization output files")
-    domain_list = CollectionProperty(type=GAMerTetDomainPropertyGroup, name="Domain List")
-    active_domain_index = IntProperty(name="Active Domain Index", default=0)
-    next_id = IntProperty(name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization
+            name="Filename",
+            description="Base name of the files to export",
+            default="gamertetmesh", maxlen=1024, subtype='FILE_NAME'
+            )
+    domain_list = CollectionProperty(
+            type=GAMerTetDomainPropertyGroup, name="Domain List")
+    active_domain_index = IntProperty(
+            name="Active Domain Index", default=0)
+    next_id = IntProperty(
+            name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization
 
-    show_settings = BoolProperty( name="Tetrahedralization Settings", default=False, description="Show more detailed settings")
+    show_settings = BoolProperty(
+            name="Tetrahedralization Settings", default=False,
+            description="Show more detailed settings")
 
-    min_dihedral = FloatProperty ( name="Min Dihedral", default=10.0, description="Minimum Dihedral in Degrees" )
-    max_aspect_ratio = FloatProperty ( name="Max Aspect Ratio", default=1.3, description="Maximum Aspect Ratio" )
+    min_dihedral = FloatProperty(
+            name="Min Dihedral", default=10.0,
+            description="Minimum Dihedral in Degrees")
+    max_aspect_ratio = FloatProperty(
+            name="Max Aspect Ratio", default=1.3,
+            description="Maximum Aspect Ratio")
 
-    ho_mesh = BoolProperty ( name="Higher order mesh generation", default=False, description="Higher order mesh generation" )
+    ho_mesh = BoolProperty(
+            name="Higher order mesh generation", default=False,
+            description="Higher order mesh generation")
 
-    dolfin = BoolProperty ( name="DOLFIN", default=False, description="Generate DOLFIN output", update=check_formats_callback )
-    diffpack = BoolProperty ( name="Diffpack", default=False, description="Generate Diffpack output", update=check_formats_callback )
-    paraview = BoolProperty ( name="Paraview", default=False, description="Generate Paraview output", update=check_formats_callback )
-    fetk = BoolProperty ( name="FEtk", default=False, description="Generate FEtk output", update=check_formats_callback )
+    dolfin = BoolProperty(
+            name="DOLFIN", default=False,
+            description="Generate DOLFIN output")
+    # diffpack = BoolProperty(
+    #         name="Diffpack", default=False,
+    #         description="Generate Diffpack output")
+    paraview = BoolProperty(
+            name="Paraview", default=False,
+            description="Generate Paraview output")
 
     status = StringProperty ( name="status", default="" )
 
-    def check_formats_callback(self, context):
-        if self.dolfin or self.diffpack or self.paraview or self.fetk:
-            self.status = ""
-
-    def draw_layout ( self, context, layout ):
+    def draw_layout(self, context, layout):
 
         row = layout.row()
-        row.label ( "Domains" )
+        row.label("Domains")
 
         row = layout.row()
         col = row.column()
@@ -228,8 +233,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         if len(self.domain_list) > 0:
             domain = self.domain_list[self.active_domain_index]
 
-            row = layout.row()
-            row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
+            # row = layout.row()
+            # row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
 
             domain.draw_layout ( layout )
 
@@ -245,48 +250,39 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 row.prop(self, "export_path")
                 row = box.row()
                 row.prop(self, "export_filebase")
-                # row.operator("gamer.set_tet_path", text="Set Output File Prefix", icon='FILESEL')
-                # row = box.row()
-                # row.label ( self.tet_path )
 
                 row = box.row()
                 col = row.column()
-                col.prop ( self, "min_dihedral" )
+                col.prop(self, "min_dihedral")
                 col = row.column()
-                col.prop ( self, "max_aspect_ratio" )
+                col.prop(self, "max_aspect_ratio")
 
                 # row = box.row()
                 # row.prop ( self, "ho_mesh" )
 
                 row = box.row()
-                row.label ( "Output Formats:" )
+                row.label("Output Formats:")
 
                 row = box.row()
                 sbox = row.box()
 
                 row = sbox.row()
                 col = row.column()
-                col.prop ( self, "dolfin" )
+                col.prop(self, "dolfin")
                 col = row.column()
-                col.prop ( self, "paraview" )
-
-                # row = sbox.row()
-                # col = row.column()
-                # col.prop ( self, "diffpack" )
-                # col = row.column()
-                # col.prop ( self, "fetk" )
+                col.prop(self, "paraview")
 
             row = layout.row()
             icon = 'PROP_OFF'
-            if self.dolfin or self.diffpack or self.paraview or self.fetk:
+            if self.dolfin or self.paraview:
                 icon = 'COLOR_RED'
-            row.operator ( "gamer.tetrahedralize", text="Tetrahedralize", icon=icon )
+            row.operator("gamer.tetrahedralize", text="Tetrahedralize", icon=icon)
             if len(self.status) > 0:
                 row = layout.row()
-                row.label ( self.status, icon="ERROR" )
+                row.label(self.status, icon="ERROR")
 
 
-    def add_tet_domain ( self, context):
+    def add_tet_domain(self, context):
         print("Adding a Tet Domain")
         """ Add a new tet domain to the list of tet domains for each selected object """
         #mcell = context.scene.mcell
@@ -296,76 +292,64 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         if len(objs) > 0:
             for obj in objs:
                 # Check by name to see if it's already listed
-                current_domain_names = [ d.object_name for d in self.domain_list ]
-                print ( "Current domains = " + str(current_domain_names) )
+                current_domain_names = [d.object_name for d in self.domain_list]
+                print("Current domains = " + str(current_domain_names))
                 if not (obj.name in current_domain_names):
                     new_id = self.allocate_available_id()  # Do this first to check for empty list before adding
                     new_dom = self.domain_list.add()
                     new_dom.domain_id = new_id
                     new_dom.marker = new_id
                     new_dom.object_name = obj.name
-                    self.active_domain_index = len(self.domain_list)-1
+                    self.active_domain_index = len(self.domain_list) - 1
 
-    def remove_active_tet_domain ( self, context):
+    def remove_active_tet_domain(self, context):
         print("Removing active Tet Domain")
         """ Remove the active tet domain from the list of domains """
-        self.domain_list.remove ( self.active_domain_index )
+        self.domain_list.remove(self.active_domain_index)
         self.active_domain_index -= 1
         if self.active_domain_index < 0:
             self.active_domain_index = 0
 
-    def remove_all_tet_domains ( self, context):
+    def remove_all_tet_domains(self, context):
         print("Removing All Tet Domains")
         """ Remove all tet domains from the list of domains """
         while len(self.domain_list) > 0:
-            self.domain_list.remove ( 0 )
+            self.domain_list.remove(0)
         self.active_domain_index = 0
 
 
-    def allocate_available_id ( self ):
+    def allocate_available_id(self):
         """ Return a unique domain ID for a new domain """
-        print ( "Next ID is " + str(self.next_id) )
+        # print ("Next ID is " + str(self.next_id))
         if len(self.domain_list) <= 0:
             # Reset the ID to 1 when there are no more molecules
             self.next_id = 1
         self.next_id += 1
-        return ( self.next_id - 1 )
+        return(self.next_id - 1)
 
-    def draw_panel ( self, context, panel ):
+    def draw_panel(self, context, panel):
         layout = panel.layout
-        self.draw_layout ( context, layout )
+        self.draw_layout(context, layout)
 
-    def tetrahedralize ( self ):
-        print ( "######################## Begin Tetrahedralize ########################" )
+    def tetrahedralize(self, report):
+        print ("######################## Begin Tetrahedralize ########################")
 
         # filename = self.tet_path
         filename = self.export_path + self.export_filebase
-        if not (self.dolfin or self.diffpack or self.paraview or self.fetk):
+        if not (self.dolfin or self.paraview):
             self.status = "Please select an output format in Tetrahedralization Settings"
-            print ( self.status )
+            print(self.status)
         else:
             self.status = ""
             mesh_formats = []
 
             if self.dolfin:
                 mesh_formats.append("dolfin")
-            if self.diffpack:
-                mesh_formats.append("diffpack")
             if self.paraview:
                 mesh_formats.append("paraview")
-            if self.fetk:
-                mesh_formats.append("mcsf")
 
-            # What is this? It doesn't show up in the GAMer panel.
-            #if self.getVal(self.tetparams["mcsf_format"]):
-            #    mesh_formats.append("mcsf")
-
-            # Get gamer mesh
-            # gmeshes = []
-            # boundary_markers = []
-
+            # Vector of SurfaceMeshes
             gmeshes = g.VectorSM()
-
             for (obj_name,tet_domain) in [ (d.object_name,d) for d in self.domain_list ]:
                 print ( "obj_name = " + obj_name + ", tet_domain = " + str(tet_domain) )
 
@@ -374,9 +358,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
             for d in self.domain_list:
                 obj = bpy.data.objects[d.object_name]
-                result, gmesh = blenderToGamer(obj=obj, map_boundaries=True)
-                if gmesh == None:
-                    print( "blenderToGamer returned a gmesh of None" )
+                gmesh = blenderToGamer(report, obj=obj, map_boundaries=True)
+                if not gmesh:
+                    print("blenderToGamer returned a gmesh of None")
                 else:
                     # Necessary to prevent garbage collection of gmesh when
                     # passing into GAMer
@@ -420,8 +404,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     g.smoothMesh(tetmesh)
 
                 # Store mesh to files
-                tetmesh_formats  = ["dolfin", "mcsf", "diffpack", "paraview"]
-                tetmesh_suffices = [  ".xml",   ".m",    ".grid", ".vtk"]
+                tetmesh_formats  = ["dolfin", "paraview"]
+                tetmesh_suffices = [  ".xml", ".vtk"]
 
                 for fmt in mesh_formats:
                     try:
@@ -431,18 +415,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                             g.writeDolfin(filename+suffix, tetmesh)
                         if fmt == 'paraview':
                             g.writeVTK(filename+suffix, tetmesh)
-
-                        # # If the format is diffpack or carp we need to add boundary names
-                        # if fmt in ["diffpack", "carp"]:
-                        #     boundary_names = [b[1] for b in sorted(boundary_markers)]
-                        #     print ( "Boundary names = " + str(boundary_names) )
-                        #     ### This doesn't work for some reason ... RuntimeError: Expected a list of strings as second argument.
-                        #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix, boundary_names)
-                        # else:
-                        #     getattr(gem_mesh, "write_%s"%fmt)(filename+suffix)
-
                     except Exception as ex:
-
                         print ( "Error: Unable to write to " + fmt + " file: " + filename + suffix )
                         print ( "   " + str(ex) )
 

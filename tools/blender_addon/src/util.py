@@ -41,7 +41,7 @@ class ObjectMode():
         bpy.ops.object.mode_set(mode='OBJECT')
 
     def __exit__(self, type, value, traceback):
-        print("Changing to %s mode"%(self.mode))
+        # print("Changing to %s mode"%(self.mode))
         bpy.ops.object.mode_set(mode=self.mode)
 
 def getBoundaryMaterial(boundary_id):
@@ -60,21 +60,19 @@ def getMarkerLayer(obj):
     return markerLayer.data
 
 
-def getSelectedMesh(report):
+def getActiveMeshObject(report):
     """
     Returns the active object if it is a mesh or None
     """
     obj = bpy.context.active_object
     if obj:
         if obj.type == 'MESH':
-             # Auto select object if in EDIT mode
-            # This prevents being 'selected' in EDIT mode but really unselected
-            if obj.mode == 'EDIT':
-                obj.select = True
-            if obj.select:
-                return obj
-            else:
-                report({'ERROR'}, "Object is not selected! Select a MESH to use this feature.")
+            #  # Auto select object if in EDIT mode
+            # # This prevents being 'selected' in EDIT mode but really unselected
+            # if obj.mode == 'EDIT':
+            #     obj.select = True
+            # if obj.select:
+            return obj
         else:
             report({'ERROR'}, "Active object is not a MESH. Please select a MESH to use this feature.")
     else:
@@ -110,7 +108,7 @@ def createMesh(mesh_name, verts, faces):
     return mesh
 
 
-def blenderToGamer(report, obj=None, map_boundaries=False, auto_fix_normals=True):
+def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=True):
     """
     Convert object to GAMer mesh.
 
@@ -121,7 +119,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, auto_fix_normals=True
     """
     # Get the selected mesh
     if not obj:
-        obj = getSelectedMesh(report)
+        obj = getActiveMeshObject(report)
         # Ensure object is good
         if not obj:
             return False
@@ -191,7 +189,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, auto_fix_normals=True
     g.check_orientation(gmesh)
     vol = g.getVolume(gmesh)
     if vol < 0:
-        if auto_fix_normals:
+        if autocorrect_normals:
             g.flipNormals(gmesh)
         else:
             report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
@@ -208,9 +206,11 @@ def gamerToBlender(report, gmesh,
         return False
 
     if not obj:
-        obj = getSelectedMesh(report)
+        obj = getActiveMeshObject(report)
         if not obj:
             return False
+
+    mode = obj.mode
 
     verts = []      # Array of vertex coordinates
     idxMap = {}     # Dictionary of gamer indices to renumbered indices
@@ -260,7 +260,7 @@ def gamerToBlender(report, gmesh,
     for f in selectedFaces:
         bm.faces[f].select_set(True)
     bmesh_to_object(obj, bm)
-
+    bpy.ops.object.mode_set(mode=mode)
     return True
 
 
