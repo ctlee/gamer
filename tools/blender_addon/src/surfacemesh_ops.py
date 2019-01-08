@@ -170,7 +170,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
                 g.coarse_flat(gmesh, rate=self.flat_rate)
             except Exception as e:
                 report({'ERROR'}, str(e))
-                return (False, str(e))
+                return False
             return gamerToBlender(report, gmesh)
         return False
 
@@ -181,7 +181,8 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             try:
                 g.smooth(gmesh, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
             except Exception as e:
-                return (False, str(e))
+                report({'ERROR'}, str(e))
+                return False
             return gamerToBlender(report, gmesh)
         return False
 
@@ -192,7 +193,8 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             try:
                 g.normalSmooth(gmesh)
             except Exception as e:
-                return (False, str(e))
+                report({'ERROR'}, str(e))
+                return False
             return gamerToBlender(report, gmesh)
         return False
 
@@ -203,7 +205,8 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             try:
                 g.fillHoles(gmesh)
             except Exception as e:
-                return (False, str(e))
+                report({'ERROR'}, str(e))
+                return False
             return gamerToBlender(report, gmesh)
         return False
 
@@ -213,6 +216,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     #         try:
     #             g.refine_mesh(gmesh)
     #         except Exception as e:
-    #             return (False, str(e))
+    #             report({'ERROR'}, str(e))
+    #             return False
     #         return gamerToBlender(report, gmesh)
     #     return False

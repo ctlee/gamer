@@ -214,7 +214,20 @@ std::unique_ptr<TetMesh> makeTetMesh(
         tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
     }
     catch (int e){
-        std::cout << "Caught TetGen Error " << e << std::endl;
+        switch(e){
+        case 1:
+            throw std::runtime_error("Tetgen: Out of memory");
+        case 2:
+            throw std::runtime_error("Tetgen: internal error");
+        case 3:
+            throw std::runtime_error("Tetgen: A self intersection was detected. Program stopped. Hint: use -d option to detect all self-intersections");
+        case 4:
+            throw std::runtime_error("Tetgen: A very small input feature size was detected.");
+        case 5:
+            throw std::runtime_error("Tetgen: Two very close input facets were detected");
+        case 10:
+            throw std::runtime_error("Tetgen: An input error was detected");
+        }
     }
     // auto result = const_cast<char*>("result");
     // out.save_nodes(result);
