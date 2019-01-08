@@ -25,17 +25,17 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
-#include <map>
-#include <set>
-#include <vector>
-#include <string>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <fstream>
+#include <map>
 #include <ostream>
+#include <set>
+#include <strstream>
+#include <string>
+#include <vector>
 
 #include <libraries/casc/casc>
-//#include <libraries/casc/include/typetraits.h>
 
 #include "TetMesh.h"
 
@@ -53,20 +53,22 @@ std::unique_ptr<TetMesh> makeTetMesh(
         size_t nfaces = surfmesh->template size<3>();
 
         if(nverts == 0 || nfaces == 0){
-            std::cerr << "The " << i << "th surface mesh is empty."
-                      << " Abandoning tetrahedralization." << std::endl;
-            tetmesh.reset();
-            return tetmesh;
+            std::stringstream ss;
+            ss << "SurfaceMesh " << i << " contains no data."
+                      << " Cannot tetrahedralize nothing.";
+            throw std::runtime_error(ss.str());
         }
 
         auto metadata = *surfmesh->get_simplex_up();
 
-        if (!metadata.closed){
-            std::cerr << "The " << i << "th surface mesh is not closed."
-                    << " Abandoning tetrahedralization." << std::endl;
-            tetmesh.reset();
-            return tetmesh;
+
+        // TODO: (10) Use a more rigorous check of closedness
+        if(hasHole(*surfmesh)){
+            std::stringstream ss;
+            ss << "SurfaceMesh " << i << " is not closed. Cannot tetrahedralize non-manifold objects.";
+            throw std::runtime_error(ss.str());
         }
+
         metadata.ishole ? ++nHoles : ++nRegions;
 
         nVertices += nverts;
@@ -76,8 +78,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
     if (nRegions < 1){
         std::cerr << "Error(makeTetMesh): Expected at least one non-hole SurfaceMesh." << std::endl;
-        tetmesh.reset();
-        return tetmesh;
+        throw std::runtime_error("No non-hole Surface Meshes found. makeTetMesh expects at least one non-hole SurfaceMesh");
     }
 
     std::cout << "Number of vertices: " << nVertices << std::endl;
@@ -150,6 +151,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
         auto metadata = *surfmesh->get_simplex_up();
 
+        // TODO: (25) Improve region point picking strategy
         // Pick a point inside the region
         auto faceID = *surfmesh->template get_level_id<3>().begin();
         Vector normal = getNormal(*surfmesh, faceID);
@@ -166,6 +168,8 @@ std::unique_ptr<TetMesh> makeTetMesh(
         // flip normal and scale by weight
         normal *= weight;
         Vector regionPoint = (a+b+c)/3 - normal;
+
+        std::cout << "Region point: " << regionPoint << std::endl;
 
         if(metadata.ishole){
             auto idx            = nHoles*3;
@@ -194,7 +198,6 @@ std::unique_ptr<TetMesh> makeTetMesh(
     } // endif for surfmesh :surfmeshes
 
     // Add boundary marker on each node
-    // TODO: Why? aren't the markers set on the generated mesh? (from old notes)
     in.pointmarkerlist = new int[in.numberofpoints];
     for (int i = 0; i < in.numberofpoints; ++i){
         in.pointmarkerlist[i] = 1;
@@ -202,25 +205,34 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
     // Casting away const is an evil thing to do, however, tetgen has not yet
     // conformed...
-    auto plc = const_cast<char*>("plc");
-    in.save_nodes(plc);
-    in.save_poly(plc);
+    // auto plc = const_cast<char*>("plc");
+    // in.save_nodes(plc);
+    // in.save_poly(plc);
 
     // Call TetGen
-    try {
+    try{
         tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
     }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Caught TetGen Error: " << e.what() << std::endl;
-        exit(1);
+    catch (int e){
+        switch(e){
+        case 1:
+            throw std::runtime_error("Tetgen: Out of memory");
+        case 2:
+            throw std::runtime_error("Tetgen: internal error");
+        case 3:
+            throw std::runtime_error("Tetgen: A self intersection was detected. Program stopped. Hint: use -d option to detect all self-intersections");
+        case 4:
+            throw std::runtime_error("Tetgen: A very small input feature size was detected.");
+        case 5:
+            throw std::runtime_error("Tetgen: Two very close input facets were detected");
+        case 10:
+            throw std::runtime_error("Tetgen: An input error was detected");
+        }
     }
-
-    auto result = const_cast<char*>("result");
-    out.save_nodes(result);
-    out.save_elements(result);
-    out.save_faces(result);
-
+    // auto result = const_cast<char*>("result");
+    // out.save_nodes(result);
+    // out.save_elements(result);
+    // out.save_faces(result);
     return tetgenioToTetMesh(out);
 }
 
@@ -228,9 +240,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     std::unique_ptr<TetMesh> mesh(new TetMesh);
 
     if (tetio.mesh_dim == 2){
-        std::cerr << "ERROR(tetgenToTetMesh): Expected a tetrahedral mesh from tetgen." << std::endl;
-        mesh.reset();
-        return mesh;
+        throw std::runtime_error("tetgenioToTetMesh expects a tetrahedral tetgenio. Found surface instead.");
     }
 
     auto &metadata = *mesh->get_simplex_up();
@@ -262,7 +272,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
         // TODO: (0) Do we need to set the orientation?
         // std::cout << casc::to_string(std::array<int,4>({ptr[0], ptr[1], ptr[2], ptr[3]})) << std::endl;
         mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]},
-                tetmesh::Cell(casc::Orientable{0}, tetmesh::CellProperties{marker, 0, 0}));
+                tetmesh::Cell(0, marker));
     }
 
     // std::cout << "Number of vertices: " << mesh->size<1>() << std::endl;

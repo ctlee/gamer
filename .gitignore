@@ -4,7 +4,7 @@
 *.swp
 .~
 
-# Ignore the build directory 
+# Ignore the build directory
 build/
 release/
 debug/
@@ -44,3 +44,10 @@ debug/
 *.exe
 *.out
 *.app
+
+# Sublime Text files
+*.sublime-project
+*.sublime-workspace
+
+# Mac Files
+*.DS_Store

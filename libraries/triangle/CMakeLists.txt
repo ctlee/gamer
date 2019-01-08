@@ -25,6 +25,7 @@ project(Triangle VERSION 1.6)
 option(SINGLE "Use single precision" OFF)
 option(BUILD_TRIANGLE_BIN "Build the triangle binaries" OFF)
 option(BUILD_STATIC_LIB "Build the static library" OFF)
+option(SELF_CHECK "Insert lots of self checks" OFF)
 
 set(TARGET_BINS "")
 set(TARGET_LIBS "")
@@ -79,6 +80,10 @@ list(APPEND COMPILE_DEFS NO_TIMER) # Skip timing code
 if(SINGLE)
     list(APPEND COMPILE_DEFS SINGLE)
 endif(SINGLE)
+
+if(SELF_CHECK)
+    list(APPEND COMPILE_DEFS SELF_CHECK)
+endif(SELF_CHECK)
 
 # Set some definitions in accord with Shewchuk's recommendations
 if(CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_COMPILER_IS_GNUCC)

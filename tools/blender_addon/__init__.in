@@ -21,73 +21,71 @@
 #
 
 bl_info = {
-    "name": "GAMer",
-    "description": "GAMer: Geometry-preserving Adaptive Mesher",
-    "author": "Chris Lee, John Moody, Zeyun Yu, Tom Bartol, Johan Hake, and Michael Holst",
-    "version": (@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@),
-    "blender": (2, 7, 9),
-    "api": 55057,
-    "location": "View3D > Add > Mesh",
-    "warning": "",
-    "wiki_url": "https://github.com/ctlee/gamer/wiki",
-    "tracker_url": "https://github.com/ctlee/gamer/issues",
-    "category": "Mesh"}
-
+        "name": "GAMer: Geometry-preserving Adaptive Mesher",
+        "description": "Utilities for generating finite elements simulation compatible meshes",
+        "author": "Christopher T. Lee, John B. Moody, Zeyun Yu, Tom Bartol, Johan Hake, and Michael Holst",
+        "version": (@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@),
+        "blender": (2, 79, 0),
+        "location": "3D View > Tool Shelf",
+        "wiki_url": "https://github.com/ctlee/gamer",
+        "tracker_url": "https://github.com/ctlee/gamer/issues",
+        "support": 'COMMUNITY',
+        "category": "Mesh",
+    }
 
 if "bpy" in locals():
-    print("Reloading GAMer")
     import importlib
-    importlib.reload(gamer_gui)
+    importlib.reload(gameraddon_main)
+    importlib.reload(ui)
+    importlib.reload(surfacemesh_ops)
     importlib.reload(markers)
     importlib.reload(tetrahedralization)
-    importlib.reload(util)
+    importlib.reload(versions)
+    improtlib.reload(meshstats)
 else:
-    print("Importing GAMer")
-    from . import gamer_gui
-    from . import markers
-    from . import tetrahedralization
-    from . import util
+    from . import (
+            gameraddon_main,
+            ui,
+            markers,
+            tetrahedralization,
+            surfacemesh_ops,
+            versions,
+            meshstats,
+            )
 
 # General import
 import bpy
-import sys
-import os
+from bpy.props import PointerProperty
 
-def add_handler ( handler_list, handler_function ):
+def add_handler(handler_list, handler_function):
     """ Only add a handler if it's not already in the list """
     if not (handler_function in handler_list):
-        handler_list.append ( handler_function )
+        handler_list.append(handler_function)
 
 
-def remove_handler ( handler_list, handler_function ):
+def remove_handler(handler_list, handler_function):
     """ Only remove a handler if it's in the list """
     if handler_function in handler_list:
-        handler_list.remove ( handler_function )
-
+        handler_list.remove(handler_function)
 
 def register():
-    # print("Registering GAMer...")
     bpy.utils.register_module(__name__)
-    T = bpy.types
-    PP = bpy.props.PointerProperty
-    T.Scene.gamer = PP(type=gamer_gui.GAMerPropertyGroup)
-    T.Object.gamer = PP(type=markers.GAMerBoundaryMarkersList)
-    T.Material.gamer = PP(type=markers.GAMerBoundaryMaterial)
+    types = bpy.types
+    types.Scene.gamer = PointerProperty(type=gameraddon_main.GAMerAddonProperties)
+    types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
+    types.Material.gamer = PointerProperty(type=markers.GAMerBoundaryMaterial)
 
     # Add the load_post handlers
-    add_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
-    add_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
-    # bpy.utils.register_class(util.GAMerDialogOperator)
-    # print("GAMer registered")
+    add_handler(bpy.app.handlers.load_post, gameraddon_main.gamer_load_post)
 
 
 def unregister():
-    # bpy.utils.unregister_class(util.GAMerDialogOperator)
-    remove_handler ( bpy.app.handlers.load_post, markers.boundary_markers_load_post )
-    remove_handler ( bpy.app.handlers.load_post, gamer_gui.gamer_load_post )
+    remove_handler(bpy.app.handlers.load_post, gameraddon_main.gamer_load_post)
+    types = bpy.types
+    del types.Material.gamer
+    del types.Object.gamer
+    del types.Scene.gamer
     bpy.utils.unregister_module(__name__)
-    # print("GAMer unregistered")
-
 
 # for testing
 if __name__ == '__main__':

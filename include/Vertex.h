@@ -256,11 +256,10 @@ inline double magnitude(const Vector& A){
     return  std::sqrt(A|A);
 }
 
-inline Vector& normalize(Vector& A){
+inline void normalize(Vector& A){
     double mag = magnitude(A);
     if (mag == 0)
         throw std::runtime_error("Cannot normalize a vector with length of 0.");
     A /= mag;
-    return A;
 }
 

@@ -24,17 +24,26 @@ include(${SWIG_USE_FILE})
 
 # First find the python interpreter
 find_package(PythonInterp REQUIRED)
-# message(STATUS "Found Python binary: ${PYTHON_EXECUTABLE}")
-# message(STATUS "Python Version String: ${PYTHON_VERSION_STRING}")
+message(STATUS "Found Python binary: ${PYTHON_EXECUTABLE}")
+message(STATUS "Python Version String: ${PYTHON_VERSION_STRING}")
 
 # Then use it to inform pythonlibs
 find_package(PythonLibs REQUIRED)
-# message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
-# message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
-# message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
+message(STATUS "PythonLibs Version String: ${PYTHONLIBS_VERSION_STRING}")
+message(STATUS "Python Include Dir: ${PYTHON_INCLUDE_PATH}")
+message(STATUS "Python Lib Dir: ${PYTHON_LIBRARIES}")
 
-if(NOT ${PYTHON_VERSION_STRING} STREQUAL ${PYTHONLIBS_VERSION_STRING})
+if(NOT ${PYTHON_VERSION_STRING} VERSION_EQUAL ${PYTHONLIBS_VERSION_STRING})
     message(FATAL_ERROR "Python interpreter and libs versions do not match")
+endif()
+
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import sys; print(sys.maxsize > 2**32)"
+    OUTPUT_VARIABLE is_interp_x64
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if(NOT ${is_interp_x64})
+    message(FATAL_ERROR "Python interpreter is not 64bits.")
 endif()
 
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
@@ -58,6 +67,7 @@ endif()
 if(APPLE)
     set_target_properties(${SWIG_MODULE_pygamer_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 elseif(WIN32)
+    # MVSC requires linking of python lib
     swig_link_libraries(pygamer ${PYTHON_LIBRARIES})
 else()
     # Nothing yet
@@ -73,16 +83,20 @@ install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 # Have CMake install Blender...
 #####################################################################
 add_custom_target(stage_files
-    COMMAND ${CMAKE_COMMAND} -E make_directory plugin/gamer
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/swig/__init__.py plugin/gamer/
-    COMMAND ${CMAKE_COMMAND} -E copy swig/pygamer.py plugin/gamer/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:_pygamer> plugin/gamer/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ./plugin/gamer_addon
+    # COMMAND ${CMAKE_COMMAND} -E make_directory plugin/gamer
+    # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/swig/__init__.py plugin/gamer_addon/
+    COMMAND ${CMAKE_COMMAND} -E copy swig/pygamer.py plugin/gamer_addon/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:_pygamer> plugin/gamer_addon/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ./plugin/gamer_addon/
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gamer_gui.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gameraddon_main.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/tetrahedralization.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/markers.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/versions.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/surfacemesh_ops.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/ui.py
     COMMENT "Staging the GAMer Blender addon files"
     VERBATIM
 )

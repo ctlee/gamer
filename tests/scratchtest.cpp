@@ -26,138 +26,40 @@
 
 int  main(int argc, char *argv[])
 {
-    if(argc != 2)
-    {
-        std::cerr << "Wrong arguments passed" << std::endl;
-        return -1;
+    auto mesh = readOFF(argv[1]);
+
+    fillHoles(*mesh);
+
+    writeOFF("test.off", *mesh);
+
+    auto vol = getVolume(*mesh);
+    if (vol < 0){
+        flipNormals(*mesh);
     }
-    // auto mesh = readOFF(argv[1]);
-    // auto mesh = readPDB_gauss(argv[1], -0.2, 2.5);
-    // auto mesh = readPDB_distgrid(argv[1], 1.4);
-    auto mesh = readPDB_molsurf(argv[1]);
+    // vector of vectors >.<
+    // std::vector<std::vector<SurfaceMesh::SimplexID<2>>> test;
+    // surfacemesh_detail::findHoles(*mesh, test);
 
-    if(mesh == nullptr){
-        std::cout << "Something bad happened..." << std::endl;
-        exit(1);
-    }
-    std::cout << "Done reading" << std::endl;
+    // std::cout << "Number of holes: " << test.size()  << std::endl << std::endl;
 
-    std::cout << "General mesh statistics: " << std::endl;
-    std::cout << "# Vertices: " << mesh->size<1>() << std::endl;
-    std::cout << "# Edges: " << mesh->size<2>() << std::endl;
-    std::cout << "# Faces: " << mesh->size<3>() << std::endl;
+    // int i = 0;
+    // for(auto v : test){
+    //     std::cout << "Begin ring: ";
+    //     for(auto s : v){
+    //         ++i;
+    //         std::cout << s << " ";
+    //     }
+    //     std::cout << std::endl;
 
-    compute_orientation(*mesh);
-    if(getVolume(*mesh) < 0){
-        for(auto &face : mesh->get_level<3>())
-            face.orientation *= -1;
-    }
+    //     std::cout << "Sorted Vertices: ";
+    //     std::vector<SurfaceMesh::SimplexID<1>> foo;
+    //     surfacemesh_detail::edgeRingToVertices(*mesh, v, std::back_inserter(foo));
+    //     for(auto vert : foo){
+    //         std::cout << vert << " ";
+    //     }
+    //     std::cout << std::endl << std::endl;
+    // }
 
-
-    coarseIT(*mesh, 0.016, 1, 0);
-    coarseIT(*mesh, 2.5, 0, 10);
-    smoothMesh(*mesh, 15, 165, 5, true);
-
-    for(auto &face : mesh->get_level<3>())
-        face.marker = 23;
-
-    auto &global = *mesh->get_simplex_up();
-    global.closed = true;
-    global.ishole = true;
-    global.marker = -1;
-
-    auto box = cube(5);
-
-    for(auto &face : box->get_level<3>())
-        face.marker = 50;
-
-    auto &global2 = *box->get_simplex_up();
-    global2.closed = true;
-    global2.ishole = false;
-    global2.marker = 5;
-
-    Vector center;
-    double radius;
-    std::tie(center, radius) = getCenterRadius(*mesh);
-    scale(*box, radius*2);
-
-    std::cout << "General box statistics: " << std::endl;
-    std::cout << "# Vertices: " << box->size<1>() << std::endl;
-    std::cout << "# Edges: " << box->size<2>() << std::endl;
-    std::cout << "# Faces: " << box->size<3>() << std::endl;
-
-    std::vector<SurfaceMesh*> meshes;
-
-    std::cout << "Volume of mesh: " << getVolume(*mesh) << std::endl;
-    std::cout << "Volume of box: " << getVolume(*box) << std::endl;
-
-    meshes.push_back(std::move(mesh.get()));
-    meshes.push_back(std::move(box.get()));
-
-    std::cout << "\n\n\nBEGINNING TETRAHEDRALIZATION..." << std::endl;
-    auto tetmesh = makeTetMesh(meshes, "pq1.4zYAQ");
-
-    std::cout << "Done Tetrahedralizing" << std::endl;
-
-    std::cout << "General TetMesh statistics: " << std::endl;
-    std::cout << "# Vertices: " << tetmesh->size<1>() << std::endl;
-    std::cout << "# Edges: " << tetmesh->size<2>() << std::endl;
-    std::cout << "# Faces: " << tetmesh->size<3>() << std::endl;
-    std::cout << "# Cells: " << tetmesh->size<4>() << std::endl;
-
-    int cnt = 0;
-    int cnt2 = 0;
-    for (auto face : tetmesh->get_level<3>()){
-        if (face.marker == 23)
-            cnt++;
-        else if (face.marker == 50)
-            cnt2++;
-    }
-    std::cout << "There are " << cnt << " faces with marker 23." << std::endl;
-    std::cout << "There are " << cnt2 << " faces with marker 50." << std::endl;
-
-
-    writeVTK("output.vtk", *tetmesh);
-    writeDolfin("output.xml", *tetmesh);
-
-
-    SurfaceMesh protein, boxE;
-
-    for(auto face : tetmesh->get_level_id<3>()){
-        auto fdata = *face;
-        if (fdata.marker == 23){
-            auto name = tetmesh->get_name(face);
-            protein.insert(name);
-            auto vertices = tetmesh->down(std::move(tetmesh->down(face)));
-
-            for (auto vertex : vertices){
-                auto &data  = *(protein.get_simplex_up(tetmesh->get_name(vertex)));
-                data = *vertex;
-            }
-
-        } else if (fdata.marker == 50){
-            auto name = tetmesh->get_name(face);
-            boxE.insert(name);
-            auto vertices = tetmesh->down(std::move(tetmesh->down(face)));
-
-            for (auto vertex : vertices){
-                auto &data = *(boxE.get_simplex_up(tetmesh->get_name(vertex)));
-                data = *vertex;
-            }
-        } else{
-            // std::cout << fdata.marker << std::endl;
-            // auto tets = tetmesh->up(face);
-            // for (auto tet : tets){
-            //     std::cout << (*tet).marker << std::endl;
-            // }
-        }
-    }
-
-    compute_orientation(protein);
-    compute_orientation(boxE);
-
-    writeOFF("proteinExtracted.off", protein);
-    writeOFF("boxExtracted.off", boxE);
-
+    // std::cout << "Number of edges: " << i << std::endl;
     std::cout << "EOF" << std::endl;
 }
