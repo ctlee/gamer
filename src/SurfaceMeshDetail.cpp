@@ -442,7 +442,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
  * @param      mesh      The mesh
  * @param[in]  vertexID  The vertex id
  */
-void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double k)
 {
     auto            name = mesh.get_name(vertexID)[0];
     double          areaSum = 0;
@@ -469,13 +469,17 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
         neighbors(mesh, faceID, std::back_inserter(faces));
         Vector avgNorm;
 
+        double sumWeight = 0;
+
         for (auto face : faces)
         {
             auto inorm = getNormal(mesh, face);
             inorm /= std::sqrt(inorm|inorm);
-            avgNorm += inorm;
+            double weight = exp(k*(normal|inorm));
+            avgNorm += weight*inorm;
+            sumWeight += weight;
         }
-        avgNorm /= 3;
+        avgNorm /= sumWeight;
 
         // Compute the edge (axis) to rotate about.
         auto edge = mesh.get_simplex_down(faceID, name);
