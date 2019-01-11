@@ -377,20 +377,25 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         double alpha = (pS|nS) + 1;
 
         // Check if vertices are colinear
-        if (magnitude(bisector) == 0 || alpha == 0 || alpha == 2){
+        if (magnitude(bisector) == 0 || alpha < 1e-6 || fabs(alpha-2) < 1e-6){
             perpNorm = pS;
             normalize(perpNorm);
         }
         else {
-            normalize(bisector);
-            // Normal of tangent plane
-            Vector tanNorm = cross(pS, nS);
-            // Get the perpendicular plane made up of plane normal of bisector
-            perpNorm = cross(tanNorm, bisector);
-            normalize(perpNorm);
+            try{
+                normalize(bisector);
+                // Normal of tangent plane
+                Vector tanNorm = cross(pS, nS);
+                // Get the perpendicular plane made up of plane normal of bisector
+                perpNorm = cross(tanNorm, bisector);
+                normalize(perpNorm);
+            }
+            catch(std::exception & e){
+                throw std::runtime_error("Chris is a dummy");
+            }
         }
 
-        // Get a reference vecter to shared which lies on the plane of interest.
+        // Get a reference vector to shared which lies on the plane of interest.
         Vector disp = center - shared;
         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
