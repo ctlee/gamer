@@ -345,9 +345,20 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
 
         // Get the vertices connected to adjacent edge by face
         auto up   = mesh.get_cover(edge);
+        if (up.size() != 2){
+            // Edge is a boundary or otherwise...
+            // Let's not move it
+            return;
+        }
+
         Vertex prev = *mesh.get_simplex_up({up[0]});
         Vertex next = *mesh.get_simplex_up({up[1]});
 
+        // std::cout << mesh.get_simplex_up({up[0]}) << " "
+        //             << mesh.get_simplex_up({up[1]}) << " "
+        //             << mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]}) << std::endl;
+
+        // std::cout << prev << " " << next << " " << shared << std::endl;
         Vector pS, nS;
         try{
             pS = prev - shared;
