@@ -345,9 +345,20 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
 
         // Get the vertices connected to adjacent edge by face
         auto up   = mesh.get_cover(edge);
+        if (up.size() != 2){
+            // Edge is a boundary or otherwise...
+            // Let's not move it
+            return;
+        }
+
         Vertex prev = *mesh.get_simplex_up({up[0]});
         Vertex next = *mesh.get_simplex_up({up[1]});
 
+        // std::cout << mesh.get_simplex_up({up[0]}) << " "
+        //             << mesh.get_simplex_up({up[1]}) << " "
+        //             << mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]}) << std::endl;
+
+        // std::cout << prev << " " << next << " " << shared << std::endl;
         Vector pS, nS;
         try{
             pS = prev - shared;
@@ -366,20 +377,25 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         double alpha = (pS|nS) + 1;
 
         // Check if vertices are colinear
-        if (magnitude(bisector) == 0 || alpha == 0 || alpha == 2){
+        if (magnitude(bisector) == 0 || alpha < 1e-6 || fabs(alpha-2) < 1e-6){
             perpNorm = pS;
             normalize(perpNorm);
         }
         else {
-            normalize(bisector);
-            // Normal of tangent plane
-            Vector tanNorm = cross(pS, nS);
-            // Get the perpendicular plane made up of plane normal of bisector
-            perpNorm = cross(tanNorm, bisector);
-            normalize(perpNorm);
+            try{
+                normalize(bisector);
+                // Normal of tangent plane
+                Vector tanNorm = cross(pS, nS);
+                // Get the perpendicular plane made up of plane normal of bisector
+                perpNorm = cross(tanNorm, bisector);
+                normalize(perpNorm);
+            }
+            catch(std::exception & e){
+                throw std::runtime_error("Chris is a dummy");
+            }
         }
 
-        // Get a reference vecter to shared which lies on the plane of interest.
+        // Get a reference vector to shared which lies on the plane of interest.
         Vector disp = center - shared;
         Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
 
@@ -431,7 +447,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
  * @param      mesh      The mesh
  * @param[in]  vertexID  The vertex id
  */
-void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double k)
 {
     auto            name = mesh.get_name(vertexID)[0];
     double          areaSum = 0;
@@ -458,13 +474,17 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
         neighbors(mesh, faceID, std::back_inserter(faces));
         Vector avgNorm;
 
+        double sumWeight = 0;
+
         for (auto face : faces)
         {
             auto inorm = getNormal(mesh, face);
             inorm /= std::sqrt(inorm|inorm);
-            avgNorm += inorm;
+            double weight = exp(k*(normal|inorm));
+            avgNorm += weight*inorm;
+            sumWeight += weight;
         }
-        avgNorm /= 3;
+        avgNorm /= sumWeight;
 
         // Compute the edge (axis) to rotate about.
         auto edge = mesh.get_simplex_down(faceID, name);

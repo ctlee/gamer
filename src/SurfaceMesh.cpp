@@ -333,7 +333,7 @@ void centeralize(SurfaceMesh &mesh){
 
 void normalSmooth(SurfaceMesh &mesh){
     for(auto nid : mesh.get_level_id<1>()){
-        surfacemesh_detail::normalSmoothH(mesh, nid);
+        surfacemesh_detail::normalSmoothH(mesh, nid, 2);
     }
     double min, max;
     int nSmall, nLarge;
