@@ -136,6 +136,10 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
                 col = layout.column()
                 col.label(text="Change to Edit Mode to enable local improvement options", icon='INFO')
 
+            row = layout.row()
+            row.operator("gamer.select_wagonwheels", text="Select wagon wheels")
+            row.prop(smprops, "n_wagon_edges")
+
             col = layout.column()
             col.label(text="Mesh analysis:")
             col.operator("mesh.meshstats_check_all", text="Generate Mesh Report")

@@ -112,6 +112,18 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
+class GAMER_OT_select_wagonwheels(bpy.types.Operator):
+    bl_idname = "gamer.select_wagonwheels"
+    bl_label = "Select wagon wheels"
+    bl_description = "Select vertices connected to many edges"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        if context.scene.gamer.surfmesh_procs.select_wagonwheels(context, self.report):
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
 # class GAMER_OT_refine_mesh(bpy.types.Operator):
 #     bl_idname = "gamer.refine_mesh"
 #     bl_label = "Quadrisect mesh"
@@ -127,7 +139,7 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
 
 class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     dense_rate = FloatProperty(
-        name="CD_Rate", default=1, min=0.001, max=4.0, precision=4,
+        name="CD_Rate", default=1, min=0.001, max=50.0, precision=4,
         description="The rate for coarsening dense areas")
     dense_iter = IntProperty(
         name="CD_Iter", default=1, min=1, max=15,
@@ -148,6 +160,9 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         description="Show additional surface mesh improvement options")
     autocorrect_normals = BoolProperty(name="Autocorrect normals", default=True,
         description="Auto fix inconsistent normals")
+    n_wagon_edges = IntProperty(
+        name="N Edges", default=8, min=1,
+        description="The number of incident edges to a vertex to be selected")
     verbose = BoolProperty(name="Verbose", default=False,
         description="Print information to console")
 
@@ -209,6 +224,27 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
                 return False
             return gamerToBlender(report, gmesh)
         return False
+
+    def select_wagonwheels(self, context, report):
+        obj = getActiveMeshObject(report);
+
+        # Deselect all first
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        bm = bmesh_from_object(obj)
+        bm.verts.ensure_lookup_table()
+
+        for v in bm.verts:
+            if len(v.link_edges) >= self.n_wagon_edges:
+                v.select_set(True)
+        bmesh_to_object(obj, bm)
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        return True
+
+
 
     # def refine_mesh(self, context, report):
     #     gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
