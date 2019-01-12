@@ -124,6 +124,18 @@ class GAMER_OT_select_wagonwheels(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
+class GAMER_OT_write_quality_info(bpy.types.Operator):
+    bl_idname = "gamer.write_quality_info"
+    bl_label = "Print mesh quality info to files"
+    bl_description = "Dump quality info to files"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        if context.scene.gamer.surfmesh_procs.write_quality_info(context, self.report):
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
 # class GAMER_OT_refine_mesh(bpy.types.Operator):
 #     bl_idname = "gamer.refine_mesh"
 #     bl_label = "Quadrisect mesh"
@@ -165,6 +177,18 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         description="The number of incident edges to a vertex to be selected")
     verbose = BoolProperty(name="Verbose", default=False,
         description="Print information to console")
+
+    export_path = StringProperty(
+            name="Export Directory",
+            description="Path to directory where files will be created",
+            default="./", maxlen=1024, subtype='DIR_PATH'
+            )
+    export_filebase = StringProperty(
+            name="Filename",
+            description="Base name of the files to export",
+            default="meshquality", maxlen=1024, subtype='FILE_NAME'
+            )
+
 
     def coarse_dense(self, context, report):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
@@ -244,7 +268,15 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         bpy.ops.object.mode_set(mode='EDIT')
         return True
 
-
+    def write_quality_info(self, context, report):
+        for obj in bpy.data.objects:
+            if obj.type == 'MESH':
+                fname = self.export_filebase + self.export_filebase + "_" + obj.name
+                gmesh = blenderToGamer(report,
+                    autocorrect_normals=self.autocorrect_normals)
+                if gmesh:
+                    g.printQualityInfo(fname, gmesh)
+        return True
 
     # def refine_mesh(self, context, report):
     #     gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
