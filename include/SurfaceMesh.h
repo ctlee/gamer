@@ -640,11 +640,13 @@ std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
 
 void print(const SurfaceMesh &mesh);
+void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh);
 void generateHistogram(const SurfaceMesh &mesh);
 std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
     int maxMinAngle, int minMaxAngle);
 double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+double getArea(Vertex a, Vertex b, Vertex c);
 double getVolume(const SurfaceMesh &mesh);
 bool hasHole(const SurfaceMesh &mesh);
 

@@ -28,7 +28,9 @@
 #include <cmath>
 #include <iomanip>
 #include <map>
+#include <ostream>
 #include <stdexcept>
+#include <strstream>
 #include <vector>
 
 #include <libraries/casc/casc>
@@ -153,6 +155,45 @@ void generateHistogram(const SurfaceMesh &mesh)
     std::cout << std::endl << std::endl;
 }
 
+void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh){
+
+    std::stringstream anglefilename;
+    anglefilename << filename << ".angle";
+
+    std::ofstream angleOut(anglefilename.str());
+    if(!angleOut.is_open())
+    {
+        std::stringstream ss;
+        ss << "Couldn't open file " << filename << ".angle";
+        throw std::runtime_error(ss.str());
+    }
+
+    std::stringstream areafilename;
+    areafilename << filename << ".area";
+    std::ofstream areaOut(areafilename.str());
+    if(!areaOut.is_open())
+    {
+        std::stringstream ss;
+        ss << "Couldn't open file " << filename << ".area";
+        throw std::runtime_error(ss.str());
+    }
+
+    for(auto faceID : mesh.get_level_id<3>()){
+        auto name = mesh.get_name(faceID);
+        auto a = *mesh.get_simplex_up({name[0]});
+        auto b = *mesh.get_simplex_up({name[1]});
+        auto c = *mesh.get_simplex_up({name[2]});
+
+        areaOut << getArea(a,b,c) << "\n";
+        // Print angles in degrees
+        angleOut    << angle(a,b,c) << "\n"
+                    << angle(b,a,c) << "\n"
+                    << angle(a,c,b) << "\n";
+    }
+    areaOut.close();
+    angleOut.close();
+}
+
 std::tuple<double, double, int, int> getMinMaxAngles(
     const SurfaceMesh &mesh,
     int maxMinAngle,
@@ -211,6 +252,10 @@ double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
     auto a = *mesh.get_simplex_up({name[0]});
     auto b = *mesh.get_simplex_up({name[1]});
     auto c = *mesh.get_simplex_up({name[2]});
+    return getArea(a, b, c);
+}
+
+double getArea(Vertex a, Vertex b, Vertex c){
     auto wedge = (b-a)^(b-c);
     return std::sqrt(wedge|wedge)/2;
 }

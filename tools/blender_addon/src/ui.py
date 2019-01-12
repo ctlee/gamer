@@ -109,6 +109,9 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
                 col.prop(smprops, "autocorrect_normals")
                 col.prop(smprops, "verbose")
 
+                col.prop(smprops, "export_path")
+                col.prop(smprops, "export_filebase")
+                col.operator("gamer.write_quality_info")
 
             col = layout.column()
             col.label(text="Global mesh operations:")
