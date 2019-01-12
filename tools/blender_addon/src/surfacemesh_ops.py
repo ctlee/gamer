@@ -272,7 +272,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         for obj in bpy.data.objects:
             if obj.type == 'MESH':
                 fname = self.export_filebase + self.export_filebase + "_" + obj.name
-                gmesh = blenderToGamer(report,
+                gmesh = blenderToGamer(report, obj=obj,
                     autocorrect_normals=self.autocorrect_normals)
                 if gmesh:
                     g.printQualityInfo(fname, gmesh)
