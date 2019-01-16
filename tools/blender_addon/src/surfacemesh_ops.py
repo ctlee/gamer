@@ -112,30 +112,6 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
-class GAMER_OT_select_wagonwheels(bpy.types.Operator):
-    bl_idname = "gamer.select_wagonwheels"
-    bl_label = "Select wagon wheels"
-    bl_description = "Select vertices connected to many edges"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.select_wagonwheels(context, self.report):
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
-
-class GAMER_OT_write_quality_info(bpy.types.Operator):
-    bl_idname = "gamer.write_quality_info"
-    bl_label = "Print mesh quality info to files"
-    bl_description = "Dump quality info to files"
-    bl_options = {'REGISTER'}
-
-    def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.write_quality_info(context, self.report):
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
-
 # class GAMER_OT_refine_mesh(bpy.types.Operator):
 #     bl_idname = "gamer.refine_mesh"
 #     bl_label = "Quadrisect mesh"
@@ -172,23 +148,8 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         description="Show additional surface mesh improvement options")
     autocorrect_normals = BoolProperty(name="Autocorrect normals", default=True,
         description="Auto fix inconsistent normals")
-    n_wagon_edges = IntProperty(
-        name="N Edges", default=8, min=1,
-        description="The number of incident edges to a vertex to be selected")
     verbose = BoolProperty(name="Verbose", default=False,
         description="Print information to console")
-
-    export_path = StringProperty(
-            name="Export Directory",
-            description="Path to directory where files will be created",
-            default="./", maxlen=1024, subtype='DIR_PATH'
-            )
-    export_filebase = StringProperty(
-            name="Filename",
-            description="Base name of the files to export",
-            default="meshquality", maxlen=1024, subtype='FILE_NAME'
-            )
-
 
     def coarse_dense(self, context, report):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
@@ -249,34 +210,6 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             return gamerToBlender(report, gmesh)
         return False
 
-    def select_wagonwheels(self, context, report):
-        obj = getActiveMeshObject(report);
-
-        # Deselect all first
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        bm = bmesh_from_object(obj)
-        bm.verts.ensure_lookup_table()
-
-        for v in bm.verts:
-            if len(v.link_edges) >= self.n_wagon_edges:
-                v.select_set(True)
-        bmesh_to_object(obj, bm)
-
-        bpy.ops.object.mode_set(mode='EDIT')
-        return True
-
-    def write_quality_info(self, context, report):
-        for obj in bpy.data.objects:
-            if obj.type == 'MESH':
-                fname = self.export_filebase + self.export_filebase + "_" + obj.name
-                gmesh = blenderToGamer(report, obj=obj,
-                    autocorrect_normals=self.autocorrect_normals)
-                if gmesh:
-                    g.printQualityInfo(fname, gmesh)
-        return True
 
     # def refine_mesh(self, context, report):
     #     gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)

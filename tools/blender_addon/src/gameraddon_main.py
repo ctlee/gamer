@@ -25,11 +25,16 @@ from bpy.props import (BoolProperty, CollectionProperty, EnumProperty,
         PointerProperty, StringProperty, BoolVectorProperty)
 from bpy.app.handlers import persistent
 
-from gamer_addon.surfacemesh_ops import (SurfaceMeshImprovementProperties)
+from gamer_addon.surfacemesh_ops import SurfaceMeshImprovementProperties
+
 from gamer_addon.versions import (checkVersion, getGamerVersion)
+
+from gamer_addon.meshstats import MeshQualityReportProperties
+
+from gamer_addon.tetrahedralization import GAMerTetrahedralizationPropertyGroup
+
 from gamer_addon.util import UNSETID
 
-import gamer_addon.tetrahedralization as tetrahedralization
 
 # python imports
 import sys
@@ -73,8 +78,12 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
             type=SurfaceMeshImprovementProperties,
             name="GAMer Surface Mesh Improvement")
 
+    mesh_quality_properties = PointerProperty(
+            type=MeshQualityReportProperties,
+            name="GAMer Mesh Quality Reporting"        )
+
     tet_group = PointerProperty(
-            type=tetrahedralization.GAMerTetrahedralizationPropertyGroup,
+            type=GAMerTetrahedralizationPropertyGroup,
             name="GAMer Tetrahedralization")
 
     def allocate_boundary_id ( self ):

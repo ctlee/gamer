@@ -52,7 +52,6 @@ class GAMER_PT_versionerror(bpy.types.Panel):
         layout.label(text="Warning the current file was generated with a newer version of GAMer!")
         layout.label(text="We strongly recommend you update the plugin before manipulating this file.")
 
-
 class GAMER_PT_surfacemesh(bpy.types.Panel):
     bl_label = "Surface Mesh Conditioning"
     bl_space_type = 'VIEW_3D'
@@ -60,37 +59,10 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
     bl_category = "GAMer"
     bl_options = {'DEFAULT_CLOSED'}
 
-    _type_to_icon = {
-        bmesh.types.BMVert: 'VERTEXSEL',
-        bmesh.types.BMEdge: 'EDGESEL',
-        bmesh.types.BMFace: 'FACESEL',
-        }
-
     # Panel will be drawn if this returns True
     @classmethod
     def poll(cls, context):
         return (context.scene is not None)
-
-    ## This method is from 3D Print Addon
-    @staticmethod
-    def draw_report(layout, context):
-        """Display Reports"""
-        info = report.info()
-        if info:
-            obj = context.edit_object
-
-            layout.label(text="Mesh Stats Report:")
-            box = layout.box()
-            col = box.column(align=False)
-            # box.alert = True
-            for i, (text, data) in enumerate(info):
-                if obj and data and data[1]:
-                    bm_type, bm_array = data
-                    col.operator("mesh.meshstats_select_report",
-                                 text=text,
-                                 icon=GAMER_PT_surfacemesh._type_to_icon[bm_type]).index = i
-                else:
-                    col.label(text=text)
 
     def draw_header(self, context):
         self.layout.label(text="", icon='OUTLINER_DATA_MESH')
@@ -108,10 +80,6 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
                 col.prop(smprops, "advanced_options", icon='TRIA_DOWN', emboss=False)
                 col.prop(smprops, "autocorrect_normals")
                 col.prop(smprops, "verbose")
-
-                col.prop(smprops, "export_path")
-                col.prop(smprops, "export_filebase")
-                col.operator("gamer.write_quality_info")
 
             col = layout.column()
             col.label(text="Global mesh operations:")
@@ -138,18 +106,69 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
             else:
                 col = layout.column()
                 col.label(text="Change to Edit Mode to enable local improvement options", icon='INFO')
-
-            row = layout.row()
-            row.operator("gamer.select_wagonwheels", text="Select wagon wheels")
-            row.prop(smprops, "n_wagon_edges")
-
-            col = layout.column()
-            col.label(text="Mesh analysis:")
-            col.operator("mesh.meshstats_check_all", text="Generate Mesh Report")
-
-            GAMER_PT_surfacemesh.draw_report(layout, context)
         else:
             layout.label(text="Select a mesh object to use GAMer mesh processing features", icon='HAND')
+
+class GAMER_PT_mesh_quality(bpy.types.Panel):
+    bl_label = "Mesh Quality Reporting"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'TOOLS'
+    bl_category = "GAMer"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    _type_to_icon = {
+    bmesh.types.BMVert: 'VERTEXSEL',
+    bmesh.types.BMEdge: 'EDGESEL',
+    bmesh.types.BMFace: 'FACESEL',
+    }
+
+    # Panel will be drawn if this returns True
+    @classmethod
+    def poll(cls, context):
+        return (context.scene is not None)
+
+    ## This method is from 3D Print Addon
+    @staticmethod
+    def draw_report(layout, context):
+        """Display Reports"""
+        info = report.info()
+        if info:
+            obj = context.edit_object
+
+            layout.label(text="Mesh Stats Report:")
+            box = layout.box()
+            col = box.column(align=False)
+            # box.alert = True
+            for i, (text, data) in enumerate(info):
+                if obj and data and data[1]:
+                    bm_type, bm_array = data
+                    col.operator("gamer.meshstats_select_report",
+                                 text=text,
+                                 icon=GAMER_PT_mesh_quality._type_to_icon[bm_type]).index = i
+                else:
+                    col.label(text=text)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+
+        # Mesh quality properties object
+        qProps = context.scene.gamer.mesh_quality_properties
+
+        col.prop(qProps, "export_path")
+        col.prop(qProps, "export_filebase")
+        col.operator("gamer.write_quality_info")
+
+        row = layout.row()
+        row.operator("gamer.meshstats_check_wagonwheels")
+        row.prop(qProps, "n_wagon_edges")
+
+        col = layout.column()
+        col.label(text="Mesh analysis:")
+        col.operator("gamer.meshstats_check_all", text="Generate Mesh Report")
+
+        GAMER_PT_mesh_quality.draw_report(layout, context)
+
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):
     bl_label = "Boundary Marking"
@@ -250,7 +269,7 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "GAMer"
-    # bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
