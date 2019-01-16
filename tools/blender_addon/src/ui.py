@@ -150,18 +150,27 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        col = layout.column()
-
         # Mesh quality properties object
         qProps = context.scene.gamer.mesh_quality_properties
 
+        box = layout.box()
+        col = box.column()
         col.prop(qProps, "export_path")
         col.prop(qProps, "export_filebase")
         col.operator("gamer.write_quality_info")
 
-        row = layout.row()
+        col = layout.column(align=True)
+        col.operator("gamer.meshstats_check_solid")
+        col.operator("gamer.meshstats_check_degenerate")
+        col.operator("gamer.meshstats_check_intersect")
+
+        row = col.row(align=True)
         row.operator("gamer.meshstats_check_wagonwheels")
         row.prop(qProps, "n_wagon_edges")
+
+        row = col.row(align=True)
+        row.operator("gamer.meshstats_check_sharp")
+        row.prop(qProps, "min_angle")
 
         col = layout.column()
         col.label(text="Mesh analysis:")

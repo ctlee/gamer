@@ -16,12 +16,15 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+import math
 import bpy
 from bpy.props import (
         BoolProperty, CollectionProperty, EnumProperty,
         FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty,
         PointerProperty, StringProperty, BoolVectorProperty)
 import bmesh
+
+import gamer_addon.pygamer as g
 
 import gamer_addon.report as report
 from gamer_addon.util import *
@@ -98,8 +101,27 @@ class GAMER_OT_MeshStats_Info_Volume(bpy.types.Operator):
     @staticmethod
     def main_check(obj,info):
         bm = bmesh_copy_from_object(obj)
-        volume = bm.calc_volume()
+        volume = 0.0
+        for face in bm.faces:
+            if len(face.loops != 3):
+                info.append(("Cannot compute volume for non triangulated object.", None))
+                return
+            tv0 = face.loops[0].vert.co
+            tv1 = face.loops[1].vert.co
+            tv2 = face.loops[2].vert.co
+            x0 = tv0.x
+            y0 = tv0.y
+            z0 = tv0.z
+            x1 = tv1.x
+            y1 = tv1.y
+            z1 = tv1.z
+            x2 = tv2.x
+            y2 = tv2.y
+            z2 = tv2.z
+            det = x0*(y1*z2-y2*z1)+x1*(y2*z0-y0*z2)+x2*(y0*z1-y1*z0)
+            volume = volume + det
         bm.free()
+        volume = volume/6.0
         info.append(("Volume: %s" % clean_float("%.8f" % volume), None))
 
     def execute(self, context):
@@ -125,6 +147,7 @@ class GAMER_OT_MeshStats_Check_Solid(bpy.types.Operator):
     """Check for geometry is solid (has valid inside/outside) and correct normals"""
     bl_idname = "gamer.meshstats_check_solid"
     bl_label = "MeshStats Check Solid"
+    bl_description = "Check for non-manifolds and inconsistent normals"
 
     @staticmethod
     def main_check(obj, info):
@@ -168,7 +191,8 @@ class GAMER_OT_MeshStats_Check_Degenerate(bpy.types.Operator):
     """Check for degenerate geometry that may not print properly """ \
     """(zero area faces, zero length edges)"""
     bl_idname = "gamer.meshstats_check_degenerate"
-    bl_label = "MeshStats Check Degenerate"
+    bl_label = "Check Degenerate Faces and Edges"
+    bl_description = "Check for zero length/area edges and faces"
 
     @staticmethod
     def main_check(obj, info):
@@ -218,6 +242,37 @@ class GAMER_OT_MeshStats_Check_Wagonwheels(bpy.types.Operator):
     def execute(self, context):
         return execute_check(self,context)
 
+
+class GAMER_OT_MeshStats_Check_Sharp(bpy.types.Operator):
+    bl_idname = "gamer.meshstats_check_sharp"
+    bl_label = "Check for small angles"
+    bl_description = "Check for faces with small angles"
+
+    @staticmethod
+    def main_check(obj, info):
+        import array
+
+        min_angle = bpy.context.scene.gamer.mesh_quality_properties.min_angle
+        bm = bmesh_copy_from_object(obj, transform=False, triangulate=False)
+
+        # TODO: (10) make this into a fancy list comprehension...
+        sharp_list = []
+        for i, face in enumerate(bm.faces):
+            for loop in face.loops:
+                if loop.calc_angle()*180/math.pi <= min_angle:
+                    sharp_list.append(i)
+
+        sharp = array.array('i', sharp_list)
+
+        info.append((
+                "Sharp faces: %d"%len(sharp),
+                (bmesh.types.BMFace, sharp)
+            ))
+        bm.free()
+
+    def execute(self, context):
+        return execute_check(self,context)
+
 class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
     """Run all checks"""
     bl_idname = "gamer.meshstats_check_all"
@@ -226,24 +281,20 @@ class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
     check_cls = (
         GAMER_OT_MeshStats_Info_Volume,
         GAMER_OT_MeshStats_Info_Area,
-        GAMER_OT_MeshStats_Check_Solid,
         GAMER_OT_MeshStats_Check_Wagonwheels,
+        GAMER_OT_MeshStats_Check_Sharp,
+        GAMER_OT_MeshStats_Check_Solid,
         GAMER_OT_MeshStats_Check_Intersections,
         GAMER_OT_MeshStats_Check_Degenerate,
         )
 
     def execute(self, context):
         obj = context.active_object
-
         info = []
-
         for cls in self.check_cls:
             cls.main_check(obj, info)
-
         report.update(*info)
-
         multiple_obj_warning(self, context)
-
         return {'FINISHED'}
 
 
@@ -254,7 +305,13 @@ class GAMER_OT_write_quality_info(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def execute(self, context):
-        # mqp = context.scene.gamer.mesh_quality_properties
+        mqp = bpy.context.scene.gamer.mesh_quality_properties
+        for obj in context.objects:
+            if obj.type == 'MESH' and obj.selected == True:
+                fname = mqp.export_path + mqp.export_filebase + "_" + obj.name
+                gmesh = blenderToGamer(self.report, obj=obj)
+                if gmesh:
+                    g.printQualityInfo(fname, gmesh)
         return {'FINISHED'}
 
 
@@ -273,13 +330,6 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             description="Base name of the files to export",
             default="meshquality", maxlen=1024, subtype='FILE_NAME'
             )
-
-    def write_quality_info(self, context, report):
-        for obj in bpy.data.objects:
-            if obj.type == 'MESH':
-                fname = self.export_filebase + self.export_filebase + "_" + obj.name
-                gmesh = blenderToGamer(report, obj=obj,
-                    autocorrect_normals=self.autocorrect_normals)
-                if gmesh:
-                    g.printQualityInfo(fname, gmesh)
-        return True
+    min_angle = IntProperty(
+        name="Angle Theshold", default=15, min=0, max=180,
+        description="Select faces with angles less than this criteria")
