@@ -306,14 +306,14 @@ class GAMER_OT_write_quality_info(bpy.types.Operator):
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
-        for obj in context.objects:
-            if obj.type == 'MESH' and obj.selected == True:
+        for obj in context.selected_objects:
+            if obj.type == 'MESH':
                 fname = mqp.export_path + mqp.export_filebase + "_" + obj.name
+                print("Dumping quality info of mesh %s to file %s"%(obj.name, fname))
                 gmesh = blenderToGamer(self.report, obj=obj)
                 if gmesh:
                     g.printQualityInfo(fname, gmesh)
         return {'FINISHED'}
-
 
 
 class MeshQualityReportProperties(bpy.types.PropertyGroup):
