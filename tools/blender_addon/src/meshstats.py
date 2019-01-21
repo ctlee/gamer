@@ -103,7 +103,7 @@ class GAMER_OT_MeshStats_Info_Volume(bpy.types.Operator):
         bm = bmesh_copy_from_object(obj)
         volume = 0.0
         for face in bm.faces:
-            if len(face.loops != 3):
+            if len(face.loops) != 3:
                 info.append(("Cannot compute volume for non triangulated object.", None))
                 return
             tv0 = face.loops[0].vert.co
