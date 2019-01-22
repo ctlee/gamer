@@ -391,7 +391,8 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
                 normalize(perpNorm);
             }
             catch(std::exception & e){
-                throw std::runtime_error("Chris is a dummy");
+                // TODO: (0) rewrite this robustly to remove try catch blocks
+                throw std::runtime_error("ERROR: cannot normalize zero length vector");
             }
         }
 
@@ -407,7 +408,6 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
         perp_e = perpProj_e*disp_e; // matrix (3x3) * vector = vector
 
-        // auto alpha = (pS|nS)+1; // keep the dot product positive
         sumWeights += alpha;
 
         newPos += alpha*(center.position - perp);
