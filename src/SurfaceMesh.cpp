@@ -428,7 +428,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
     {
         norm += getNormal(mesh, faceID);
     }
-    norm /= faces.size();
+    // norm /= faces.size();
     return norm;
 }
 

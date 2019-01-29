@@ -52,8 +52,12 @@ tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
     for (SurfaceMesh::SimplexID<1> nid : nbors)
     {
         auto norm = getNormal(mesh, nid);           // Get Vector normal
-        norm /= std::sqrt(norm|norm);               // normalize
-        lst += norm*norm;                           // tensor product
+        auto mag = std::sqrt(norm|norm);
+        if (mag <= 0){
+            continue;
+        }
+        norm /= mag;               // normalize
+        lst += norm*norm;          // tensor product
     }
 
     // Print the LST nicely
@@ -327,7 +331,6 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
     SurfaceMesh::SimplexID<1> vertexID,
     int rings)
 {
-    // TODO: (2) Fix problems when manipulating boundary vertices.
     auto   centerName = mesh.get_name(vertexID)[0];
     auto  &center = *vertexID; // get the vertex data
 
@@ -346,7 +349,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         // Get the vertices connected to adjacent edge by face
         auto up   = mesh.get_cover(edge);
         if (up.size() != 2){
-            // Edge is a boundary or otherwise...
+            // Vertex is on a boundary or otherwise...
             // Let's not move it
             return;
         }
