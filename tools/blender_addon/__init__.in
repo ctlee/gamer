@@ -78,7 +78,6 @@ def register():
     # Add the load_post handlers
     add_handler(bpy.app.handlers.load_post, gameraddon_main.gamer_load_post)
 
-
 def unregister():
     remove_handler(bpy.app.handlers.load_post, gameraddon_main.gamer_load_post)
     types = bpy.types

@@ -72,7 +72,7 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
     initialized = BoolProperty(name="GAMer Initialized", default=False)
     gamer_version = StringProperty(name="GAMer Version", default="0")
     boundary_id_counter = IntProperty(name="GAMer Boundary id Counter")
-    versionerror = BoolProperty(name="Version mismatch", default=False)
+    versionerror = IntProperty(name="Version mismatch", default=0)
 
     surfmesh_procs = PointerProperty(
             type=SurfaceMeshImprovementProperties,

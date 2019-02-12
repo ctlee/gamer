@@ -534,7 +534,7 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                     // The local topology will be changed by edge flip.
                     // Don't flip edges which share a common face.
                     std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
-                    kneighbors(mesh, edgeID, 2, tmpIgnored);
+                    kneighbors(mesh, edgeID, 3, tmpIgnored);
                     ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
                     // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
                 }

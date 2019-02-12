@@ -41,7 +41,7 @@ class GAMER_PT_versionerror(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return (context.scene is not None) and context.scene.gamer.versionerror
+        return (context.scene is not None) and context.scene.gamer.versionerror != 0
 
     def draw_header(self, context):
         self.layout.label(text="", icon='CANCEL')
@@ -49,8 +49,16 @@ class GAMER_PT_versionerror(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         layout.alert = True
-        layout.label(text="Warning the current file was generated with a newer version of GAMer!")
-        layout.label(text="We strongly recommend you update the plugin before manipulating this file.")
+
+        if context.scene.gamer.versionerror > 0:
+            layout.label(text="Warning the current file was generated with a newer version of GAMer!")
+            layout.label(text="We strongly recommend you update the plugin before manipulating this file.")
+        elif context.scene.gamer.versionerror < 0:
+            layout.label(text="Warning the current file was generated with an older version of GAMer which does not support autoupdate!")
+            layout.label(text="Please be careful manipulating this file as data may be lost.")
+            layout.label(text="Use the following converters at your own risk!")
+            col = layout.column()
+            col.operator("gamer.update_to_2_0_1_from_v_0_1")
 
 class GAMER_PT_surfacemesh(bpy.types.Panel):
     bl_label = "Surface Mesh Conditioning"
