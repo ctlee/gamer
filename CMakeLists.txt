@@ -112,6 +112,7 @@ list(APPEND SOURCES
 )
 
 add_library(gamershared SHARED ${SOURCES})
+add_dependencies(gamershared casc)
 #message(STATUS "GAMer sources: ${SOURCES}")
 
 target_link_libraries(gamershared tetshared)
@@ -120,6 +121,7 @@ install(TARGETS gamershared DESTINATION lib)
 
 if(BUILD_BLENDER OR BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
+    add_dependencies(gamerstatic casc)
     target_link_libraries(gamerstatic tetstatic)
     install(TARGETS gamerstatic DESTINATION lib)
 endif()

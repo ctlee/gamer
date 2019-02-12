@@ -139,9 +139,9 @@ class GAMER_OT_select_all_boundary_faces(bpy.types.Operator):
 
     def execute(self, context):
         for bnd in context.object.gamer.boundary_list:
+            print(bnd)
             bnd.select_boundary_faces(context)
-            return {'FINISHED'}
-        return {'CANCELLED'}
+        return {'FINISHED'}
 
 ## PROPERTYGROUPS
 
