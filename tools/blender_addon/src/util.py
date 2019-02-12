@@ -299,9 +299,6 @@ def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifier
             bm = bmesh.new()
             bm.from_mesh(me)
 
-    # TODO. remove all customdata layers.
-    # would save ram
-
     if transform:
         bm.transform(obj.matrix_world)
 

@@ -127,7 +127,7 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
 
 class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     dense_rate = FloatProperty(
-        name="CD_Rate", default=1, min=0.001, max=4.0, precision=4,
+        name="CD_Rate", default=1, min=0.001, max=50.0, precision=4,
         description="The rate for coarsening dense areas")
     dense_iter = IntProperty(
         name="CD_Iter", default=1, min=1, max=15,
@@ -209,6 +209,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
                 return False
             return gamerToBlender(report, gmesh)
         return False
+
 
     # def refine_mesh(self, context, report):
     #     gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)

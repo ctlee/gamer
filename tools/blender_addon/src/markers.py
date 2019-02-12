@@ -278,7 +278,6 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
                 for f in mesh.polygons:
                     if f.select:
                         face_set.add(f.index)
-
             mats = bpy.data.materials
             bnd_id = self.boundary_id
 

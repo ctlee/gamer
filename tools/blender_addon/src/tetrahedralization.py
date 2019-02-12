@@ -399,9 +399,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 # Do the tetrahedralization
                 tetmesh = g.MakeTetMesh(gmeshes, quality_str)
 
-                for i in range(0,5):
-                    print("Laplacian smooth iteration.")
-                    g.smoothMesh(tetmesh)
+                # for i in range(0,5):
+                #     print("Laplacian smooth iteration.")
+                #     g.smoothMesh(tetmesh)
 
                 # Store mesh to files
                 tetmesh_formats  = ["dolfin", "paraview"]

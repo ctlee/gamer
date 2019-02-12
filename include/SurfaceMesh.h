@@ -534,7 +534,7 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                     // The local topology will be changed by edge flip.
                     // Don't flip edges which share a common face.
                     std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
-                    kneighbors(mesh, edgeID, 2, tmpIgnored);
+                    kneighbors(mesh, edgeID, 3, tmpIgnored);
                     ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
                     // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
                 }
@@ -564,7 +564,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  */
 bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
 
-void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double k);
 
 /**
  * @brief      Traverse mesh and find holes
@@ -640,11 +640,13 @@ std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
 
 void print(const SurfaceMesh &mesh);
+void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh);
 void generateHistogram(const SurfaceMesh &mesh);
 std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
     int maxMinAngle, int minMaxAngle);
 double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+double getArea(Vertex a, Vertex b, Vertex c);
 double getVolume(const SurfaceMesh &mesh);
 bool hasHole(const SurfaceMesh &mesh);
 
