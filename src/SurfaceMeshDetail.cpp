@@ -494,13 +494,17 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double
         auto edgeName = mesh.get_name(edge);
         auto a  = *mesh.get_simplex_up({edgeName[0]});
         auto b  = *mesh.get_simplex_up({edgeName[1]});
+
         auto ab = a-b;
         ab /= std::sqrt(ab|ab); // Eigen AngleAxis requires unit vector
-
 
         // Angle between normals in radians. This is the angle to rotate the
         // normal by.
         double angle = std::copysign(std::acos(normal|avgNorm), dot(cross(normal, avgNorm), ab));
+        // Catch for floating point dot product issues
+        if(isnan(angle)){
+            angle = 0;
+        }
         //Vector rotAxis = (*faceID).orientation * ab; // We don't need this
         // because the angle is relative.
         Vector rotAxis = ab;
