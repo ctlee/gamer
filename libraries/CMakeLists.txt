@@ -19,11 +19,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-# Verify that CASC submodule was initialized
-if( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/casc/.git" )
-  message( SEND_ERROR "The CASC submodules is not available. Please run
-                        git submodule update --init"
+include(ExternalProject)
+ExternalProject_Add(
+    casc
+    URL https://github.com/ctlee/casc/archive/v1.0.1.tar.gz
+    URL_HASH SHA1=34cfe1ae39c4abd63f88e0056202d376c01ff190
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/casc
+    INSTALL_COMMAND ""
 )
-endif()
+
 add_subdirectory(tetgen)
 # add_subdirectory(triangle)
