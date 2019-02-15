@@ -160,12 +160,17 @@ class GAMER_OT_MeshStats_Check_Solid(bpy.types.Operator):
         edges_non_contig = array.array('i', (i for i, ele in enumerate(bm.edges)
                 if ele.is_manifold and (not ele.is_contiguous)))
 
+        verts_non_manifold = array.array('i', (i for i, ele in enumerate(bm.verts)
+                if not ele.is_manifold))
+
         info.append(("Non Manifold Edge: %d" % len(edges_non_manifold),
                     (bmesh.types.BMEdge, edges_non_manifold)))
 
         info.append(("Bad Contig. Edges: %d" % len(edges_non_contig),
                     (bmesh.types.BMEdge, edges_non_contig)))
 
+        info.append(("Non Manifold Vertices: %d" % len(verts_non_manifold),
+            (bmesh.types.BMVert, verts_non_manifold)))
         bm.free()
 
     def execute(self, context):
