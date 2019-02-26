@@ -10,7 +10,6 @@ In the future, we will reintroduce CLI programs for mesh processing.
 [![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
 [![Developement Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
 
-
 ## Installing
 Prebuilt binaries of the GAMer Blender-addon are available under [releases](https://github.com/ctlee/gamer/releases).
 Download the corresponding `.zip` for your platform and follow Blender's instructions to [install from file](https://docs.blender.org/manual/fi/dev/preferences/addons.html#header).
@@ -65,13 +64,23 @@ These can be used in addition to the standard [CMake flags](https://cmake.org/cm
 * The GAMer documentation can be built if you have access to
 [doxygen](http://www.doxygen.nl/) by running `make docs` with any build.
 
-## Authors
-**John Moody**\
-Department of Mathematics\
-University of California, San Diego
+## Acknowledging your use of GAMer
+Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know. 
 
+Please cite the above Zenodo DOI to acknowledge the software version and cite the following paper:\
+[Lee, C. T.; Laughlin, J. G.; Angliviel de La Beaumelle, N.; Amaro, R.; McCammon, J. A.; Ramamoorthi, R.; Holst, M. J.; Rangamani, P. GAMer 2: A System for 3D Mesh Processing of Cellular Electron Micrographs. bioRxiv 2019, 534479.](https://www.biorxiv.org/content/10.1101/534479v1)
+
+## Contributing
+If you find a bug, unexpected behavior, or otherwise have some feature you would like to see please file an [Issue on GitHub](https://github.com/ctlee/gamer/issues).
+To contribute to the development of GAMer please fork this repository and submit a pull request describing your additions.
+
+## Authors
 **[Christopher Lee](https://github.com/ctlee)**\
 Department of Chemistry & Biochemistry\
+University of California, San Diego
+
+**John Moody**\
+Department of Mathematics\
 University of California, San Diego
 
 ### Contributors to GAMer
