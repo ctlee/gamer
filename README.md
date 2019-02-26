@@ -55,6 +55,8 @@ To enable these options append the flags to your initial CMake function call
 These can be used in addition to the standard [CMake flags](https://cmake.org/cmake/help/latest/manual/cmake.1.html).
 
 * Build Python Extension: `-DBUILD_PYTHONEXT=ON`
+* Specify Python Version: `-DPYTHON_EXECUTABLE:FILEPATH=/path/to/python3`
+    Plugin requires Python >= 3.0
 * Build the Blender addon: `-DBUILD_BLENDER=ON`\
     This automatically builds the Python extension.
 * Single Precision floating point numbers: `-DSINGLE=ON`
