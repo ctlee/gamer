@@ -113,6 +113,9 @@ list(APPEND SOURCES
 
 add_library(gamershared SHARED ${SOURCES})
 add_dependencies(gamershared casc)
+add_library(gamershared SHARED ${SOURCES} tests/DecimateTest.cpp)
+add_library(gamershared SHARED ${SOURCES} tests/DecimateTest.cpp)
+
 #message(STATUS "GAMer sources: ${SOURCES}")
 
 target_link_libraries(gamershared tetshared)

@@ -91,6 +91,8 @@ struct Edge : Vertex
  */
 struct Global
 {
+    bool isHigher_order() const;
+
     bool higher_order;
 };
 
@@ -99,8 +101,17 @@ struct TetVertex : Vertex
     using Vertex::Vertex; // Inherit constructor from Vertex
     TetVertex() {}
     TetVertex(Vertex v) : Vertex(v) {}
+
+    double getError() const;
+
     double error = 0;
 };
+
+struct complex_errors {
+    size_t level;
+    std::vector<int> test;
+};
+
 
 /**
  * @brief      A helper struct containing the traits/types in the simplicial
@@ -133,6 +144,22 @@ std::unique_ptr<TetMesh> makeTetMesh(
         std::string tetgen_params);
 #endif //SWIG
 
+template <std:: size_t level>
+TetMesh::SimplexID<level> get_lowest_err();
+
+
+template <std::size_t level>
+void propagateHelper(TetMesh & mesh){
+    for (auto node : mesh.get_level_id<level>()){
+        auto parents = mesh.up(node);
+        double tmperror;
+        for (auto parent : parents){
+            tmperror += parent->error;
+        }
+        double error = tmperror / parents.size();
+        node->error = error;
+    }
+}
 
 void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);

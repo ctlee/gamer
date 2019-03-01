@@ -36,6 +36,11 @@
 #include <vector>
 
 #include <libraries/casc/casc>
+#include <libraries/casc/include/decimate.h>
+#include <libraries/casc/include/util.h>
+#include <include/TetMesh.h>
+
+//#include <libraries/casc/include/typetraits.h>
 
 #include "TetMesh.h"
 
@@ -325,6 +330,35 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     }
     compute_orientation(*mesh);
     return mesh;
+}
+
+template <std::size_t level, template <typename> class Callback>
+void decimation(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
+
+    if (threshold < 1) {
+        throw std::invalid_argument("Threshold to decimate to must be at least 1");
+    }
+
+    // Exit, mesh already sufficiently decimated
+    if (threshold > mesh.size<level>()) {
+        return;
+    }
+
+    int initialLevelSimplexCount = mesh.size<level>();
+    int numToRemove = initialLevelSimplexCount - threshold;
+
+    for(int i = 0; i < numToRemove; ++i){
+        auto nextCollapse = get_lowest_err<level>(mesh);
+        casc::decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
+    }
+}
+
+
+
+void propagateError(TetMesh & mesh){
+    using RevIndex = typename util::reverse_sequence<std::size_t, typename TetMesh::LevelIndex>;
+
+    util::int_for_each<RevIndex>(propagateHelper(mesh));
 }
 
 void writeVTK(const std::string& filename, const TetMesh &mesh){
@@ -644,6 +678,13 @@ void smoothMesh(TetMesh &mesh){
         }
     }
 }
+
+template <std:: size_t level>
+auto get_lowest_err(TetMesh &mesh){
+    return mesh.get_lowest_error<level>;
+}
+
+
 
 
 
