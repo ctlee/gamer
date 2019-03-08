@@ -355,10 +355,69 @@ void decimation(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
 
 
 
-void propagateError(TetMesh & mesh){
-    using RevIndex = typename util::reverse_sequence<std::size_t, typename TetMesh::LevelIndex>;
+template <std::size_t level>
+void propagateHelper(TetMesh & mesh){
+    if (level == 0) return;
 
-    util::int_for_each<RevIndex>(propagateHelper(mesh));
+    for (auto node : mesh.get_level_id<level>()){
+        auto parents = mesh.up(node);
+        double tmperror;
+        for (auto parent : parents){
+            tmperror += parent->error;
+        }
+        double error = tmperror / parents.size();
+        node->error = error;
+    }
+    propagateHelper<level-1>(mesh);
+}
+
+struct complex_errors1 {
+    using TetVertex = tetmesh::TetVertex;
+    std::priority_queue<TetVertex, std::vector<TetVertex>, TetVertex::ErrorComparator> errorQueue;
+
+
+
+        for (TetVertex v : mesh.get_level_id<1>()) {
+            errorQueue.push(v);
+        }
+
+
+    TetVertex lowestErr() {
+        if (errorQueue.empty()) {
+            throw std::bad_function_call();
+        }
+        auto low =  errorQueue.top();
+        errorQueue.pop();
+        return low;
+    }
+};
+
+struct complex_errors{
+    using TetVertex = tetmesh::TetVertex;
+    std::priority_queue<TetVertex, std::vector<TetVertex>, std::greater<void>> errorQueue;
+
+    complex_errors(TetMesh &mesh) {
+        for (auto v : mesh.get_level_id<1>()) {
+            errorQueue.push(v);
+        }
+    }
+
+    TetVertex lowestErr() {
+        if (errorQueue.empty()) {
+            throw std::bad_function_call();
+        }
+        auto low =  errorQueue.top();
+        errorQueue.pop();
+        return low;
+    }
+};
+
+complex_errors errors();
+
+template <std::size_t level>
+void propagateError(TetMesh & mesh){
+    propagateHelper<level>(mesh);
+    complex_errors errors(mesh);
 }
 
 void writeVTK(const std::string& filename, const TetMesh &mesh){
@@ -681,7 +740,7 @@ void smoothMesh(TetMesh &mesh){
 
 template <std:: size_t level>
 auto get_lowest_err(TetMesh &mesh){
-    return mesh.get_lowest_error<level>;
+    return errors().lowestErr();
 }
 
 

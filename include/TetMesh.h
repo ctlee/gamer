@@ -79,7 +79,6 @@ struct Cell : casc::Orientable, CellProperties
     {}
 };
 
-
 struct Edge : Vertex
 {
     Edge() {}
@@ -104,13 +103,21 @@ struct TetVertex : Vertex
 
     double getError() const;
 
-    double error = 0;
+    static double error;
+
+
+    bool operator< (const TetVertex& rhs)
+    {
+        return  error < rhs.getError();
+    };
+
+    bool operator> (const TetVertex& rhs)
+    {
+        return  error > rhs.getError();
+    };
+
 };
 
-struct complex_errors {
-    size_t level;
-    std::vector<int> test;
-};
 
 
 /**
@@ -146,20 +153,6 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
 template <std:: size_t level>
 TetMesh::SimplexID<level> get_lowest_err();
-
-
-template <std::size_t level>
-void propagateHelper(TetMesh & mesh){
-    for (auto node : mesh.get_level_id<level>()){
-        auto parents = mesh.up(node);
-        double tmperror;
-        for (auto parent : parents){
-            tmperror += parent->error;
-        }
-        double error = tmperror / parents.size();
-        node->error = error;
-    }
-}
 
 void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);
