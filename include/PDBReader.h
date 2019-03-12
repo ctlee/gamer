@@ -312,6 +312,39 @@ bool readPDB(const std::string& filename, Inserter inserter)
     }
 }
 
+template <typename Inserter>
+bool readPQR(const std::string& filename, Inserter inserter)
+{
+    std::ifstream infile(filename);
+    std::string line;
+
+    initElementMap(); // Init the element map if it
+
+    if(infile.is_open())
+    {
+        while (std::getline(infile, line))
+        {
+            std::smatch match;
+            if (std::regex_match(line, match, detail::atom))
+            {
+                Atom atom;
+                // See PDB file formatting guidelines
+                float x = std::atof(line.substr(30,8).c_str());
+                float y = std::atof(line.substr(38,8).c_str());
+                float z = std::atof(line.substr(46,8).c_str());
+                atom.pos = Vector({x, y, z});
+                atom.radius = std::atof(line.substr(62,7).c_str());
+                *inserter++ = atom;
+            }
+        }
+        return true;
+    }
+    else
+    {
+        std::cerr << "Unable to open \"" << filename << "\"" << std::endl;
+        return false;
+    }
+}
 
 template <typename Iterator, typename BlurFunc>
 void getMinMax(Iterator begin, Iterator end, f3Vector& min, f3Vector& max, BlurFunc &&f)
@@ -521,3 +554,5 @@ void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim,
 std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& filename);
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, float blobbyness, float isovalue);
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius);
+
+std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string& filename, float blobbyness, float isovalue);

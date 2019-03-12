@@ -54,6 +54,14 @@ option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
 option(BLENDER_PLUGIN_INSTALL "Have CMake install the plugin" OFF)
 option(BUILD_TESTS "Build the GAMer googletest tests" OFF)
 
+# Set conditional build
+if(BUILD_BLENDER)
+    set(BUILD_PYTHONEXT ON)
+endif()
+if(BUILD_PYTHONEXT)
+    set(BUILD_STATIC_LIB ON)
+endif()
+
 # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -119,14 +127,14 @@ target_link_libraries(gamershared tetshared)
 install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(TARGETS gamershared DESTINATION lib)
 
-if(BUILD_BLENDER OR BUILD_STATIC_LIB)
+if(BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
     add_dependencies(gamerstatic casc)
     target_link_libraries(gamerstatic tetstatic)
     install(TARGETS gamerstatic DESTINATION lib)
 endif()
 
-if(BUILD_BLENDER OR BUILD_PYTHONEXT)
+if(BUILD_PYTHONEXT)
     add_subdirectory(swig)
 endif()
 
