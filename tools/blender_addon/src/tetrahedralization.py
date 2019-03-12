@@ -388,7 +388,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             # Tetrahedralize mesh
             if len(gmeshes) > 0:
 
-                quality_str = "q%.4f/%.4fO3/7AYVC"%(self.max_aspect_ratio,self.min_dihedral)
+                quality_str = "q%.4f/%.4fO8/7AYVC"%(self.max_aspect_ratio,self.min_dihedral)
 
                 # a%.8f volume constraint..
                 quality_str += "o2" if self.ho_mesh else ""
