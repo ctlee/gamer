@@ -226,6 +226,9 @@ SurfaceMesh* ReadPDB_molsurf(const std::string & filename){
 SurfaceMesh* ReadPDB_gauss(const std::string& filename, float blobbyness, float isovalue){
   return readPDB_gauss(filename, blobbyness, isovalue).release();
 }
+SurfaceMesh* ReadPQR_gauss(const std::string& filename, float blobbyness, float isovalue){
+  return readPQR_gauss(filename, blobbyness, isovalue).release();
+}
 
 SurfaceMesh* meshSphere(int order){
   return sphere(order).release();
