@@ -371,34 +371,14 @@ void propagateHelper(TetMesh & mesh){
     propagateHelper<level-1>(mesh);
 }
 
-struct complex_errors1 {
-    using TetVertex = tetmesh::TetVertex;
-    std::priority_queue<TetVertex, std::vector<TetVertex>, TetVertex::ErrorComparator> errorQueue;
-
-
-
-        for (TetVertex v : mesh.get_level_id<1>()) {
-            errorQueue.push(v);
-        }
-
-
-    TetVertex lowestErr() {
-        if (errorQueue.empty()) {
-            throw std::bad_function_call();
-        }
-        auto low =  errorQueue.top();
-        errorQueue.pop();
-        return low;
-    }
-};
-
 struct complex_errors{
     using TetVertex = tetmesh::TetVertex;
     std::priority_queue<TetVertex, std::vector<TetVertex>, std::greater<void>> errorQueue;
 
     complex_errors(TetMesh &mesh) {
-        for (auto v : mesh.get_level_id<1>()) {
-            errorQueue.push(v);
+        for (TetMesh::SimplexID<1> v : mesh.get_level_id<1>()) {
+            TetVertex vertex = *v;
+            errorQueue.push(vertex);
         }
     }
 

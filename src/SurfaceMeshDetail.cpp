@@ -502,7 +502,7 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double
         // normal by.
         double angle = std::copysign(std::acos(normal|avgNorm), dot(cross(normal, avgNorm), ab));
         // Catch for floating point dot product issues
-        if(isnan(angle)){
+        if(std::isnan(angle)){
             angle = 0;
         }
         //Vector rotAxis = (*faceID).orientation * ab; // We don't need this
