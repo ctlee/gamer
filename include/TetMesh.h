@@ -118,7 +118,11 @@ struct TetVertex : Vertex
 
 };
 
+struct TetEdge : TetVertex {
+    TetEdge() {}
+    TetEdge(TetVertex v) : TetVertex(v) {}
 
+};
 
 /**
  * @brief      A helper struct containing the traits/types in the simplicial

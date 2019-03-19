@@ -354,6 +354,28 @@ void decimation(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
 }
 
 
+/*
+ * Return lowest error edge corresponding to a given vertex
+ */
+tetmesh::TetEdge vertexToEdge(tetmesh::TetVertex v) {
+
+}
+
+
+/*
+ * Compute errors of each vertex/edge based on inputted functions
+ */
+double computePenalty(Edge e, std::vector<std::function<double(Edge)>> penaltyList){
+    // Scalarization of penalty funciton; using weighted sum method with 1/n as
+    // coefficient for each individual function
+    double weight = (1/penaltyList.size());
+
+    double penalty = 0;
+    for (auto f : penaltyList) {
+        penalty += weight * f(e);
+    }
+    return penalty;
+}
 
 template <std::size_t level>
 void propagateHelper(TetMesh & mesh){
