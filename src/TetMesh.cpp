@@ -36,7 +36,6 @@
 #include <vector>
 
 #include <libraries/casc/casc>
-#include <libraries/casc/include/decimate.h>
 #include <libraries/casc/include/util.h>
 #include <include/TetMesh.h>
 
@@ -332,67 +331,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     return mesh;
 }
 
-template <std::size_t level, template <typename> class Callback>
-void decimation(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
-
-    if (threshold < 1) {
-        throw std::invalid_argument("Threshold to decimate to must be at least 1");
-    }
-
-    // Exit, mesh already sufficiently decimated
-    if (threshold > mesh.size<level>()) {
-        return;
-    }
-
-    int initialLevelSimplexCount = mesh.size<level>();
-    int numToRemove = initialLevelSimplexCount - threshold;
-
-    for(int i = 0; i < numToRemove; ++i){
-        auto nextCollapse = get_lowest_err<level>(mesh);
-        casc::decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
-    }
-}
-
-
-/*
- * Return lowest error edge corresponding to a given vertex
- */
-tetmesh::TetEdge vertexToEdge(tetmesh::TetVertex v) {
-
-}
-
-
-/*
- * Compute errors of each vertex/edge based on inputted functions
- */
-double computePenalty(Edge e, std::vector<std::function<double(Edge)>> penaltyList){
-    // Scalarization of penalty funciton; using weighted sum method with 1/n as
-    // coefficient for each individual function
-    double weight = (1/penaltyList.size());
-
-    double penalty = 0;
-    for (auto f : penaltyList) {
-        penalty += weight * f(e);
-    }
-    return penalty;
-}
-
-template <std::size_t level>
-void propagateHelper(TetMesh & mesh){
-    if (level == 0) return;
-
-    for (auto node : mesh.get_level_id<level>()){
-        auto parents = mesh.up(node);
-        double tmperror;
-        for (auto parent : parents){
-            tmperror += parent->error;
-        }
-        double error = tmperror / parents.size();
-        node->error = error;
-    }
-    propagateHelper<level-1>(mesh);
-}
-
+// Store decimation/error info
 struct complex_errors{
     using TetVertex = tetmesh::TetVertex;
     std::priority_queue<TetVertex, std::vector<TetVertex>, std::greater<void>> errorQueue;
@@ -416,11 +355,125 @@ struct complex_errors{
 
 complex_errors errors();
 
+
+// Misc Error computation and propagation funcitons
+template <std::size_t level>
+void propagateHelper(TetMesh & mesh){
+    if (level == 0) return;
+
+    for (auto node : mesh.get_level_id<level>()){
+        auto parents = mesh.up(node);
+        double tmperror;
+        for (auto parent : parents){
+            tmperror += parent->error;
+        }
+        double error = tmperror / parents.size();
+        node->error = error;
+    }
+    propagateHelper<level-1>(mesh);
+}
+
+
 template <std::size_t level>
 void propagateError(TetMesh & mesh){
     propagateHelper<level>(mesh);
     complex_errors errors(mesh);
 }
+
+
+/*
+ * Compute errors of each vertex/edge based on inputted functions
+ * vertex Loc is location of new vertex relative to edge endpoints
+ */
+double computePenalty(tetmesh::TetEdge & e, double vertexLoc,
+        std::vector<std::function<double (tetmesh::TetEdge, double)>> penaltyList){
+    // Scalarization of penalty function; using weighted sum method with 1/n as
+    // coefficient for each individual function
+    double weight = (1/penaltyList.size());
+
+    double penalty = 0;
+    for (auto f : penaltyList) {
+        penalty += weight * f(e, vertexLoc);
+    }
+    return penalty;
+}
+
+
+// Decimation operators
+
+/*
+ * Return lowest error edge corresponding to a given vertex
+ */
+tetmesh::TetEdge vertexToEdge(tetmesh::TetVertex v) {
+
+}
+
+/*
+ * Collapse edge and place new vertex at coordinate c, c in range 0-1
+ * specifying location between endpoints of e
+ */
+void edgeCollapse(tetmesh::TetEdge e, double vertexLoc) {
+
+}
+
+void halfEdgeCollapse(tetmesh::TetEdge e, std::vector<std::function<double(tetmesh::TetEdge, double)>> penaltyList) {
+    double penaltyA = computePenalty(e, 0, penaltyList);
+    double penaltyB = computePenalty(e, 1, penaltyList);
+    if (penaltyA < penaltyB) {
+        edgeCollapse(e, 0);
+    } else {
+        edgeCollapse(e, 1);
+    }
+}
+
+void vertexRemoval(tetmesh::TetVertex v) {
+    // Remove v
+
+    // Retriangulate hole
+}
+
+
+// Penalty/Constraint functions
+double isBoundaryEdge(tetmesh::TetEdge e) {
+
+}
+
+double isBoundaryVertex(tetmesh::TetEdge e) {
+
+}
+
+double edgeLength(tetmesh::TetEdge e) {
+
+}
+
+double scalarInfoValue(tetmesh::TetEdge e) {}
+
+double volumePreservation(tetmesh::TetEdge e) {}
+
+
+template <std::size_t level, template <typename> class Callback>
+void decimate(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
+
+    if (threshold < 1) {
+        throw std::invalid_argument("Threshold to decimate to must be at least 1");
+    }
+
+    // Exit, mesh already sufficiently decimated
+    if (threshold > mesh.size<level>()) {
+        return;
+    }
+
+    int initialLevelSimplexCount = mesh.size<level>();
+    int numToRemove = initialLevelSimplexCount - threshold;
+
+    for(int i = 0; i < numToRemove; ++i){
+        auto nextCollapse = get_lowest_err<level>(mesh);
+        decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
+    }
+}
+
+
+
 
 void writeVTK(const std::string& filename, const TetMesh &mesh){
     std::ofstream fout(filename);
