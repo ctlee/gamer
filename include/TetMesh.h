@@ -43,6 +43,12 @@
 #ifndef SWIG
 namespace tetmesh
 {
+
+struct ErrorProperties
+{
+    double error;
+};
+
 /**
  * @brief      Properties that Faces should have
  */
@@ -55,7 +61,7 @@ struct FaceProperties
 /**
  * @brief      Face object
  */
-struct Face : FaceProperties
+struct Face : FaceProperties, ErrorProperties
 {
     /// Default constructor
     Face() {}
@@ -70,7 +76,7 @@ struct CellProperties
     // int material;
 };
 
-struct Cell : casc::Orientable, CellProperties
+struct Cell : casc::Orientable, CellProperties, ErrorProperties
 {
     Cell() {}
     Cell(int orient, int marker) : Cell(Orientable{orient}, CellProperties{marker}) {}
@@ -79,7 +85,7 @@ struct Cell : casc::Orientable, CellProperties
     {}
 };
 
-struct Edge : Vertex
+struct Edge : Vertex, ErrorProperties
 {
     Edge() {}
     Edge(Vertex v) : Vertex(v) {}
@@ -103,7 +109,7 @@ struct TetVertex : Vertex
 
     double getError() const;
 
-    static double error;
+    double error;
 
 
     bool operator< (const TetVertex& rhs)

@@ -332,7 +332,9 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
 }
 
 // Store decimation/error info
+// template typename k
 struct complex_errors{
+    // TetMesh::SimplexID<k>
     using TetVertex = tetmesh::TetVertex;
     std::priority_queue<TetVertex, std::vector<TetVertex>, std::greater<void>> errorQueue;
 
@@ -354,6 +356,14 @@ struct complex_errors{
 };
 
 complex_errors errors();
+
+
+template size_t k
+struct error_cmp{
+    constexpr bool operator(){...} const {
+        return lhs->error < rhs->error;
+    }
+}
 
 
 // Misc Error computation and propagation funcitons
@@ -400,13 +410,6 @@ double computePenalty(tetmesh::TetEdge & e, double vertexLoc,
 
 
 // Decimation operators
-
-/*
- * Return lowest error edge corresponding to a given vertex
- */
-tetmesh::TetEdge vertexToEdge(tetmesh::TetVertex v) {
-
-}
 
 /*
  * Collapse edge and place new vertex at coordinate c, c in range 0-1
