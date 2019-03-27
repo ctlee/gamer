@@ -362,8 +362,8 @@ template size_t k
 struct error_cmp{
     constexpr bool operator(){...} const {
         return lhs->error < rhs->error;
-    }
-}
+    };
+};
 
 
 // Misc Error computation and propagation funcitons
@@ -437,22 +437,41 @@ void vertexRemoval(tetmesh::TetVertex v) {
 
 
 // Penalty/Constraint functions
-double isBoundaryEdge(tetmesh::TetEdge e) {
-
+double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    auto name = mesh.get_name(edge);
+    std::set<TetMesh::SimplexID<3>> faces= mesh.up(edge);
+    for (auto face : faces) {
+        std::set<TetMesh::SimplexID<4>> parentTets = mesh.up(face);
+        if (parentTets.size() == 1) {
+            return INT_MAX;
+        }
+    }
+    return 0;
 }
 
-double isBoundaryVertex(tetmesh::TetEdge e) {
-
+double isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh) {
+    auto name = mesh.get_name(v);
+    std::set<TetMesh::SimplexID<2>> edges = mesh.up(v);
+    for (auto edge : edges) {
+        if (isBoundaryEdge(edge, mesh)) {
+            return INT_MAX;
+        }
+    }
+    return 0;
 }
 
-double edgeLength(tetmesh::TetEdge e) {
-
+double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    auto name =  mesh.get_name(edge);
+    auto v = *mesh.get_simplex_down(edge, name[0])
+             - *mesh.get_simplex_down(edge, name[1]);
+    return std::sqrt(v|v);
 }
 
 double scalarInfoValue(tetmesh::TetEdge e) {}
 
 double volumePreservation(tetmesh::TetEdge e) {}
 
+double substructurePreservation(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 
 template <std::size_t level, template <typename> class Callback>
 void decimate(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
