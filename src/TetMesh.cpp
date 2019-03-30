@@ -42,6 +42,7 @@
 //#include <libraries/casc/include/typetraits.h>
 
 #include "TetMesh.h"
+#include <libraries/casc/include/decimate.h>
 
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<SurfaceMesh*> &surfmeshes,
@@ -357,14 +358,14 @@ struct complex_errors{
 
 complex_errors errors();
 
-
+/*
 template size_t k
 struct error_cmp{
     constexpr bool operator(){...} const {
         return lhs->error < rhs->error;
     };
 };
-
+*/
 
 // Misc Error computation and propagation funcitons
 template <std::size_t level>
@@ -395,8 +396,8 @@ void propagateError(TetMesh & mesh){
  * Compute errors of each vertex/edge based on inputted functions
  * vertex Loc is location of new vertex relative to edge endpoints
  */
-double computePenalty(tetmesh::TetEdge & e, double vertexLoc,
-        std::vector<std::function<double (tetmesh::TetEdge, double)>> penaltyList){
+double computePenalty(TetMesh::SimplexID<2> & e, double vertexLoc,
+        std::vector<std::function<double (TetMesh::SimplexID<2>, double)>> penaltyList){
     // Scalarization of penalty function; using weighted sum method with 1/n as
     // coefficient for each individual function
     double weight = (1/penaltyList.size());
@@ -410,22 +411,37 @@ double computePenalty(tetmesh::TetEdge & e, double vertexLoc,
 
 
 // Decimation operators
+struct Callback
+{
+    int operator()(TetMesh& F,
+                   const Vector newPos,
+                   const casc::SimplexSet<TetMesh>& merged){
+
+        return 0;
+    }
+};
+
 
 /*
  * Collapse edge and place new vertex at coordinate c, c in range 0-1
  * specifying location between endpoints of e
  */
-void edgeCollapse(tetmesh::TetEdge e, double vertexLoc) {
-
+void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc) {
+    auto name =  mesh.get_name(edge);
+    auto v = *mesh.get_simplex_down(edge, name[0])
+             - *mesh.get_simplex_down(edge, name[1]);
+    Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v*vertexLoc;
+    casc::decimate(mesh, edge, Callback);
 }
 
-void halfEdgeCollapse(tetmesh::TetEdge e, std::vector<std::function<double(tetmesh::TetEdge, double)>> penaltyList) {
+void halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<std::function<double(TetMesh::SimplexID<2>,
+        double)>> penaltyList) {
     double penaltyA = computePenalty(e, 0, penaltyList);
     double penaltyB = computePenalty(e, 1, penaltyList);
     if (penaltyA < penaltyB) {
-        edgeCollapse(e, 0);
+        edgeCollapse(mesh, e, 0);
     } else {
-        edgeCollapse(e, 1);
+        edgeCollapse(mesh, e, 1);
     }
 }
 
@@ -438,7 +454,6 @@ void vertexRemoval(tetmesh::TetVertex v) {
 
 // Penalty/Constraint functions
 double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
-    auto name = mesh.get_name(edge);
     std::set<TetMesh::SimplexID<3>> faces= mesh.up(edge);
     for (auto face : faces) {
         std::set<TetMesh::SimplexID<4>> parentTets = mesh.up(face);
@@ -450,7 +465,6 @@ double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
 }
 
 double isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh) {
-    auto name = mesh.get_name(v);
     std::set<TetMesh::SimplexID<2>> edges = mesh.up(v);
     for (auto edge : edges) {
         if (isBoundaryEdge(edge, mesh)) {
@@ -471,7 +485,14 @@ double scalarInfoValue(tetmesh::TetEdge e) {}
 
 double volumePreservation(tetmesh::TetEdge e) {}
 
+// Test if a potential edge collapse preserves substructes
 double substructurePreservation(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
+// Test if a potential edge collapse results in inverted tetrahedra
+double simplexInversionCheck(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
+// Error from error quadrics as described in garland paper
+double quadricError(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 
 template <std::size_t level, template <typename> class Callback>
 void decimate(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
@@ -489,8 +510,8 @@ void decimate(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
     int numToRemove = initialLevelSimplexCount - threshold;
 
     for(int i = 0; i < numToRemove; ++i){
-        auto nextCollapse = get_lowest_err<level>(mesh);
-        decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
+        TetMesh::SimplexID<2> nextCollapse = get_lowest_err<level>(mesh);
+        casc::decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
     }
 }
 
