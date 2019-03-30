@@ -24,42 +24,54 @@
 #include <libraries/casc/include/decimate.h>
 #include <libraries/casc/include/typetraits.h>
 
+
+template <typename Complex>
+struct Callback
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
+
+    Face operator()(Complex& F,
+            const std::array<KeyType, 3>& new_name,
+            const SimplexSet& merged){
+      std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+      return **merged.template cbegin<3>();
+    }
+
+    Edge operator()(Complex& F,
+            const std::array<KeyType, 2>& new_name,
+            const SimplexSet& merged){
+      std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+      return **merged.template cbegin<2>();
+    }
+
+    Vertex operator()(Complex& F,
+            const std::array<KeyType, 1>& new_name,
+            const SimplexSet& merged){
+      std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+      return **merged.template cbegin<1>();
+    }
+
+    // template <std::size_t k>
+    // Complex::NodeDataTypes<k> operator()(Complex& F,
+    //         const std::array<KeyType, k>& new_name,
+    //         const SimplexSet& merged){
+    //     // std::cout << merged << " -> " << new_name << std::endl;
+    //     // return 0;
+    // }
+};
+
 int  main(int argc, char *argv[])
 {
     auto mesh = readOFF(argv[1]);
+    // auto mesh = readPQR_gauss(argv[1],-0.2, 2.5);
+    // writeOFF("test.off", *mesh);
 
-    fillHoles(*mesh);
+    std::cout << "Mesh read in" << std::endl;
 
-    writeOFF("test.off", *mesh);
+    auto edge = *mesh->get_level_id<2>().begin();
 
-    auto vol = getVolume(*mesh);
-    if (vol < 0){
-        flipNormals(*mesh);
-    }
-    // vector of vectors >.<
-    // std::vector<std::vector<SurfaceMesh::SimplexID<2>>> test;
-    // surfacemesh_detail::findHoles(*mesh, test);
+    casc::decimate(*mesh, edge, Callback<SurfaceMesh>());
 
-    // std::cout << "Number of holes: " << test.size()  << std::endl << std::endl;
-
-    // int i = 0;
-    // for(auto v : test){
-    //     std::cout << "Begin ring: ";
-    //     for(auto s : v){
-    //         ++i;
-    //         std::cout << s << " ";
-    //     }
-    //     std::cout << std::endl;
-
-    //     std::cout << "Sorted Vertices: ";
-    //     std::vector<SurfaceMesh::SimplexID<1>> foo;
-    //     surfacemesh_detail::edgeRingToVertices(*mesh, v, std::back_inserter(foo));
-    //     for(auto vert : foo){
-    //         std::cout << vert << " ";
-    //     }
-    //     std::cout << std::endl << std::endl;
-    // }
-
-    // std::cout << "Number of edges: " << i << std::endl;
     std::cout << "EOF" << std::endl;
 }
