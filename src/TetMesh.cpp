@@ -410,40 +410,48 @@ double computePenalty(TetMesh::SimplexID<2> & e, double vertexLoc,
 }
 
 
-// Decimation operators
+// Core decimation operators
 
 /*
  * Collapse edge and place new vertex at coordinate c, c in range 0-1
  * specifying location between endpoints of e
  */
-void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc) {
+/*
+template <typename Complex, template <typename> class Callback>
+void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, Callback<Complex> &&clbk) {
     auto name =  mesh.get_name(edge);
     auto v = *mesh.get_simplex_down(edge, name[0])
              - *mesh.get_simplex_down(edge, name[1]);
     Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v*vertexLoc;
 
     using SimplexMap = typename casc::SimplexMap<TetMesh>;
-    SimplexMap simplexMap;
+
+    casc::SimplexMap<TetMesh> simplexMap;
     casc::decimateFirstHalf(mesh, edge, simplexMap);
-
-    
+    typename casc::decimation_detail::SimplexDataSet<TetMesh>::type rv;
+    run_user_callback(mesh, simplexMap, std::forward<Callback<Complex>>(clbk), rv);
+    casc::decimateBackHalf(mesh, simplexMap, rv);
+    std::cout << simplexMap << std::endl;
 }
-
-void halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<std::function<double(TetMesh::SimplexID<2>,
-        double)>> penaltyList) {
-    double penaltyA = computePenalty(e, 0, penaltyList);
-    double penaltyB = computePenalty(e, 1, penaltyList);
-    if (penaltyA < penaltyB) {
-        edgeCollapse(mesh, e, 0);
-    } else {
-        edgeCollapse(mesh, e, 1);
-    }
-}
-
+*/
 void vertexRemoval(tetmesh::TetVertex v) {
     // Remove v
 
     // Retriangulate hole
+}
+
+
+// Specific decimation operations
+template <typename Complex, template <typename> class Callback>
+void halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<std::function<double(TetMesh::SimplexID<2>,
+        double)>> penaltyList, Callback<Complex> &&clbk) {
+    double penaltyA = computePenalty(e, 0, penaltyList);
+    double penaltyB = computePenalty(e, 1, penaltyList);
+    if (penaltyA < penaltyB) {
+        edgeCollapse(mesh, e, 0, clbk);
+    } else {
+        edgeCollapse(mesh, e, 1, clbk);
+    }
 }
 
 
@@ -489,8 +497,9 @@ double simplexInversionCheck(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 // Error from error quadrics as described in garland paper
 double quadricError(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 
-template <std::size_t level, template <typename> class Callback>
-void decimate(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
+/*
+template <std::size_t level, typename Complex, template <typename> class Callback>
+void decimate(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
 
     if (threshold < 1) {
         throw std::invalid_argument("Threshold to decimate to must be at least 1");
@@ -509,7 +518,7 @@ void decimate(TetMesh & mesh, double threshold, Callback<TetMesh> &&cbk){
         casc::decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
     }
 }
-
+*/
 
 
 

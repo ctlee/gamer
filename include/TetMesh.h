@@ -161,15 +161,28 @@ std::unique_ptr<TetMesh> makeTetMesh(
         std::string tetgen_params);
 #endif //SWIG
 
-template <std:: size_t level>
-TetMesh::SimplexID<level> get_lowest_err();
+template <typename Complex, template <typename> class Callback>
+void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, Callback<Complex> &&clbk) {
+    auto name = mesh.get_name(edge);
+    auto v = *mesh.get_simplex_down(edge, name[0])
+             - *mesh.get_simplex_down(edge, name[1]);
+    Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v * vertexLoc;
+
+    using SimplexMap = typename casc::SimplexMap<TetMesh>;
+
+    casc::SimplexMap<TetMesh> simplexMap;
+    casc::decimateFirstHalf(mesh, edge, simplexMap);
+    typename casc::decimation_detail::SimplexDataSet<TetMesh>::type rv;
+    run_user_callback(mesh, simplexMap, std::forward<Callback<Complex>>(clbk), rv);
+    casc::decimateBackHalf(mesh, simplexMap, rv);
+    std::cout << simplexMap << std::endl;
+}
 
 void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
 void writeTriangle(const std::string &filename, const TetMesh &mesh);
-
 /*
 template <typename Complex>
 struct Callback

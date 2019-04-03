@@ -59,7 +59,7 @@ set_target_properties(libgtest PROPERTIES
 include_directories("${source_dir}/googletest/include")
                     # "${source_dir}/googlemock/include")
 
-add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp)
+add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp DecimateTest.cpp)
 target_link_libraries(objecttests gamershared libgtest)
 add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
 

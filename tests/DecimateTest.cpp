@@ -3,6 +3,7 @@
 //
 
 
+
 #include <iostream>
 #include <map>
 #include <cmath>
@@ -13,6 +14,20 @@
 #include "Vertex.h"
 #include "gtest/gtest.h"
 
+template <typename Complex>
+struct Callback
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
+
+    template <std::size_t k>
+    int operator()(Complex& F,
+                   const std::array<KeyType, k>& new_name,
+                   const SimplexSet& merged){
+            // std::cout << merged << " -> " << new_name << std::endl;
+            return 0;
+    }
+};
 
 class DecimateTest : public testing::Test {
 protected:
@@ -66,9 +81,9 @@ protected:
     std::unique_ptr<TetMesh> mesh;
 };
 
-TEST_F(TetMeshTest, Refinement){
-int fbefore = mesh->size<3>();
-mesh = refineMesh(*mesh);
-int fafter = mesh->size<3>();
-EXPECT_EQ(fbefore*4, fafter);
+TEST_F(DecimateTest, EdgeCollapseOp){
+    auto s = (*mesh).get_simplex_up({0,1});
+    //decimate(mesh, 10, Callback<TetMesh>()));
+    edgeCollapse<TetMesh, Callback>(*mesh, s, 0, Callback<TetMesh>());
+    EXPECT_EQ(0, 0);
 }
