@@ -781,3 +781,27 @@ std::unique_ptr<SurfaceMesh> cube(int order){
     return mesh;
 }
 
+
+double getCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    double Amix = 0;
+    Vector center = *Vertex;
+
+    auto cover = mesh.get_cover(vertexID);
+
+    std::cout << cover << std::endl;
+
+    // std::set<SurfaceMesh::SimplexID<1>> vNbors;
+    // casc::neighbors_up(mesh, vertexID, std::inserter(vNbors, vNbors.end()));
+
+    // std::vector<SurfaceMesh::SimplexID<1>> sortedRing;
+
+
+    // Current Vertex -> Up vertexID -> up should give only viable vertices...
+
+    // Construct ordered one ring of vertices
+    // std::array<SurfaceMesh::SimplexID<1>, > ring;
+
+
+    return 0;
+}
+
