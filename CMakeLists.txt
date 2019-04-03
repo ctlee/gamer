@@ -94,7 +94,7 @@ add_subdirectory(libraries)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# List the include directories for debugging
+# List the include directories for debuggingdebugging
 # get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 # foreach(dir ${dirs})
 #     message(STATUS "GAMer include_dir='${dir}'")

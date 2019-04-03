@@ -411,17 +411,6 @@ double computePenalty(TetMesh::SimplexID<2> & e, double vertexLoc,
 
 
 // Decimation operators
-template <typename Complex>
-struct Callback
-{
-    int operator()(TetMesh& F,
-                   const Vector newPos,
-                   const casc::SimplexSet<TetMesh>& merged){
-
-        return 0;
-    }
-};
-
 
 /*
  * Collapse edge and place new vertex at coordinate c, c in range 0-1
@@ -432,7 +421,12 @@ void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc) 
     auto v = *mesh.get_simplex_down(edge, name[0])
              - *mesh.get_simplex_down(edge, name[1]);
     Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v*vertexLoc;
-    casc::decimate(mesh, edge, Callback<TetMesh>());
+
+    using SimplexMap = typename casc::SimplexMap<TetMesh>;
+    SimplexMap simplexMap;
+    casc::decimateFirstHalf(mesh, edge, simplexMap);
+
+    
 }
 
 void halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<std::function<double(TetMesh::SimplexID<2>,

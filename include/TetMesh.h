@@ -170,6 +170,66 @@ void writeOFF(const std::string& filename, const TetMesh &mesh);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
 void writeTriangle(const std::string &filename, const TetMesh &mesh);
 
+/*
+template <typename Complex>
+struct Callback
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
+
+    Face operator()(Complex& F,
+                    const std::array<KeyType, 3>& new_name,
+                    const SimplexSet& merged){
+        std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+        return **merged.template cbegin<3>();
+    }
+
+    Edge operator()(Complex& F,
+                    const std::array<KeyType, 2>& new_name,
+                    const SimplexSet& merged){
+
+
+        auto verts = *merged.template cbegin<1>();
+
+        TetMesh::SimplexID<1> v1 = *verts.begin();
+        TetMesh::SimplexID<2> v2 = *verts.end();
+        auto v = *v1 - *v2;
+
+        //TODO :: getter for this
+        double vertexLoc = 0;
+        Vector pos = v1.data().position - v*vertexLoc;
+
+        std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+        return **merged.template cbegin<2>();
+    }
+
+    Vertex operator()(Complex& F,
+                      const std::array<KeyType, 1>& new_name,
+                      const SimplexSet& merged){
+
+        auto verts = merged.template cbegin<1>();
+
+        TetMesh::SimplexID<1> v1 = *verts.begin();
+        TetMesh::SimplexID<1> v2 = *verts.end();
+        auto v = *v1 - *v2;
+
+        //TODO :: getter for this
+        double vertexLoc = 0;
+        Vector pos = *v1 - v*vertexLoc;
+
+        std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+        return Vertex(pos);
+    }
+
+    // template <std::size_t k>
+    // Complex::NodeDataTypes<k> operator()(Complex& F,
+    //         const std::array<KeyType, k>& new_name,
+    //         const SimplexSet& merged){
+    //     // std::cout << merged << " -> " << new_name << std::endl;
+    //     // return 0;
+    // }
+};
+*/
 // void writeMCSF(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack
 //void writeCARP
