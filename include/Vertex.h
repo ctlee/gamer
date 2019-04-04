@@ -251,6 +251,8 @@ Vertex operator/(const Vertex& A, double x);
 double distance(const Vertex& A, const Vertex& B);
 double angle(const Vertex& A, const Vertex& B, const Vertex& C);
 double angle(const Vector& AB, const Vector& CB);
+double angleRad(const Vertex& A, const Vertex& B, const Vertex& C);
+double angleRad(const Vector& AB, const Vector& CB);
 
 inline double magnitude(const Vector& A){
     return  std::sqrt(A|A);

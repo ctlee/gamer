@@ -781,27 +781,70 @@ std::unique_ptr<SurfaceMesh> cube(int order){
     return mesh;
 }
 
+/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
+Vector getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    Vertex center = *vertexID;
+    int vKey = mesh.get_name(vertexID)[0];
 
-double getCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    std::vector<int> cover = mesh.get_cover(vertexID);
+    std::vector<SurfaceMesh::SimplexID<1>> orderedNbhd;
+
+    auto eID = mesh.get_simplex_up(vertexID, cover.back());
+    cover.pop_back();
+    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+
+    while(!cover.empty()){
+        auto ecover = mesh.get_cover(eID);
+        for(int nKey : ecover){
+            auto it = std::find(cover.begin(), cover.end(), nKey);
+            if(it != cover.end()){
+                eID = mesh.get_simplex_up(vertexID, *it);
+                cover.erase(it);
+                orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+                break;
+            }
+        }
+    }
+
     double Amix = 0;
-    Vector center = *Vertex;
+    Vector curvature;
+    for(int i = 0; i < orderedNbhd.size(); ++i){
+        Vertex prev, curr, next;
+        if (i == 0){
+            prev = *orderedNbhd.back();
+        }else{
+            prev = *orderedNbhd[i-1];
+        }
 
-    auto cover = mesh.get_cover(vertexID);
+        curr = *orderedNbhd[i];
 
-    std::cout << cover << std::endl;
+        if (i+1 == orderedNbhd.size()){
+            next = *orderedNbhd.front();
+        }
 
-    // std::set<SurfaceMesh::SimplexID<1>> vNbors;
-    // casc::neighbors_up(mesh, vertexID, std::inserter(vNbors, vNbors.end()));
+        // Consider the triangle vID, i, i+1 with wrapping
+        std::array<double, 3> ls;
+        ls[0] = distance(center, curr);
+        ls[1] = distance(center, next);
+        ls[2] = distance(curr, next);
+        std::sort(ls.begin(), ls.end());
 
-    // std::vector<SurfaceMesh::SimplexID<1>> sortedRing;
-
-
-    // Current Vertex -> Up vertexID -> up should give only viable vertices...
-
-    // Construct ordered one ring of vertices
-    // std::array<SurfaceMesh::SimplexID<1>, > ring;
-
-
-    return 0;
+        if(ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2]){
+            // Triangle is obtuse!
+            if(angle(curr, center, next) > 90){
+                Amix += getArea(center, curr, next)/2;
+            }
+            else{
+                Amix += getArea(center, curr, next)/4;
+            }
+        }
+        else{
+            // Compute using voronoi formula
+            Amix += (pow(distance(center, curr),2)/tan(angleRad(center, next, curr))
+                    + pow(distance(center, next),2)/tan(angleRad(center, curr, next)))/8;
+        }
+        curvature += (1/tan(angleRad(center, prev, curr)) + 1/tan(angleRad(center, next, curr)))*(center - curr);
+    }
+    return curvature/(2*Amix);
 }
 
