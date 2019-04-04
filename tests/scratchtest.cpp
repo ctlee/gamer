@@ -31,34 +31,13 @@ struct Callback
     using SimplexSet = typename casc::SimplexSet<Complex>;
     using KeyType = typename Complex::KeyType;
 
-    Face operator()(Complex& F,
-            const std::array<KeyType, 3>& new_name,
-            const SimplexSet& merged){
-      std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
-      return **merged.template cbegin<3>();
+    template <std::size_t k>
+    int operator()(Complex& F,
+                   const std::array<KeyType, k>& new_name,
+                   const SimplexSet& merged){
+        // std::cout << merged << " -> " << new_name << std::endl;
+        return 0;
     }
-
-    Edge operator()(Complex& F,
-            const std::array<KeyType, 2>& new_name,
-            const SimplexSet& merged){
-      std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
-      return **merged.template cbegin<2>();
-    }
-
-    Vertex operator()(Complex& F,
-            const std::array<KeyType, 1>& new_name,
-            const SimplexSet& merged){
-      std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
-      return **merged.template cbegin<1>();
-    }
-
-    // template <std::size_t k>
-    // Complex::NodeDataTypes<k> operator()(Complex& F,
-    //         const std::array<KeyType, k>& new_name,
-    //         const SimplexSet& merged){
-    //     // std::cout << merged << " -> " << new_name << std::endl;
-    //     // return 0;
-    // }
 };
 
 int  main(int argc, char *argv[])
@@ -69,9 +48,13 @@ int  main(int argc, char *argv[])
 
     std::cout << "Mesh read in" << std::endl;
 
-    auto edge = *mesh->get_level_id<2>().begin();
+    std::vector<SurfaceMesh*> vec;
+    vec.push_back(mesh.get());
+    auto tetmesh = makeTetMesh(vec, "test");
 
-    casc::decimate(*mesh, edge, Callback<SurfaceMesh>());
+    auto edge = *tetmesh->get_level_id<2>().begin();
+
+    edgeCollapse(*tetmesh, edge, 0, Callback<TetMesh>());
 
     std::cout << "EOF" << std::endl;
 }

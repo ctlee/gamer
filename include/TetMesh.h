@@ -173,7 +173,7 @@ void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, 
     casc::SimplexMap<TetMesh> simplexMap;
     casc::decimateFirstHalf(mesh, edge, simplexMap);
     typename casc::decimation_detail::SimplexDataSet<TetMesh>::type rv;
-    run_user_callback(mesh, simplexMap, std::forward<Callback<Complex>>(clbk), rv);
+    //run_user_callback(mesh, simplexMap, clbk, rv);
     casc::decimateBackHalf(mesh, simplexMap, rv);
     std::cout << simplexMap << std::endl;
 }

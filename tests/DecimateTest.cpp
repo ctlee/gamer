@@ -34,7 +34,7 @@ protected:
     DecimateTest() {}
     ~DecimateTest() {}
     virtual void SetUp() {
-        mesh = std::make_unique<TetMesh>();
+        mesh = new SurfaceMesh();
         // Idealized icosahedron!
         std::vector<Vertex> vectors;
         vectors.push_back(Vertex(0.0, 0.0, 2.0));
@@ -75,15 +75,19 @@ protected:
         mesh->insert({8,11,9});
         mesh->insert({9,11,10});
         mesh->insert({10,11,6});
+
+        std::vector<SurfaceMesh*> vec;
+        vec.push_back(mesh);
+        tetmesh = makeTetMesh(vec, "test");
     }
     virtual void TearDown() {}
 
-    std::unique_ptr<TetMesh> mesh;
+    SurfaceMesh* mesh;
+    std::unique_ptr<TetMesh> tetmesh;
 };
 
 TEST_F(DecimateTest, EdgeCollapseOp){
     auto s = (*mesh).get_simplex_up({0,1});
-    //decimate(mesh, 10, Callback<TetMesh>()));
-    edgeCollapse<TetMesh, Callback>(*mesh, s, 0, Callback<TetMesh>());
+    //edgeCollapse<TetMesh, Callback>(tetmesh, s, 0, Callback<TetMesh>());
     EXPECT_EQ(0, 0);
 }
