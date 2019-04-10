@@ -274,7 +274,7 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
             fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
         else if(orientation == -1){
-            fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[1]] << "\n";
+            fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[0]] << "\n";
 
         }
         else{
