@@ -652,7 +652,7 @@ bool hasHole(const SurfaceMesh &mesh);
 
 int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
-Vector getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 // These exist for the a potential python interface
 void translate(SurfaceMesh &mesh, Vector v);

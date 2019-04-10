@@ -112,6 +112,19 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
+class GAMER_OT_mean_curvature(bpy.types.Operator):
+    bl_idname = "gamer.mean_curvature"
+    bl_label = "Mean Curvature"
+    bl_description = "Compute mean curvature to vertex colors"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        if context.scene.gamer.surfmesh_procs.mean_curvature(context, self.report):
+            self.report({'INFO'}, "GAMer: Mean Curvature complete")
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
 # class GAMER_OT_refine_mesh(bpy.types.Operator):
 #     bl_idname = "gamer.refine_mesh"
 #     bl_label = "Quadrisect mesh"
@@ -208,6 +221,38 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
                 report({'ERROR'}, str(e))
                 return False
             return gamerToBlender(report, gmesh)
+        return False
+
+    def mean_curvature(self, context, report):
+        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
+        if gmesh:
+            curvatures = np.zeros(gmesh.sizeVertices())
+            for i, vID in enumerate(gmesh.vertexIDs()):
+                curvatures[i] = g.getMeanCurvature(gmesh, vID)
+            print(np.amax(curvatures))
+            curvatures /= np.amax(curvatures)
+            curvatures = 1-curvatures
+
+            colors = np.ones((gmesh.sizeVertices(), 3))
+            colors[:,0] = curvatures
+            colors[:,1] = curvatures
+            colors[:,2] = curvatures
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "Curvature" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="Curvature")
+
+            color_layer = mesh.vertex_colors['Curvature']
+            mesh.vertex_colors["Curvature"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+            for value in color_layer.data:
+                print(value.color, len(color_layer.data))
+            return True
         return False
 
 

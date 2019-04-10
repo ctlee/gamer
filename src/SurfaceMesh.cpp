@@ -782,7 +782,7 @@ std::unique_ptr<SurfaceMesh> cube(int order){
 }
 
 /// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
-Vector getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
     Vertex center = *vertexID;
     int vKey = mesh.get_name(vertexID)[0];
 
@@ -845,6 +845,7 @@ Vector getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         }
         curvature += (1/tan(angleRad(center, prev, curr)) + 1/tan(angleRad(center, next, curr)))*(center - curr);
     }
-    return curvature/(2*Amix);
+    curvature /= (2*Amix);
+    return std::sqrt(curvature|curvature);
 }
 

@@ -26,6 +26,12 @@
 
 int  main(int argc, char *argv[])
 {
+    // auto mesh = readPDB_molsurf("2jho.pdb");
+
+    // smoothMesh(*mesh, 10, true, false);
+
+    // writeOFF("2jho.off", *mesh);
+
     auto mesh = readOFF(argv[1]);
 
     auto vol = getVolume(*mesh);
@@ -33,11 +39,14 @@ int  main(int argc, char *argv[])
         flipNormals(*mesh);
     }
 
-    auto s = *mesh->get_level_id<1>().begin();
-
-    auto curve = getMeanCurvature(*mesh, s);
-
-    std::cout << "Curvature = " << std::sqrt(curve|curve)/2 << std::endl;
+    double max = 0;
+    for (auto s : mesh->get_level_id<1>()){
+        auto curve = getMeanCurvature(*mesh, s);
+        std::cout << s << ": curvature = " << curve << std::endl;
+        if (curve > max)
+            max = curve;
+    }
+    std::cout << "Max: " << max << std::endl;
 
     std::cout << "EOF" << std::endl;
 }
