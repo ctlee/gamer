@@ -230,14 +230,12 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
 
-            curvatures = np.sqrt(np.sqrt(curvatures))
+            curvatures = np.power(curvatures,1/4)
             curvatures /= np.amax(curvatures)
-            splitter = curvatures > 0.5
-            # curvatures = 1-curvatures
 
             colors = np.zeros((gmesh.sizeVertices(), 3))
-            colors[:,0] = splitter*curvatures
-            colors[:,1] = np.logical_not(splitter)*curvatures
+            colors[:,0] = 1-curvatures
+            colors[:,1] = curvatures
             # colors[:,2] = np.zeroes((gmesh.sizeVertices()))
 
             # Use 'curvature' vertex color entry for results

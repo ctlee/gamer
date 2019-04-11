@@ -23,6 +23,7 @@ import bpy
 import sys
 import re
 from ast import literal_eval
+from gamer_addon.util import *
 
 class GAMER_OT_prompt_update(bpy.types.Operator):
     bl_idname = "gamer.prompt_update"
@@ -52,17 +53,33 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
 
     def execute(self, context):
         for obj in context.scene.objects:
-            bpy.context.scene.objects.active = obj
+            # bpy.context.scene.objects.active = obj
             if obj.type == 'MESH':
+                print("\n"+"="*30+"\n",obj,"\n"+"="*30)
+                if not 'boundaries' in obj:
+                    continue
+                hidden = False
+                if obj.hide:
+                    hidden = True
+                    obj.hide = False
                 obj.gamer.remove_all_boundaries(context)
                 for key, bdry in obj['boundaries'].items():
+                    print("Migrating boundary: %s"%(key))
+
+                    # First move the material...
+                    mat = bpy.data.materials[key+'_mat']
+                    newBdryID = context.scene.gamer.boundary_id_counter+1
+                    mat.name = materialNamer(newBdryID)
+                    mat.gamer.boundary_id = newBdryID
+                    mat.use_fake_user = True
+
                     obj.gamer.add_boundary(context)
                     newBdry = obj.gamer.boundary_list[obj.gamer.active_bnd_index]
 
-                    newBdry.boundary_name = key
+                    newBdry.boundary_name = 'NewBoundaryFrom_%s'%(key)
                     newBdry.marker = bdry['marker']
 
-                    # Deselect all
+                    # # Deselect all
                     bpy.ops.object.mode_set(mode='EDIT')
                     bpy.ops.mesh.select_all(action='DESELECT')
                     bpy.ops.object.mode_set(mode='OBJECT')
@@ -72,15 +89,16 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                         for i in faces:
                             obj.data.polygons[i].select = True
                     bpy.ops.object.mode_set(mode='EDIT')
-
                     newBdry.assign_boundary_faces(context)
-            del obj['boundaries']
-            if 'id_counter' in obj.gamer:
-                del obj.gamer['id_counter']
-            if 'include' in obj.gamer:
-                del obj.gamer['include']
-            context.scene.gamer.gamer_version = "(2,0,1)"
-            checkVersion()
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                del obj['boundaries']
+                if 'id_counter' in obj.gamer:
+                    del obj.gamer['id_counter']
+                if 'include' in obj.gamer:
+                    del obj.gamer['include']
+                obj.hide = hidden
+        context.scene.gamer.gamer_version = "(2,0,1)"
+        checkVersion()
         return {'FINISHED'}
 
 def getGamerVersion():
