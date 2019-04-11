@@ -229,14 +229,16 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             curvatures = np.zeros(gmesh.sizeVertices())
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
-            print(np.amax(curvatures))
-            curvatures /= np.amax(curvatures)
-            curvatures = 1-curvatures
 
-            colors = np.ones((gmesh.sizeVertices(), 3))
-            colors[:,0] = curvatures
-            colors[:,1] = curvatures
-            colors[:,2] = curvatures
+            curvatures = np.sqrt(np.sqrt(curvatures))
+            curvatures /= np.amax(curvatures)
+            splitter = curvatures > 0.5
+            # curvatures = 1-curvatures
+
+            colors = np.zeros((gmesh.sizeVertices(), 3))
+            colors[:,0] = splitter*curvatures
+            colors[:,1] = np.logical_not(splitter)*curvatures
+            # colors[:,2] = np.zeroes((gmesh.sizeVertices()))
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -249,9 +251,6 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             mloops = np.zeros((len(mesh.loops)), dtype=np.int)
             mesh.loops.foreach_get("vertex_index", mloops)
             color_layer.data.foreach_set("color", colors[mloops].flatten())
-
-            for value in color_layer.data:
-                print(value.color, len(color_layer.data))
             return True
         return False
 

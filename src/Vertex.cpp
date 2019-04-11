@@ -97,7 +97,7 @@ double angle(const Vector& AB, const Vector& CB){
 double angleRad(const Vertex& A, const Vertex& B, const Vertex& C){
     Vector AB = A-B;
     Vector CB = C-B;
-    return angle(AB,CB);
+    return angleRad(AB,CB);
 }
 
 double angleRad(const Vector& AB, const Vector& CB){

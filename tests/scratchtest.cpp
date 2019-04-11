@@ -42,7 +42,8 @@ int  main(int argc, char *argv[])
     double max = 0;
     for (auto s : mesh->get_level_id<1>()){
         auto curve = getMeanCurvature(*mesh, s);
-        std::cout << s << ": curvature = " << curve << std::endl;
+        if (curve > 5)
+            std::cout << s << ": curvature = " << curve << std::endl;
         if (curve > max)
             max = curve;
     }

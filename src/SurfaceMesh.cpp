@@ -820,6 +820,8 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
 
         if (i+1 == orderedNbhd.size()){
             next = *orderedNbhd.front();
+        }else{
+            next = *orderedNbhd[i+1];
         }
 
         // Consider the triangle vID, i, i+1 with wrapping
@@ -832,6 +834,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         if(ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2]){
             // Triangle is obtuse!
             if(angle(curr, center, next) > 90){
+                // The angle of T at center is obtuse
                 Amix += getArea(center, curr, next)/2;
             }
             else{
