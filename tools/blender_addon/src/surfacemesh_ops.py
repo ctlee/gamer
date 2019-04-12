@@ -28,12 +28,12 @@ from bpy.props import (
 import gamer_addon.pygamer as g
 from gamer_addon.util import *
 from gamer_addon.markers import *
+from gamer_addon.colormap import getColor
 
 # python imports
 import os, sys
 import numpy as np
 import collections
-
 
 # we use per module class registration/unregistration
 def register():
@@ -245,13 +245,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
 
-            curvatures = np.power(curvatures,1/4)
-            curvatures /= np.amax(curvatures)
-
-            colors = np.zeros((gmesh.sizeVertices(), 3))
-            colors[:,0] = 1-curvatures
-            colors[:,1] = curvatures
-            # colors[:,2] = np.zeroes((gmesh.sizeVertices()))
+            colors = getColor(curvatures, maxV=5)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -275,13 +269,15 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getGaussianCurvature(gmesh, vID)
 
-            curvatures += 0.5
-            curvatures[curvatures > 1] = 1
+            # curvatures += 0.5
+            # curvatures[curvatures > 1] = 1
 
-            colors = np.zeros((gmesh.sizeVertices(), 3))
-            colors[:,0] = 1-curvatures
-            colors[:,1] = curvatures
+            # colors = np.zeros((gmesh.sizeVertices(), 3))
+            # colors[:,0] = 1-curvatures
+            # colors[:,1] = curvatures
             # colors[:,2] = np.zeroes((gmesh.sizeVertices()))
+
+            colors = getColor(curvatures, minV=-0.5, maxV=0.5)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
