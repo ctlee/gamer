@@ -28,7 +28,7 @@ from bpy.props import (
 import gamer_addon.pygamer as g
 from gamer_addon.util import *
 from gamer_addon.markers import *
-from gamer_addon.colormap import getColor
+
 
 # python imports
 import os, sys
@@ -111,34 +111,6 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
-
-class GAMER_OT_mean_curvature(bpy.types.Operator):
-    bl_idname = "gamer.mean_curvature"
-    bl_label = "Mean Curvature"
-    bl_description = "Compute mean curvature to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.mean_curvature(context, self.report):
-            self.report({'INFO'}, "GAMer: Mean Curvature complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
-
-
-class GAMER_OT_gaussian_curvature(bpy.types.Operator):
-    bl_idname = "gamer.gaussian_curvature"
-    bl_label = "Gaussian Curvature"
-    bl_description = "Compute gaussian curvature to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.gaussian_curvature(context, self.report):
-            self.report({'INFO'}, "GAMer: Gaussian Curvature complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
-
 
 # class GAMER_OT_refine_mesh(bpy.types.Operator):
 #     bl_idname = "gamer.refine_mesh"
@@ -236,61 +208,6 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
                 report({'ERROR'}, str(e))
                 return False
             return gamerToBlender(report, gmesh)
-        return False
-
-    def mean_curvature(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            curvatures = np.zeros(gmesh.sizeVertices())
-            for i, vID in enumerate(gmesh.vertexIDs()):
-                curvatures[i] = g.getMeanCurvature(gmesh, vID)
-
-            colors = getColor(curvatures, maxV=5)
-
-            # Use 'curvature' vertex color entry for results
-            mesh = bpy.context.object.data
-            if "Curvature" not in mesh.vertex_colors:
-                mesh.vertex_colors.new(name="Curvature")
-
-            color_layer = mesh.vertex_colors['Curvature']
-            mesh.vertex_colors["Curvature"].active = True
-
-            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
-            mesh.loops.foreach_get("vertex_index", mloops)
-            color_layer.data.foreach_set("color", colors[mloops].flatten())
-            return True
-        return False
-
-
-    def gaussian_curvature(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            curvatures = np.zeros(gmesh.sizeVertices())
-            for i, vID in enumerate(gmesh.vertexIDs()):
-                curvatures[i] = g.getGaussianCurvature(gmesh, vID)
-
-            # curvatures += 0.5
-            # curvatures[curvatures > 1] = 1
-
-            # colors = np.zeros((gmesh.sizeVertices(), 3))
-            # colors[:,0] = 1-curvatures
-            # colors[:,1] = curvatures
-            # colors[:,2] = np.zeroes((gmesh.sizeVertices()))
-
-            colors = getColor(curvatures, minV=-0.5, maxV=0.5)
-
-            # Use 'curvature' vertex color entry for results
-            mesh = bpy.context.object.data
-            if "Curvature" not in mesh.vertex_colors:
-                mesh.vertex_colors.new(name="Curvature")
-
-            color_layer = mesh.vertex_colors['Curvature']
-            mesh.vertex_colors["Curvature"].active = True
-
-            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
-            mesh.loops.foreach_get("vertex_index", mloops)
-            color_layer.data.foreach_set("color", colors[mloops].flatten())
-            return True
         return False
 
     # def refine_mesh(self, context, report):

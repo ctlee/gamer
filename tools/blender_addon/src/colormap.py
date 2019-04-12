@@ -23,14 +23,14 @@
 import numpy as np
 
 def getColor(values, minV=-1000, maxV=1000):
+    print("Minimum value: %s; Maximum value: %s"%(np.amin(values),np.amax(values)))
     data = values
     # Truncate at min and max
     data[data < minV] = minV
     data[data > maxV] = maxV
     amin = np.amin(data)
-    # print(amin)
-    # print(np.amax(data))
 
+    print("PostTruncation--Minimum value: %s; Maximum value: %s"%(np.amin(data),np.amax(data)))
     # Set lower bound to 0
     if(amin < 0):
         data = data + np.absolute(amin)

@@ -786,6 +786,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
     Vertex center = *vertexID;
     int vKey = mesh.get_name(vertexID)[0];
 
+    // Get 1-ring around vertexID and order it
     std::vector<int> cover = mesh.get_cover(vertexID);
     std::vector<SurfaceMesh::SimplexID<1>> orderedNbhd;
 
