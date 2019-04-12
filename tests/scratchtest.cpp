@@ -39,11 +39,11 @@ int  main(int argc, char *argv[])
         flipNormals(*mesh);
     }
 
+
     double max = 0;
     for (auto s : mesh->get_level_id<1>()){
-        auto curve = getMeanCurvature(*mesh, s);
-        if (curve > 5)
-            std::cout << s << ": curvature = " << curve << std::endl;
+        auto curve = getGaussianCurvature(*mesh, s);
+        std::cout << s << ": curvature = " << curve << std::endl;
         if (curve > max)
             max = curve;
     }

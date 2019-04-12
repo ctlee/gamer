@@ -852,3 +852,73 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
     return std::sqrt(curvature|curvature);
 }
 
+
+/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
+double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    Vertex center = *vertexID;
+    int vKey = mesh.get_name(vertexID)[0];
+
+    std::vector<int> cover = mesh.get_cover(vertexID);
+    std::vector<SurfaceMesh::SimplexID<1>> orderedNbhd;
+
+    auto eID = mesh.get_simplex_up(vertexID, cover.back());
+    cover.pop_back();
+    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+
+    while(!cover.empty()){
+        auto ecover = mesh.get_cover(eID);
+        for(int nKey : ecover){
+            auto it = std::find(cover.begin(), cover.end(), nKey);
+            if(it != cover.end()){
+                eID = mesh.get_simplex_up(vertexID, *it);
+                cover.erase(it);
+                orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+                break;
+            }
+        }
+    }
+
+    double Amix = 0;
+    double angleSum = 0;
+    for(int i = 0; i < orderedNbhd.size(); ++i){
+        Vertex prev, curr, next;
+        if (i == 0){
+            prev = *orderedNbhd.back();
+        }else{
+            prev = *orderedNbhd[i-1];
+        }
+
+        curr = *orderedNbhd[i];
+
+        if (i+1 == orderedNbhd.size()){
+            next = *orderedNbhd.front();
+        }else{
+            next = *orderedNbhd[i+1];
+        }
+
+        // Consider the triangle vID, i, i+1 with wrapping
+        std::array<double, 3> ls;
+        ls[0] = distance(center, curr);
+        ls[1] = distance(center, next);
+        ls[2] = distance(curr, next);
+        std::sort(ls.begin(), ls.end());
+
+        if(ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2]){
+            // Triangle is obtuse!
+            if(angle(curr, center, next) > 90){
+                // The angle of T at center is obtuse
+                Amix += getArea(center, curr, next)/2;
+            }
+            else{
+                Amix += getArea(center, curr, next)/4;
+            }
+        }
+        else{
+            // Compute using voronoi formula
+            Amix += (pow(distance(center, curr),2)/tan(angleRad(center, next, curr))
+                    + pow(distance(center, next),2)/tan(angleRad(center, curr, next)))/8;
+        }
+        angleSum += angleRad(curr, center, next);
+    }
+    return (2*M_PI-angleSum)/Amix;
+}
