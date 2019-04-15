@@ -168,18 +168,31 @@ void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, 
     auto name = mesh.get_name(edge);
     auto v = *mesh.get_simplex_down(edge, name[0])
              - *mesh.get_simplex_down(edge, name[1]);
-    Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v * vertexLoc;
+    Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v*vertexLoc;
 
     using SimplexMap = typename casc::SimplexMap<Complex>;
 
     casc::SimplexMap<Complex> simplexMap;
-    casc::decimateFirstHalf(mesh, edge, simplexMap);
+    int np = casc::decimateFirstHalf(mesh, edge, simplexMap);
     typename casc::decimation_detail::SimplexDataSet<Complex>::type rv;
 
+    run_user_callback(mesh, simplexMap,  std::forward<Callback<Complex>>(clbk), rv);
 
-    run_user_callback(mesh, simplexMap, Callback<Complex>(), rv);
+    tetmesh::TetVertex vert;
+    for (auto vpair : std::get<1>(rv)) {
+        auto vnames = vpair.first;
+        for (auto name : vnames) {
+            if (np == name) {
+                vert = vpair.second;
+                goto endloop;
+            }
+
+        }
+    }
+    endloop:
+    vert.position = pos;
     casc::decimateBackHalf(mesh, simplexMap, rv);
-    //std::cout << simplexMap << std::endl;
+    std::cout << vert << std::endl;
 }
 
 void smoothMesh(TetMesh & mesh);

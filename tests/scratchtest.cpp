@@ -34,14 +34,13 @@ struct Callback
     tetmesh::Cell operator()(Complex& F,
                              const std::array<KeyType, 4>& new_name,
                              const SimplexSet& merged){
-        std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+        //std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
         return **merged.template cbegin<4>();
     }
 
     tetmesh::Face operator()(Complex& F,
                     const std::array<KeyType, 3>& new_name,
                     const SimplexSet& merged){
-        std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
         return **merged.template cbegin<3>();
     }
 
@@ -50,18 +49,19 @@ struct Callback
                     const SimplexSet& merged){
 
 
-        auto verts = *merged.template cbegin<1>();
-
-        /*TetMesh::SimplexID<1> v1 = *verts.begin();
-        TetMesh::SimplexID<2> v2 = *verts.end();
-        auto v = *v1 - *v2;
+       // tetmesh::TetVertex v1 = **merged.template cbegin<1>();
+       // tetmesh::TetVertex v2 = **merged.template cend<1>();
+/*
+        auto v = v1 - v2;
 
         //TODO :: getter for this
         double vertexLoc = 0;
-        Vector pos = v1.data().position - v*vertexLoc;
+        auto pos = v1.position - v*vertexLoc;
 
         std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
-         */
+
+        return tetmesh::TetVertex(pos);
+        */
         return **merged.template cbegin<2>();
     }
 
@@ -69,29 +69,37 @@ struct Callback
                       const std::array<KeyType, 1>& new_name,
                       const SimplexSet& merged){
 
-        /*auto verts = merged.template cbegin<1>();
+        /*
 
-        TetMesh::SimplexID<1> v1 = *verts.begin();
-        TetMesh::SimplexID<1> v2 = *verts.end();
-        auto v = *v1 - *v2;
+        tetmesh::TetVertex v1 = *verts.cbegin();
+        tetmesh::TetVertex v2 = *verts.end();
+
+        v1 = verts.first();
+
+        std::cout << v1 << "sdfsd" << std::endl;
+        auto v = v1.position - v2.position;
 
         //TODO :: getter for this
         double vertexLoc = 0;
-        Vector pos = *v1 - v*vertexLoc;
-
-        std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
-        return Vertex(pos);
+        Vector pos = v1 - v*vertexLoc;
+         */
+         //std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
+  /*      return Vertex(pos);
         */
-        return **merged.template cbegin<1>();
+  return **merged.template cbegin<1>();
     }
+
     /*
     template <std::size_t k>
-    typename Complex::template NodeDataTypes operator()(Complex& F,
+    typename Complex::template NodeDataTypes<k> operator()(Complex& F,
             const std::array<KeyType, k>& new_name,
-            const SimplexSet& merged){
+            const SimplexSet& merged) {
         std::cout << merged << " -> " << new_name << std::endl;
+        auto a = merged.template getlevel<k>();
         return 0;
-    }*/
+
+    }
+    */
 };
 
 int  main(int argc, char *argv[])
@@ -114,13 +122,12 @@ int  main(int argc, char *argv[])
 
     auto tetmesh = makeTetMesh(vec, "q2/2O8/7AYVC");
 
-
     auto edge = *tetmesh->get_level_id<2>().begin();
 
     //std::cout << edge << std::endl;
 
-    edgeCollapse(*tetmesh, edge, 0, Callback<TetMesh>());
+    edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
 
-    std::cout << "EOF" << std::endl;
+    //std::cout << "EOF" << std::endl;
 
 }
