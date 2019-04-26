@@ -388,7 +388,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
 
-            colors = getColor(curvatures, minV=self.minCurve, maxV=self.maxCurve)
+            colors = getColor(curvatures, 'mean', minV=self.minCurve, 
+                maxV=self.maxCurve, autoTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -411,7 +412,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getGaussianCurvature(gmesh, vID)
 
-            colors = getColor(curvatures, minV=self.minCurve, maxV=self.maxCurve)
+            colors = getColor(curvatures, 'gauss', minV=self.minCurve,
+                maxV=self.maxCurve, autoTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
