@@ -28,7 +28,7 @@ def getColor(data, colormapStr, minV=-1000, maxV=1000, autoTruncate=False):
     elif colormapStr=='gauss':
         colorStyle = BrBG_11
     elif colormapStr == 'bgr':
-        colorStyle = bgr
+        colorStyle = Oranges_8#bgr
 
     print("*** Pre Truncation ***")
     print("Minimum value: %s; Maximum value: %s"%(np.amin(data),np.amax(data)))
@@ -80,16 +80,24 @@ def genColorBar(colorStyle,minV,maxV,fontsize,orientation='vertical'):
     """
     import matplotlib as mpl
     import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
     fig = plt.figure(figsize=(3,8))
     if orientation=='horizontal':
         ax = fig.add_axes([0.05,0.80,0.9,0.15])
     elif orientation=='vertical':
         ax = fig.add_axes([0.05,0.05,0.15,0.9])
-    cmap = colorStyle.mpl_colormap
+    #cmap = colorStyle.mpl_colormap
+    # cmap = mpl.colors.LinearSegmentedColormap.from_list('name',colorStyle) # if input is a numpy array
     cnorm = mpl.colors.Normalize(vmin=minV,vmax=maxV)
-    cb = mpl.colorbar.ColorbarBase(ax,cmap=cmap,norm=cnorm,orientation=orientation)
+    cb = mpl.colorbar.ColorbarBase(ax,cmap=cmap,norm=cnorm,orientation=orientation,format=ticker.FuncFormatter(colormap_format))
     cb.ax.tick_params(labelsize=fontsize)
+    #ax.ticklabel_format(axis='both',style='sci')
     fig.show()
+
+def colormap_format(x,pos):
+    num, power = '{:.1e}'.format(x).split('e')
+    power=int(power)
+    return r'${} \times 10^{{{}}}$'.format(num,power)
 
 # import numpy as np
 # from palettable.colorbrewer.diverging import RdBu_7_r
