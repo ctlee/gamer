@@ -8,6 +8,7 @@
 build/
 release/
 debug/
+cmake-modules/
 
 # C++ gitignore
 # Prerequisites
