@@ -1,0 +1,13 @@
+# Target labels
+ casc
+# Source files and their labels
+/home/justin/gitrepos/gamer/cmake-modules/libraries/CMakeFiles/casc
+/home/justin/gitrepos/gamer/cmake-modules/libraries/CMakeFiles/casc.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/CMakeFiles/casc-complete.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-install.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-mkdir.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-download.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-update.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-patch.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-configure.rule
+/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-build.rule

@@ -923,3 +923,4 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     }
     return (2*M_PI-angleSum)/Amix;
 }
+

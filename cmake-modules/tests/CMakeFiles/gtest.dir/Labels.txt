@@ -1,0 +1,13 @@
+# Target labels
+ gtest
+# Source files and their labels
+/home/justin/gitrepos/gamer/cmake-modules/tests/CMakeFiles/gtest
+/home/justin/gitrepos/gamer/cmake-modules/tests/CMakeFiles/gtest.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/CMakeFiles/gtest-complete.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-install.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-mkdir.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-download.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-update.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-patch.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-configure.rule
+/home/justin/gitrepos/gamer/cmake-modules/tests/gtest/src/gtest-stamp/gtest-build.rule

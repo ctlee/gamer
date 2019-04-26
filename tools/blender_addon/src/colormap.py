@@ -22,11 +22,13 @@
 
 import numpy as np
 
-def getColor(data, curvType, minV=-1000, maxV=1000, autoTruncate=False):
-    if curvType=='mean':
+def getColor(data, colormapStr, minV=-1000, maxV=1000, autoTruncate=False):
+    if colormapStr=='mean':
         colorStyle = Oranges_8
-    elif curvType=='gauss':
+    elif colormapStr=='gauss':
         colorStyle = BrBG_11
+    elif colormapStr == 'bgr':
+        colorStyle = bgr
 
     print("*** Pre Truncation ***")
     print("Minimum value: %s; Maximum value: %s"%(np.amin(data),np.amax(data)))
@@ -34,14 +36,14 @@ def getColor(data, curvType, minV=-1000, maxV=1000, autoTruncate=False):
     
     # automatically find truncation points
     if autoTruncate:
-        if curvType == 'mean':
+        if colormapStr == 'mean':
             lowerPercentile, upperPercentile = (0,85)
-        elif curvType == 'gauss':
+        elif colormapStr == 'gauss':
             lowerPercentile, upperPercentile = (15,85)
         minV = np.percentile(data,lowerPercentile)
         maxV = np.percentile(data,upperPercentile)
         print("Data truncated at %f and %f percentiles"%(lowerPercentile,upperPercentile) )       
-        if curvType == 'gauss':
+        if colormapStr == 'gauss':
             absV = np.max((np.abs(minV),np.abs(maxV)))
             minV, maxV = (-absV, absV)
             print("Data symmetrized around 0")
@@ -122,6 +124,28 @@ Oranges_8 = np.array([[1.        , 0.96078431, 0.92156863],
        [0.85098039, 0.28235294, 0.00392157],
        [0.54901961, 0.17647059, 0.01568627]])
 
+#https://jdherman.github.io/colormap/
+# blue green red
+bgr=np.array([[0,0,255],
+[0,27,235],
+[0,54,215],
+[0,81,195],
+[0,108,174],
+[0,135,151],
+[0,162,117],
+[0,189,84],
+[0,216,50],
+[0,242,17],
+[17,242,0],
+[50,216,0],
+[83,189,0],
+[116,162,0],
+[149,135,0],
+[172,108,0],
+[193,81,0],
+[214,54,0],
+[235,27,0],
+[255,0,0]])/255
 
 
 

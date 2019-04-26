@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/CMakeFiles/casc"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/CMakeFiles/casc.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/CMakeFiles/casc-complete.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-install.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-mkdir.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-download.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-update.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-patch.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-configure.rule"
+		},
+		{
+			"file" : "/home/justin/gitrepos/gamer/cmake-modules/libraries/casc-prefix/src/casc-stamp/casc-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"casc"
+		],
+		"name" : "casc"
+	}
+}

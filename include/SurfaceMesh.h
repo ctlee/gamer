@@ -655,6 +655,7 @@ int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID
 double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
+
 // These exist for the a potential python interface
 void translate(SurfaceMesh &mesh, Vector v);
 void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
