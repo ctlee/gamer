@@ -412,7 +412,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
 
             colors = getColor(curvatures, 'bgr', minV=self.minCurve, 
-                maxV=self.maxCurve, autoTruncate=False)
+                maxV=self.maxCurve, percentTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -436,7 +436,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                 curvatures[i] = g.getGaussianCurvature(gmesh, vID)
 
             colors = getColor(curvatures, 'bgr', minV=self.minCurve,
-                maxV=self.maxCurve, autoTruncate=False)
+                maxV=self.maxCurve, percentTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -454,15 +454,15 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
 
     def helfrich_energy(self, context, report):
         gmesh = blenderToGamer(report)
-        kappa_h = 2 # bending rigidity, mean curvature [units: kb*T]
-        kappa_g = 0.8 # bending rigidity, gaussian curvature [units: kb*T]
+        kappa_h = 20 # bending rigidity, mean curvature [units: kb*T]
+        kappa_g = 0.8*kappa_h # bending rigidity, gaussian curvature [units: kb*T]
         if gmesh:
             energy = np.zeros(gmesh.sizeVertices())
             for i, vID in enumerate(gmesh.vertexIDs()):
                 energy[i] = 2*kappa_h*g.getMeanCurvature(gmesh, vID)**2 + kappa_g*g.getGaussianCurvature(gmesh, vID)
 
             colors = getColor(energy, 'bgr', minV=self.minEnergy,
-                maxV=self.maxEnergy, autoTruncate=False)
+                maxV=self.maxEnergy, percentTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
