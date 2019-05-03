@@ -524,7 +524,8 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                 auto f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
                 auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
                 auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
-                if (areaFlip/area > 1.01) continue; // If area changes by a lot then continue
+                double edgeFlipCriterion = 1.001;
+                if (areaFlip/area > edgeFlipCriterion) continue; // If area changes by a lot then continue
 
                 // Check the flip using user function
                 if (checkFlip(mesh, edgeID))
