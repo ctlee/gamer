@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -O2 -DNDEBUG  -shared -Wl,-soname,libtetshared.so -o ../../lib/libtetshared.so CMakeFiles/tetshared.dir/tetgen.cxx.o CMakeFiles/tetshared.dir/predicates.cxx.o 

@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libtetstatic.a  CMakeFiles/tetstatic.dir/tetgen.cxx.o CMakeFiles/tetstatic.dir/predicates.cxx.o
-/usr/bin/ranlib ../../lib/libtetstatic.a

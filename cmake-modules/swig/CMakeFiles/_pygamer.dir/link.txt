@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -O2 -DNDEBUG  -shared  -o ../lib/_pygamer.so CMakeFiles/_pygamer.dir/pygamerPYTHON_wrap.cxx.o ../lib/libgamerstatic.a ../lib/libtetstatic.a 
