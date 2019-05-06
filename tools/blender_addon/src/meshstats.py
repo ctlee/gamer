@@ -351,6 +351,19 @@ class GAMER_OT_gaussian_curvature(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
+class GAMER_OT_helfrich_energy(bpy.types.Operator):
+    bl_idname = "gamer.helfrich_energy"
+    bl_label = "Helfrich Energy [kb*T]"
+    bl_description = "Compute helfrich energy to vertex colors"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        mqp = bpy.context.scene.gamer.mesh_quality_properties
+        if mqp.helfrich_energy(context, self.report):
+            self.report({'INFO'}, "GAMer: Helfrich Energy complete")
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
 
 class MeshQualityReportProperties(bpy.types.PropertyGroup):
     n_wagon_edges = IntProperty(
@@ -380,6 +393,16 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Upper bound threshold of curvatures"
         )
 
+    minEnergy = FloatProperty(
+        name="Minimum energy", default = 0,
+        description="Lower bound for plotting/thresholding energy"
+        )
+
+    maxEnergy = FloatProperty(
+        name="Maximum energy", default = 100,
+        description="Maximum bound for plotting/thresholding energy"
+        )    
+
 
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
@@ -388,7 +411,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
 
-            colors = getColor(curvatures, minV=self.minCurve, maxV=self.maxCurve)
+            colors = getColor(curvatures, 'bgr', minV=self.minCurve, 
+                maxV=self.maxCurve, percentTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -411,7 +435,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getGaussianCurvature(gmesh, vID)
 
-            colors = getColor(curvatures, minV=self.minCurve, maxV=self.maxCurve)
+            colors = getColor(curvatures, 'bgr', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=False)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -420,6 +445,32 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
 
             color_layer = mesh.vertex_colors['GaussianCurvature']
             mesh.vertex_colors["GaussianCurvature"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+            return True
+        return False
+
+    def helfrich_energy(self, context, report):
+        gmesh = blenderToGamer(report)
+        kappa_h = 20 # bending rigidity, mean curvature [units: kb*T]
+        kappa_g = 0.8*kappa_h # bending rigidity, gaussian curvature [units: kb*T]
+        if gmesh:
+            energy = np.zeros(gmesh.sizeVertices())
+            for i, vID in enumerate(gmesh.vertexIDs()):
+                energy[i] = 2*kappa_h*g.getMeanCurvature(gmesh, vID)**2 + kappa_g*g.getGaussianCurvature(gmesh, vID)
+
+            colors = getColor(energy, 'bgr', minV=self.minEnergy,
+                maxV=self.maxEnergy, percentTruncate=False)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "HelfrichEnergy" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="HelfrichEnergy")
+
+            color_layer = mesh.vertex_colors['HelfrichEnergy']
+            mesh.vertex_colors["HelfrichEnergy"].active = True
 
             mloops = np.zeros((len(mesh.loops)), dtype=np.int)
             mesh.loops.foreach_get("vertex_index", mloops)
