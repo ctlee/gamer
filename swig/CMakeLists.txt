@@ -96,6 +96,7 @@ add_custom_target(stage_files
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/versions.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/surfacemesh_ops.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/report.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/ui.py
     COMMENT "Staging the GAMer Blender addon files"
     VERBATIM

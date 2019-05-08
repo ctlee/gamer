@@ -195,6 +195,15 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col.operator("gamer.mean_curvature")
         col.operator("gamer.gaussian_curvature")
 
+
+        col=layout.column()
+        col.label(text="Curvature Calculations:")
+        row = col.row(align=True)
+        row.prop(qProps, "minEnergy")
+        row.prop(qProps, "maxEnergy")
+        col.operator("gamer.helfrich_energy")
+
+
 class GAMER_PT_boundary_marking(bpy.types.Panel):
     bl_label = "Boundary Marking"
     bl_space_type = 'VIEW_3D'
