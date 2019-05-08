@@ -332,40 +332,30 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     return mesh;
 }
 
+
 // Store decimation/error info
 // template typename k
 struct complex_errors{
     // TetMesh::SimplexID<k>
-    using TetVertex = tetmesh::TetVertex;
-    std::priority_queue<TetVertex, std::vector<TetVertex>, std::greater<void>> errorQueue;
+    std::priority_queue<tetmesh::Edge, std::vector<TetMesh::SimplexID<2>>, std::greater<void>> errorQueue;
 
     complex_errors(TetMesh &mesh) {
-        for (TetMesh::SimplexID<1> v : mesh.get_level_id<1>()) {
-            TetVertex vertex = *v;
-            errorQueue.push(vertex);
+        for (TetMesh::SimplexID<2> e : mesh.get_level_id<2>()) {
+            tetmesh::Edge edge = *e;
+            errorQueue.push(e);
         }
     }
 
-    TetVertex lowestErr() {
+    TetMesh::SimplexID<2> lowestErr() {
         if (errorQueue.empty()) {
             throw std::bad_function_call();
         }
         auto low =  errorQueue.top();
         errorQueue.pop();
-        return low;
+        return (TetMesh::SimplexID<2>) low;
     }
 };
 
-complex_errors errors();
-
-/*
-template size_t k
-struct error_cmp{
-    constexpr bool operator(){...} const {
-        return lhs->error < rhs->error;
-    };
-};
-*/
 
 // Misc Error computation and propagation funcitons
 template <std::size_t level>
@@ -408,38 +398,6 @@ double computePenalty(TetMesh::SimplexID<2> & e, double vertexLoc,
     }
     return penalty;
 }
-
-
-// Core decimation operators
-
-/*
- * Collapse edge and place new vertex at coordinate c, c in range 0-1
- * specifying location between endpoints of e
- */
-/*
-template <typename Complex, template <typename> class Callback>
-void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, Callback<Complex> &&clbk) {
-    auto name =  mesh.get_name(edge);
-    auto v = *mesh.get_simplex_down(edge, name[0])
-             - *mesh.get_simplex_down(edge, name[1]);
-    Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v*vertexLoc;
-
-    using SimplexMap = typename casc::SimplexMap<TetMesh>;
-
-    casc::SimplexMap<TetMesh> simplexMap;
-    casc::decimateFirstHalf(mesh, edge, simplexMap);
-    typename casc::decimation_detail::SimplexDataSet<TetMesh>::type rv;
-    run_user_callback(mesh, simplexMap, std::forward<Callback<Complex>>(clbk), rv);
-    casc::decimateBackHalf(mesh, simplexMap, rv);
-    std::cout << simplexMap << std::endl;
-}
-*/
-void vertexRemoval(tetmesh::TetVertex v) {
-    // Remove v
-
-    // Retriangulate hole
-}
-
 
 // Specific decimation operations
 template <typename Complex, template <typename> class Callback>
@@ -497,28 +455,6 @@ double simplexInversionCheck(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 // Error from error quadrics as described in garland paper
 double quadricError(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 
-/*
-template <std::size_t level, typename Complex, template <typename> class Callback>
-void decimate(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
-
-    if (threshold < 1) {
-        throw std::invalid_argument("Threshold to decimate to must be at least 1");
-    }
-
-    // Exit, mesh already sufficiently decimated
-    if (threshold > mesh.size<level>()) {
-        return;
-    }
-
-    int initialLevelSimplexCount = mesh.size<level>();
-    int numToRemove = initialLevelSimplexCount - threshold;
-
-    for(int i = 0; i < numToRemove; ++i){
-        TetMesh::SimplexID<2> nextCollapse = get_lowest_err<level>(mesh);
-        casc::decimate(mesh, nextCollapse, std::forward<Callback>(cbk));
-    }
-}
-*/
 
 
 
@@ -840,10 +776,14 @@ void smoothMesh(TetMesh &mesh){
     }
 }
 
-template <std:: size_t level>
-auto get_lowest_err(TetMesh &mesh){
-    return errors().lowestErr();
-}
+
+/*
+TetMesh::SimplexID<2> getLowestErr(TetMesh &mesh){
+    auto edge = *iter;
+    std::cout << "next" << std::endl;
+    iter++;
+    return edge;
+}*/
 
 
 

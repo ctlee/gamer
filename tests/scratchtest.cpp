@@ -21,9 +21,9 @@
 #include <libraries/casc/include/CASCFunctions.h>
 #include <libraries/casc/include/SimplexSet.h>
 #include <libraries/casc/include/SimplexMap.h>
+#include <libraries/casc/include/SimplicialComplex.h>
 #include <libraries/casc/include/decimate.h>
 #include <libraries/casc/include/typetraits.h>
-
 
 template <typename Complex>
 struct Callback
@@ -124,10 +124,40 @@ int  main(int argc, char *argv[])
 
     auto edge = *tetmesh->get_level_id<2>().begin();
 
-    //std::cout << edge << std::endl;
+    std::vector<std::pair<std::pair<int,int>, double>> list;
+    markDecimatedEdge(*tetmesh, list, edge, 0.5);
+    //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
+    decimated(*tetmesh, 500, Callback<SurfaceMesh>());
 
-    edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
+    std::cout << "EOF" << std::endl;
 
-    //std::cout << "EOF" << std::endl;
+    SurfaceMesh surfaceMesh;
+
+    std::set<int> vertices;
+    // for face-in faces: if face participates in 2 tets continue
+    // else get positions of vertices and insert face into surface mesh
+    for (auto face : tetmesh->get_level_id<3>()) {
+        if (tetmesh->get_cover(face).size() > 1) {
+            continue;
+        } else {
+            auto name = tetmesh->get_name(face);
+            auto v1 = name[0];
+            auto v2 = name[1];
+            auto v3 = name[2];
+            surfaceMesh.insert({v1,v2,v3});
+
+            for (auto key : name){
+                vertices.insert(key);
+            }
+        }
+    }
+    for (auto vertexKey : vertices){
+        auto& data = *surfaceMesh.get_simplex_up({vertexKey});
+        data = Vertex((*tetmesh->get_simplex_up({vertexKey})).position);
+    }
+
+    compute_orientation(surfaceMesh);
+    writeOFF("meshOut.off", surfaceMesh);
+
 
 }
