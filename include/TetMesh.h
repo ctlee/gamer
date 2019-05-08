@@ -143,3 +143,5 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh);
 // void writeMCSF(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack
 //void writeCARP
+
+std::unique_ptr<TetMesh> readDolfin(const std::string&filename);

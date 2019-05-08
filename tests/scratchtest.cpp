@@ -32,22 +32,25 @@ int  main(int argc, char *argv[])
 
     // writeOFF("2jho.off", *mesh);
 
-    auto mesh = readOFF(argv[1]);
+    // auto mesh = readOFF(argv[1]);
 
-    auto vol = getVolume(*mesh);
-    if (vol < 0){
-        flipNormals(*mesh);
-    }
+    // auto vol = getVolume(*mesh);
+    // if (vol < 0){
+    //     flipNormals(*mesh);
+    // }
 
 
-    double max = 0;
-    for (auto s : mesh->get_level_id<1>()){
-        auto curve = getGaussianCurvature(*mesh, s);
-        std::cout << s << ": curvature = " << curve << std::endl;
-        if (curve > max)
-            max = curve;
-    }
-    std::cout << "Max: " << max << std::endl;
+    // double max = 0;
+    // for (auto s : mesh->get_level_id<1>()){
+    //     auto curve = getGaussianCurvature(*mesh, s);
+    //     std::cout << s << ": curvature = " << curve << std::endl;
+    //     if (curve > max)
+    //         max = curve;
+    // }
+    // std::cout << "Max: " << max << std::endl;
+    //
+    auto mesh = readDolfin(argv[1]);
 
+    writeDolfin("test.xml", *mesh);
     std::cout << "EOF" << std::endl;
 }

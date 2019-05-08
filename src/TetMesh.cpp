@@ -29,7 +29,9 @@
 #include <iostream>
 #include <iomanip>
 #include <map>
+#include <memory>
 #include <ostream>
+#include <regex>
 #include <set>
 #include <strstream>
 #include <string>
@@ -644,6 +646,165 @@ void smoothMesh(TetMesh &mesh){
         }
     }
 }
+
+std::unique_ptr<TetMesh> readDolfin(const std::string&filename){
+    // Instantiate mesh!
+    std::unique_ptr<TetMesh> mesh(new TetMesh);
+
+    std::ifstream fin(filename);
+    if(!fin.is_open())
+    {
+        std::cerr << "Read Error: File '" << filename << "' could not be read." << std::endl;
+        mesh.reset();
+        return mesh;
+    }
+
+    std::string line;
+    getline(fin, line);
+    getline(fin, line);
+    getline(fin, line);
+
+    // read number of vertices
+    getline(fin, line);
+    std::regex vertexnum("<vertices size=\"([[:digit:]]+)\">",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::smatch match;
+    std::regex_search(line, match, vertexnum);
+
+    int nvertices = std::stoi(match[1].str());
+
+    std::regex vertexLineRegex("<vertex index=\"([[:digit:]]+)\" x=\"(.*)\" y=\"(.*)\" z=\"(.*)\" />",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    for (int i=0; i < nvertices; ++i){
+        getline(fin, line);
+
+        std::regex_search(line, match, vertexLineRegex);
+
+        mesh->insert<1>({std::stoi(match[1].str())}, Vertex(std::stod(match[2].str()), std::stod(match[3].str()), std::stod(match[4].str())));
+        // for (int j=0; j < match.size(); ++j){
+        //     std::cout << match[j].str() << std::endl;
+        // }
+    }
+
+    // for(auto vid : mesh->get_level_id<1>()){
+    //     std::cout << vid << " " << *vid << std::endl;
+    // }
+
+    getline(fin, line);
+    getline(fin, line);
+
+    std::regex cellnum("<cells size=\"([[:digit:]]+)\">",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::regex_search(line, match,cellnum);
+
+    int ncells = std::stoi(match[1].str());
+
+    std::regex tetLineRegex("<tetrahedron index=\"([[:digit:]]+)\" v0=\"([[:digit:]]+)\" v1=\"([[:digit:]]+)\" v2=\"([[:digit:]]+)\" v3=\"([[:digit:]]+)\" />",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::cout << "Reading in " << ncells << " cells" << std::endl;
+
+    std::map<int, std::array<int,4>> cellMap;
+
+    for (int i=0; i < ncells; ++i){
+        getline(fin, line);
+        std::regex_search(line, match, tetLineRegex);
+
+        std::array<int, 4> vals;
+
+        for(int j=0; j < 4; ++j){
+            vals[j] = std::stoi(match[j+2].str());
+        }
+
+        mesh->insert<4>(vals);
+        cellMap.emplace(std::make_pair(std::stoi(match[1].str()), vals));
+    }
+
+    getline(fin, line);
+    getline(fin, line);
+    getline(fin, line);
+
+    std::regex collectionRegex("<mesh_value_collection name=\"m\" type=\"uint\" dim=\"([[:digit:]]+)\" size=\"([[:digit:]]+)\">",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::regex_search(line, match, collectionRegex);
+
+    int ncollect = std::stoi(match[2].str());
+
+    std::regex collectLineRegex("<value cell_index=\"([[:digit:]]+)\" local_entity=\"([[:digit:]]+)\" value=\"([[:digit:]]+)\" />",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::cout << "Reading in " << ncollect << " collections" << std::endl;
+
+    for(auto face : mesh->get_level_id<3>()){
+        (*face).marker = 0;
+    }
+
+    for (int i=0; i < ncollect; ++i){
+        getline(fin, line);
+        std::regex_search(line, match, collectLineRegex);
+
+        int idx = std::stoi(match[1].str());
+        int entity = std::stoi(match[2].str());
+        int value = std::stoi(match[3].str());
+
+        auto key = cellMap[idx];
+
+        std::array<int, 3> faceKey;
+
+        int k = 0;
+        for(int j = 0; j < 4; ++j){
+            if (j == entity) continue;
+            else{
+                faceKey[k] = key[j];
+                ++k;
+            }
+        }
+
+        (*mesh->get_simplex_up(faceKey)).marker = value;
+    }
+
+    getline(fin, line);
+    getline(fin, line);
+
+    std::regex tetCollectionRegex("<mesh_value_collection name=\"m\" type=\"uint\" dim=\"([[:digit:]]+)\" size=\"([[:digit:]]+)\">",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::regex_search(line, match, tetCollectionRegex);
+
+    ncollect = std::stoi(match[2].str());
+
+    std::regex collectTetRegex("<value cell_index=\"([[:digit:]]+)\" local_entity=\"([[:digit:]]+)\" value=\"([[:digit:]]+)\" />",  std::regex_constants::ECMAScript | std::regex_constants::icase);
+
+    std::cout << "Reading in " << ncollect << " collections" << std::endl;
+
+    for(auto tet : mesh->get_level_id<4>()){
+        (*tet).marker = 0;
+    }
+
+    for (int i=0; i < ncollect; ++i){
+        getline(fin, line);
+        std::regex_search(line, match, collectTetRegex);
+
+        int idx = std::stoi(match[1].str());
+        int value = std::stoi(match[3].str());
+
+        auto key = cellMap[idx];
+
+        (*mesh->get_simplex_up(key)).marker = value;
+    }
+
+    return mesh;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
