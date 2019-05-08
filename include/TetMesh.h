@@ -232,11 +232,14 @@ void decimated(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         sortedEdges.push_back(e);
     }
 
+    auto edgeErrorCmp = [](const TetMesh::SimplexID<2> e1, const TetMesh::SimplexID<2> e2) -> bool{
+        return *e1 < *e2;
+    }
+
     // sort edges in order of error
-    std::sort_heap(sortedEdges.begin(), sortedEdges.end());
+    std::sort_heap(sortedEdges.begin(), sortedEdges.end(), edgeErrorCmp);
 
     // remove invalid edges (if edge with both vertices decimated already decimated, will cause segfault)
-    std::vector<bool> encountered(mesh.size<1>(), false);
     for (auto it = sortedEdges.begin(); it != sortedEdges.end();) {
         auto edge = *it;
         auto name =  mesh.get_name(edge);
