@@ -171,6 +171,8 @@ std::unique_ptr<TetMesh> makeTetMesh(
         std::string tetgen_params);
 #endif //SWIG
 
+typedef double (*PenaltyFunction)(TetMesh::SimplexID<2>, TetMesh&);
+
 // Core decimation operators
 void vertexRemoval(tetmesh::TetVertex v) {
     // Remove v
@@ -237,7 +239,7 @@ void propagateHelper(TetMesh & mesh){
  * vertex Loc is location of new vertex relative to edge endpoints
  */
 double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
-                      std::vector<std::function<double (TetMesh::SimplexID<2>, TetMesh&)>> penaltyList){
+                      std::vector<PenaltyFunction > penaltyList){
     // Scalarization of penalty function; using weighted sum method with 1/n as
     // coefficient for each individual function
     double weight = (1/penaltyList.size());
@@ -250,7 +252,7 @@ double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc
 }
 
 
-void propagateError(TetMesh & mesh, std::vector<std::function<double (TetMesh::SimplexID<2>, TetMesh&)>> penalty){
+void propagateError(TetMesh & mesh, std::vector<PenaltyFunction> penalty){
     for (auto edge : mesh.get_level_id<2>()) {
         (*edge).error = computePenalty(edge, mesh, 0, penalty);
     }
@@ -259,8 +261,8 @@ void propagateError(TetMesh & mesh, std::vector<std::function<double (TetMesh::S
 
 // Specific decimation operations
 template <typename Complex, template <typename> class Callback>
-int halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<std::function<double(TetMesh::SimplexID<2>,
-                                                                                                TetMesh&)>> penaltyList, Callback<Complex> &&clbk) {
+int halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<PenaltyFunction> penaltyList,
+        Callback<Complex> &&clbk) {
     double penaltyA = computePenalty(e, mesh, 0, penaltyList);
     double penaltyB = computePenalty(e, mesh, 1, penaltyList);
     if (penaltyA < penaltyB) {
@@ -314,8 +316,6 @@ double simplexInversionCheck(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
 
 // Error from error quadrics as described in garland paper
 double quadricError(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
-
-//std::vector<std::function<double (TetMesh::SimplexID<2>, TetMesh&)>> samplePenaltyFunction = {edgeLength, isBoundaryEdge};
 
 void markDecimatedEdge(TetMesh & mesh, std::vector<std::pair<std::pair<int,int>, double>>& list, TetMesh::SimplexID<2> edge,
                        double loc) {
@@ -381,6 +381,8 @@ void writeRestrictionMatrix(const std::string &filename, int origSize,
 
 template <typename Complex, template <typename> class Callback>
 void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
+    std::vector<PenaltyFunction> samplePenaltyFunction = {edgeLength, isBoundaryEdge};
+
     int origVertexNum = mesh.size<1>();
     int numToRemove = origVertexNum - threshold;
 
@@ -395,7 +397,7 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         return;
     }
 
-    //propagateError(mesh, samplePenaltyFunction);
+    propagateError(mesh, samplePenaltyFunction);
 
     std::vector<TetMesh::SimplexID<2>> sortedEdges;
     // initialize vector of edges
@@ -437,9 +439,9 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
     for(auto it = sortedEdges.begin(); it != sortedEdges.end(); it++){
         auto edge = *it;
         std::cout << "collapsing edge: " << *it << std::endl;
-        edgeCollapse(mesh, *it, .5, Callback<TetMesh>());
-        //int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
-        markDecimatedEdge(mesh, decimatedList, edge, .5);
+        //edgeCollapse(mesh, *it, .5, Callback<TetMesh>());
+        int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
+        markDecimatedEdge(mesh, decimatedList, edge, pos);
     }
     std::cout << "Decimation finished, final size: " << mesh.size<2>() << " edges." << std::endl;
     writeRestrictionMatrix("restrictionM.csv", origVertexNum, decimatedList, encountered);
