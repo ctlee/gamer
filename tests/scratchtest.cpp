@@ -108,6 +108,7 @@ int  main(int argc, char *argv[])
     // auto mesh = readPQR_gauss(argv[1],-0.2, 2.5);
     // writeOFF("test.off", *mesh);
 
+
     auto vol = getVolume(*mesh);
     if (vol < 0) {
         flipNormals(*mesh);
@@ -123,11 +124,11 @@ int  main(int argc, char *argv[])
     auto tetmesh = makeTetMesh(vec, "q2/2O8/7AYVC");
 
     //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
-    decimation(*tetmesh, 200, Callback<SurfaceMesh>());
+    decimation(*tetmesh, 10000, Callback<SurfaceMesh>());
 
     std::cout << "EOF" << std::endl;
 
-    /*
+
     SurfaceMesh surfaceMesh;
 
     std::set<int> vertices;
@@ -153,7 +154,8 @@ int  main(int argc, char *argv[])
     }
 
     compute_orientation(surfaceMesh);
+
     writeOFF("meshOut.off", surfaceMesh);
-    */
+
 
 }

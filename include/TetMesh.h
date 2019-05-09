@@ -381,7 +381,7 @@ void writeRestrictionMatrix(const std::string &filename, int origSize,
 
 template <typename Complex, template <typename> class Callback>
 void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
-    std::vector<PenaltyFunction> samplePenaltyFunction = {edgeLength, isBoundaryEdge};
+    std::vector<PenaltyFunction> samplePenaltyFunction = {isBoundaryEdge};
 
     int origVertexNum = mesh.size<1>();
     int numToRemove = origVertexNum - threshold;
@@ -428,10 +428,10 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
             it = sortedEdges.erase(it);
         } else {
             ++it;
+            numValidEdges++;
         }
         encountered[name[0]] = true;
         encountered[name[1]] = true;
-        numValidEdges++;
     }
 
     std::vector<std::pair<std::pair<int,int>, double>> decimatedList;
@@ -443,7 +443,7 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
         markDecimatedEdge(mesh, decimatedList, edge, pos);
     }
-    std::cout << "Decimation finished, final size: " << mesh.size<2>() << " edges." << std::endl;
+    std::cout << "Decimation finished, final size: " << mesh.size<1>() << " vertices." << std::endl;
     writeRestrictionMatrix("restrictionM.csv", origVertexNum, decimatedList, encountered);
 }
 
@@ -451,6 +451,7 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
 void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);
 void writeOFF(const std::string& filename, const TetMesh &mesh);
+std::unique_ptr<TetMesh> readDolfin(const std::string&filename);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
 void writeTriangle(const std::string &filename, const TetMesh &mesh);
 
