@@ -90,12 +90,12 @@ struct Edge : Vertex, ErrorProperties
     Edge() {}
     Edge(Vertex v) : Vertex(v) {}
 
-    bool operator< (const Edge& rhs)
+    bool operator< (const Edge& rhs) const
     {
         return  error < rhs.error;
     };
 
-    bool operator> (const Edge& rhs)
+    bool operator> (const Edge& rhs) const
     {
         return  error > rhs.error;
     };
@@ -122,14 +122,14 @@ struct TetVertex : Vertex
     double error;
 
 
-    bool operator< (const TetVertex& rhs)
+    const bool operator< (const TetVertex& rhs)
     {
-        return  error < rhs.getError();
+        return  error < rhs.error;
     };
 
-    bool operator> (const TetVertex& rhs)
+    const bool operator> (const TetVertex& rhs)
     {
-        return  error > rhs.getError();
+        return  error > rhs.error;
     };
 
 };
@@ -211,10 +211,179 @@ void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, 
 }
 
 
-TetMesh::SimplexID<2> getLowestErr(TetMesh &complex);
+// Misc Error computation and propagation funcitons
+template <std::size_t level>
+void propagateHelper(TetMesh & mesh){
+    if (level <= 1) return;
+
+    for (auto node : mesh.get_level_id<level>()){
+        auto parents = mesh.up(node);
+        double tmperror;
+        for (auto parent : parents){
+            tmperror += parent->error;
+        }
+        double error = tmperror / parents.size();
+        node->error = error;
+    }
+    propagateHelper<level-1>(mesh);
+}
+
+
+
+
+
+/*
+ * Compute errors of each vertex/edge based on inputted functions
+ * vertex Loc is location of new vertex relative to edge endpoints
+ */
+double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
+                      std::vector<std::function<double (TetMesh::SimplexID<2>, TetMesh&)>> penaltyList){
+    // Scalarization of penalty function; using weighted sum method with 1/n as
+    // coefficient for each individual function
+    double weight = (1/penaltyList.size());
+
+    double penalty = 0;
+    for (auto f : penaltyList) {
+        penalty += weight * f(e, mesh);
+    }
+    return penalty;
+}
+
+
+void propagateError(TetMesh & mesh, std::vector<std::function<double (TetMesh::SimplexID<2>, TetMesh&)>> penalty){
+    for (auto edge : mesh.get_level_id<2>()) {
+        (*edge).error = computePenalty(edge, mesh, 0, penalty);
+    }
+    //propagateHelper<2>(mesh);
+}
+
+// Specific decimation operations
+template <typename Complex, template <typename> class Callback>
+int halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<std::function<double(TetMesh::SimplexID<2>,
+                                                                                                TetMesh&)>> penaltyList, Callback<Complex> &&clbk) {
+    double penaltyA = computePenalty(e, mesh, 0, penaltyList);
+    double penaltyB = computePenalty(e, mesh, 1, penaltyList);
+    if (penaltyA < penaltyB) {
+        edgeCollapse(mesh, e, 0, Callback<TetMesh>());
+        return 0;
+    } else {
+        edgeCollapse(mesh, e, 1, Callback<TetMesh>());
+        return 1;
+    }
+}
+
+
+// Penalty/Constraint functions
+double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    std::set<TetMesh::SimplexID<3>> faces= mesh.up(edge);
+    for (auto face : faces) {
+        std::set<TetMesh::SimplexID<4>> parentTets = mesh.up(face);
+        if (parentTets.size() == 1) {
+            return INT_MAX;
+        }
+    }
+    return 0;
+}
+
+double isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh) {
+    std::set<TetMesh::SimplexID<2>> edges = mesh.up(v);
+    for (auto edge : edges) {
+        if (isBoundaryEdge(edge, mesh)) {
+            return INT_MAX;
+        }
+    }
+    return 0;
+}
+
+double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    auto name =  mesh.get_name(edge);
+    auto v = *mesh.get_simplex_down(edge, name[0])
+             - *mesh.get_simplex_down(edge, name[1]);
+    return std::sqrt(v|v);
+}
+
+double scalarInfoValue(tetmesh::TetEdge e) {}
+
+double volumePreservation(tetmesh::TetEdge e) {}
+
+// Test if a potential edge collapse preserves substructes
+double substructurePreservation(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
+// Test if a potential edge collapse results in inverted tetrahedra
+double simplexInversionCheck(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
+// Error from error quadrics as described in garland paper
+double quadricError(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
+//std::vector<std::function<double (TetMesh::SimplexID<2>, TetMesh&)>> samplePenaltyFunction = {edgeLength, isBoundaryEdge};
+
+void markDecimatedEdge(TetMesh & mesh, std::vector<std::pair<std::pair<int,int>, double>>& list, TetMesh::SimplexID<2> edge,
+                       double loc) {
+    auto name =  mesh.get_name(edge);
+    list.push_back(std::pair<std::pair<int,int>,double>(std::pair<int,int>(name[0], name[1]), loc));
+}
+
+// Restriction matrix with convention as in http://www.cs.huji.ac.il/~csip/CSIP2007-MG.pdf
+void writeRestrictionMatrix(const std::string &filename, int origSize,
+        std::vector<std::pair<std::pair<int,int>, double>> list, std::vector<bool> encountered) {
+
+    std::ofstream fout(filename);
+    if(!fout.is_open())
+    {
+        std::cerr   << "File '" << filename
+                    << "' could not be writen to." << std::endl;
+        exit(1);
+    }
+
+    std::vector<std::vector<double>> matrix(origSize, std::vector<double> (origSize, 0));
+    auto iter = list.begin();
+
+    for (int i = 0; i < (origSize-list.size()); i++) {
+        if (!encountered[i]) {
+            matrix[i][i] = 1;
+        }
+    }
+
+    for (int i = (origSize-list.size()); i < matrix.size(); i++) {
+        int a = std::get<0>(std::get<0>(*iter));
+        int b = std::get<1>(std::get<0>(*iter));
+        double pos = std::get<1>(*iter);
+        matrix[i][a] = pos;
+        matrix[i][b] = 1 - pos;
+        iter++;
+    }
+
+    // Delete rows that are all 0
+    for (auto itr = matrix.begin(); itr != matrix.end();) {
+        bool allzeros = true;
+        for (auto col : *itr) {
+            if (col != 0) {
+                allzeros = false;
+                break;
+            }
+        }
+        if (allzeros) {
+            itr = matrix.erase(itr);
+        } else {
+            ++itr;
+        }
+
+    }
+
+    // Print to file as csv
+    for (auto row : matrix) {
+        for (auto element : row) {
+            fout << element << ",";
+        }
+        fout << std::endl;
+    }
+}
 
 template <typename Complex, template <typename> class Callback>
-void decimated(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
+void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
+    int origVertexNum = mesh.size<1>();
+    int numToRemove = origVertexNum - threshold;
+
     if (threshold < 1) {
         throw std::invalid_argument("Threshold to decimate to must be at least 1");
     }
@@ -226,6 +395,8 @@ void decimated(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         return;
     }
 
+    //propagateError(mesh, samplePenaltyFunction);
+
     std::vector<TetMesh::SimplexID<2>> sortedEdges;
     // initialize vector of edges
     for (TetMesh::SimplexID<2> e : mesh.get_level_id<2>()) {
@@ -234,13 +405,20 @@ void decimated(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
 
     auto edgeErrorCmp = [](const TetMesh::SimplexID<2> e1, const TetMesh::SimplexID<2> e2) -> bool{
         return *e1 < *e2;
-    }
+    };
 
     // sort edges in order of error
     std::sort_heap(sortedEdges.begin(), sortedEdges.end(), edgeErrorCmp);
 
     // remove invalid edges (if edge with both vertices decimated already decimated, will cause segfault)
+    std::vector<bool> encountered(mesh.size<1>(), false);
+    int numValidEdges = 0;
     for (auto it = sortedEdges.begin(); it != sortedEdges.end();) {
+        if (numValidEdges > numToRemove) {
+            sortedEdges.erase(it, sortedEdges.end());
+            break;
+        }
+
         auto edge = *it;
         auto name =  mesh.get_name(edge);
 
@@ -251,76 +429,22 @@ void decimated(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         }
         encountered[name[0]] = true;
         encountered[name[1]] = true;
+        numValidEdges++;
     }
 
-    for (int i =0 ; i < 100; i++ ) {
-        std::cout << i << ": " << sortedEdges[i] << std::endl;
-    }
+    std::vector<std::pair<std::pair<int,int>, double>> decimatedList;
 
-
-    int initialLevelSimplexCount = mesh.size<2>();
-    int numToRemove = initialLevelSimplexCount - threshold;
-
-    sortedEdges.erase(sortedEdges.begin() + 8);
-    sortedEdges.erase(sortedEdges.begin() + 14);
     for(auto it = sortedEdges.begin(); it != sortedEdges.end(); it++){
-        if (numToRemove == 0) {
-            break;
-        }
-
-        if (*it != NULL) {
-            numToRemove--;
-            std::cout << "collapse #" << numToRemove << ": edge" << *it << std::endl;
-            edgeCollapse(mesh, *it, 0.5, Callback<TetMesh>());
-            std::cout << "collapsed" << std::endl;
-        }
-
+        auto edge = *it;
+        std::cout << "collapsing edge: " << *it << std::endl;
+        edgeCollapse(mesh, *it, .5, Callback<TetMesh>());
+        //int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
+        markDecimatedEdge(mesh, decimatedList, edge, .5);
     }
+    std::cout << "Decimation finished, final size: " << mesh.size<2>() << " edges." << std::endl;
+    writeRestrictionMatrix("restrictionM.csv", origVertexNum, decimatedList, encountered);
 }
 
-
-
-void markDecimatedEdge(TetMesh & mesh, std::vector<std::pair<std::pair<int,int>, double>> list, TetMesh::SimplexID<2> edge,
-                       double loc) {
-    auto name =  mesh.get_name(edge);
-    list.push_back(std::pair<std::pair<int,int>,double>(std::pair<int,int>(name[0], name[1]), loc));
-}
-
-void writeRestrictionMatrix(const std::string &filename, int origSize,
-        std::vector<std::pair<std::pair<int,int>, double>> list) {
-
-    std::ofstream fout(filename);
-    if(!fout.is_open())
-    {
-        std::cerr   << "File '" << filename
-                    << "' could not be writen to." << std::endl;
-        exit(1);
-    }
-
-    /*
-     * //Write identity matrix
-    for (int i = 0; i < (origSize-list.size()); i++) {
-        for (int j = 0; j < origSize; i++) {
-            if (i == j) {
-                fout << "1 ";
-            } else {
-                fout << "0 ";
-            }
-        }
-        fout << std::endl;
-    }
-    */
-
-
-    auto iter = list.begin();
-    for (int i = (origSize-list.size()); i < origSize; i++) {
-        int a = std::get<0>(std::get<0>(*iter));
-        int b = std::get<1>(std::get<0>(*iter));
-        double pos = std::get<1>(*iter);
-
-
-    }
-}
 
 void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);

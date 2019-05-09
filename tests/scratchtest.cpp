@@ -122,20 +122,16 @@ int  main(int argc, char *argv[])
 
     auto tetmesh = makeTetMesh(vec, "q2/2O8/7AYVC");
 
-    auto edge = *tetmesh->get_level_id<2>().begin();
-
-    std::vector<std::pair<std::pair<int,int>, double>> list;
-    markDecimatedEdge(*tetmesh, list, edge, 0.5);
     //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
-    decimated(*tetmesh, 500, Callback<SurfaceMesh>());
+    decimation(*tetmesh, 200, Callback<SurfaceMesh>());
 
     std::cout << "EOF" << std::endl;
 
+    /*
     SurfaceMesh surfaceMesh;
 
     std::set<int> vertices;
-    // for face-in faces: if face participates in 2 tets continue
-    // else get positions of vertices and insert face into surface mesh
+    // Create surface mesh from tetrahedral mesh
     for (auto face : tetmesh->get_level_id<3>()) {
         if (tetmesh->get_cover(face).size() > 1) {
             continue;
@@ -158,6 +154,6 @@ int  main(int argc, char *argv[])
 
     compute_orientation(surfaceMesh);
     writeOFF("meshOut.off", surfaceMesh);
-
+    */
 
 }
