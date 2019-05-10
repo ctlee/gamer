@@ -104,7 +104,8 @@ struct Callback
 
 int  main(int argc, char *argv[])
 {
-    auto mesh = readOFF(argv[1]);
+    auto tetmesh = readDolfin(argv[1]);
+    /*auto mesh = readOFF(argv[1]);
     // auto mesh = readPQR_gauss(argv[1],-0.2, 2.5);
     // writeOFF("test.off", *mesh);
 
@@ -124,10 +125,11 @@ int  main(int argc, char *argv[])
     auto tetmesh = makeTetMesh(vec, "q2/2O8/7AYVC");
 
     //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
-    decimation(*tetmesh, .97, Callback<TetMesh>());
+    */
+    decimation(*tetmesh, .8, Callback<TetMesh>());
 
     std::cout << "EOF" << std::endl;
-
+/*
 
     SurfaceMesh surfaceMesh;
 
@@ -154,8 +156,8 @@ int  main(int argc, char *argv[])
     }
 
     compute_orientation(surfaceMesh);
-
-    writeOFF("meshOut.off", surfaceMesh);
-
+*/
+    //writeOFF("meshOut.off", surfaceMesh);
+    writeDolfin("meshOut.xml", *tetmesh);
 
 }

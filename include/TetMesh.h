@@ -249,6 +249,9 @@ double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc
     double penalty = 0;
     for (auto f : penaltyList) {
         penalty += weight * f(e, mesh);
+        if (std::isnan(penalty)) {
+            return INFINITY;
+        }
     }
     return penalty;
 }
@@ -283,20 +286,20 @@ double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
     for (auto face : faces) {
         std::set<TetMesh::SimplexID<4>> parentTets = mesh.up(face);
         if (parentTets.size() == 1) {
-            return INT_MAX;
+            return INFINITY;
         }
     }
     return 0;
 }
 
-double isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh) {
+bool isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh) {
     std::set<TetMesh::SimplexID<2>> edges = mesh.up(v);
     for (auto edge : edges) {
         if (isBoundaryEdge(edge, mesh)) {
-            return INT_MAX;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
 double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
@@ -309,16 +312,17 @@ double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
 double scalarInfoValue(tetmesh::TetEdge e) {}
 
 double volumePreservation(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
 double inwardCollapse(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
     auto name =  mesh.get_name(edge);
     auto v1 = mesh.get_simplex_down(edge, name[0]);
     auto v2 = mesh.get_simplex_down(edge, name[1]);
     auto b1 = isBoundaryVertex(v1, mesh);
     auto b2 = isBoundaryVertex(v2, mesh);
-    if (b1 > 0 && b2 > 0) {
-        return INT_MAX;
-    } else if (b1 == b2 == 0) {
-        return INT_MAX;
+    if (b1 && b2) {
+        return INFINITY;
+    } else if (!b1 && !b2) {
+        return INFINITY;
     } else {
         return 0;
     }
@@ -397,7 +401,7 @@ void writeRestrictionMatrix(const std::string &filename, int origSize,
 
 template <typename Complex, template <typename> class Callback>
 void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
-    std::vector<PenaltyFunction> samplePenaltyFunction = {isBoundaryEdge, inwardCollapse, edgeLength};
+    std::vector<PenaltyFunction> samplePenaltyFunction = {inwardCollapse, edgeLength};
 
     int origVertexNum = mesh.size<1>();
     int numToRemove = origVertexNum - origVertexNum*threshold;
@@ -437,6 +441,14 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         }
 
         auto edge = *it;
+
+        /*
+        if ((*edge).error == INFINITY) {
+            sortedEdges.erase(it, sortedEdges.end());
+            std::cout << "No more valid edges for decimation, all remaining edges are protected by constraints." << std::endl;
+            break;
+        }
+        */
         auto name =  mesh.get_name(edge);
 
         if (encountered[name[0]] || encountered[name[1]]) {
