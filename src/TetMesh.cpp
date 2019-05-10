@@ -333,31 +333,6 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     return mesh;
 }
 
-
-// Store decimation/error info
-// template typename k
-struct complex_errors{
-    // TetMesh::SimplexID<k>
-    std::priority_queue<tetmesh::Edge, std::vector<TetMesh::SimplexID<2>>, std::greater<void>> errorQueue;
-
-    complex_errors(TetMesh &mesh) {
-        for (TetMesh::SimplexID<2> e : mesh.get_level_id<2>()) {
-            tetmesh::Edge edge = *e;
-            errorQueue.push(e);
-        }
-    }
-
-    TetMesh::SimplexID<2> lowestErr() {
-        if (errorQueue.empty()) {
-            throw std::bad_function_call();
-        }
-        auto low =  errorQueue.top();
-        errorQueue.pop();
-        return (TetMesh::SimplexID<2>) low;
-    }
-};
-
-
 void writeVTK(const std::string& filename, const TetMesh &mesh){
     std::ofstream fout(filename);
     if(!fout.is_open())
