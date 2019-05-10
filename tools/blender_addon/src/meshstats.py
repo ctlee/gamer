@@ -401,7 +401,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     maxEnergy = FloatProperty(
         name="Maximum energy", default = 100,
         description="Maximum bound for plotting/thresholding energy"
-        )    
+        )
 
 
     def mean_curvature(self, context, report):
@@ -411,8 +411,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getMeanCurvature(gmesh, vID)
 
-            colors = getColor(curvatures, 'bgr', minV=self.minCurve, 
-                maxV=self.maxCurve, percentTruncate=False)
+            colors = getColor(curvatures, 'viridis', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=True)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -435,8 +435,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             for i, vID in enumerate(gmesh.vertexIDs()):
                 curvatures[i] = g.getGaussianCurvature(gmesh, vID)
 
-            colors = getColor(curvatures, 'bgr', minV=self.minCurve,
-                maxV=self.maxCurve, percentTruncate=False)
+            colors = getColor(curvatures, 'viridis', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=True)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data

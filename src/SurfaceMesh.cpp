@@ -850,7 +850,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         curvature += (1/tan(angleRad(center, prev, curr)) + 1/tan(angleRad(center, next, curr)))*(center - curr);
     }
     curvature /= (2*Amix);
-    return std::sqrt(curvature|curvature);
+    return std::sqrt(curvature|curvature)/2;
 }
 
 

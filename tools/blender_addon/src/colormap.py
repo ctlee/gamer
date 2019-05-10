@@ -22,13 +22,16 @@
 
 import numpy as np
 
-def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False):
+def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, saveData=True):
     colorStyle = colormapDict[colormapKey]
+
+    if saveData:
+        np.savetxt('data.npy', data)
 
     print("*** Pre Truncation ***")
     print("Minimum value: %s; Maximum value: %s"%(np.amin(data),np.amax(data)))
     print("Mean value: %s; Median value: %s"%(np.mean(data),np.median(data)))
-    
+
     # the minV/maxV values are percentiles instead
     if percentTruncate:
         print("Using min/max values as percentiles!")
@@ -45,12 +48,12 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False):
 
         minV = np.percentile(data,lowerPercentile)
         maxV = np.percentile(data,upperPercentile)
-        print("Data truncated at %f and %f percentiles"%(lowerPercentile,upperPercentile) )       
+        print("Data truncated at %f and %f percentiles"%(lowerPercentile,upperPercentile) )
         # if colormapKey == 'gauss':
         #     absV = np.max((np.abs(minV),np.abs(maxV)))
         #     minV, maxV = (-absV, absV)
         #     print("Data symmetrized around 0")
-    
+
     # Truncate at min and max
     data[data < minV] = minV
     data[data > maxV] = maxV
@@ -63,9 +66,9 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False):
     # Normalize based on minV and maxV so colorbar is scaled accordingly
     data = data - minV # set values at minV to 0
     data = data/(maxV-minV) # set values which were at maxV to 1
-    
-    print('normalized data min/max: %f' % np.amin(data))
-    print('normalized data max: %f' % np.amax(data))
+
+    # print('normalized data min/max: %f' % np.amin(data))
+    # print('normalized data max: %f' % np.amax(data))
     chunk = 1/(len(colorStyle)-2)
     remainder = np.mod(data, chunk)
     idx = np.floor_divide(data, chunk).astype(int)
@@ -86,17 +89,19 @@ def genColorBar(colorStyle,minV,maxV,fontsize,orientation='vertical'):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
+
     fig = plt.figure(figsize=(3,8))
+
     if orientation=='horizontal':
         ax = fig.add_axes([0.05,0.80,0.9,0.15])
     elif orientation=='vertical':
         ax = fig.add_axes([0.05,0.05,0.15,0.9])
+
     if type(colorStyle) == np.ndarray:
         cmap = mpl.colors.LinearSegmentedColormap.from_list('name',colorStyle)
     else:
         cmap = colorStyle.mpl_colormap
-    #cmap = colorStyle.mpl_colormap
-    # cmap = mpl.colors.LinearSegmentedColormap.from_list('name',colorStyle) # if input is a numpy array
+
     cnorm = mpl.colors.Normalize(vmin=minV,vmax=maxV)
     cb = mpl.colorbar.ColorbarBase(ax,cmap=cmap,norm=cnorm,orientation=orientation,format=ticker.FuncFormatter(eng_notation))
     cb.ax.tick_params(labelsize=fontsize)
@@ -106,7 +111,7 @@ def genColorBar(colorStyle,minV,maxV,fontsize,orientation='vertical'):
 def eng_notation(x,pos):
     num, power = '{:.1e}'.format(x).split('e')
     power=int(power)
-    return r'${} \times 10^{{{}}}$'.format(num,power)
+    return r'${} \times 10^{{{}}}$'.format(num, power)
 
 # Example of importing a colormap from palettable:
 # import numpy as np
@@ -114,14 +119,19 @@ def eng_notation(x,pos):
 # import matplotlib as mpl
 # np.array(RdBu_7_r.mpl_colors)
 
-colormapDict = {"BuRd": np.array([[0.12941176, 0.4       , 0.6745098 ],
+colormapDict = {
+  "BuRd": np.array(
+    [[0.12941176, 0.4       , 0.6745098 ],
        [0.40392157, 0.6627451 , 0.81176471],
        [0.81960784, 0.89803922, 0.94117647],
        [0.96862745, 0.96862745, 0.96862745],
        [0.99215686, 0.85882353, 0.78039216],
        [0.9372549 , 0.54117647, 0.38431373],
-       [0.69803922, 0.09411765, 0.16862745]]),
-      "BrBG_11": np.array([[0.32941176, 0.18823529, 0.01960784],
+       [0.69803922, 0.09411765, 0.16862745]]
+    ),
+
+  "BrBG_11": np.array(
+      [[0.32941176, 0.18823529, 0.01960784],
        [0.54901961, 0.31764706, 0.03921569],
        [0.74901961, 0.50588235, 0.17647059],
        [0.8745098 , 0.76078431, 0.49019608],
@@ -131,16 +141,22 @@ colormapDict = {"BuRd": np.array([[0.12941176, 0.4       , 0.6745098 ],
        [0.50196078, 0.80392157, 0.75686275],
        [0.20784314, 0.59215686, 0.56078431],
        [0.00392157, 0.4       , 0.36862745],
-       [0.        , 0.23529412, 0.18823529]]),
-       "Oranges_8": np.array([[1.        , 0.96078431, 0.92156863],
+       [0.        , 0.23529412, 0.18823529]]
+    ),
+
+  "Oranges_8": np.array(
+      [[1.        , 0.96078431, 0.92156863],
        [0.99607843, 0.90196078, 0.80784314],
        [0.99215686, 0.81568627, 0.63529412],
        [0.99215686, 0.68235294, 0.41960784],
        [0.99215686, 0.55294118, 0.23529412],
        [0.94509804, 0.41176471, 0.0745098 ],
        [0.85098039, 0.28235294, 0.00392157],
-       [0.54901961, 0.17647059, 0.01568627]]),
-       "bgr": np.array([[0,0,255],
+       [0.54901961, 0.17647059, 0.01568627]]
+    ),
+
+  "bgr": np.array(
+      [[0,0,255],
        [0,27,235],
        [0,54,215],
        [0,81,195],
@@ -159,64 +175,11 @@ colormapDict = {"BuRd": np.array([[0.12941176, 0.4       , 0.6745098 ],
        [193,81,0],
        [214,54,0],
        [235,27,0],
-       [255,0,0]])/255}
+       [255,0,0]]
+    )/255,
 
-# BuRd = np.array([[0.12941176, 0.4       , 0.6745098 ],
-#        [0.40392157, 0.6627451 , 0.81176471],
-#        [0.81960784, 0.89803922, 0.94117647],
-#        [0.96862745, 0.96862745, 0.96862745],
-#        [0.99215686, 0.85882353, 0.78039216],
-#        [0.9372549 , 0.54117647, 0.38431373],
-#        [0.69803922, 0.09411765, 0.16862745]])
-
-# BrBG_11 = np.array([[0.32941176, 0.18823529, 0.01960784],
-#        [0.54901961, 0.31764706, 0.03921569],
-#        [0.74901961, 0.50588235, 0.17647059],
-#        [0.8745098 , 0.76078431, 0.49019608],
-#        [0.96470588, 0.90980392, 0.76470588],
-#        [0.96078431, 0.96078431, 0.96078431],
-#        [0.78039216, 0.91764706, 0.89803922],
-#        [0.50196078, 0.80392157, 0.75686275],
-#        [0.20784314, 0.59215686, 0.56078431],
-#        [0.00392157, 0.4       , 0.36862745],
-#        [0.        , 0.23529412, 0.18823529]])
-
-# Oranges_8 = np.array([[1.        , 0.96078431, 0.92156863],
-#        [0.99607843, 0.90196078, 0.80784314],
-#        [0.99215686, 0.81568627, 0.63529412],
-#        [0.99215686, 0.68235294, 0.41960784],
-#        [0.99215686, 0.55294118, 0.23529412],
-#        [0.94509804, 0.41176471, 0.0745098 ],
-#        [0.85098039, 0.28235294, 0.00392157],
-#        [0.54901961, 0.17647059, 0.01568627]])
-
-# #https://jdherman.github.io/colormap/
-# # blue green red
-# bgr=np.array([[0,0,255],
-# [0,27,235],
-# [0,54,215],
-# [0,81,195],
-# [0,108,174],
-# [0,135,151],
-# [0,162,117],
-# [0,189,84],
-# [0,216,50],
-# [0,242,17],
-# [17,242,0],
-# [50,216,0],
-# [83,189,0],
-# [116,162,0],
-# [149,135,0],
-# [172,108,0],
-# [193,81,0],
-# [214,54,0],
-# [235,27,0],
-# [255,0,0]])/255
-
-
-
-
-viridis = np.array([[0.26666667, 0.00392157, 0.32941176],
+  "viridis": np.array(
+      [[0.26666667, 0.00392157, 0.32941176],
        [0.26666667, 0.00784314, 0.3372549 ],
        [0.27058824, 0.01568627, 0.34117647],
        [0.27058824, 0.01960784, 0.34901961],
@@ -471,4 +434,6 @@ viridis = np.array([[0.26666667, 0.00392157, 0.32941176],
        [0.96470588, 0.90196078, 0.1254902 ],
        [0.97254902, 0.90196078, 0.12941176],
        [0.98431373, 0.90588235, 0.1372549 ],
-       [0.99215686, 0.90588235, 0.14509804]])
+       [0.99215686, 0.90588235, 0.14509804]]
+    )
+}
