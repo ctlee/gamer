@@ -124,7 +124,7 @@ int  main(int argc, char *argv[])
     auto tetmesh = makeTetMesh(vec, "q2/2O8/7AYVC");
 
     //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
-    decimation(*tetmesh, 10000, Callback<SurfaceMesh>());
+    decimation(*tetmesh, .97, Callback<TetMesh>());
 
     std::cout << "EOF" << std::endl;
 
