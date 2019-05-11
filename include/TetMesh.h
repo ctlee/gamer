@@ -401,7 +401,7 @@ void writeRestrictionMatrix(const std::string &filename, int origSize,
 
 template <typename Complex, template <typename> class Callback>
 void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
-    std::vector<PenaltyFunction> samplePenaltyFunction = {inwardCollapse, edgeLength};
+    std::vector<PenaltyFunction> samplePenaltyFunction = {isBoundaryEdge, inwardCollapse};
 
     int origVertexNum = mesh.size<1>();
     int numToRemove = origVertexNum - origVertexNum*threshold;
@@ -467,6 +467,10 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         auto edge = *it;
         std::cout << "collapsing edge: " << *it << std::endl;
         //markDecimatedEdge(mesh, decimatedList, edge, .5);
+        if (isBoundaryEdge(*it, mesh)) {
+            std::cout << "Warning: boundary edges being collapsed, raise threshold" << std::endl;
+            continue;
+        }
         edgeCollapse(mesh, *it, .5, Callback<TetMesh>());
         //int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
     }

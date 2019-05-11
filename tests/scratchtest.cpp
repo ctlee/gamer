@@ -126,10 +126,10 @@ int  main(int argc, char *argv[])
 
     //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
     */
-    decimation(*tetmesh, .8, Callback<TetMesh>());
+    decimation(*tetmesh, .5, Callback<TetMesh>());
 
     std::cout << "EOF" << std::endl;
-/*
+
 
     SurfaceMesh surfaceMesh;
 
@@ -156,8 +156,8 @@ int  main(int argc, char *argv[])
     }
 
     compute_orientation(surfaceMesh);
-*/
-    //writeOFF("meshOut.off", surfaceMesh);
-    writeDolfin("meshOut.xml", *tetmesh);
+
+    writeOFF("meshOut.off", surfaceMesh);
+    //writeDolfin("meshOut.xml", *tetmesh);
 
 }
