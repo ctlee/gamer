@@ -67,3 +67,5 @@ add_executable(scratchtest scratchtest.cpp)
 target_link_libraries(scratchtest gamershared)
 # # Profiling with gperftools
 # # target_link_libraries(scratchtest gamershared profiler)
+
+pybind11_add_module(cmake_example example.cpp)

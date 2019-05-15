@@ -135,7 +135,7 @@ if(BUILD_STATIC_LIB)
 endif()
 
 if(BUILD_PYTHONEXT)
-    add_subdirectory(swig)
+    # add_subdirectory(swig)
 endif()
 
 if(BUILD_BLENDER)

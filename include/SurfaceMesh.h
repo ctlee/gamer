@@ -37,7 +37,6 @@
 
 #include "Vertex.h"
 
-#ifndef SWIG
 /**
  * @brief      Properties that Faces should have
  */
@@ -97,7 +96,6 @@ struct Face : casc::Orientable, FaceProperties
     }
 
 };
-#endif // IFNDEF SWIG
 
 struct Edge{
     bool selected;
@@ -121,7 +119,6 @@ struct Global
     bool  ishole;
 };
 
-#ifndef SWIG
 /**
  * @brief      A helper struct containing the traits/types in the simplicial
  *             complex
@@ -135,11 +132,9 @@ struct complex_traits
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable>;
 };
-#endif //SWIG
 
 using SurfaceMesh = casc::simplicial_complex<complex_traits>;
 
-#ifndef SWIG
 /**
  * @brief      Compute the tangent to a vertex.
  *
@@ -614,9 +609,6 @@ void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<2>>  &edgeList);
 
 } // end namespace surfacemesh_detail
-#endif // IFNDEF SWIG
-
-// std::tuple<a,b,c> checkMesh(const SurfaceMesh& mesh);
 
 /**
  * @brief      Reads in a GeomView OFF file.
