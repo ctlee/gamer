@@ -19,25 +19,30 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-include(ExternalProject)
-ExternalProject_Add(
+include(FetchContent)
+
+FetchContent_Declare(
     casc
     URL https://github.com/ctlee/casc/archive/v1.0.1.tar.gz
     URL_HASH SHA1=34cfe1ae39c4abd63f88e0056202d376c01ff190
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/casc
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
 )
-ExternalProject_Add(
-    pybind11_download
+FetchContent_Declare(
+    pybind11
     URL https://github.com/pybind/pybind11/archive/v2.2.4.tar.gz
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pybind11
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
 )
 
-add_subdirectory(pybind11)
+FetchContent_GetProperties(casc)
+if(NOT casc_POPULATED)
+  FetchContent_Populate(casc)
+endif()
+
+FetchContent_GetProperties(pybind11)
+if(NOT pybind11_POPULATED)
+  FetchContent_Populate(pybind11)
+  add_subdirectory(${pybind11_SOURCE_DIR})
+endif()
+
 add_subdirectory(tetgen)
 # add_subdirectory(triangle)

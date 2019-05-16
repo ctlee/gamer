@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.11)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
@@ -101,6 +101,7 @@ add_subdirectory(libraries)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries")
 
 # List the include directories for debugging
 # get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -120,7 +121,6 @@ list(APPEND SOURCES
 )
 
 add_library(gamershared SHARED ${SOURCES})
-add_dependencies(gamershared casc)
 #message(STATUS "GAMer sources: ${SOURCES}")
 
 target_link_libraries(gamershared tetshared)
@@ -129,12 +129,12 @@ install(TARGETS gamershared DESTINATION lib)
 
 if(BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
-    add_dependencies(gamerstatic casc)
     target_link_libraries(gamerstatic tetstatic)
     install(TARGETS gamerstatic DESTINATION lib)
 endif()
 
 if(BUILD_PYTHONEXT)
+    add_subdirectory(python)
     # add_subdirectory(swig)
 endif()
 
