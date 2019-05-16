@@ -31,7 +31,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include <libraries/casc/casc>
+#include <casc/casc>
 #include <libraries/Eigen/Dense>
 #include <libraries/Eigen/Eigenvalues>
 
