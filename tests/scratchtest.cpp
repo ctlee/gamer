@@ -26,11 +26,11 @@
 
 int  main(int argc, char *argv[])
 {
-    // auto mesh = readPDB_molsurf("2jho.pdb");
+    auto mesh = readPDB_molsurf("5kp9_bioassembly1.pdb");
 
     // smoothMesh(*mesh, 10, true, false);
 
-    // writeOFF("2jho.off", *mesh);
+    writeOFF("5kp9_bioassembly1.off", *mesh);
 
     // auto mesh = readOFF(argv[1]);
 
@@ -49,8 +49,8 @@ int  main(int argc, char *argv[])
     // }
     // std::cout << "Max: " << max << std::endl;
     //
-    auto mesh = readDolfin(argv[1]);
+    // auto mesh = readDolfin(argv[1]);
 
-    writeDolfin("test.xml", *mesh);
+    // writeDolfin("test.xml", *mesh);
     std::cout << "EOF" << std::endl;
 }
