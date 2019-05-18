@@ -23,8 +23,8 @@ include(FetchContent)
 
 FetchContent_Declare(
     casc
-    URL https://github.com/ctlee/casc/archive/v1.0.1.tar.gz
-    URL_HASH SHA1=34cfe1ae39c4abd63f88e0056202d376c01ff190
+    GIT_REPOSITORY git@github.com:ctlee/casc.git
+    GIT_TAG        origin/development
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/casc
 )
 FetchContent_Declare(
