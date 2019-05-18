@@ -5,6 +5,14 @@
 # Required
 version: 2
 
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  builder: html
+  configuration: docs/RTDconf.py
+
+# Optionally build your docs in additional formats such as PDF and ePub
+# formats: all
+
 build:
   image: latest
 
@@ -15,8 +23,3 @@ python:
     - requirements: docs/requirements.txt
     - method: setuptools
       path: .
-
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-  builder: html
-  configuration: docs/conf.py
