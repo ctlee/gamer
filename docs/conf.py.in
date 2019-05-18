@@ -31,36 +31,36 @@ extensions = [
 'sphinx.ext.intersphinx',
 ]
 
-autosummary_generate = True
-
 if(@DOXYGEN_TO_SPHINX@):
     extensions.extend(['breathe', 'exhale'])
 
-    breathe_projects = { "gamer_project": "@CMAKE_CURRENT_SOURCE_DIR@/_doxyoutput/xml" }
-    breathe_default_project = "gamer_project"
+breathe_projects = { "gamer_project": "@CMAKE_CURRENT_SOURCE_DIR@/_doxyoutput/xml" }
+breathe_default_project = "gamer_project"
 
-    # Setup the exhale extension
-    exhale_args = {
-        # These arguments are required
-        "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/_generated",
-        "rootFileName":          "cpp_api_root.rst",
-        "rootFileTitle":         "C++ API Reference",
-        "doxygenStripFromPath":  "..",
-        # Suggested optional arguments
-        "createTreeView":        True,
-        # TIP: if using the sphinx-bootstrap-theme, you need
-        # "treeViewIsBootstrap": True,
-        "exhaleExecutesDoxygen": True,
-        "exhaleDoxygenStdin":    "INPUT = @PROJECT_SOURCE_DIR@/include"
-    }
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/_generated",
+    "rootFileName":          "cpp_api_root.rst",
+    "rootFileTitle":         "C++ API Reference",
+    "doxygenStripFromPath":  "..",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    # TIP: if using the sphinx-bootstrap-theme, you need
+    # "treeViewIsBootstrap": True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleDoxygenStdin":    "INPUT = @PROJECT_SOURCE_DIR@/include"
+}
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -73,7 +73,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
+# html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
