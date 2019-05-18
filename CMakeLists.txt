@@ -193,7 +193,7 @@ if(DOXYGEN_FOUND)
     # message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
     message(STATUS "Build the GAMer documentation using `make docs`")
     # Parse Doxyfile.in and replace CMake @macros@.
-    configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
     add_custom_target(docs
         ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
