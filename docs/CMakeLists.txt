@@ -52,11 +52,6 @@ if(SPHINX_FOUND)
     # configured documentation tools and intermediate build results
     set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
 
-
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
-        "${CMAKE_CURRENT_SOURCE_DIR}/RTDconf.py"
-        @ONLY)
-
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
         "${BINARY_BUILD_DIR}/conf.py"
         @ONLY)
