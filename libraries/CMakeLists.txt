@@ -23,7 +23,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     casc
-    GIT_REPOSITORY git@github.com:ctlee/casc.git
+    GIT_REPOSITORY https://github.com/ctlee/casc.git
     GIT_TAG        origin/development
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/casc
 )
