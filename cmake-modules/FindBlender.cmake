@@ -120,4 +120,4 @@ endif()
 
 # message(STATUS "Blender python path: ${BLENDER_PYTHON_ROOT}")
 # message(STATUS "Blender python version: ${BLENDER_PYTHON_VERSION_STRING}")
-# message(STATUS "Blender sageddon path: ${BLENDER_ADDON_PATH}")
+# message(STATUS "Blender addon path: ${BLENDER_ADDON_PATH}")

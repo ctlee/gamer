@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.11)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # Add path to custom modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
 # Override rules for MSVC static compiler flags
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
@@ -185,20 +185,7 @@ if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-#####################################################################
-# Target to generate Doxygen documentation
-#####################################################################
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-    # message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
-    message(STATUS "Build the GAMer documentation using `make docs`")
-    # Parse Doxyfile.in and replace CMake @macros@.
-    configure_file(${CMAKE_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
-    add_custom_target(docs
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Generating API documentation with Doxygen" VERBATIM
-    )
-else()
-    message(STATUS "CMake could not find Doxygen. Please install Doxygen or help me find your Doxygen binary to build the documentation!")
-endif(DOXYGEN_FOUND)
+# Configure documentation building
+add_subdirectory(docs)
+
+
