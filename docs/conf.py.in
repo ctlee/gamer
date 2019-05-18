@@ -12,14 +12,13 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../build/lib/'))
+sys.path.insert(0, os.path.abspath('@CMAKE_BINARY_DIR@/lib/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'GAMer'
+project = '@CMAKE_PROJECT_NAME@'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -30,30 +29,30 @@ extensions = [
 'sphinx.ext.autosummary',
 'sphinx.ext.napoleon',
 'sphinx.ext.intersphinx',
-'breathe',
-'exhale'
 ]
 
 autosummary_generate = True
 
-breathe_projects = { "gamer_project": "./_doxyoutput/xml" }
-breathe_default_project = "gamer_project"
+if(@DOXYGEN_TO_SPHINX@):
+    extensions.extend(['breathe', 'exhale'])
 
+    breathe_projects = { "gamer_project": "@CMAKE_CURRENT_SOURCE_DIR@/_doxyoutput/xml" }
+    breathe_default_project = "gamer_project"
 
-# Setup the exhale extension
-exhale_args = {
-    # These arguments are required
-    "containmentFolder":     "./_generated",
-    "rootFileName":          "cpp_api_root.rst",
-    "rootFileTitle":         "C++ API Reference",
-    "doxygenStripFromPath":  "..",
-    # Suggested optional arguments
-    "createTreeView":        True,
-    # TIP: if using the sphinx-bootstrap-theme, you need
-    # "treeViewIsBootstrap": True,
-    "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = ../include"
-}
+    # Setup the exhale extension
+    exhale_args = {
+        # These arguments are required
+        "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/_generated",
+        "rootFileName":          "cpp_api_root.rst",
+        "rootFileTitle":         "C++ API Reference",
+        "doxygenStripFromPath":  "..",
+        # Suggested optional arguments
+        "createTreeView":        True,
+        # TIP: if using the sphinx-bootstrap-theme, you need
+        # "treeViewIsBootstrap": True,
+        "exhaleExecutesDoxygen": True,
+        "exhaleDoxygenStdin":    "INPUT = @PROJECT_SOURCE_DIR@/include"
+    }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -74,7 +73,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
