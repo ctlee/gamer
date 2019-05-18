@@ -52,25 +52,24 @@ if(SPHINX_FOUND)
     # configured documentation tools and intermediate build results
     set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
 
-    if($ENV{READTHEDOCS})
-        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
-            "${CMAKE_CURRENT_SOURCE_DIR}/conf.py"
-            @ONLY)
-    else()
-        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
-            "${BINARY_BUILD_DIR}/conf.py"
-            @ONLY)
 
-        add_custom_target(sphinx_docs ALL
-            ${SPHINX_EXECUTABLE}
-                -M html
-                "${CMAKE_CURRENT_SOURCE_DIR}"
-                "${CMAKE_CURRENT_BINARY_DIR}"
-                -c "${BINARY_BUILD_DIR}"
-            DEPENDS pygamer
-            COMMENT "Building HTML documentation with Sphinx")
-        message(STATUS "Build the Sphinx documentation using `make sphinx_docs`")
-    endif()
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/RTDconf.py"
+        @ONLY)
+
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
+        "${BINARY_BUILD_DIR}/conf.py"
+        @ONLY)
+
+    add_custom_target(sphinx_docs ALL
+        ${SPHINX_EXECUTABLE}
+            -M html
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+            "${CMAKE_CURRENT_BINARY_DIR}"
+            -c "${BINARY_BUILD_DIR}"
+        DEPENDS pygamer
+        COMMENT "Building HTML documentation with Sphinx")
+    message(STATUS "Build the Sphinx documentation using `make sphinx_docs`")
 else()
     message(STATUS "CMake could not find Sphinx.")
 endif(SPHINX_FOUND)
