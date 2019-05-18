@@ -77,11 +77,11 @@ class CMakeBuild(build_ext):
 
 setup(
     name='gamer',
-    version='0.0.1',
+    version='2.0.1',
     author='Christopher T. Lee',
     author_email='ctlee@ucsd.edu',
-    description='GAMer',
-    long_description='',
+    description='GAMer: Geometry-preserving Adaptive Mesher',
+    long_description='Python wrapper around the GAMer C++ library for mesh generation.',
     ext_modules=[CMakeExtension('gamer')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,

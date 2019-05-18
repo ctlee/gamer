@@ -49,26 +49,25 @@ if(SPHINX_FOUND)
         set(DOXYGEN_TO_SPHINX True)
     endif()
 
-    # Configured documentation tools and intermediate build results
-    set(SPHINX_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/_build")
+    # configured documentation tools and intermediate build results
+    set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
 
     # Sphinx cache with pickled ReST documents
-    set(SPHINX_CACHE_DIR "${SPHINX_BUILD_DIR}/_doctrees")
+    set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
 
     # HTML output directory
-    set(SPHINX_HTML_DIR "${SPHINX_BUILD_DIR}/html")
+    set(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
-        "${SPHINX_BUILD_DIR}/conf.py"
+        "${BINARY_BUILD_DIR}/conf.py"
         @ONLY)
 
     add_custom_target(sphinx_docs ALL
         ${SPHINX_EXECUTABLE}
-            -q -b html
-            -c "${SPHINX_BUILD_DIR}"
-            -d "${SPHINX_CACHE_DIR}"
+            -M html
             "${CMAKE_CURRENT_SOURCE_DIR}"
             "${SPHINX_HTML_DIR}"
+            -c "${BINARY_BUILD_DIR}"
         DEPENDS pygamer
         COMMENT "Building HTML documentation with Sphinx")
     message(STATUS "Build the Sphinx documentation using `make sphinx_docs`")
