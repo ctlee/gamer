@@ -43,8 +43,8 @@ breathe_default_project = "gamer_project"
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
-    "containmentFolder":     "./_api",
-    "rootFileName":          "library_root.rst",
+    "containmentFolder":     "./_generated",
+    "rootFileName":          "cpp_api_root.rst",
     "rootFileTitle":         "C++ API Reference",
     "doxygenStripFromPath":  "..",
     # Suggested optional arguments
