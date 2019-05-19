@@ -20,6 +20,9 @@ project = '@CMAKE_PROJECT_NAME@'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
+# The full version, including alpha/beta/rc tags
+release = '@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@'
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -34,13 +37,14 @@ extensions = [
 if(@DOXYGEN_TO_SPHINX@):
     extensions.extend(['breathe', 'exhale'])
 
-breathe_projects = { "gamer_project": "@CMAKE_CURRENT_SOURCE_DIR@/_doxyoutput/xml" }
+# -- Configuration for breathe -----------------------------------------------
+breathe_projects = { "gamer_project": "@CMAKE_CURRENT_SOURCE_DIR@/src/_doxyoutput/xml" }
 breathe_default_project = "gamer_project"
 
-# Setup the exhale extension
+# -- Configuration for exhale ------------------------------------------------
 exhale_args = {
     # These arguments are required
-    "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/_generated",
+    "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/src/_generated",
     "rootFileName":          "cpp_api_root.rst",
     "rootFileTitle":         "C++ API Reference",
     "doxygenStripFromPath":  "..",
@@ -55,7 +59,7 @@ exhale_args = {
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_templates']
+templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/src/_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

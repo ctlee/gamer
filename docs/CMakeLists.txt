@@ -26,10 +26,10 @@
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
     # message(STATUS "Doxygen Executable: ${DOXYGEN_EXECUTABLE}")
-    message(STATUS "Build the Doxygen GAMer documentation using `make docs`")
+    message(STATUS "Build the Doxygen GAMer documentation using `make doxy_docs`")
     # Parse Doxyfile.in and replace CMake @macros@.
     configure_file(${CMAKE_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
-    add_custom_target(docs
+    add_custom_target(doxy_docs
         ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen" VERBATIM
@@ -59,7 +59,7 @@ if(SPHINX_FOUND)
     add_custom_target(sphinx_docs ALL
         ${SPHINX_EXECUTABLE}
             -M html
-            "${CMAKE_CURRENT_SOURCE_DIR}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src"
             "${CMAKE_CURRENT_BINARY_DIR}"
             -c "${BINARY_BUILD_DIR}"
         DEPENDS pygamer
@@ -68,3 +68,10 @@ if(SPHINX_FOUND)
 else()
     message(STATUS "CMake could not find Sphinx.")
 endif(SPHINX_FOUND)
+
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/src/_generated"
+        "${CMAKE_CURRENT_BINARY_DIR}/src/_doxyoutput"
+        "${CMAKE_CURRENT_BINARY_DIR}/_build")
+
+

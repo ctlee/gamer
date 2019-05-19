@@ -7,8 +7,8 @@ Currently this version of GAMer is available only as a library, Blender addon, a
 In the future, we will reintroduce CLI programs for mesh processing.
 
 ## Build Status
-[![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
-[![Developement Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
+Master: [![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
+Development: [![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
 
 ## Installing
 Prebuilt binaries of the GAMer Blender-addon are available under [releases](https://github.com/ctlee/gamer/releases).
@@ -67,7 +67,7 @@ These can be used in addition to the standard [CMake flags](https://cmake.org/cm
 [doxygen](http://www.doxygen.nl/) by running `make docs` with any build.
 
 ## Acknowledging your use of GAMer
-Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know. 
+Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know.
 
 Please cite the above Zenodo DOI to acknowledge the software version and cite the following paper:\
 [Lee, C. T.; Laughlin, J. G.; Angliviel de La Beaumelle, N.; Amaro, R.; McCammon, J. A.; Ramamoorthi, R.; Holst, M. J.; Rangamani, P. GAMer 2: A System for 3D Mesh Processing of Cellular Electron Micrographs. bioRxiv 2019, 534479.](https://www.biorxiv.org/content/10.1101/534479v1)
