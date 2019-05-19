@@ -1,3 +1,6 @@
+# Config to simplify building on ReadTheDocs!
+# The Sphinx documentation can also be built locally using CMake.
+#
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -12,13 +15,16 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../build/lib/'))
+sys.path.insert(0, os.path.abspath('../../build/lib/'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
+
+# The full version, including alpha/beta/rc tags
+# release = '2.0.1 beta'
 
 # -- General configuration ---------------------------------------------------
 
@@ -72,7 +78,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['/Users/ctlee/gamer/docs/_static']
+# html_static_path = ['/Users/ctlee/gamer/docs/_static']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}

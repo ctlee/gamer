@@ -1,4 +1,3 @@
 _build/
-_api/
-_doxyoutput/
-_generated/
+src/_doxyoutput/
+src/_generated/

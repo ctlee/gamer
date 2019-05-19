@@ -2,7 +2,7 @@ notifications:
   email: false
 
 language: cpp
-dist: trusty
+dist: xenial
 sudo: false
 
 # Blacklist
@@ -10,6 +10,7 @@ branches:
   only:
     - master
     - development
+    - pybind11
 matrix:
   include:
     - os: osx
@@ -39,7 +40,7 @@ after_success:
       brew install doxygen;
       brew install graphviz;
       cmake ..;
-      make docs;
+      make doxy_docs;
     fi;
 deploy:
   provider: pages
