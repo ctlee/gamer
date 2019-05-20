@@ -67,3 +67,15 @@ add_executable(scratchtest scratchtest.cpp)
 target_link_libraries(scratchtest gamershared)
 # # Profiling with gperftools
 # # target_link_libraries(scratchtest gamershared profiler)
+
+find_program(PYTEST "pytest")
+if(NOT PYTEST)
+    message(ERROR "pytest could not be found! Please install pytest to run python tests.")
+else()
+    # Add a test for pytest
+    add_test(NAME python-tests
+      COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
+    )
+    set_tests_properties(python-tests PROPERTIES DEPENDS pygamer)
+endif()
