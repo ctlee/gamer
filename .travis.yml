@@ -38,6 +38,7 @@ install:
 - |
   # Configure
   if [ "$TRAVIS_OS_NAME" = "windows" ]; then
+    choco install python
     cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
     cmake --build .
   else
@@ -47,8 +48,13 @@ install:
 script:
 - "./bin/objecttests;"
 after_success:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then brew install doxygen; brew install graphviz;
-  cmake ..; make doxy_docs; fi;
+- |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then
+    brew install doxygen
+    brew install graphviz
+    cmake ..
+    make doxy_docs
+  fi
 deploy:
   provider: pages
   local-dir: build/html
