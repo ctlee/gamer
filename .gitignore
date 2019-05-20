@@ -51,3 +51,6 @@ debug/
 
 # Mac Files
 *.DS_Store
+
+.eggs/
+gamer.egg-info/

@@ -37,8 +37,10 @@ PYBIND11_MODULE(pygamer, pygamer) {
     face.def(py::init<>(), "Default constructor");
     face.def(py::init<int, bool>(), "Construct with marker and selection");
     face.def(py::init<int, int, bool>(), "Construct with orientation marker and selection");
-
-
+    face.def_readwrite("orientation", &Face::orientation);
+    face.def_readwrite("marker", &Face::marker);
+    face.def_readwrite("selected", &Face::selected);
+    face.def("__repr__", &Face::to_string);
 
     // Bindings for VertexID
     py::class_<VertexID> vid(pygamer, "SMVertexID",
