@@ -44,8 +44,8 @@ breathe_default_project = "gamer_project"
 # -- Configuration for exhale ------------------------------------------------
 exhale_args = {
     # These arguments are required
-    "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/src/_generated",
-    "rootFileName":          "cpp_api_root.rst",
+    "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/src/_cppapi",
+    "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
     "doxygenStripFromPath":  "..",
     # Suggested optional arguments

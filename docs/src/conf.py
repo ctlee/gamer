@@ -39,25 +39,27 @@ extensions = [
 'exhale'
 ]
 
+autosummary_generate = True
+
 breathe_projects = { "gamer_project": "./_doxyoutput/xml" }
 breathe_default_project = "gamer_project"
 
 # Setup the exhale extension
 exhale_args = {
-    # These arguments are required
-    "containmentFolder":     "./_generated",
-    "rootFileName":          "cpp_api_root.rst",
+    ############################################################################
+    # These arguments are required.                                            #
+    ############################################################################
+    "containmentFolder":     "./_cppapi",
+    "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
     "doxygenStripFromPath":  "..",
-    # Suggested optional arguments
+    ############################################################################
+    # Suggested optional arguments.                                            #
+    ############################################################################
     "createTreeView":        True,
-    # TIP: if using the sphinx-bootstrap-theme, you need
-    # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = ../include"
+    "exhaleDoxygenStdin":    "INPUT = ../../include",
 }
-
-autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -70,14 +72,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
 html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['/Users/ctlee/gamer/docs/_static']
 
 # Example configuration for intersphinx: refer to the Python standard library.

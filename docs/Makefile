@@ -14,7 +14,7 @@ help:
 .PHONY: help Makefile
 
 clean:
-	rm -rf _doxyoutput/ _generated/
+	rm -rf src/_doxyoutput/ src/_cppapi/ src/_pythonapi/
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new

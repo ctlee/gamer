@@ -10,7 +10,7 @@ Welcome to GAMer's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   _generated/cpp_api_root
+   _cppapi/root
    pygamer
 
 Indices and tables

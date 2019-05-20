@@ -56,7 +56,7 @@ if(SPHINX_FOUND)
         "${CMAKE_CURRENT_BINARY_DIR}/conf.py"
         @ONLY)
 
-    add_custom_target(sphinx_docs ALL
+    add_custom_target(sphinx_docs
         ${SPHINX_EXECUTABLE}
             -M html
             "${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -70,7 +70,8 @@ else()
 endif(SPHINX_FOUND)
 
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/_generated"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/_cppapi"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/_pythonapi"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/_doxyoutput"
         "${CMAKE_CURRENT_BINARY_DIR}/doctrees"
         "${CMAKE_CURRENT_BINARY_DIR}/html")
