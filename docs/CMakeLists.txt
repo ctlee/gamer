@@ -50,10 +50,10 @@ if(SPHINX_FOUND)
     endif()
 
     # configured documentation tools and intermediate build results
-    set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
+    # set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
-        "${BINARY_BUILD_DIR}/conf.py"
+        "${CMAKE_CURRENT_BINARY_DIR}/conf.py"
         @ONLY)
 
     add_custom_target(sphinx_docs ALL
@@ -61,7 +61,7 @@ if(SPHINX_FOUND)
             -M html
             "${CMAKE_CURRENT_SOURCE_DIR}/src"
             "${CMAKE_CURRENT_BINARY_DIR}"
-            -c "${BINARY_BUILD_DIR}"
+            -c "${CMAKE_CURRENT_BINARY_DIR}"
         DEPENDS pygamer
         COMMENT "Building HTML documentation with Sphinx")
     message(STATUS "Build the Sphinx documentation using `make sphinx_docs`")
@@ -70,8 +70,9 @@ else()
 endif(SPHINX_FOUND)
 
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/src/_generated"
-        "${CMAKE_CURRENT_BINARY_DIR}/src/_doxyoutput"
-        "${CMAKE_CURRENT_BINARY_DIR}/_build")
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/_generated"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/_doxyoutput"
+        "${CMAKE_CURRENT_BINARY_DIR}/doctrees"
+        "${CMAKE_CURRENT_BINARY_DIR}/html")
 
 

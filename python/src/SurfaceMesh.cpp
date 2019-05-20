@@ -87,10 +87,16 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
     SurfMesh.def("insert",
-        py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::insert<2>)
+        py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::insert<2>),
+        R"delim(
+            Inserts an edge based on key.
+        )delim"
     );
     SurfMesh.def("insert",
-        py::overload_cast<const std::array<int, 2>&, const Edge&>(&SurfaceMesh::insert<2>)
+        py::overload_cast<const std::array<int, 2>&, const Edge&>(&SurfaceMesh::insert<2>),
+        R"delim(
+            Inserts an edge and data based on key.
+        )delim"
     );
     SurfMesh.def("insert", py::overload_cast<const std::array<int, 3>&>(&SurfaceMesh::insert<3>));
     SurfMesh.def("insert", py::overload_cast<const std::array<int, 3>&, const Face&>(&SurfaceMesh::insert<3>));
