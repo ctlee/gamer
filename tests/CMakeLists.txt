@@ -25,7 +25,7 @@ include(ExternalProject)
 ExternalProject_Add(
     gtest
     # URL https://github.com/google/googletest/archive/master.zip
-    URL https://github.com/google/googletest/archive/release-1.8.0.zip
+    URL https://github.com/google/googletest/archive/release-1.8.1.tar.gz
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
     INSTALL_COMMAND ""
 )
