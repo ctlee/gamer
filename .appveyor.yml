@@ -3,12 +3,14 @@ image:
 - Visual Studio 2017
 platform:
 - x64
+environment:
+  matrix:
+  - PYTHON: "C:\Python36-x64"
 install:
-- ps: |
-    if ($env:PLATFORM -eq "x64") { $env:PYTHON = "$env:PYTHON-x64" }
-    $env:PATH = "C:\Python$env:PYTHON\;C:\Python$env:PYTHON\Scripts\;$env:PATH"
-    python -m pip install --upgrade pip wheel
-    python -m pip install pytest numpy --no-warn-script-location
+- SET PATH=%PYTHON%;%PYTHON%\Scripts\;%PATH%
+- python --version
+- python -m pip install --upgrade pip wheel
+- python -m pip install pytest numpy --no-warn-script-location
 - mkdir build_64
 - cd build_64
 - cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
