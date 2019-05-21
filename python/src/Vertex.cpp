@@ -14,7 +14,19 @@ void init_vertex(py::module& pygamer){
     );
     vertex.def(py::init<>(), "Default constructor");
     vertex.def(py::init<double, double, double>(), "Other constructor");
-    vertex.def_readwrite("position", (std::array<double, 3> (Vertex::*)) &Vertex::position, "Vertex position");
+
+    vertex.def("__getitem__",
+        [](const Vertex &v, std::size_t i) -> const double& {
+            if (i >= 3) throw py::index_error("Vector only contains three coordinates");
+            return v[i];
+        },
+        "Get coordinate of position");
+    vertex.def("__setitem__",
+        [](Vertex &v, size_t i, double val) {
+            if (i >= 3) throw py::index_error("Vector only contains three coordinates");
+            v[i] = val;
+        },
+        "Set coordinate...");
     vertex.def_readwrite("marker", &Vertex::marker, "Boundary marker value");
     vertex.def_readwrite("selected", &Vertex::selected, "Selection status of vertex");
     vertex.def("__repr__", &Vertex::to_string);

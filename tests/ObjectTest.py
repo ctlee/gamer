@@ -45,4 +45,22 @@ class TestSurfaceMesh(object):
         assert data.marker == 2
         assert data.selected == True
 
-        assert pygamer.Face(1,2,True) == fid.data()
+
+class TestVertex(object):
+    def test_assignment(self):
+        vertex = pygamer.Vertex()
+
+        vertex[0] = 5
+        vertex[1] = 8
+        vertex[2] = 10
+        vertex.marker = 25
+        vertex.selected = True
+
+        assert vertex[0] == 5
+        assert vertex[1] == 8
+        assert vertex[2] == 10
+        assert vertex.marker == 25
+        assert vertex.selected == True
+
+        with pytest.raises(IndexError):
+            print(vertex[3])

@@ -19,4 +19,18 @@ PYBIND11_MODULE(pygamer, pygamer) {
     init_vertex(pygamer);
     init_face(pygamer);
     init_surfacemesh(pygamer);
+
+    py::module SurfMeshMod = pygamer.def_submodule("surfmesh", "Methods associated with SurfaceMesh");
+
+    SurfMeshMod.def("readOFF", &readOFF);
+    SurfMeshMod.def("writeOFF", &writeOFF);
+    SurfMeshMod.def("readOBJ", &readOBJ);
+    SurfMeshMod.def("writeOBJ", &writeOBJ);
+    SurfMeshMod.def("getMeanCurvature", &getMeanCurvature);
+    SurfMeshMod.def("getGaussianCurvature", &getGaussianCurvature);
+    SurfMeshMod.def("smoothMesh", &smoothMesh);
+    SurfMeshMod.def("coarse", &coarse);
+    SurfMeshMod.def("normalSmooth", &normalSmooth);
+    SurfMeshMod.def("cube", &cube);
+    SurfMeshMod.def("sphere", &sphere);
 }

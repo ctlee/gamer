@@ -26,7 +26,6 @@ void init_surfacemesh(py::module& pygamer){
             reference to the actual object.
         )delim"
     );
-    // vid.def(py::init<>(), "Default constructor");
     vid.def("data",
             py::overload_cast<>(&VertexID::data),
             py::return_value_policy::reference_internal,
@@ -47,7 +46,6 @@ void init_surfacemesh(py::module& pygamer){
             reference to the actual object.
         )delim"
     );
-    // eid.def(py::init<>(), "Default constructor");
     eid.def("data", py::overload_cast<>(&EdgeID::data),
         py::return_value_policy::reference_internal,
         R"delim(
@@ -64,10 +62,16 @@ void init_surfacemesh(py::module& pygamer){
             reference to the actual object.
         )delim"
     );
-    // fid.def(py::init<>(), "Default constructor");
     fid.def("data",
         py::overload_cast<>(&FaceID::data),
-        py::return_value_policy::reference_internal, "Access the data.");
+        py::return_value_policy::reference_internal,
+        R"delim(
+            Access the data stored on the 3-simplex
+
+            Returns:
+                Face (:py:class:`Face`): Face data
+        )delim"
+    );
 
     // Bindings for SurfaceMesh
     py::class_<SurfaceMesh> SurfMesh(pygamer, "SurfaceMesh",
@@ -119,7 +123,7 @@ void init_surfacemesh(py::module& pygamer){
                 key (array): Array [1] of vertex key.
 
             Returns:
-                SimplexID (SMVertexID): The object.
+                SimplexID (:py:class:`SMVertexID`): The object.
         )delim"
     );
 
@@ -129,10 +133,10 @@ void init_surfacemesh(py::module& pygamer){
             Get a simplex by key.
 
             Args:
-                key (array): Array [1] of vertex key.
+                key (array): Array [2] of edge key.
 
             Returns:
-                SimplexID (SMVertexID): The object.
+                SimplexID (:py:class:`SMEdgeID`): The object.
         )delim"
     );
 
@@ -142,10 +146,10 @@ void init_surfacemesh(py::module& pygamer){
             Get a simplex by key.
 
             Args:
-                key (array): Array [1] of vertex key.
+                key (array): Array [3] of vertex key.
 
             Returns:
-                SimplexID (SMVertexID): The object.
+                SimplexID (:py:class:`SMFaceID`): The object.
         )delim"
     );
 
