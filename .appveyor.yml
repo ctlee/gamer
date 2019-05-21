@@ -5,9 +5,9 @@ platform:
 - x64
 environment:
   matrix:
-  - PYTHON: "C:\Python36-x64"
+  - PYTHON: "C:\\Python36-x64"
 install:
-- SET PATH=%PYTHON%;%PYTHON%\Scripts\;%PATH%
+- SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
 - python --version
 - python -m pip install --upgrade pip wheel
 - python -m pip install pytest numpy --no-warn-script-location
