@@ -8,3 +8,4 @@ Python API Reference
    :toctree: _pythonapi
 
    pygamer
+   pygamer.surfmesh

@@ -4,7 +4,7 @@ image:
 platform:
 - x64
 install:
-- mkdir build; cd build;
+- cd build
 - cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
 build_script:
 - cmake --build . -- -j2

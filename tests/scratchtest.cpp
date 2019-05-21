@@ -26,11 +26,14 @@
 
 int  main(int argc, char *argv[])
 {
-    auto mesh = readPDB_molsurf("5kp9_bioassembly1.pdb");
+    auto v = Vertex(1,2,3);
+    std::cout << type_name<decltype(&Vertex::position)>() << std::endl;
+
+    // auto mesh = readPDB_molsurf("5kp9_bioassembly1.pdb");
 
     // smoothMesh(*mesh, 10, true, false);
 
-    writeOFF("5kp9_bioassembly1.off", *mesh);
+    // writeOFF("5kp9_bioassembly1.off", *mesh);
 
     // auto mesh = readOFF(argv[1]);
 
