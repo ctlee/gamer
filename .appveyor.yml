@@ -15,6 +15,6 @@ install:
 - cd build_64
 - cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
 build_script:
-- cmake --build . -- -j2
+- cmake --build .
 test_script:
 - ctest -V
