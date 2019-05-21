@@ -13,7 +13,7 @@ install:
 - python -m pip install pytest numpy --no-warn-script-location
 - mkdir build_64
 - cd build_64
-- cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
+- cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 -DCMAKE_CXX_FLAGS=/w ..
 build_script:
 - cmake --build .
 test_script:

@@ -14,8 +14,6 @@ matrix:
   fast_finish: true
   allow_failures:
   - os: windows
-    env:
-    - MATRIX_EVAL="CC=CL.exe && CXX=CL.exe"
   include:
   - os: osx
     osx_image: xcode
@@ -31,6 +29,9 @@ matrix:
     before_install:
     - pyenv global 3.7.1
   - os: windows
+    env:
+    - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    - MATRIX_EVAL="CC=CL.exe && CXX=CL.exe"
     before_install:
     - choco install python
 before_install:
@@ -42,7 +43,7 @@ install:
   # Configure
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
     cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
-    cmake --build . -- -j2
+    cmake --build .
   else
     cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on ..
     cmake --build . -- -j2
