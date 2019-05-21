@@ -1,5 +1,3 @@
-
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -17,31 +15,8 @@ using VertexID = SurfaceMesh::SimplexID<1>;
 using EdgeID = SurfaceMesh::SimplexID<2>;
 using FaceID = SurfaceMesh::SimplexID<3>;
 
-PYBIND11_MODULE(pygamer, pygamer) {
-    pygamer.doc() = R"delim(
-        Python wrapper around the GAMer C++ library.
-    )delim";
 
-    py::class_<Vertex> vertex(pygamer, "Vertex",
-        R"delim(
-            Wrapper around a :cpp:class:`Vertex`.
-        )delim"
-    );
-    vertex.def(py::init<>(), "Default constructor");
-
-    py::class_<Face> face(pygamer, "Face",
-        R"delim(
-            Wrapper around a :cpp:class:`Face`.
-        )delim"
-    );
-    face.def(py::init<>(), "Default constructor");
-    face.def(py::init<int, bool>(), "Construct with marker and selection");
-    face.def(py::init<int, int, bool>(), "Construct with orientation marker and selection");
-    face.def_readwrite("orientation", &Face::orientation);
-    face.def_readwrite("marker", &Face::marker);
-    face.def_readwrite("selected", &Face::selected);
-    face.def("__repr__", &Face::to_string);
-
+void init_surfacemesh(py::module& pygamer){
     // Bindings for VertexID
     py::class_<VertexID> vid(pygamer, "SMVertexID",
         R"delim(
@@ -51,9 +26,10 @@ PYBIND11_MODULE(pygamer, pygamer) {
             reference to the actual object.
         )delim"
     );
-    vid.def(py::init<>(), "Default constructor");
+    // vid.def(py::init<>(), "Default constructor");
     vid.def("data",
             py::overload_cast<>(&VertexID::data),
+            py::return_value_policy::reference_internal,
             R"delim(
                 Access the data stored on the 1-simplex
 
@@ -63,20 +39,21 @@ PYBIND11_MODULE(pygamer, pygamer) {
         );
 
     // Bindings for EdgeID
-    // py::class_<EdgeID> eid(pygamer, "SMEdgeID",
-    //     R"delim(
-    //         Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<2> object
+    py::class_<EdgeID> eid(pygamer, "SMEdgeID",
+        R"delim(
+            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<2> object
 
-    //         This is a token to represent a 2-simplex object. It serves as a
-    //         reference to the actual object.
-    //     )delim"
-    // );
+            This is a token to represent a 2-simplex object. It serves as a
+            reference to the actual object.
+        )delim"
+    );
     // eid.def(py::init<>(), "Default constructor");
-    // eid.def("data", py::overload_cast<>(&EdgeID::data),
-    //     R"delim(
-    //         Access the data stored on the edge.
-    //     )delim"
-    // );
+    eid.def("data", py::overload_cast<>(&EdgeID::data),
+        py::return_value_policy::reference_internal,
+        R"delim(
+            Access the data stored on the edge.
+        )delim"
+    );
 
     // Bindings for FaceID
     py::class_<FaceID> fid(pygamer, "SMFaceID",
@@ -87,13 +64,15 @@ PYBIND11_MODULE(pygamer, pygamer) {
             reference to the actual object.
         )delim"
     );
-    fid.def(py::init<>(), "Default constructor");
-    fid.def("data", py::overload_cast<>(&FaceID::data), "Access the data.");
+    // fid.def(py::init<>(), "Default constructor");
+    fid.def("data",
+        py::overload_cast<>(&FaceID::data),
+        py::return_value_policy::reference_internal, "Access the data.");
 
     // Bindings for SurfaceMesh
     py::class_<SurfaceMesh> SurfMesh(pygamer, "SurfaceMesh",
         R"delim(
-            Python wrapper around SurfaceMesh class.
+            Python wrapper around :cpp:type:`SurfaceMesh`.
         )delim"
     );
     SurfMesh.def(py::init<>(), "Default constructor");
@@ -133,6 +112,32 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
     SurfMesh.def("get_simplex_up",
         py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::get_simplex_up<1>, py::const_),
+        R"delim(
+            Get a simplex by key.
+
+            Args:
+                key (array): Array [1] of vertex key.
+
+            Returns:
+                SimplexID (SMVertexID): The object.
+        )delim"
+    );
+
+    SurfMesh.def("get_simplex_up",
+        py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::get_simplex_up<2>, py::const_),
+        R"delim(
+            Get a simplex by key.
+
+            Args:
+                key (array): Array [1] of vertex key.
+
+            Returns:
+                SimplexID (SMVertexID): The object.
+        )delim"
+    );
+
+    SurfMesh.def("get_simplex_up",
+        py::overload_cast<const std::array<int, 3>&>(&SurfaceMesh::get_simplex_up<3>, py::const_),
         R"delim(
             Get a simplex by key.
 

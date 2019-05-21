@@ -1,0 +1,12 @@
+version: 2.0.1.{build}
+image:
+- Visual Studio 2017
+platform:
+- x64
+install:
+- mkdir build; cd build;
+- cmake -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
+build_script:
+- cmake --build . -- -j2
+test_script:
+- ctest -V
