@@ -25,32 +25,21 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "Vertex.h"
+#include "SurfaceMesh.h"
 
 namespace py = pybind11;
 
-void init_SMVertex(py::module& mod){
-    py::class_<Vertex> vertex(mod, "Vertex",
-    R"delim(
-    Wrapper around a :cpp:class:`Vertex`.
-    )delim"
+void init_SMFace(py::module& mod){
+    py::class_<Face> face(mod, "Face",
+        R"delim(
+            Wrapper around a :cpp:class:`Face`.
+        )delim"
     );
-    vertex.def(py::init<>(), "Default constructor");
-    vertex.def(py::init<double, double, double>(), "Other constructor");
-
-    vertex.def("__getitem__",
-        [](const Vertex &v, std::size_t i) -> const double& {
-            if (i >= 3) throw py::index_error("Vector only contains three coordinates");
-            return v[i];
-        },
-        "Get coordinate of position");
-    vertex.def("__setitem__",
-        [](Vertex &v, size_t i, double val) {
-            if (i >= 3) throw py::index_error("Vector only contains three coordinates");
-            v[i] = val;
-        },
-        "Set coordinate...");
-    vertex.def_readwrite("marker", &Vertex::marker, "Boundary marker value");
-    vertex.def_readwrite("selected", &Vertex::selected, "Selection status of vertex");
-    vertex.def("__repr__", &Vertex::to_string);
+    face.def(py::init<>(), "Default constructor");
+    face.def(py::init<int, bool>(), "Construct with marker and selection");
+    face.def(py::init<int, int, bool>(), "Construct with orientation, marker, and selection");
+    face.def_readwrite("orientation", &Face::orientation, "The orientation of the face");
+    face.def_readwrite("marker", &Face::marker, "Boundary marker value");
+    face.def_readwrite("selected", &Face::selected, "Selection status of face");
+    face.def("__repr__", &Face::to_string, "Pretty print");
 }
