@@ -76,14 +76,14 @@ void generateHistogram(const SurfaceMesh &mesh)
         Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
         auto   binAngle = [&](double angle) -> int{
-                return std::floor(angle/10);
+                return static_cast<int>(std::floor(angle/10));
             };
         histogram[binAngle(angle(a, b, c))]++;
         histogram[binAngle(angle(b, a, c))]++;
         histogram[binAngle(angle(c, a, b))]++;
     }
 
-    int factor = mesh.size<3>()*3;
+    std::size_t factor = mesh.size<3>()*3;
     std::for_each(histogram.begin(), histogram.end(), [&factor](double &n){
         n = 100.0*n/factor;
     });
@@ -218,6 +218,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
             angles[2] = angle(a,c,b);
         }
         catch (std::runtime_error& e){
+            std::cout << e.what() << std::endl;
             throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area.");
         }
 

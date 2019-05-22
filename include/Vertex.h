@@ -65,7 +65,7 @@ struct Vertex
      * @param[in]  m     marker ID
      * @param[in]  sel   selection flag
      */
-    Vertex(double x, double y, double z, size_t m, bool sel){
+    Vertex(double x, double y, double z, int m, bool sel){
         position[0] = x;
         position[1] = y;
         position[2] = z;

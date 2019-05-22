@@ -43,14 +43,10 @@ find_package(Exhale)
 find_package(Breathe)
 
 if(SPHINX_FOUND)
-
     set(DOXYGEN_TO_SPHINX False)
     if(DOXYGEN_FOUND AND EXHALE_FOUND AND BREATHE_FOUND)
         set(DOXYGEN_TO_SPHINX True)
     endif()
-
-    # configured documentation tools and intermediate build results
-    # set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
         "${CMAKE_CURRENT_BINARY_DIR}/conf.py"
@@ -66,7 +62,7 @@ if(SPHINX_FOUND)
         COMMENT "Building HTML documentation with Sphinx")
     message(STATUS "Build the Sphinx documentation using `make sphinx_docs`")
 else()
-    message(STATUS "CMake could not find Sphinx.")
+    message(STATUS "CMake could not find Sphinx. Please install Sphinx or help me find your Sphinx binary to build the documentation!")
 endif(SPHINX_FOUND)
 
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES

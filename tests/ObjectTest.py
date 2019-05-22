@@ -3,20 +3,20 @@ import pygamer
 
 class TestFace(object):
     def test_constructors(self):
-        face = pygamer.Face(1,2,True)
+        face = pygamer.surfacemesh.Face(1,2,True)
 
         assert face.orientation == 1
         assert face.marker == 2
         assert face.selected == True
 
-        face = pygamer.Face()
+        face = pygamer.surfacemesh.Face()
 
         assert face.orientation == 0
         assert face.marker == 0
         assert face.selected == False
 
 
-        face = pygamer.Face(3, True)
+        face = pygamer.surfacemesh.Face(3, True)
 
         assert face.orientation == 0
         assert face.marker == 3
@@ -25,7 +25,7 @@ class TestFace(object):
 
 class TestSurfaceMesh(object):
     def test_assignment(self):
-        mesh = pygamer.SurfaceMesh()
+        mesh = pygamer.surfacemesh.SurfaceMesh()
         mesh.insert([1,2,3])
 
         fid = mesh.get_simplex_up([1,2,3])
@@ -48,7 +48,7 @@ class TestSurfaceMesh(object):
 
 class TestVertex(object):
     def test_assignment(self):
-        vertex = pygamer.Vertex()
+        vertex = pygamer.surfacemesh.Vertex()
 
         vertex[0] = 5
         vertex[1] = 8
