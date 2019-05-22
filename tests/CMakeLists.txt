@@ -53,12 +53,12 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp)
-target_link_libraries(objecttests gamershared gtest_main)
+target_link_libraries(objecttests gamerstatic gtest_main)
 
 add_test(NAME ObjectTests COMMAND objecttests)
 
-add_executable(scratchtest scratchtest.cpp)
-target_link_libraries(scratchtest gamershared)
+# add_executable(scratchtest scratchtest.cpp)
+# target_link_libraries(scratchtest gamershared)
 # # Profiling with gperftools
 # # target_link_libraries(scratchtest gamershared profiler)
 
@@ -69,6 +69,6 @@ elseif(BUILD_PYTHONEXT)
     # Add a test for pytest
     add_test(NAME python-tests
       COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
+      WORKING_DIRECTORY $<TARGET_FILE_DIR:pygamer>
     )
 endif()

@@ -17,4 +17,4 @@ install:
 build_script:
 - cmake --build . --config Release
 test_script:
-- ctest -V
+- ctest -C Release -V
