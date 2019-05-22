@@ -1,7 +1,7 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2018
+ * Copyright (C) 2016-2019
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
  *
