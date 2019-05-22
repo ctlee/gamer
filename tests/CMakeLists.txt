@@ -19,49 +19,43 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-find_package(Threads REQUIRED)
+# find_package(Threads REQUIRED)
 
-include(ExternalProject)
-ExternalProject_Add(
-    gtest
+include(FetchContent)
+
+FetchContent_Declare(
+    googletest
     # URL https://github.com/google/googletest/archive/master.zip
     URL https://github.com/google/googletest/archive/release-1.8.1.tar.gz
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
-    INSTALL_COMMAND ""
+    SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
+    BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
 )
 
-# Get GTest source and binary directories from CMake project
-ExternalProject_Get_Property(gtest source_dir binary_dir)
-# message(STATUS "source_dir ${source_dir}")
-# message(STATUS "binary_dir ${binary_dir}")
+# Prevent overriding the parent project's compiler/linker
+# settings on Windows
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-# Create a libgtest target to be used as a dependency by test programs
-add_library(libgtest IMPORTED STATIC GLOBAL)
-add_dependencies(libgtest gtest)
+FetchContent_GetProperties(googletest)
+if(NOT googletest_POPULATED)
+    FetchContent_Populate(googletest)
+    # Add googletest directly to our build. This defines
+    # the gtest and gtest_main targets.
+    add_subdirectory(${googletest_SOURCE_DIR}
+                     ${googletest_BINARY_DIR}
+                     EXCLUDE_FROM_ALL)
+endif()
 
-# Set libgtest properties
-set_target_properties(libgtest PROPERTIES
-    "IMPORTED_LOCATION" "${binary_dir}/googlemock/gtest/libgtest.a"
-    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
-)
-
-# Create a libgmock target to be used as a dependency by test programs
-# add_library(libgmock IMPORTED STATIC GLOBAL)
-# add_dependencies(libgmock gtest)
-
-# Set libgmock properties
-# set_target_properties(libgmock PROPERTIES
-#     "IMPORTED_LOCATION" "${binary_dir}/googlemock/libgmock.a"
-#     "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
-# )
-
-# I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
-include_directories("${source_dir}/googletest/include")
-                    # "${source_dir}/googlemock/include")
+# The gtest/gtest_main targets carry header search path
+# dependencies automatically when using CMake 2.8.11 or
+# later. Otherwise we have to add them here ourselves.
+if (CMAKE_VERSION VERSION_LESS 2.8.11)
+  include_directories("${googletest_SOURCE_DIR}/include")
+endif()
 
 add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp)
-target_link_libraries(objecttests gamershared libgtest)
-add_test(objecttests ${EXECUTABLE_OUTPUT_PATH}/objecttests)
+target_link_libraries(objecttests gamershared gtest_main)
+
+add_test(NAME ObjectTests COMMAND objecttests)
 
 add_executable(scratchtest scratchtest.cpp)
 target_link_libraries(scratchtest gamershared)
@@ -71,11 +65,10 @@ target_link_libraries(scratchtest gamershared)
 find_program(PYTEST "pytest")
 if(NOT PYTEST)
     message(ERROR "pytest could not be found! Please install pytest to run python tests.")
-else()
+elseif(BUILD_PYTHONEXT)
     # Add a test for pytest
     add_test(NAME python-tests
       COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/lib/
     )
-    set_tests_properties(python-tests PROPERTIES DEPENDS pygamer)
 endif()
