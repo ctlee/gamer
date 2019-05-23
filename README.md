@@ -9,8 +9,8 @@ In the future, we will reintroduce CLI programs for mesh processing.
 ## Build Status
 Master: [![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
 Development: [![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
+Pybind11:[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/pybind11?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/pybind11)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
-
 
 ## Installing
 Prebuilt binaries of the GAMer Blender-addon are available under [releases](https://github.com/ctlee/gamer/releases).
