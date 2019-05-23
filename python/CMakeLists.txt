@@ -29,5 +29,6 @@ list(APPEND PYGAMER_SOURCES
     )
 
 PYBIND11_ADD_MODULE(pygamer MODULE ${PYGAMER_SOURCES})
+
 # Link pygamer to gamer static
 target_link_libraries(pygamer PRIVATE gamerstatic)

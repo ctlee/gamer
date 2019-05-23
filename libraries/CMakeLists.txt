@@ -52,6 +52,10 @@ if(NOT pybind11_POPULATED)
   add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
 endif()
 
+
+###########################
+# FIND/GET EIGEN 3.3.7
+###########################
 if(NOT GETEIGEN)
     find_package (Eigen3 3.3 NO_MODULE)
     if(NOT Eigen3_FOUND)
@@ -61,9 +65,6 @@ if(NOT GETEIGEN)
 endif()
 
 if(GETEIGEN)
-    ###########################
-    # GET EIGEN 3.3.7
-    ###########################
     FetchContent_Declare(
         eigen
         URL https://github.com/eigenteam/eigen-git-mirror/archive/3.3.7.tar.gz
@@ -78,5 +79,8 @@ if(GETEIGEN)
     endif()
 endif()
 
+###########################
+# Tetgen
+###########################
 add_subdirectory(tetgen)
 # add_subdirectory(triangle)
