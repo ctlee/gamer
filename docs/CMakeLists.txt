@@ -42,6 +42,8 @@ find_package(Sphinx)
 find_package(Exhale)
 find_package(Breathe)
 
+SET(SPHINXOPTS CACHE STRING "Extra options to pass to Sphinx")
+
 if(SPHINX_FOUND)
     set(DOXYGEN_TO_SPHINX False)
     if(DOXYGEN_FOUND AND EXHALE_FOUND AND BREATHE_FOUND)
@@ -58,6 +60,7 @@ if(SPHINX_FOUND)
             "${CMAKE_CURRENT_SOURCE_DIR}/src"
             "${CMAKE_CURRENT_BINARY_DIR}"
             -c "${CMAKE_CURRENT_BINARY_DIR}"
+            ${SPHINXOPTS}
         DEPENDS pygamer
         COMMENT "Building HTML documentation with Sphinx")
     message(STATUS "Build the Sphinx documentation using `make sphinx_docs`")

@@ -732,7 +732,7 @@ std::unique_ptr<SurfaceMesh> sphere(int order){
         mesh = refineMesh(*mesh);
     }
 
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &data : mesh->get_level<3>())
             data.orientation *= -1;
@@ -775,7 +775,7 @@ std::unique_ptr<SurfaceMesh> cube(int order){
         mesh = refineMesh(*mesh);
     }
 
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &data : mesh->get_level<3>())
             data.orientation *= -1;

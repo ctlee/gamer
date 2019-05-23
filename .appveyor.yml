@@ -1,3 +1,7 @@
+notifications:
+- provider: Slack
+  incoming_webhook:
+    secure: bmfSFbqVVCm0/XYaDqAVMGeBP6RNW1f/yzolevVJ1GXCZZHejnpU1aPG8LIYDskbaudyf1Obaf5ua5WTKRqQJm79EGCYiH6NGPq6qhTyMV0=
 version: 2.0.1.{build}
 image:
 - Visual Studio 2017

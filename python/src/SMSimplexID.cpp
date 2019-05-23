@@ -53,6 +53,13 @@ void init_SMSimplexID(py::module& mod){
                     Vertex (:py:class:`Vertex`): Vertex data
             )delim"
         );
+    vid.def("__repr__",
+        [](const VertexID vid){
+            std::ostringstream out;
+            out << vid;
+            return out.str();
+        }
+    );
 
     // Bindings for EdgeID
     py::class_<EdgeID> eid(mod, "EdgeID",
@@ -68,6 +75,13 @@ void init_SMSimplexID(py::module& mod){
         R"delim(
             Access the data stored on the edge.
         )delim"
+    );
+    eid.def("__repr__",
+        [](const EdgeID eid){
+            std::ostringstream out;
+            out << eid;
+            return out.str();
+        }
     );
 
     // Bindings for FaceID
@@ -88,5 +102,12 @@ void init_SMSimplexID(py::module& mod){
             Returns:
                 Face (:py:class:`Face`): Face data
         )delim"
+    );
+    fid.def("__repr__",
+        [](const FaceID fid){
+            std::ostringstream out;
+            out << fid;
+            return out.str();
+        }
     );
 }

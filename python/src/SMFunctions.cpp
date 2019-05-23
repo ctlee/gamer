@@ -30,64 +30,56 @@
 namespace py = pybind11;
 
 void init_SMFunctions(py::module& mod){
-    mod.def("readOFF", &readOFF);
-    mod.def("writeOFF", &writeOFF);
-    mod.def("readOBJ", &readOBJ);
-    mod.def("writeOBJ", &writeOBJ);
-    mod.def("getMeanCurvature", &getMeanCurvature);
-    mod.def("getGaussianCurvature", &getGaussianCurvature,
-        py::arg("mesh"), py::arg("VertexID"),
+    mod.def("readOFF", &readOFF,
+        py::arg("filename"),
         R"delim(
-            Compute the Gaussian curvature around a vertex
+            Read OFF file to mesh
 
             Args:
-                mesh (:py:class:`SurfaceMesh`): Mesh of interest
-                VertexID (:py:class:`VertexID`): SimplexID of the vertex
-
+                filename (str): Filename to read from
             Returns:
-                double: Local Gaussian curvature
+                :py:class:`SurfaceMesh`: Mesh of interest
         )delim"
         );
-    mod.def("smoothMesh", &smoothMesh,
-        py::arg("mesh"), py::arg("maxIter"), py::arg("preserveRidges"), py::arg("verbose"),
-        R"delim(
-            Smooth a :py:class:`SurfaceMesh`
 
-            This operation performs an iterative weightedVertexSmooth
-            and edge flipping approach.
+
+    mod.def("writeOFF", &writeOFF,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in OFF format
 
             Args:
-                mesh (:py:class:`SurfaceMesh`): Surface mesh to smooth
-                maxIter (int): Maximum number of smoothing iterations
-                preserveRidges (bool):  Prevent flipping of edges along ridges.
-                verbose (bool): Print details to std::out
+                filename (str): Filename to write to
+                mesh (:py:class:`SurfaceMesh`): Mesh of interest
         )delim"
         );
-    mod.def("coarse", &coarse,
-        py::arg("mesh"), py::arg("coarseRate"), py::arg("flatRate"),
-        py::arg("denseWeight"),
-        R"delim(
-            Coarsen a surface mesh
 
-            This operation selects vertices to decimate then removes them and
-            retriangulates the resulting hole.
+
+    mod.def("readOBJ", &readOBJ,
+        py::arg("filename"),
+        R"delim(
+            Read OBJ file to mesh
 
             Args:
-                mesh (:py:class:`SurfaceMesh`): Surface mesh to coarsen
-                coarseRate (double): Threshold value for coarsening
-                flatRate (double): Priority of decimating flat regions
-                denseWeight (double): Priority of decimating dense regions
+                filename (str): Filename to read from
+            Returns:
+                :py:class:`SurfaceMesh`: Mesh
         )delim"
         );
-    mod.def("normalSmooth", &normalSmooth,
-        py::arg("mesh"),
+
+
+    mod.def("writeOBJ", &writeOBJ,
+        py::arg("filename"), py::arg("mesh"),
         R"delim(
-            Perform smoothing of mesh face normals
+            Write mesh to file in OBJ format
 
             Args:
-                mesh (:py:class:`SurfaceMesh`): SurfaceMesh to smooth
+                filename (str): Filename to write to
+                mesh (:py:class:`SurfaceMesh`): Mesh of interest
         )delim"
         );
+
+
     mod.def("cube", &cube,
         py::arg("order"),
         R"delim(
@@ -97,9 +89,11 @@ void init_SMFunctions(py::module& mod){
                 order (int): Number of subdivisions
 
             Returns:
-                mesh: Cubical :py:class:`SurfaceMesh`
+                :py:class:`SurfaceMesh`: Mesh cube
         )delim"
         );
+
+
     mod.def("sphere", &sphere,
         py::arg("order"),
         R"delim(
@@ -109,16 +103,7 @@ void init_SMFunctions(py::module& mod){
                 order (int): Number of subdivisions
 
             Returns:
-                mesh: Spherical :py:class:`SurfaceMesh`
-        )delim"
-        );
-    mod.def("print", &print,
-        py::arg("mesh"),
-        R"delim(
-            Print a surface mesh.
-
-            Args:
-                mesh (:py:class:`SurfaceMesh`): SurfaceMesh to print
+                :py:class:`SurfaceMesh`: Spherical mesh
         )delim"
         );
 }
