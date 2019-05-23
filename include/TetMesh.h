@@ -35,7 +35,7 @@
 #define TETLIBRARY
 #include <libraries/tetgen/tetgen.h>
 
-#include <libraries/casc/casc>
+#include <casc/casc>
 
 #include "Vertex.h"
 #include "SurfaceMesh.h"

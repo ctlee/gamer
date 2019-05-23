@@ -31,9 +31,9 @@
 #include <stdexcept>
 #include <vector>
 
-#include <libraries/casc/casc>
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
+#include <casc/casc>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 #include "SurfaceMesh.h"
 #include "Vertex.h"

@@ -42,22 +42,22 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
 #####################################################################
 # Options
 #####################################################################
-option(SINGLE "Use single precision floating point numbers" OFF)
-option(BUILD_TETGEN_BIN "Build tetgen binaries" OFF)
-option(BUILD_STATIC_LIB "Build static libraries" OFF)
-option(BUILD_PYTHONEXT "Build GAMer python extension" OFF)
-option(BUILD_BLENDER "Build the GAMer addon for Blender" OFF)
-option(BLENDER_PLUGIN_INSTALL "Have CMake install the plugin" OFF)
-option(BUILD_TESTS "Build the GAMer googletest tests" OFF)
+option(SINGLE "Use single precision floating point numbers?" OFF)
+option(BUILD_STATIC_LIB "Build static libraries?" OFF)
+option(BUILD_PYTHONEXT "Build GAMer python extension?" OFF)
+option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
+option(BLENDER_PLUGIN_INSTALL "Have CMake install the plugin?" OFF)
+option(BUILD_TESTS "Build the GAMer tests?" OFF)
+option(GETEIGEN "Download Eigen?" ON)
 
 # Set conditional build
 if(BUILD_BLENDER)
     set(BUILD_PYTHONEXT ON)
 endif()
+
 if(BUILD_PYTHONEXT)
     set(BUILD_STATIC_LIB ON)
 endif()
@@ -68,10 +68,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set build type to Release if none was defined
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-if(BUILD_TESTS)
-    enable_testing()
 endif()
 
 if(WIN32)
@@ -93,13 +89,13 @@ endif()
 # message(STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE})
 
 # Define where to put the libraries and binaries
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
+# set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+# set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+# set(TEST_DATA_PATH ${PROJECT_SOURCE_DIR}/data)
 
 add_subdirectory(libraries)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries")
 
@@ -123,13 +119,13 @@ list(APPEND SOURCES
 add_library(gamershared SHARED ${SOURCES})
 #message(STATUS "GAMer sources: ${SOURCES}")
 
-target_link_libraries(gamershared tetshared)
+target_link_libraries(gamershared tetshared casc eigen)
 install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(TARGETS gamershared DESTINATION lib)
 
 if(BUILD_STATIC_LIB)
     add_library(gamerstatic STATIC ${SOURCES})
-    target_link_libraries(gamerstatic tetstatic)
+    target_link_libraries(gamerstatic tetstatic casc eigen)
     install(TARGETS gamerstatic DESTINATION lib)
 endif()
 
@@ -182,6 +178,7 @@ if(BUILD_BLENDER)
 endif()
 
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(tests)
 endif()
 

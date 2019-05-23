@@ -32,8 +32,8 @@
 #include <utility>
 
 #include <casc/casc>
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 #include "Vertex.h"
 

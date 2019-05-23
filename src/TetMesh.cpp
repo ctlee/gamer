@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#include <libraries/casc/casc>
+#include <casc/casc>
 
 #include "TetMesh.h"
 

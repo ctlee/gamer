@@ -26,7 +26,7 @@ class TestFace(object):
 class TestSurfaceMesh(object):
     def test_assignment(self):
         mesh = pygamer.surfacemesh.SurfaceMesh()
-        mesh.insert([1,2,3])
+        mesh.insertFace([1,2,3])
 
         fid = mesh.get_simplex_up([1,2,3])
         data = fid.data()

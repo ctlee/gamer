@@ -19,8 +19,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-# find_package(Threads REQUIRED)
-
 include(FetchContent)
 
 FetchContent_Declare(
@@ -62,8 +60,8 @@ add_test(NAME ObjectTests COMMAND objecttests)
 # # Profiling with gperftools
 # # target_link_libraries(scratchtest gamershared profiler)
 
-find_program(PYTEST "pytest")
-if(NOT PYTEST)
+find_package(pytest)
+if(NOT PYTEST_FOUND)
     message(ERROR "pytest could not be found! Please install pytest to run python tests.")
 elseif(BUILD_PYTHONEXT)
     # Add a test for pytest
