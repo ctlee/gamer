@@ -1,4 +1,5 @@
-{{ fullname | escape | underline}}
+{% set fullname = fullname | replace(module ~ ".", "") %}
+{{ fullname | escape | underline }}
 
 .. currentmodule:: {{ module }}
 

@@ -46,12 +46,14 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMesh.def("addVertex",
         py::overload_cast<const Vertex&>(&SurfaceMesh::add_vertex),
+        py::arg("data"),
         R"delim(
             Add a vertex to the mesh without specifying the key.
         )delim"
     );
 
-    SurfMesh.def("insert",
+
+    SurfMesh.def("insertVertex",
         py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::insert<1>),
         R"delim(
             Inserts a vertex based on key.
@@ -60,7 +62,9 @@ void init_SurfaceMesh(py::module& mod){
                 key (array): Array [1] of vertex key.
         )delim"
     );
-    SurfMesh.def("insert",
+
+
+    SurfMesh.def("insertVertex",
         py::overload_cast<const std::array<int, 1>&, const Vertex&>(&SurfaceMesh::insert<1>),
         R"delim(
             Inserts a vertex and data based on key.
@@ -70,7 +74,9 @@ void init_SurfaceMesh(py::module& mod){
                 data (:py:class:`Vertex`): Vertex data.
         )delim"
     );
-    SurfMesh.def("insert",
+
+
+    SurfMesh.def("insertEdge",
         py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::insert<2>),
         R"delim(
             Insert an edge into the mesh
@@ -79,7 +85,9 @@ void init_SurfaceMesh(py::module& mod){
                 key (array): Array [2] of edge key.
         )delim"
     );
-    SurfMesh.def("insert",
+
+
+    SurfMesh.def("insertEdge",
         py::overload_cast<const std::array<int, 2>&, const Edge&>(&SurfaceMesh::insert<2>),
         R"delim(
             Insert an edge into the mesh
@@ -89,7 +97,9 @@ void init_SurfaceMesh(py::module& mod){
                 data (Edge): Edge data.
         )delim"
     );
-    SurfMesh.def("insert",
+
+
+    SurfMesh.def("insertFace",
         py::overload_cast<const std::array<int, 3>&>(&SurfaceMesh::insert<3>),
         R"delim(
             Insert a face into the mesh
@@ -98,7 +108,9 @@ void init_SurfaceMesh(py::module& mod){
                 key (array): Array [3] of face key.
         )delim"
     );
-    SurfMesh.def("insert",
+
+
+    SurfMesh.def("insertFace",
         py::overload_cast<const std::array<int, 3>&, const Face&>(&SurfaceMesh::insert<3>),
         R"delim(
             Insert a face into the mesh
@@ -108,6 +120,7 @@ void init_SurfaceMesh(py::module& mod){
                 arg2 (Face): Face data.
         )delim"
     );
+
 
     SurfMesh.def("get_simplex_up",
         py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::get_simplex_up<1>, py::const_),
@@ -370,7 +383,7 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMesh.def("fillHoles", &fillHoles,
         R"delim(
-            Fill holes in the mesh
+            Fill holes in the mesh.
         )delim"
     );
 
