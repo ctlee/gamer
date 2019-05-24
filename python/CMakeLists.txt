@@ -20,15 +20,19 @@
 # ***************************************************************************
 
 list(APPEND PYGAMER_SOURCES
-    "src/pygamer.cpp"
-    "src/SurfaceMesh.cpp"
-    "src/Vertex.cpp"
+    "src/SMGlobal.cpp"
+    "src/SMVertex.cpp"
+    "src/SMEdge.cpp"
     "src/SMFace.cpp"
     "src/SMSimplexID.cpp"
     "src/SMFunctions.cpp"
+    "src/SurfaceMesh.cpp"
+    "src/pygamer.cpp"
     )
 
+# Create the target
 PYBIND11_ADD_MODULE(pygamer MODULE ${PYGAMER_SOURCES})
 
 # Link pygamer to gamer static
 target_link_libraries(pygamer PRIVATE gamerstatic)
+

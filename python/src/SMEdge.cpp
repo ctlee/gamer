@@ -25,32 +25,19 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "Vertex.h"
+#include "SurfaceMesh.h"
 
 namespace py = pybind11;
 
-void init_SMVertex(py::module& mod){
-    py::class_<Vertex> vertex(mod, "Vertex",
-    R"delim(
-    Wrapper around a :cpp:class:`Vertex`.
-    )delim"
+void init_SMEdge(py::module& mod){
+    py::class_<Edge> edge(mod, "Edge",
+        R"delim(
+            Wrapper around a :cpp:class:`Edge`.
+        )delim"
     );
-    vertex.def(py::init<>(), "Default constructor");
-    vertex.def(py::init<double, double, double>(), "Other constructor");
-
-    vertex.def("__getitem__",
-        [](const Vertex &v, std::size_t i) -> const double& {
-            if (i >= 3) throw py::index_error("Vector only contains three coordinates");
-            return v[i];
-        },
-        "Get coordinate of position");
-    vertex.def("__setitem__",
-        [](Vertex &v, size_t i, double val) {
-            if (i >= 3) throw py::index_error("Vector only contains three coordinates");
-            v[i] = val;
-        },
-        "Set coordinate...");
-    vertex.def_readwrite("marker", &Vertex::marker, "Boundary marker value");
-    vertex.def_readwrite("selected", &Vertex::selected, "Selection status of vertex");
-    vertex.def("__repr__", &Vertex::to_string);
+    edge.def(py::init<>(), "Default constructor.");
+    edge.def(py::init<bool>(),
+        py::arg("selected"),
+        "Constructor defining selection.");
+    edge.def_readwrite("selected", &Edge::selected, "Selection status of edge.");
 }

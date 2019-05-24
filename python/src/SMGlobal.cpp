@@ -29,29 +29,15 @@
 
 namespace py = pybind11;
 
-// Forward function declarations
-void init_SMGlobal(py::module &);
-void init_SMVertex(py::module &);
-void init_SMEdge(py::module &);
-void init_SMFace(py::module &);
-void init_SMSimplexID(py::module &);
-void init_SMFunctions(py::module &);
-void init_SurfaceMesh(py::module &);
+void init_SMGlobal(py::module& mod){
+    py::class_<Global> global(mod, "Global",
+        R"delim(
+            Wrapper around a :cpp:class:`Global`.
+        )delim"
+    );
 
-// Initialize the main `pygamer` module
-PYBIND11_MODULE(pygamer, pygamer) {
-    pygamer.doc() = "Python wrapper around the GAMer C++ library.";
-
-    // pygamer.surfacemesh submodule defs
-    py::module SurfMeshMod = pygamer.def_submodule("surfacemesh",
-        "Submodule containing SurfaceMesh along with related objects and methods.");
-
-    // WARNING: the order of initialization matters for dependent calls.
-    init_SMGlobal(SurfMeshMod);     // Global class
-    init_SMVertex(SurfMeshMod);     // Vertex class
-    init_SMEdge(SurfMeshMod);       // Edge class
-    init_SMFace(SurfMeshMod);       // Face class
-    init_SMSimplexID(SurfMeshMod);  // SurfaceMesh::SimplexID class
-    init_SMFunctions(SurfMeshMod);  // Functions pyg.sm.SM.*
-    init_SurfaceMesh(SurfMeshMod);  // SurfaceMesh class
+    global.def_readwrite("marker", &Global::marker, "Domain marker to use when tetrahedralizing.");
+    global.def_readwrite("volumeConstraint", &Global::volumeConstraint, "Domain volumeConstraint to use when tetrahedralizing.");
+    global.def_readwrite("useVolumeConstraint", &Global::useVolumeConstraint, "Use a volume constraint when tetrahedralizing.");
+    global.def_readwrite("ishole", &Global::ishole, "Does this domain represent a hole or not?");
 }

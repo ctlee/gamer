@@ -26,6 +26,7 @@
 #include <pybind11/stl.h>
 
 #include "SurfaceMesh.h"
+#include "Vertex.h"
 
 namespace py = pybind11;
 
@@ -44,6 +45,10 @@ void init_SurfaceMesh(py::module& mod){
     );
     SurfMesh.def(py::init<>(), "Default constructor.");
 
+
+    /************************************
+     *  INSERT
+     ************************************/
     SurfMesh.def("addVertex",
         py::overload_cast<const Vertex&>(&SurfaceMesh::add_vertex),
         py::arg("data"),
@@ -54,46 +59,26 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMesh.def("insertVertex",
-        py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::insert<1>),
-        R"delim(
-            Inserts a vertex based on key.
-
-            Args:
-                key (array): Array [1] of vertex key.
-        )delim"
-    );
-
-
-    SurfMesh.def("insertVertex",
         py::overload_cast<const std::array<int, 1>&, const Vertex&>(&SurfaceMesh::insert<1>),
+        py::arg("key"), py::arg("data") = Vertex(0,0,0,0,false),
         R"delim(
             Inserts a vertex and data based on key.
 
             Args:
-                key (array): Array [1] of vertex key.
-                data (:py:class:`Vertex`): Vertex data.
-        )delim"
-    );
-
-
-    SurfMesh.def("insertEdge",
-        py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::insert<2>),
-        R"delim(
-            Insert an edge into the mesh
-
-            Args:
-                key (array): Array [2] of edge key.
+                key (list): Array [1] of vertex key.
+                data (:py:class:`Vertex`, optional): Vertex data.
         )delim"
     );
 
 
     SurfMesh.def("insertEdge",
         py::overload_cast<const std::array<int, 2>&, const Edge&>(&SurfaceMesh::insert<2>),
+        py::arg("key"), py::arg("data") = Edge(false),
         R"delim(
             Insert an edge into the mesh
 
             Args:
-                key (array): Array [2] of edge key.
+                key (list): Array [2] of edge key.
                 data (Edge): Edge data.
         )delim"
     );
@@ -105,64 +90,128 @@ void init_SurfaceMesh(py::module& mod){
             Insert a face into the mesh
 
             Args:
-                key (array): Array [3] of face key.
+                key (list): Array [3] of face key.
         )delim"
     );
 
 
     SurfMesh.def("insertFace",
         py::overload_cast<const std::array<int, 3>&, const Face&>(&SurfaceMesh::insert<3>),
+        py::arg("key"), py::arg("data") = Face(0,0,false),
         R"delim(
             Insert a face into the mesh
 
             Args:
-                arg1 (array): Array [3] of edge key.
+                arg1 (list): Array [3] of edge key.
                 arg2 (Face): Face data.
         )delim"
     );
 
 
-    SurfMesh.def("get_simplex_up",
+    SurfMesh.def("getRoot",
+        [](SurfaceMesh &mesh){
+            return *(mesh.get_simplex_up());
+        },
+        R"delim(
+            Get the global metadata.
+
+            Returns:
+                data (:py:class:`Global`): Global mesh metadata.
+        )delim"
+    );
+
+    /************************************
+     * GET SIMPLEXID
+     ************************************/
+    SurfMesh.def("getVertex",
         py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::get_simplex_up<1>, py::const_),
         R"delim(
             Get a simplex by key.
 
             Args:
-                key (array): Array [1] of vertex key.
+                key (list): Array [1] of vertex key.
 
             Returns:
                 SimplexID (:py:class:`VertexID`): The object.
         )delim"
     );
 
-    SurfMesh.def("get_simplex_up",
+    SurfMesh.def("getEdge",
         py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::get_simplex_up<2>, py::const_),
         R"delim(
             Get a simplex by key.
 
             Args:
-                key (array): Array [2] of edge key.
+                key (list): Array [2] of edge key.
 
             Returns:
                 SimplexID (:py:class:`EdgeID`): The object.
         )delim"
     );
 
-    SurfMesh.def("get_simplex_up",
+    SurfMesh.def("getFace",
         py::overload_cast<const std::array<int, 3>&>(&SurfaceMesh::get_simplex_up<3>, py::const_),
         R"delim(
             Get a simplex by key.
 
             Args:
-                key (array): Array [3] of vertex key.
+                key (list): Array [3] of vertex key.
 
             Returns:
                 SimplexID (:py:class:`FaceID`): The object.
         )delim"
     );
 
-    // SurfMesh.def("print", &print, "Print a surface mesh");
-    SurfMesh.def("__repr__", &print);
+
+    /************************************
+     *  GET SIMPLEX NAMES
+     ************************************/
+    SurfMesh.def("getName",
+        py::overload_cast<SurfaceMesh::SimplexID<1>>(&SurfaceMesh::get_name<1>, py::const_),
+        R"delim(
+            Get the name of the vertex
+
+            Args:
+                SimplexID  (:py:class`VertexID`): VertexID to get the name of.
+
+            Returns:
+                key (list): Name of the vertex.
+        )delim"
+    );
+
+
+    SurfMesh.def("getName",
+        py::overload_cast<SurfaceMesh::SimplexID<2>>(&SurfaceMesh::get_name<2>, py::const_),
+        R"delim(
+            Get the name of the vertex
+
+            Args:
+                SimplexID  (:py:class`VertexID`): VertexID to get the name of.
+
+            Returns:
+                key (list): Name of the vertex.
+        )delim"
+    );
+
+
+    SurfMesh.def("getName",
+        py::overload_cast<SurfaceMesh::SimplexID<3>>(&SurfaceMesh::get_name<3>, py::const_),
+        R"delim(
+            Get the name of the vertex
+
+            Args:
+                SimplexID  (:py:class`FaceID`): FaceID to get the name of.
+
+            Returns:
+                key (list): List of vertex indices which make up the face.
+        )delim"
+    );
+
+
+    /************************************
+     *  UTILITY
+     ************************************/
+    SurfMesh.def("__repr__", &print, "Pretty print the mesh.");
 
 
     /************************************
@@ -201,16 +250,6 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
-    // SurfMesh.def("getVertexDataIterator",
-    //     [](const SurfaceMesh& m){
-    //         auto it = m.get_level<1>();
-    //         return py::make_iterator(it.begin(), it.end());
-    //     },
-    //     py::keep_alive<0, 1>(), /* Essential: keep object alive while iterator exists */
-    //     R"delim(
-    //         Get an iterator over :py:class:`Vertex`s.
-    //     )delim"
-    // );
 
     SurfMesh.def_property_readonly("edgeIDs",
         [](const SurfaceMesh& m){
@@ -223,6 +262,7 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+
     SurfMesh.def("getEdgeIDIterator",
         [](const SurfaceMesh& m){
             auto it = m.get_level_id<2>();
@@ -233,6 +273,7 @@ void init_SurfaceMesh(py::module& mod){
             Get an iterator over :py:class:`EdgeID`.
         )delim"
     );
+
 
     SurfMesh.def_property_readonly("faceIDs",
         [](const SurfaceMesh& m){
@@ -245,16 +286,6 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
-    // SurfMesh.def_property_readonly("faces",
-    //     [](const SurfaceMesh& m){
-    //         auto it = m.get_level<3>();
-    //         return py::make_iterator(it.begin(), it.end());
-    //     },
-    //     py::keep_alive<0, 1>(),
-    //     R"delim(
-    //         A convenience iterator over :py:class:`Vertex`s.
-    //     )delim"
-    // );
 
     SurfMesh.def("getFaceIDIterator",
         [](const SurfaceMesh& m){
@@ -266,17 +297,6 @@ void init_SurfaceMesh(py::module& mod){
             Get an iterator over :py:class:`FaceID`.
         )delim"
     );
-
-    // SurfMesh.def("getFaceDataIterator",
-    //     [](const SurfaceMesh& m){
-    //         auto it = m.get_level<3>();
-    //         return py::make_iterator(it.begin(), it.end());
-    //     },
-    //     py::keep_alive<0, 1>(), /* Essential: keep object alive while iterator exists */
-    //     R"delim(
-    //         Get an iterator over :py:class:`Face`s.
-    //     )delim"
-    // );
 
 
     /************************************
@@ -444,5 +464,4 @@ void init_SurfaceMesh(py::module& mod){
             Set normals to be outward facing.
         )delim"
     );
-
 }

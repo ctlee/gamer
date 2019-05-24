@@ -40,7 +40,7 @@ void init_SMFunctions(py::module& mod){
             Returns:
                 :py:class:`SurfaceMesh`: Mesh of interest
         )delim"
-        );
+    );
 
 
     mod.def("writeOFF", &writeOFF,
@@ -52,7 +52,7 @@ void init_SMFunctions(py::module& mod){
                 filename (str): Filename to write to
                 mesh (:py:class:`SurfaceMesh`): Mesh of interest
         )delim"
-        );
+    );
 
 
     mod.def("readOBJ", &readOBJ,
@@ -65,7 +65,7 @@ void init_SMFunctions(py::module& mod){
             Returns:
                 :py:class:`SurfaceMesh`: Mesh
         )delim"
-        );
+    );
 
 
     mod.def("writeOBJ", &writeOBJ,
@@ -77,7 +77,7 @@ void init_SMFunctions(py::module& mod){
                 filename (str): Filename to write to
                 mesh (:py:class:`SurfaceMesh`): Mesh of interest
         )delim"
-        );
+    );
 
 
     mod.def("cube", &cube,
@@ -91,7 +91,7 @@ void init_SMFunctions(py::module& mod){
             Returns:
                 :py:class:`SurfaceMesh`: Mesh cube
         )delim"
-        );
+    );
 
 
     mod.def("sphere", &sphere,
@@ -105,5 +105,5 @@ void init_SMFunctions(py::module& mod){
             Returns:
                 :py:class:`SurfaceMesh`: Spherical mesh
         )delim"
-        );
+    );
 }
