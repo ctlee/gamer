@@ -42,24 +42,30 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Define where to put the libraries and binaries
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
 #####################################################################
 # Options
 #####################################################################
 option(SINGLE "Use single precision floating point numbers?" OFF)
-option(BUILD_STATIC_LIB "Build static libraries?" OFF)
+
+option(GAMER_STATIC "Build static libraries?" OFF)
+option(GAMER_SHARED "Build shared libraries?" OFF)
 option(BUILD_PYTHONEXT "Build GAMer python extension?" OFF)
+
 option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
-option(BLENDER_PLUGIN_INSTALL "Have CMake install the plugin?" OFF)
-option(BUILD_TESTS "Build the GAMer tests?" OFF)
+option(BLENDER_PLUGIN_INSTALL "Have CMake install the Blender plugin?" OFF)
+
+option(GAMER_TEST "Build the GAMer tests?" OFF)
 option(GETEIGEN "Download Eigen?" ON)
 
-# Set conditional build
+option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
+
+# Blender Addon requires Python extension
 if(BUILD_BLENDER)
     set(BUILD_PYTHONEXT ON)
-endif()
-
-if(BUILD_PYTHONEXT)
-    set(BUILD_STATIC_LIB ON)
 endif()
 
 # Add -fPIC to all targets
@@ -67,7 +73,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set build type to Release if none was defined
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
+    message(STATUS "No build type was specified. Setting to 'Release'")
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 if(WIN32)
@@ -75,36 +82,28 @@ if(WIN32)
 endif()
 
 ## Print debug flags
-# message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
-# message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
-# message(STATUS "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
-# message(STATUS "CMAKE_C_FLAGS_RELWITHDEBINFO is: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-# message(STATUS "CMAKE_C_FLAGS_MINSIZEREL is: ${CMAKE_C_FLAGS_MINSIZEREL}")
-# message(STATUS "CMAKE_CXX_FLAGS is: ${CMAKE_CXX_FLAGS}")
-# message(STATUS "CMAKE_CXX_FLAGS_DEBUG is: ${CMAKE_CXX_FLAGS_DEBUG}")
-# message(STATUS "CMAKE_CXX_FLAGS_RELEASE is: ${CMAKE_CXX_FLAGS_RELEASE}")
-# message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO is: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-# message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL is: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
-# message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-# message(STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE})
+if(GAMER_CMAKE_VERBOSE)
+    message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
+    message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
+    message(STATUS "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
+    message(STATUS "CMAKE_C_FLAGS_RELWITHDEBINFO is: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+    message(STATUS "CMAKE_C_FLAGS_MINSIZEREL is: ${CMAKE_C_FLAGS_MINSIZEREL}")
+    message(STATUS "CMAKE_CXX_FLAGS is: ${CMAKE_CXX_FLAGS}")
+    message(STATUS "CMAKE_CXX_FLAGS_DEBUG is: ${CMAKE_CXX_FLAGS_DEBUG}")
+    message(STATUS "CMAKE_CXX_FLAGS_RELEASE is: ${CMAKE_CXX_FLAGS_RELEASE}")
+    message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO is: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL is: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+    message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE})
+endif(GAMER_CMAKE_VERBOSE)
 
-# Define where to put the libraries and binaries
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+# Add and configure library dependencies
+add_subdirectory(libraries EXCLUDE_FROM_ALL)
 
-add_subdirectory(libraries)
-
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries")
+# include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries")
 
-# List the include directories for debugging
-# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-# foreach(dir ${dirs})
-#     message(STATUS "GAMer include_dir='${dir}'")
-# endforeach()
-
-list(APPEND SOURCES
+list(APPEND GAMER_SOURCES
     "src/OFF_SurfaceMesh.cpp"
     "src/OBJ_SurfaceMesh.cpp"
     "src/SurfaceMesh.cpp"
@@ -115,15 +114,13 @@ list(APPEND SOURCES
     "src/pdb2mesh.cpp"
 )
 
-add_library(gamershared SHARED ${SOURCES})
-#message(STATUS "GAMer sources: ${SOURCES}")
-
-target_link_libraries(gamershared tetshared casc eigen)
+add_library(gamershared SHARED ${GAMER_SOURCES})
+target_link_libraries(gamershared tetstatic casc eigen)
 install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(TARGETS gamershared DESTINATION lib)
 
-if(BUILD_STATIC_LIB)
-    add_library(gamerstatic STATIC ${SOURCES})
+if(GAMERSTATIC)
+    add_library(gamerstatic STATIC ${GAMER_SOURCES})
     target_link_libraries(gamerstatic tetstatic casc eigen)
     install(TARGETS gamerstatic DESTINATION lib)
 endif()
@@ -176,12 +173,10 @@ if(BUILD_BLENDER)
     endif()
 endif()
 
-if(BUILD_TESTS)
+if(GAMER_TEST)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-# Configure documentation building
+# Configure documentation builders
 add_subdirectory(docs)
-
-

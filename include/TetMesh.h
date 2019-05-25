@@ -33,7 +33,7 @@
 #include <gamer.h>
 
 #define TETLIBRARY
-#include <tetgen/tetgen.h>
+#include <tetgen.h>
 
 #include <casc/casc>
 

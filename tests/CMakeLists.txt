@@ -55,13 +55,9 @@ target_link_libraries(objecttests gamerstatic gtest_main)
 
 add_test(NAME ObjectTests COMMAND objecttests)
 
-# add_executable(scratchtest scratchtest.cpp)
-# target_link_libraries(scratchtest gamershared)
-# # Profiling with gperftools
-# # target_link_libraries(scratchtest gamershared profiler)
-
+# Configure testing of Python module
 find_package(pytest)
-if(NOT PYTEST_FOUND)
+if(NOT PYTEST_FOUND AND BUILD_PYTHONEXT)
     message(ERROR "pytest could not be found! Please install pytest to run python tests.")
 elseif(BUILD_PYTHONEXT)
     # Add a test for pytest
@@ -70,3 +66,11 @@ elseif(BUILD_PYTHONEXT)
       WORKING_DIRECTORY $<TARGET_FILE_DIR:pygamer>
     )
 endif()
+
+
+
+# add_executable(scratchtest scratchtest.cpp)
+# target_link_libraries(scratchtest gamershared)
+# # Profiling with gperftools
+# # target_link_libraries(scratchtest gamershared profiler)
+

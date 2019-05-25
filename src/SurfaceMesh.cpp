@@ -33,8 +33,8 @@
 #include <stdexcept>
 #include <strstream>
 #include <vector>
-
 #include <casc/casc>
+
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 

@@ -82,5 +82,5 @@ endif()
 ###########################
 # Tetgen
 ###########################
-add_subdirectory(tetgen)
-# add_subdirectory(triangle)
+add_subdirectory(tetgen EXCLUDE_FROM_ALL)
+# add_subdirectory(triangle EXCLUDE_FROM_ALL)
