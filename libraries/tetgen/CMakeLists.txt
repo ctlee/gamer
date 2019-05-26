@@ -9,17 +9,7 @@ endif()
 
 # Set some default options
 option(BUILD_TETGEN_BIN "Build the tetgen binary?" ${TETGEN_MASTER_PROJECT})
-option(TET_STATIC "Build the tetgen static library?" OFF)
-option(TET_SHARED "Build the tetgen shared libary?" OFF)
 option(SINGLE "Use single precision floating point numbers?" OFF)
-
-# If added by add_subdirectory(... EXCLUDE_FROM_ALL) automatically expose shared
-# and static library for building as dependencies.
-get_directory_property(EXCLUDE_FROM_ALL DIRECTORY . EXCLUDE_FROM_ALL)
-if (NOT TETGEN_MASTER_PROJECT AND EXCLUDE_FROM_ALL)
-    set(TET_STATIC on)
-    set(TET_SHARED on)
-endif()
 
 ####################################################################
 # Define various compile defs and flags for proper function
@@ -46,25 +36,23 @@ endif()
 #####################################################################
 # Define library targets
 #####################################################################
-if(TET_SHARED)
-    add_library(tetshared SHARED tetgen.cxx predicates.cxx)
-    target_compile_definitions(tetshared PRIVATE TETLIBRARY ${COMPILE_DEFS})
-    target_include_directories(tetshared INTERFACE
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        )
-    install(TARGETS tetshared DESTINATION lib)
-endif()
+# OBJECT LIBRARY: compiles the sources only once
+add_library(tet_objlib OBJECT tetgen.cxx predicates.cxx)
+target_compile_definitions(tet_objlib PRIVATE TETLIBRARY ${COMPILE_DEFS})
+target_include_directories(tet_objlib INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
 
-if(TET_STATIC)
-    add_library(tetstatic STATIC tetgen.cxx predicates.cxx)
-    target_compile_definitions(tetstatic PRIVATE TETLIBRARY ${COMPILE_DEFS})
-    target_include_directories(tetstatic INTERFACE
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        )
-    install(TARGETS tetstatic DESTINATION lib)
-endif()
+# SHARED LIBRARY
+add_library(tetshared SHARED $<TARGET_OBJECTS:tet_objlib>)
+target_link_libraries(tetshared PUBLIC tet_objlib)
+install(TARGETS tetshared DESTINATION lib)
+
+# STATIC LIBRARY
+add_library(tetstatic STATIC $<TARGET_OBJECTS:tet_objlib>)
+target_link_libraries(tetstatic PUBLIC tet_objlib)
+install(TARGETS tetstatic DESTINATION lib)
 
 #####################################################################
 # Setup binary targets

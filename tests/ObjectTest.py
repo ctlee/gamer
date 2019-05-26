@@ -28,7 +28,7 @@ class TestSurfaceMesh(object):
         mesh = pygamer.surfacemesh.SurfaceMesh()
         mesh.insertFace([1,2,3])
 
-        fid = mesh.get_simplex_up([1,2,3])
+        fid = mesh.getFace([1,2,3])
         data = fid.data()
 
         assert data.orientation == 0
@@ -39,7 +39,7 @@ class TestSurfaceMesh(object):
         data.marker = 2
         data.selected = True
 
-        fid = mesh.get_simplex_up([1,2,3])
+        fid = mesh.getFace([1,2,3])
 
         assert data.orientation == 1
         assert data.marker == 2

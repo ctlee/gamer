@@ -31,8 +31,9 @@ list(APPEND PYGAMER_SOURCES
     )
 
 # Create the target
-PYBIND11_ADD_MODULE(pygamer MODULE ${PYGAMER_SOURCES})
+pybind11_add_module(pygamer MODULE ${PYGAMER_SOURCES})
 
 # Link pygamer to gamer static
-target_link_libraries(pygamer PRIVATE gamerstatic casc eigen)
+target_link_libraries(pygamer PRIVATE gamerstatic)
 
+# TODO: INSTALL?

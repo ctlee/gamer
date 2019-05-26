@@ -22,14 +22,6 @@
 cmake_minimum_required(VERSION 3.11)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
-
-# Add path to custom modules
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
-
-# Override rules for MSVC static compiler flags
-set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
-
 #####################################################################
 # Project GAMer
 #####################################################################
@@ -37,6 +29,24 @@ set(PRERELEASE ON)
 set(PRE_VERSION beta)
 project(GAMer VERSION 2.0.1)
 
+#####################################################################
+# Options
+#####################################################################
+option(SINGLE "Use single precision floating point numbers?" OFF)
+
+option(BUILD_PYTHONEXT "Build GAMer python extension?" OFF)
+option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
+option(BLENDER_PLUGIN_INSTALL "Have CMake install the Blender plugin?" OFF)
+option(BLENDER_VERSION_STRICT "Have CMake verify compatibility of plugin with Blender?" OFF)
+
+option(GAMER_TEST "Build the GAMer tests?" OFF)
+option(GETEIGEN "Download Eigen?" ON)
+
+option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
+
+#####################################################################
+# Configuration
+#####################################################################
 # Require c++14 and standard libraries
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -46,30 +56,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-#####################################################################
-# Options
-#####################################################################
-option(SINGLE "Use single precision floating point numbers?" OFF)
+# Add path to custom modules
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
-option(GAMER_STATIC "Build static libraries?" OFF)
-option(GAMER_SHARED "Build shared libraries?" OFF)
-option(BUILD_PYTHONEXT "Build GAMer python extension?" OFF)
+# Override rules for MSVC static compiler flags
+set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
 
-option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
-option(BLENDER_PLUGIN_INSTALL "Have CMake install the Blender plugin?" OFF)
-
-option(GAMER_TEST "Build the GAMer tests?" OFF)
-option(GETEIGEN "Download Eigen?" ON)
-
-option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
-
-# Blender Addon requires Python extension
-if(BUILD_BLENDER)
-    set(BUILD_PYTHONEXT ON)
-endif()
-
-# Add -fPIC to all targets
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# # Add -fPIC to all targets
+# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set build type to Release if none was defined
 if(NOT CMAKE_BUILD_TYPE)
@@ -77,11 +72,17 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Required for linking correctly on Windows
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-## Print debug flags
+# Blender Addon requires Python extension
+if(BUILD_BLENDER)
+    set(BUILD_PYTHONEXT ON)
+endif()
+
+## Print compile flags
 if(GAMER_CMAKE_VERBOSE)
     message(STATUS "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
     message(STATUS "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
@@ -100,9 +101,6 @@ endif(GAMER_CMAKE_VERBOSE)
 # Add and configure library dependencies
 add_subdirectory(libraries EXCLUDE_FROM_ALL)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-# include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries")
-
 list(APPEND GAMER_SOURCES
     "src/OFF_SurfaceMesh.cpp"
     "src/OBJ_SurfaceMesh.cpp"
@@ -114,63 +112,39 @@ list(APPEND GAMER_SOURCES
     "src/pdb2mesh.cpp"
 )
 
-add_library(gamershared SHARED ${GAMER_SOURCES})
-target_link_libraries(gamershared tetstatic casc eigen)
-install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
+#####################################################################
+# LIBRARIES
+#####################################################################
+# OBJECT LIBRARY: compiles the sources only once
+add_library(gamer_objlib OBJECT ${GAMER_SOURCES})
+target_include_directories(gamer_objlib PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
+target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
+
+# SHARED LIBRARY
+add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
+target_link_libraries(gamershared PUBLIC gamer_objlib)
 install(TARGETS gamershared DESTINATION lib)
 
-if(GAMERSTATIC)
-    add_library(gamerstatic STATIC ${GAMER_SOURCES})
-    target_link_libraries(gamerstatic tetstatic casc eigen)
-    install(TARGETS gamerstatic DESTINATION lib)
-endif()
+# STATIC LIBRARY
+add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
+target_link_libraries(gamerstatic PUBLIC gamer_objlib)
+install(TARGETS gamerstatic DESTINATION lib)
 
+# Install headers
+install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
+
+#####################################################################
+# PYTHON EXTENSION AND BLENDER ADDON
+#####################################################################
 if(BUILD_PYTHONEXT)
     add_subdirectory(python)
-    # add_subdirectory(swig)
 endif()
 
 if(BUILD_BLENDER)
-    # Generate the name of the build
-    set(ZIPNAME "gamer_addon-${GAMer_VERSION}-")
-    if(PRERELEASE)
-        string(CONCAT ZIPNAME ${ZIPNAME} "${PRE_VERSION}-")
-    endif()
-    string(CONCAT ZIPNAME ${ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
-
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        if(WIN32)
-            string(CONCAT ZIPNAME ${ZIPNAME} "64")
-        elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
-            string(CONCAT ZIPNAME ${ZIPNAME} "-x86_64")
-        endif()
-    else()
-        if(WIN32)
-            string(CONCAT ZIPNAME ${ZIPNAME} "32")
-        elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
-            string(CONCAT ZIPNAME ${ZIPNAME} "-i686")
-        endif()
-    endif()
-    string(CONCAT ZIPNAME ${ZIPNAME} ".zip")
-
-    configure_file(${CMAKE_SOURCE_DIR}/tools/blender_addon/__init__.in
-                ${CMAKE_BINARY_DIR}/plugin/gamer_addon/__init__.py @ONLY)
-    add_custom_target(zip_plugin
-        ALL
-        COMMAND ${CMAKE_COMMAND} -E tar "cfv"
-            ../${ZIPNAME} --format=zip
-            ./gamer_addon
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/plugin
-        COMMENT "Zipping up addon components"
-        VERBATIM
-    )
-    add_dependencies(zip_plugin stage_files)
-
-    # Have CMake install Blender...
-    if(BLENDER_PLUGIN_INSTALL)
-        find_package(Blender REQUIRED)
-        install(DIRECTORY ${CMAKE_BINARY_DIR}/plugin/ DESTINATION ${BLENDER_ADDON_PATH}/addons PATTERN "*")
-    endif()
+    add_subdirectory(tools)
 endif()
 
 if(GAMER_TEST)
