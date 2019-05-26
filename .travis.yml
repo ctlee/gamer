@@ -1,8 +1,6 @@
 notifications:
   email: false
   slack:
-    on_success: change
-    on_failure: always
     secure: ilztqDylzgDwnh+AAHdrmHjgD4rjutJa5rh783H8HfW7KKY+RtHaAa+Z9V6uAbU3/fPk29fkCXRxT/scAI4Fn0TQ/Hi0alCs7ytNJg+2fbVcI5xWHbmJznOb0pQl0Gn6MGwouSyP9WvRtivtT5u+wlNR6yKycTmUI9qP3Fe7nA/k/WdRt5SHGjjprtYZYbBOg+9UStzubMuQj5hTBeDs78UyUbejSsZ0Cp9+OkTcugoEegwn0o9QdkvFGHF/hQ5bVGGNVAFUVOg+B4DFiw59MbsgIDZ663CXCTxUJ1I4uS3rI7LpnY2G8c5dKp9E2KDkM8sPKWzg4qeyj1POMPNDUbNYWIHBBK4NxrQ+PqW1nquxNTVsqYi2IXVmV2BWx9+SUS06YwDsjrCcQyAtnCzxn/tL3aX/8jyeN3yPwytJgDuj9IF8nIJZuuMgDOs1ZVa9fbL8ANBMcZMKIPCSwjO8670ULl5xKAWKGTY7HwzGLU3syQBwOX+eukf9zx2Y9qrsP1kJJT8YTOD45icJRAMPQQEiN20wxKh/V7Kz0ewc6LG8Bv1FyM6f+7ehNZvkwrStzJJ85JwDkPeTKKiBa3kuBQzE0CBm3/cTYCXgQEo3jggH1xPF8OkbYhuX8TrZjp3PBVCABto6V6OGILFA7Hhv6gK9eHxCSVOICPfWCfYXakY=
 language: cpp
 dist: xenial
@@ -44,10 +42,10 @@ install:
 - |
   # Configure
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-    cmake -DGETEIGEN=on -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on -A x64 ..
+    cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYTHONEXT=on -A x64 ..
     cmake --build .
   else
-    cmake -DGETEIGEN=on -DBUILD_TESTS=on -DBUILD_PYTHONEXT=on ..
+    cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYTHONEXT=on ..
     cmake --build . -- -j2
   fi
 script:

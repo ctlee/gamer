@@ -18,7 +18,7 @@ Download the corresponding `.zip` for your platform and follow Blender's instruc
 
 ### Prerequisites
 To build the GAMer library you will need access to a working C++ compiler with full C++14 support.
-If you wish to use build and use the GAMer Python extensions, you will also need [SWIG > 3.0](http://www.swig.org/), access to a python intepreter, and the corresponding python shared library (`python.so` or `python.dylib`).
+<!-- If you wish to use build and use the GAMer Python extensions, you will also need [SWIG > 3.0](http://www.swig.org/), access to a python intepreter, and the corresponding python shared library (`python.so` or `python.dylib`). -->
 In order to use the GAMer Blender addon you should also have a working installation of Blender.
 
 ### Building
@@ -29,15 +29,13 @@ First, download a copy of the source from [releases](https://github.com/ctlee/ga
 ```bash
 git clone https://github.com/ctlee/gamer.git
 cd gamer
-git submodule init
-git submodule update
 ```
 
 Linux and Mac:
 ```bash
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DBUILD_TESTS=on -DCMAKE_BUILD_TYPE=Release ..
+cmake -DBUILD_TESTS=on -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
 
@@ -63,10 +61,11 @@ These can be used in addition to the standard [CMake flags](https://cmake.org/cm
     This automatically builds the Python extension.
 * Single Precision floating point numbers: `-DSINGLE=ON`
 * Compile Tetgen Binary: `-DBUILD_TETGEN_BIN=ON`
-* Test Cases: `-DBUILD_TESTS=ON`
+* Test Cases: `-DGAMER_TEST=ON`
     The test suite can be run using `make tests` or executing the output `./bin/objecttests`. Tests are organized using [GoogleTest](https://github.com/google/googletest) project.
 * The GAMer documentation can be built if you have access to
 [doxygen](http://www.doxygen.nl/) by running `make docs` with any build.
+* Other documentation can be built using Sphinx...
 
 ## Acknowledging your use of GAMer
 Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know.
@@ -97,7 +96,7 @@ Development of Blender GAMer addon.
 
 See also the list of [contributors](https://github.com/ctlee/gamer/contributors) who participated in this project.
 
-## External libraries bundled with GAMer
+## External libraries bundled/downloaded with/by GAMer
 * GAMer uses [Tetgen](http://wias-berlin.de/software/tetgen/) to generate
 tetrahedralizations.
 
@@ -108,6 +107,8 @@ compute eigenvalues/eigenvectors of the Local Structure Tensor.
 complex data structure.
 
 * GAMer uses [GoogleTest](https://github.com/google/googletest) to handle testing.
+
+* GAMer uses Pybind11...
 
 * Mesh checks in the GAMer Blender addon are inspired or borrowed from 3D Print Toolbox by Campbell Barton and Meshalyzer from CellBlender.
 

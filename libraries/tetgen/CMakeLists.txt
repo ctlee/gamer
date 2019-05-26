@@ -54,6 +54,11 @@ add_library(tetstatic STATIC $<TARGET_OBJECTS:tet_objlib>)
 target_link_libraries(tetstatic PUBLIC tet_objlib)
 install(TARGETS tetstatic DESTINATION lib)
 
+# STATIC LIBRARY
+add_library(tetstatic-fpic STATIC $<TARGET_OBJECTS:tet_objlib>)
+target_link_libraries(tetstatic-fpic PUBLIC tet_objlib)
+set_property(TARGET tetstatic-fpic PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 #####################################################################
 # Setup binary targets
 #####################################################################

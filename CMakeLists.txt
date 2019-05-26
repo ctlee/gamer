@@ -121,17 +121,23 @@ target_include_directories(gamer_objlib PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
-target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
+target_link_libraries(gamer_objlib PUBLIC casc tetstatic-fpic eigen)
 
 # SHARED LIBRARY
 add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
-target_link_libraries(gamershared PUBLIC gamer_objlib)
 install(TARGETS gamershared DESTINATION lib)
 
 # STATIC LIBRARY
 add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
-target_link_libraries(gamerstatic PUBLIC gamer_objlib)
 install(TARGETS gamerstatic DESTINATION lib)
+
+if(CMAKE_VERSION VERSION_LESS 3.12)
+    target_link_libraries(gamershared PUBLIC $<TARGET_PROPERTY:gamer_objlib,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_link_libraries(gamerstatic PUBLIC $<TARGET_PROPERTY:gamer_objlib,INTERFACE_INCLUDE_DIRECTORIES>)
+else()
+    target_link_libraries(gamershared PUBLIC gamer_objlib)
+    target_link_libraries(gamerstatic PUBLIC gamer_objlib)
+endif()
 
 # Install headers
 install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
