@@ -109,9 +109,10 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMesh.def("getRoot",
-        [](SurfaceMesh &mesh){
-            return *(mesh.get_simplex_up());
+        [](SurfaceMesh &mesh) -> Global&{
+            return mesh.get_simplex_up().data();
         },
+        py::return_value_policy::reference_internal,
         R"delim(
             Get the global metadata.
 
@@ -123,6 +124,8 @@ void init_SurfaceMesh(py::module& mod){
     /************************************
      * GET SIMPLEXID
      ************************************/
+    // NOTE: these don't need py::return_value_policy::reference_internal
+    // because they return pointers
     SurfMesh.def("getVertex",
         py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::get_simplex_up<1>, py::const_),
         R"delim(
@@ -212,6 +215,29 @@ void init_SurfaceMesh(py::module& mod){
      *  UTILITY
      ************************************/
     SurfMesh.def("__repr__", &print, "Pretty print the mesh.");
+
+    SurfMesh.def_property_readonly("nVertices",
+        &SurfaceMesh::size<1>,
+        R"delim(
+            Get the number of vertices.
+        )delim"
+    );
+
+
+    SurfMesh.def_property_readonly("nEdges",
+        &SurfaceMesh::size<2>,
+        R"delim(
+            Get the number of edges.
+        )delim"
+    );
+
+
+    SurfMesh.def_property_readonly("nFaces",
+        &SurfaceMesh::size<3>,
+        R"delim(
+            Get the number of faces.
+        )delim"
+    );
 
 
     /************************************

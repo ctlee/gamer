@@ -1,5 +1,6 @@
 import pytest
 import pygamer
+import math
 
 class TestFace(object):
     def test_constructors(self):
@@ -24,6 +25,16 @@ class TestFace(object):
 
 
 class TestSurfaceMesh(object):
+    def test_insertion(self):
+        mesh = pygamer.surfacemesh.SurfaceMesh()
+        mesh.insertFace([1,2,3])
+        mesh.insertFace([2,3,4])
+
+        assert mesh.nVertices == 4
+        assert mesh.nEdges == 5
+        assert mesh.nFaces == 2
+
+
     def test_assignment(self):
         mesh = pygamer.surfacemesh.SurfaceMesh()
         mesh.insertFace([1,2,3])
@@ -40,10 +51,28 @@ class TestSurfaceMesh(object):
         data.selected = True
 
         fid = mesh.getFace([1,2,3])
+        data = fid.data()
 
         assert data.orientation == 1
         assert data.marker == 2
         assert data.selected == True
+
+        metadata = mesh.getRoot()
+        assert metadata.marker == -1
+        assert math.isclose(metadata.volumeConstraint, -1, rel_tol=1e-5) == True
+        assert metadata.useVolumeConstraint == False
+        assert metadata.ishole == False
+
+        metadata.marker = 5
+        metadata.volumeConstraint = 3.14159
+        metadata.useVolumeConstraint = True
+        metadata.ishole = True
+
+        metadata = mesh.getRoot()
+        assert metadata.marker == 5
+        assert math.isclose(metadata.volumeConstraint, 3.14159, rel_tol=1e-5) == True
+        assert metadata.useVolumeConstraint == True
+        assert metadata.ishole == True
 
 
 class TestVertex(object):

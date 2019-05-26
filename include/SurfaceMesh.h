@@ -117,6 +117,10 @@ struct Global
     bool  useVolumeConstraint;
     /// Flag that determines if the mesh represents a hole or not
     bool  ishole;
+
+    // Default constructor
+    Global(int marker=-1, float volumeConstraint=-1, bool useVolumeConstraint=false, bool ishole=false) :
+        marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
 };
 
 /**
