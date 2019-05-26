@@ -17,6 +17,8 @@ matrix:
   include:
   - os: osx
     osx_image: xcode
+    before_install:
+    - brew upgrade cmake
   - os: linux
     addons:
       apt:

@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 #####################################################################
@@ -64,7 +64,7 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
 
 # # Add -fPIC to all targets
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set build type to Release if none was defined
 if(NOT CMAKE_BUILD_TYPE)
@@ -121,23 +121,17 @@ target_include_directories(gamer_objlib PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
-target_link_libraries(gamer_objlib PUBLIC casc tetstatic-fpic eigen)
+target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
 
 # SHARED LIBRARY
 add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
+target_link_libraries(gamershared PUBLIC gamer_objlib)
 install(TARGETS gamershared DESTINATION lib)
 
 # STATIC LIBRARY
 add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
 install(TARGETS gamerstatic DESTINATION lib)
-
-if(CMAKE_VERSION VERSION_LESS 3.12)
-    target_link_libraries(gamershared PUBLIC $<TARGET_PROPERTY:gamer_objlib,INTERFACE_INCLUDE_DIRECTORIES>)
-    target_link_libraries(gamerstatic PUBLIC $<TARGET_PROPERTY:gamer_objlib,INTERFACE_INCLUDE_DIRECTORIES>)
-else()
-    target_link_libraries(gamershared PUBLIC gamer_objlib)
-    target_link_libraries(gamerstatic PUBLIC gamer_objlib)
-endif()
+target_link_libraries(gamerstatic PUBLIC gamer_objlib)
 
 # Install headers
 install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
