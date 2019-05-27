@@ -75,8 +75,8 @@ void generateHistogram(const SurfaceMesh &mesh)
         Vertex b = *mesh.get_simplex_up<1>({vertexIDs[1]});
         Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
-        auto   binAngle = [&](double angle) -> int{
-                return static_cast<int>(std::floor(angle/10));
+        auto   binAngle = [&](double angle) -> std::size_t {
+                return static_cast<std::size_t>(std::floor(angle/10));
             };
         histogram[binAngle(angle(a, b, c))]++;
         histogram[binAngle(angle(b, a, c))]++;
@@ -89,7 +89,7 @@ void generateHistogram(const SurfaceMesh &mesh)
     });
 
     std::cout << "Angle Distribution:" << std::endl;
-    for (int x = 0; x < 18; x++)
+    for (std::size_t x = 0; x < 18; x++)
         std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)
                   << std::fixed << histogram[x] << std::endl;
     std::cout << std::endl << std::endl;
@@ -130,7 +130,7 @@ void generateHistogram(const SurfaceMesh &mesh)
             n = 100.0*n/factor;
         });
 
-        for (int x = 0; x < 20; x++)
+        for (std::size_t x = 0; x < 20; x++)
             std::cout << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)
                       << std::fixed << histogramLength[x] << std::endl;
         std::cout << std::endl << std::endl;
@@ -197,8 +197,8 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh){
 
 std::tuple<double, double, int, int> getMinMaxAngles(
     const SurfaceMesh &mesh,
-    int maxMinAngle,
-    int minMaxAngle)
+    double maxMinAngle,
+    double minMaxAngle)
 {
     double minAngle = 360;
     double maxAngle = 0;
@@ -242,7 +242,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
 
 double getArea(const SurfaceMesh &mesh)
 {
-    double area;
+    double area = 0.0;
     for (auto faceID : mesh.get_level_id<3>())
         area += getArea(mesh, faceID);
     return area;
@@ -278,7 +278,7 @@ double getVolume(const SurfaceMesh &mesh)
         auto   c = (*mesh.get_simplex_up({name[2]})).position;
 
         Vector norm;
-        double tmp;
+        double tmp = 0.0;
         if ((*faceID).orientation == 1)
         {
             // a->b->c
@@ -390,7 +390,7 @@ void normalSmooth(SurfaceMesh &mesh){
               << ", # Large Angles: " << nLarge << std::endl;
 }
 
-int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
+std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
     return mesh.get_cover(vertexID).size();
 }

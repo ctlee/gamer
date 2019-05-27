@@ -37,7 +37,7 @@ namespace stringutil
     {
         std::string s = cstr;
         // convert all delims into delim[0]
-        for (auto i=1; i < delim.size(); ++i){
+        for (int i=1; i < delim.size(); ++i){
             std::replace(s.begin(), s.end(), delim[i], delim[0]);
         }
         std::vector<std::string> result;

@@ -54,4 +54,55 @@ PYBIND11_MODULE(pygamer, pygamer) {
     init_SMSimplexID(SurfMeshMod);  // SurfaceMesh::SimplexID class
     init_SMFunctions(SurfMeshMod);  // Functions pyg.sm.SM.*
     init_SurfaceMesh(SurfMeshMod);  // SurfaceMesh class
+
+
+    pygamer.def("readOFF", &readOFF,
+        py::arg("filename"),
+        R"delim(
+            Read OFF file to mesh
+
+            Args:
+                filename (str): Filename to read from
+            Returns:
+                :py:class:`SurfaceMesh`: Mesh of interest
+        )delim"
+    );
+
+
+    pygamer.def("writeOFF", &writeOFF,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in OFF format
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`SurfaceMesh`): Mesh of interest
+        )delim"
+    );
+
+
+    pygamer.def("readOBJ", &readOBJ,
+        py::arg("filename"),
+        R"delim(
+            Read OBJ file to mesh
+
+            Args:
+                filename (str): Filename to read from
+            Returns:
+                :py:class:`SurfaceMesh`: Mesh
+        )delim"
+    );
+
+
+    pygamer.def("writeOBJ", &writeOBJ,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in OBJ format
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`SurfaceMesh`): Mesh of interest
+        )delim"
+    );
+
 }

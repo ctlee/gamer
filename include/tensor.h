@@ -489,7 +489,7 @@ int sgn(const std::array<std::size_t,N>& arr)
 	std::array<bool,N> visited;
 	visited.fill(false);
 
-	for(int i = 1; i < N; ++i)
+	for(std::size_t i = 1; i < N; ++i)
 	{
 		if(!visited[i])
 		{

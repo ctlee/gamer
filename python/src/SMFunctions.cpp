@@ -30,56 +30,6 @@
 namespace py = pybind11;
 
 void init_SMFunctions(py::module& mod){
-    mod.def("readOFF", &readOFF,
-        py::arg("filename"),
-        R"delim(
-            Read OFF file to mesh
-
-            Args:
-                filename (str): Filename to read from
-            Returns:
-                :py:class:`SurfaceMesh`: Mesh of interest
-        )delim"
-    );
-
-
-    mod.def("writeOFF", &writeOFF,
-        py::arg("filename"), py::arg("mesh"),
-        R"delim(
-            Write mesh to file in OFF format
-
-            Args:
-                filename (str): Filename to write to
-                mesh (:py:class:`SurfaceMesh`): Mesh of interest
-        )delim"
-    );
-
-
-    mod.def("readOBJ", &readOBJ,
-        py::arg("filename"),
-        R"delim(
-            Read OBJ file to mesh
-
-            Args:
-                filename (str): Filename to read from
-            Returns:
-                :py:class:`SurfaceMesh`: Mesh
-        )delim"
-    );
-
-
-    mod.def("writeOBJ", &writeOBJ,
-        py::arg("filename"), py::arg("mesh"),
-        R"delim(
-            Write mesh to file in OBJ format
-
-            Args:
-                filename (str): Filename to write to
-                mesh (:py:class:`SurfaceMesh`): Mesh of interest
-        )delim"
-    );
-
-
     mod.def("cube", &cube,
         py::arg("order"),
         R"delim(

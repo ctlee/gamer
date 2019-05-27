@@ -217,7 +217,7 @@ void init_SurfaceMesh(py::module& mod){
     SurfMesh.def("__repr__", &print, "Pretty print the mesh.");
 
     SurfMesh.def_property_readonly("nVertices",
-        &SurfaceMesh::size<1>,
+        py::overload_cast<>(&SurfaceMesh::size<1>, py::const_),
         R"delim(
             Get the number of vertices.
         )delim"
@@ -225,7 +225,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMesh.def_property_readonly("nEdges",
-        &SurfaceMesh::size<2>,
+        py::overload_cast<>(&SurfaceMesh::size<2>, py::const_),
         R"delim(
             Get the number of edges.
         )delim"
@@ -233,7 +233,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMesh.def_property_readonly("nFaces",
-        &SurfaceMesh::size<3>,
+        py::overload_cast<>(&SurfaceMesh::size<3>, py::const_),
         R"delim(
             Get the number of faces.
         )delim"
@@ -254,16 +254,6 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
-    // SurfMesh.def_property_readonly("vertices",
-    //     [](const SurfaceMesh& m){
-    //         auto it = m.get_level<1>();
-    //         return py::make_iterator(it.begin(), it.end());
-    //     },
-    //     py::keep_alive<0, 1>(),
-    //     R"delim(
-    //         A convenience iterator over :py:class:`Vertex`s.
-    //     )delim"
-    // );
 
     SurfMesh.def("getVertexIDIterator",
         [](const SurfaceMesh& m){

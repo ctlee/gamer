@@ -640,14 +640,14 @@ void print(const SurfaceMesh &mesh);
 void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh);
 void generateHistogram(const SurfaceMesh &mesh);
 std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
-    int maxMinAngle, int minMaxAngle);
+    double maxMinAngle, double minMaxAngle);
 double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 double getArea(Vertex a, Vertex b, Vertex c);
 double getVolume(const SurfaceMesh &mesh);
 bool hasHole(const SurfaceMesh &mesh);
 
-int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
