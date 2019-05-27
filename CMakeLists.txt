@@ -122,7 +122,7 @@ target_include_directories(gamer_objlib PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
-target_compile_options(gamer_objlib PRIVATE -Wall -Wextra -pedantic-errors -Wconversion -Wsign-conversion -ferror-limit=3 -Wno-unused-variable -Wno-unused-parameter)
+# target_compile_options(gamer_objlib PRIVATE -Wall -Wextra -pedantic-errors -Wconversion -Wsign-conversion -ferror-limit=3 -Wno-unused-variable -Wno-unused-parameter)
 
 # SHARED LIBRARY
 add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
