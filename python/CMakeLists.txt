@@ -20,6 +20,7 @@
 # ***************************************************************************
 
 list(APPEND PYGAMER_SOURCES
+    "src/Vector.cpp"
     "src/SMGlobal.cpp"
     "src/SMVertex.cpp"
     "src/SMEdge.cpp"

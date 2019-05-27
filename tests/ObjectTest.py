@@ -29,10 +29,24 @@ class TestSurfaceMesh(object):
         mesh = pygamer.surfacemesh.SurfaceMesh()
         mesh.insertFace([1,2,3])
         mesh.insertFace([2,3,4])
-
         assert mesh.nVertices == 4
         assert mesh.nEdges == 5
         assert mesh.nFaces == 2
+
+        mesh.insertEdge([5,6])
+        assert mesh.nVertices == 6
+        assert mesh.nEdges == 6
+        assert mesh.nFaces == 2
+
+        mesh.insertVertex([7])
+        assert mesh.nVertices == 7
+        assert mesh.nEdges == 6
+        assert mesh.nFaces == 2
+
+        mesh.removeVertex([1])
+        assert mesh.nVertices == 6
+        assert mesh.nEdges == 4
+        assert mesh.nFaces == 1
 
 
     def test_assignment(self):
@@ -73,6 +87,13 @@ class TestSurfaceMesh(object):
         assert math.isclose(metadata.volumeConstraint, 3.14159, rel_tol=1e-5) == True
         assert metadata.useVolumeConstraint == True
         assert metadata.ishole == True
+
+        vid = mesh.getVertex([1])
+        data = vid.data()
+        print(data.position)
+        assert data.marker == -1
+        assert data.selected == False
+
 
 
 class TestVertex(object):

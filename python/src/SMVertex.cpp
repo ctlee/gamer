@@ -35,26 +35,33 @@ void init_SMVertex(py::module& mod){
             Wrapper around a :cpp:class:`Vertex`.
         )delim"
     );
-    vertex.def(py::init<>(), "Default constructor.");
-    vertex.def(py::init<double, double, double>(),
-        py::arg("x"), py::arg("y"), py::arg("z"),
-        "Constructor defining coordinates.");
+
     vertex.def(py::init<double, double, double, int, bool>(),
-        py::arg("x"), py::arg("y"), py::arg("z"), py::arg("marker"), py::arg("selected"),
-        "Constructor defining doordinates, marker, and selection status.");
+        py::arg("x") = 0,
+        py::arg("y") = 0,
+        py::arg("z") = 0,
+        py::arg("marker") = -1,
+        py::arg("selected") = false,
+        "Constructor defining doordinates, marker, and selection status."
+    );
+
 
     vertex.def("__getitem__",
         [](const Vertex &v, std::size_t i) -> const double& {
             if (i >= 3) throw py::index_error("Vector only contains three coordinates");
             return v[i];
         },
-        "Get coordinate of position");
+        "Get coordinate of position"
+    );
     vertex.def("__setitem__",
         [](Vertex &v, size_t i, double val) {
             if (i >= 3) throw py::index_error("Vector only contains three coordinates");
             v[i] = val;
         },
-        "Set coordinate...");
+        "Set coordinate..."
+    );
+
+    vertex.def_readwrite("position", &Vertex::position, "Position of the vertex.");
     vertex.def_readwrite("marker", &Vertex::marker, "Boundary marker value");
     vertex.def_readwrite("selected", &Vertex::selected, "Selection status of vertex");
     vertex.def("__repr__", &Vertex::to_string);

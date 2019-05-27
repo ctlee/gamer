@@ -43,16 +43,27 @@ void init_SMSimplexID(py::module& mod){
             reference to the actual object.
         )delim"
     );
+    vid.def(py::init<>());
+
     vid.def("data",
             py::overload_cast<>(&VertexID::data),
             py::return_value_policy::reference_internal,
             R"delim(
-                Access the data stored on the 1-simplex
+                Access the data stored on the 1-simplex.
 
                 Returns:
                     Vertex (:py:class:`Vertex`): Vertex data
             )delim"
         );
+    vid.def("isValid",
+        [](const VertexID& lhs) {return lhs != nullptr;},
+        R"delim(
+            Checks if VertexID refers to a valid simplex.
+
+            Returns:
+                valid (bool): True if valid.
+        )delim"
+    );
     vid.def("__repr__",
         [](const VertexID vid){
             std::ostringstream out;
@@ -74,6 +85,15 @@ void init_SMSimplexID(py::module& mod){
         py::return_value_policy::reference_internal,
         R"delim(
             Access the data stored on the edge.
+        )delim"
+    );
+    eid.def("isValid",
+        [](const EdgeID& lhs) {return lhs != nullptr;},
+        R"delim(
+            Checks if EdgeID refers to a valid simplex.
+
+            Returns:
+                valid (bool): True if valid.
         )delim"
     );
     eid.def("__repr__",
@@ -101,6 +121,15 @@ void init_SMSimplexID(py::module& mod){
 
             Returns:
                 Face (:py:class:`Face`): Face data
+        )delim"
+    );
+    fid.def("isValid",
+        [](const FaceID& lhs) {return lhs != nullptr;},
+        R"delim(
+            Checks if FaceID refers to a valid simplex.
+
+            Returns:
+                valid (bool): True if valid.
         )delim"
     );
     fid.def("__repr__",

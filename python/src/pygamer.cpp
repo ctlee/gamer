@@ -31,6 +31,7 @@ namespace py = pybind11;
 
 // Forward function declarations
 void init_SMGlobal(py::module &);
+void init_Vector(py::module &);
 void init_SMVertex(py::module &);
 void init_SMEdge(py::module &);
 void init_SMFace(py::module &);
@@ -41,6 +42,8 @@ void init_SurfaceMesh(py::module &);
 // Initialize the main `pygamer` module
 PYBIND11_MODULE(pygamer, pygamer) {
     pygamer.doc() = "Python wrapper around the GAMer C++ library.";
+
+    init_Vector(pygamer);           // Vector class
 
     // pygamer.surfacemesh submodule defs
     py::module SurfMeshMod = pygamer.def_submodule("surfacemesh",
@@ -64,7 +67,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Args:
                 filename (str): Filename to read from
             Returns:
-                :py:class:`SurfaceMesh`: Mesh of interest
+                :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest
         )delim"
     );
 
@@ -76,7 +79,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
             Args:
                 filename (str): Filename to write to
-                mesh (:py:class:`SurfaceMesh`): Mesh of interest
+                mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
         )delim"
     );
 
@@ -89,7 +92,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Args:
                 filename (str): Filename to read from
             Returns:
-                :py:class:`SurfaceMesh`: Mesh
+                :py:class:`surfacemesh.SurfaceMesh`: Mesh
         )delim"
     );
 
@@ -101,7 +104,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
             Args:
                 filename (str): Filename to write to
-                mesh (:py:class:`SurfaceMesh`): Mesh of interest
+                mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
         )delim"
     );
 

@@ -54,7 +54,7 @@ struct Vertex
      * @param[in]  y     y-position of the vertex
      * @param[in]  z     z-position of the vertex
      */
-    Vertex(double x, double y, double z): Vertex(x,y,z, 0, false){}
+    Vertex(double x, double y, double z): Vertex(x,y,z, -1, false){}
 
     /**
      * @brief      Constructor
@@ -75,7 +75,7 @@ struct Vertex
 
     Vertex(Vector v){
         position = v;
-        marker = 0;
+        marker = -1;
         selected = false;
     }
 

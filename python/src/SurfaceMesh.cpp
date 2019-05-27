@@ -47,7 +47,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     /************************************
-     *  INSERT
+     *  INSERT/REMOVE
      ************************************/
     SurfMesh.def("addVertex",
         py::overload_cast<const Vertex&>(&SurfaceMesh::add_vertex),
@@ -75,7 +75,7 @@ void init_SurfaceMesh(py::module& mod){
         py::overload_cast<const std::array<int, 2>&, const Edge&>(&SurfaceMesh::insert<2>),
         py::arg("key"), py::arg("data") = Edge(false),
         R"delim(
-            Insert an edge into the mesh
+            Insert an edge into the mesh.
 
             Args:
                 key (list): Array [2] of edge key.
@@ -85,41 +85,107 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMesh.def("insertFace",
-        py::overload_cast<const std::array<int, 3>&>(&SurfaceMesh::insert<3>),
-        R"delim(
-            Insert a face into the mesh
-
-            Args:
-                key (list): Array [3] of face key.
-        )delim"
-    );
-
-
-    SurfMesh.def("insertFace",
         py::overload_cast<const std::array<int, 3>&, const Face&>(&SurfaceMesh::insert<3>),
         py::arg("key"), py::arg("data") = Face(0,0,false),
         R"delim(
-            Insert a face into the mesh
+            Insert a face into the mesh.
 
             Args:
-                arg1 (list): Array [3] of edge key.
-                arg2 (Face): Face data.
+                key (list): Array [3] of edge key.
+                data (Face): Face data.
         )delim"
     );
 
 
-    SurfMesh.def("getRoot",
-        [](SurfaceMesh &mesh) -> Global&{
-            return mesh.get_simplex_up().data();
-        },
-        py::return_value_policy::reference_internal,
+    SurfMesh.def("removeVertex",
+        py::overload_cast<const std::array<int, 1>&>(&SurfaceMesh::remove<1>),
+        py::arg("key"),
         R"delim(
-            Get the global metadata.
+            Remove a vertex from the mesh.
+
+            Args:
+                key (list): Array [1] of vertex key.
 
             Returns:
-                data (:py:class:`Global`): Global mesh metadata.
+                removed (int): Number of simplices removed
         )delim"
     );
+
+
+    SurfMesh.def("removeVertex",
+        py::overload_cast<SurfaceMesh::SimplexID<1>>(&SurfaceMesh::remove<1>),
+        py::arg("key"),
+        R"delim(
+            Remove a vertex from the mesh.
+
+            Args:
+                key (:py:class:`VertexID`): SimplexID of vertex.
+
+            Returns:
+                removed (int): Number of simplices removed
+        )delim"
+    );
+
+
+    SurfMesh.def("removeEdge",
+        py::overload_cast<const std::array<int, 2>&>(&SurfaceMesh::remove<2>),
+        py::arg("key"),
+        R"delim(
+            Remove an edge from the mesh.
+
+            Args:
+                key (list): Array [2] of edge key.
+
+            Returns:
+                removed (int): Number of simplices removed
+        )delim"
+    );
+
+
+    SurfMesh.def("removeEdge",
+        py::overload_cast<SurfaceMesh::SimplexID<2>>(&SurfaceMesh::remove<2>),
+        py::arg("key"),
+        R"delim(
+            Remove an edge from the mesh.
+
+            Args:
+                key (:py:class:`EdgeID`): SimplexID of edge.
+
+            Returns:
+                removed (int): Number of simplices removed
+        )delim"
+    );
+
+
+    SurfMesh.def("removeFace",
+        py::overload_cast<const std::array<int, 3>&>(&SurfaceMesh::remove<3>),
+        py::arg("key"),
+        R"delim(
+            Remove a face from the mesh.
+
+            Args:
+                key (list): Array [3] of face key.
+
+            Returns:
+                removed (int): Number of simplices removed
+        )delim"
+    );
+
+
+    SurfMesh.def("removeFace",
+        py::overload_cast<SurfaceMesh::SimplexID<3>>(&SurfaceMesh::remove<3>),
+        py::arg("key"),
+        R"delim(
+            Remove a face from the mesh
+
+            Args:
+                key (:py:class:`FaceID`): SimplexID of face.
+
+            Returns:
+                removed (int): Number of simplices removed
+        )delim"
+    );
+
 
     /************************************
      * GET SIMPLEXID
@@ -162,6 +228,20 @@ void init_SurfaceMesh(py::module& mod){
 
             Returns:
                 SimplexID (:py:class:`FaceID`): The object.
+        )delim"
+    );
+
+
+    SurfMesh.def("getRoot",
+        [](SurfaceMesh &mesh) -> Global&{
+            return mesh.get_simplex_up().data();
+        },
+        py::return_value_policy::reference_internal,
+        R"delim(
+            Get the global metadata.
+
+            Returns:
+                data (:py:class:`Global`): Global mesh metadata.
         )delim"
     );
 

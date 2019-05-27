@@ -450,7 +450,6 @@ private:
 		return rval;
 	}
 
-private:
 	DataType  _data;
 };
 
