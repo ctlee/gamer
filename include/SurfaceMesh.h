@@ -38,12 +38,42 @@
 #include "Vertex.h"
 
 /**
+ * @brief      Type for containing root metadata
+ */
+struct Global
+{
+    /// Domain marker to be used when tetrahedralizing.
+    int   marker;
+    /// Volume constraint of the tetrahedralized domain.
+    float volumeConstraint;
+    /// flag that determines if the volume constraint is used.
+    bool  useVolumeConstraint;
+    /// Flag that determines if the mesh represents a hole or not
+    bool  ishole;
+
+    // Default constructor
+    Global(int marker=-1, float volumeConstraint=-1, bool useVolumeConstraint=false, bool ishole=false) :
+        marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
+};
+
+
+struct Edge{
+    bool selected;
+    // Default constructor
+    Edge() : Edge(0) {}
+    Edge(bool select) : selected(select) {}
+};
+
+/**
  * @brief      Properties that Faces should have
  */
 struct FaceProperties
 {
     int  marker;   /**< @brief Marker */
     bool selected; /**< @brief Selection flag */
+
+    FaceProperties(int marker, bool selected) :
+        marker(marker), selected(selected) {}
 };
 
 /**
@@ -52,7 +82,7 @@ struct FaceProperties
 struct Face : casc::Orientable, FaceProperties
 {
     /// Default constructor
-    Face() : Face(Orientable{0}, FaceProperties{0, false}) {}
+    Face() : Face(Orientable{0}, FaceProperties{-1, false}) {}
 
     /**
      * @brief      Constructor
@@ -81,46 +111,19 @@ struct Face : casc::Orientable, FaceProperties
     {}
 
     friend std::ostream& operator<<(std::ostream& output, const Face& f){
-        output  << "Face(o:" << f.orientation
-                << ";m:" << f.marker
-                << ";sel:" << std::boolalpha << f.selected << ")";
+        output  << "Face("
+                << "m:" << f.marker
+                << ";sel:" << std::boolalpha << f.selected
+                << "o:" << f.orientation << ")";
         return output;
     }
 
     std::string to_string() const{
         std::ostringstream output;
-        output  << "Face(orient:" << orientation
-                << ";m:" << marker
-                << ";sel:" << std::boolalpha << selected << ")";
+        output  << *this;
         return output.str();
     }
 
-};
-
-struct Edge{
-    bool selected;
-    // Default constructor
-    Edge() : Edge(0) {}
-    Edge(bool select) : selected(select) {}
-};
-
-/**
- * @brief      Type for containing root metadata
- */
-struct Global
-{
-    /// Domain marker to be used when tetrahedralizing.
-    int   marker;
-    /// Volume constraint of the tetrahedralized domain.
-    float volumeConstraint;
-    /// flag that determines if the volume constraint is used.
-    bool  useVolumeConstraint;
-    /// Flag that determines if the mesh represents a hole or not
-    bool  ishole;
-
-    // Default constructor
-    Global(int marker=-1, float volumeConstraint=-1, bool useVolumeConstraint=false, bool ishole=false) :
-        marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
 };
 
 /**
@@ -207,7 +210,6 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  * @return     Returns a Vector normal to the face.
  */
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
-
 
 
 namespace surfacemesh_detail{

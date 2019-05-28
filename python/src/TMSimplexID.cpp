@@ -25,19 +25,24 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "SurfaceMesh.h"
+#include "TetMesh.h"
 
 namespace py = pybind11;
 
-using SMVertexID = SurfaceMesh::SimplexID<1>;
-using SMEdgeID = SurfaceMesh::SimplexID<2>;
-using SMFaceID = SurfaceMesh::SimplexID<3>;
+using TMVertexID = TetMesh::SimplexID<1>;
+using TMEdgeID = TetMesh::SimplexID<2>;
+using TMFaceID = TetMesh::SimplexID<3>;
+using TMCellID = TetMesh::SimplexID<4>;
 
-void init_SMSimplexID(py::module& mod){
-    // Bindings for SMVertexID
-    py::class_<SMVertexID> vid(mod, "VertexID",
+void init_TMSimplexID(py::module& mod){
+
+
+    /************************************
+     *  Binding TMVertexID
+     ************************************/
+    py::class_<TMVertexID> vid(mod, "VertexID",
         R"delim(
-            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<1> object.
+            Wrapper around :cpp:type:`TetMesh`::SimplexID<1> object.
 
             This is a token to represent a 1-simplex object. It serves as a
             reference to the actual object.
@@ -46,7 +51,7 @@ void init_SMSimplexID(py::module& mod){
     vid.def(py::init<>());
 
     vid.def("data",
-            py::overload_cast<>(&SMVertexID::data),
+            py::overload_cast<>(&TMVertexID::data),
             py::return_value_policy::reference_internal,
             R"delim(
                 Access the data stored on the 1-simplex.
@@ -56,7 +61,7 @@ void init_SMSimplexID(py::module& mod){
             )delim"
         );
     vid.def("isValid",
-        [](const SMVertexID& lhs) {return lhs != nullptr;},
+        [](const TMVertexID lhs) {return lhs != nullptr;},
         R"delim(
             Checks if VertexID refers to a valid simplex.
 
@@ -65,23 +70,25 @@ void init_SMSimplexID(py::module& mod){
         )delim"
     );
     vid.def("__repr__",
-        [](const SMVertexID vid){
+        [](const TMVertexID vid){
             std::ostringstream out;
             out << vid;
             return out.str();
         }
     );
 
-    // Bindings for SMEdgeID
-    py::class_<SMEdgeID> eid(mod, "EdgeID",
+    /************************************
+     *  Binding TMEdgeID
+     ************************************/
+    py::class_<TMEdgeID> eid(mod, "EdgeID",
         R"delim(
-            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<2> object
+            Wrapper around :cpp:type:`TetMesh`::SimplexID<2> object
 
             This is a token to represent a 2-simplex object. It serves as a
             reference to the actual object.
         )delim"
     );
-    eid.def("data", py::overload_cast<>(&SMEdgeID::data),
+    eid.def("data", py::overload_cast<>(&TMEdgeID::data),
         py::return_value_policy::reference_internal,
             R"delim(
                 Access the data stored on the edge.
@@ -91,7 +98,7 @@ void init_SMSimplexID(py::module& mod){
             )delim"
     );
     eid.def("isValid",
-        [](const SMEdgeID& lhs) {return lhs != nullptr;},
+        [](const TMEdgeID lhs) {return lhs != nullptr;},
         R"delim(
             Checks if EdgeID refers to a valid simplex.
 
@@ -100,24 +107,26 @@ void init_SMSimplexID(py::module& mod){
         )delim"
     );
     eid.def("__repr__",
-        [](const SMEdgeID eid){
+        [](const TMEdgeID eid){
             std::ostringstream out;
             out << eid;
             return out.str();
         }
     );
 
-    // Bindings for SMFaceID
-    py::class_<SMFaceID> fid(mod, "FaceID",
+    /************************************
+     *  Binding TMFaceID
+     ************************************/
+    py::class_<TMFaceID> fid(mod, "FaceID",
         R"delim(
-            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<3> object
+            Wrapper around :cpp:type:`TetMesh`::SimplexID<3> object
 
             This is a token to represent a 3-simplex object. It serves as a
             reference to the actual object.
         )delim"
     );
     fid.def("data",
-        py::overload_cast<>(&SMFaceID::data),
+        py::overload_cast<>(&TMFaceID::data),
         py::return_value_policy::reference_internal,
         R"delim(
             Access the data stored on the 3-simplex
@@ -127,7 +136,7 @@ void init_SMSimplexID(py::module& mod){
         )delim"
     );
     fid.def("isValid",
-        [](const SMFaceID& lhs) {return lhs != nullptr;},
+        [](const TMFaceID lhs) {return lhs != nullptr;},
         R"delim(
             Checks if FaceID refers to a valid simplex.
 
@@ -136,9 +145,48 @@ void init_SMSimplexID(py::module& mod){
         )delim"
     );
     fid.def("__repr__",
-        [](const SMFaceID fid){
+        [](const TMFaceID fid){
             std::ostringstream out;
             out << fid;
+            return out.str();
+        }
+    );
+
+
+    /************************************
+     *  Binding TMCellID
+     ************************************/
+    py::class_<TMCellID> cid(mod, "CellID",
+        R"delim(
+            Wrapper around :cpp:type:`TetMesh`::SimplexID<4> object
+
+            This is a token to represent a 4-simplex object. It serves as a
+            reference to the actual object.
+        )delim"
+    );
+    cid.def("data",
+        py::overload_cast<>(&TMCellID::data),
+        py::return_value_policy::reference_internal,
+        R"delim(
+            Access the data stored on the 4-simplex
+
+            Returns:
+                :py:class:`Cell`: Cell data
+        )delim"
+    );
+    cid.def("isValid",
+        [](const TMCellID lhs) {return lhs != nullptr;},
+        R"delim(
+            Checks if CellID refers to a valid simplex.
+
+            Returns:
+                bool: True if valid.
+        )delim"
+    );
+    cid.def("__repr__",
+        [](const TMCellID cid){
+            std::ostringstream out;
+            out << cid;
             return out.str();
         }
     );

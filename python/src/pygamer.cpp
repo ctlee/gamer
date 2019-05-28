@@ -26,12 +26,13 @@
 #include <pybind11/stl.h>
 
 #include "SurfaceMesh.h"
+#include "TetMesh.h"
 
 namespace py = pybind11;
 
 // Forward function declarations
-void init_SMGlobal(py::module &);
 void init_Vector(py::module &);
+void init_SMGlobal(py::module &);
 void init_SMVertex(py::module &);
 void init_SMEdge(py::module &);
 void init_SMFace(py::module &);
@@ -39,13 +40,23 @@ void init_SMSimplexID(py::module &);
 void init_SMFunctions(py::module &);
 void init_SurfaceMesh(py::module &);
 
+void init_TMGlobal(py::module &);
+void init_TMVertex(py::module &);
+void init_TMEdge(py::module &);
+void init_TMFace(py::module &);
+void init_TMCell(py::module &);
+void init_TMSimplexID(py::module &);
+void init_TetMesh(py::module &);
+
 // Initialize the main `pygamer` module
 PYBIND11_MODULE(pygamer, pygamer) {
     pygamer.doc() = "Python wrapper around the GAMer C++ library.";
 
     init_Vector(pygamer);           // Vector class
 
-    // pygamer.surfacemesh submodule defs
+    /************************************
+     *  SURFACEMESH SUBMODULE
+     ************************************/
     py::module SurfMeshMod = pygamer.def_submodule("surfacemesh",
         "Submodule containing SurfaceMesh along with related objects and methods.");
 
@@ -59,6 +70,23 @@ PYBIND11_MODULE(pygamer, pygamer) {
     init_SurfaceMesh(SurfMeshMod);  // SurfaceMesh class
 
 
+    /************************************
+     *  TETMESH SUBMODULE
+     ************************************/
+    py::module TetMeshMod = pygamer.def_submodule("tetmesh",
+        "Submodule containing TetMesh along with related objects and methods.");
+
+    // WARNING: the order of initialization matters for dependent calls.
+    init_TMVertex(TetMeshMod);     // Vertex class
+    init_TMEdge(TetMeshMod);       // Edge class
+    init_TMFace(TetMeshMod);       // Face class
+    init_TMCell(TetMeshMod);       // Cell class
+    init_TMSimplexID(TetMeshMod);
+    init_TetMesh(TetMeshMod);
+
+    /************************************
+     *  PYGAMER FUNC/OBJECT DEFS
+     ************************************/
     pygamer.def("readOFF", &readOFF,
         py::arg("filename"),
         R"delim(
@@ -72,7 +100,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
     );
 
 
-    pygamer.def("writeOFF", &writeOFF,
+    pygamer.def("writeOFF", py::overload_cast<const std::string&, const SurfaceMesh&>(&writeOFF),
         py::arg("filename"), py::arg("mesh"),
         R"delim(
             Write mesh to file in OFF format
@@ -80,6 +108,18 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Args:
                 filename (str): Filename to write to
                 mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
+        )delim"
+    );
+
+
+    pygamer.def("writeOFF", py::overload_cast<const std::string&, const TetMesh&>(&writeOFF),
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in OFF format
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
         )delim"
     );
 
@@ -108,4 +148,53 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+
+    pygamer.def("writeVTK", &writeVTK,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in VTK format
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
+        )delim"
+    );
+
+
+    pygamer.def("writeDolfin", &writeDolfin,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in Dolfin format
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
+        )delim"
+    );
+
+
+    pygamer.def("writeTriangle", &writeTriangle,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in Triangle format
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
+        )delim"
+    );
+
+
+    pygamer.def("readDolfin", &readDolfin,
+        py::arg("filename"),
+        R"delim(
+            Read Dolfin format mesh into mesh
+
+            Args:
+                filename (str): Filename to write to
+
+            Returns:
+                :py:class:`TetMesh`: Tetrahedral mesh
+        )delim"
+    );
 }

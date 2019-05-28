@@ -21,6 +21,7 @@
 
 list(APPEND PYGAMER_SOURCES
     "src/Vector.cpp"
+
     "src/SMGlobal.cpp"
     "src/SMVertex.cpp"
     "src/SMEdge.cpp"
@@ -28,6 +29,15 @@ list(APPEND PYGAMER_SOURCES
     "src/SMSimplexID.cpp"
     "src/SMFunctions.cpp"
     "src/SurfaceMesh.cpp"
+
+    "src/TMGlobal.cpp"
+    "src/TMVertex.cpp"
+    "src/TMEdge.cpp"
+    "src/TMFace.cpp"
+    "src/TMCell.cpp"
+    "src/TMSimplexID.cpp"
+    "src/Tetmesh.cpp"
+
     "src/pygamer.cpp"
     )
 

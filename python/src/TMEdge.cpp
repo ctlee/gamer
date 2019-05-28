@@ -1,7 +1,7 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2018
+ * Copyright (C) 2016-2019
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
  *
@@ -22,34 +22,19 @@
  * ***************************************************************************
  */
 
-#pragma once
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-#include "tensor.h"
+#include "TetMesh.h"
 
-// The number of rings to use to compute local structure tensor
-#define RINGS 1
+namespace py = pybind11;
 
-/** @brief Blurring blobyness used in conversion from PDB/PQR to 3D volumes */
-#define BLOBBYNESS        -0.2f
-
-/** @brief Discretization rate of 3D volumes */
-#define DIM_SCALE         1.99
-
-/** @brief The minimal volumes (in voxels) of islands to be removed */
-#define MIN_VOLUME        333333
-
-#ifdef SINGLE
-#define REAL float
-#else
-#define REAL double
-#endif
-
-using Vector = tensor<REAL,3,1>;
-using d3Vector = tensor<double,3,1>;
-using f3Vector = tensor<float,3,1>;
-using i3Vector = tensor<int,3,1>;
-
-template <class T>
-std::size_t Vect2Index(const T i, const T j, const T k, const i3Vector& dim){
-    return k*dim[0]*dim[1] + j*dim[0] + i;
+void init_TMEdge(py::module& mod){
+    py::class_<tetmesh::Edge> edge(mod, "Edge",
+        R"delim(
+            Wrapper around a :cpp:class:`Edge`.
+        )delim"
+    );
+    edge.def(py::init<>(), "Default constructor.");
+    edge.def_readwrite("selected", &tetmesh::Edge::selected, "Selection status of edge.");
 }

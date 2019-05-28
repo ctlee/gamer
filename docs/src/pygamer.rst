@@ -9,3 +9,4 @@ Python API Reference
 
    pygamer
    pygamer.surfacemesh
+   pygamer.tetmesh
