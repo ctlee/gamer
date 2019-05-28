@@ -26,8 +26,8 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 # Project GAMer
 #####################################################################
 set(PRERELEASE ON)
-set(PRE_VERSION beta)
-project(GAMer VERSION 2.0.1)
+set(PRE_VERSION alpha)
+project(GAMer VERSION 2.0.2)
 
 #####################################################################
 # Options
@@ -127,15 +127,17 @@ target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
 # SHARED LIBRARY
 add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
 target_link_libraries(gamershared PUBLIC gamer_objlib)
-install(TARGETS gamershared DESTINATION lib)
+set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
 
 # STATIC LIBRARY
 add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
-install(TARGETS gamerstatic DESTINATION lib)
 target_link_libraries(gamerstatic PUBLIC gamer_objlib)
+set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
 
-# Install headers
-install(DIRECTORY include DESTINATION include FILES_MATCHING PATTERN "*.h")
+include(GNUInstallDirs)
+# Install targets and headers
+install(TARGETS gamershared gamerstatic)
+install(DIRECTORY include/gamer DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h")
 
 #####################################################################
 # PYTHON EXTENSION AND BLENDER ADDON

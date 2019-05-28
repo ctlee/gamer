@@ -27,8 +27,8 @@
 #include <bitset>
 #include <type_traits>
 #include <queue>
-#include "gamer.h"
-#include "SurfaceMesh.h"
+#include "gamer/gamer.h"
+#include "gamer/SurfaceMesh.h"
 
 
 /// Marching cubes tables

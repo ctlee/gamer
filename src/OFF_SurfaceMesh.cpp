@@ -23,7 +23,7 @@
  */
 
 
-#include "SurfaceMesh.h"
+#include "gamer/SurfaceMesh.h"
 #include <string>
 #include <iostream>
 #include <fstream>

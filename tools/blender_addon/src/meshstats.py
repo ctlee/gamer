@@ -407,9 +407,9 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = np.zeros(gmesh.sizeVertices())
-            for i, vID in enumerate(gmesh.vertexIDs()):
-                curvatures[i] = g.getMeanCurvature(gmesh, vID)
+            curvatures = np.zeros(gmesh.nVertices)
+            for i, vID in enumerate(gmesh.vertexIDs):
+                curvatures[i] = gmesh.getMeanCurvature(vID)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)
@@ -431,9 +431,9 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def gaussian_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = np.zeros(gmesh.sizeVertices())
-            for i, vID in enumerate(gmesh.vertexIDs()):
-                curvatures[i] = g.getGaussianCurvature(gmesh, vID)
+            curvatures = np.zeros(gmesh.nVertices)
+            for i, vID in enumerate(gmesh.vertexIDs):
+                curvatures[i] = gmesh.getGaussianCurvature(vID)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)
@@ -457,9 +457,9 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         kappa_h = 20 # bending rigidity, mean curvature [units: kb*T]
         kappa_g = 0.8*kappa_h # bending rigidity, gaussian curvature [units: kb*T]
         if gmesh:
-            energy = np.zeros(gmesh.sizeVertices())
-            for i, vID in enumerate(gmesh.vertexIDs()):
-                energy[i] = 2*kappa_h*g.getMeanCurvature(gmesh, vID)**2 + kappa_g*g.getGaussianCurvature(gmesh, vID)
+            energy = np.zeros(gmesh.nVertices)
+            for i, vID in enumerate(gmesh.vertexIDs):
+                energy[i] = 2*kappa_h*gmesh.getMeanCurvature(vID)**2 + kappa_g*gmesh.getGaussianCurvature(vID)
 
             colors = getColor(energy, 'bgr', minV=self.minEnergy,
                 maxV=self.maxEnergy, percentTruncate=False)

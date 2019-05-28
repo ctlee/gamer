@@ -25,7 +25,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "TetMesh.h"
+#include "gamer/TetMesh.h"
 
 namespace py = pybind11;
 
@@ -356,8 +356,6 @@ void init_TetMesh(py::module& mod){
     /************************************
      *  UTILITY
      ************************************/
-    TetMeshCls.def("__repr__", &print, "Pretty print the mesh.");
-
     TetMeshCls.def_property_readonly("nVertices",
         py::overload_cast<>(&TetMesh::size<1>, py::const_),
         R"delim(

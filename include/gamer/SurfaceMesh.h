@@ -35,7 +35,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
-#include "Vertex.h"
+#include "gamer/Vertex.h"
 
 /**
  * @brief      Type for containing root metadata
@@ -114,7 +114,7 @@ struct Face : casc::Orientable, FaceProperties
         output  << "Face("
                 << "m:" << f.marker
                 << ";sel:" << std::boolalpha << f.selected
-                << "o:" << f.orientation << ")";
+                << ";o:" << f.orientation << ")";
         return output;
     }
 

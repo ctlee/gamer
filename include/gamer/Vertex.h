@@ -29,8 +29,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "gamer.h"
-#include "tensor.h"
+#include "gamer/gamer.h"
+#include "gamer/tensor.h"
 
 
 /**

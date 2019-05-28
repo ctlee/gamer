@@ -35,8 +35,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
-#include "SurfaceMesh.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/Vertex.h"
 
 
 namespace surfacemesh_detail{

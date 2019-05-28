@@ -25,8 +25,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "SurfaceMesh.h"
-#include "TetMesh.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/TetMesh.h"
 
 namespace py = pybind11;
 
@@ -66,7 +66,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
     init_SMEdge(SurfMeshMod);       // Edge class
     init_SMFace(SurfMeshMod);       // Face class
     init_SMSimplexID(SurfMeshMod);  // SurfaceMesh::SimplexID class
-    init_SMFunctions(SurfMeshMod);  // Functions pyg.sm.SM.*
+    init_SMFunctions(SurfMeshMod);  // Functions pyg.sm.*
     init_SurfaceMesh(SurfMeshMod);  // SurfaceMesh class
 
 
@@ -195,6 +195,12 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
             Returns:
                 :py:class:`TetMesh`: Tetrahedral mesh
+        )delim"
+    );
+
+    pygamer.def("makeTetMesh", &makeTetMesh,
+        R"delim(
+            Call tetgen to make a TetMesh.
         )delim"
     );
 }

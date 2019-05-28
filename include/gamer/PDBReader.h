@@ -34,8 +34,8 @@
 #include <fstream>
 #include <array>
 
-#include "gamer.h"
-#include "Vertex.h"
+#include "gamer/gamer.h"
+#include "gamer/Vertex.h"
 
 
 namespace detail

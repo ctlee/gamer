@@ -349,7 +349,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 mesh_formats.append("paraview")
 
             # Vector of SurfaceMeshes
-            gmeshes = g.VectorSM()
+            # gmeshes = g.VectorSM()
+            gmeshes = list()
             for (obj_name,tet_domain) in [ (d.object_name,d) for d in self.domain_list ]:
                 print ( "obj_name = " + obj_name + ", tet_domain = " + str(tet_domain) )
 
@@ -362,19 +363,19 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 if not gmesh:
                     print("blenderToGamer returned a gmesh of None")
                 else:
-                    # Necessary to prevent garbage collection of gmesh when
-                    # passing into GAMer
-                    gmesh.thisown = 0;
+                    # # Necessary to prevent garbage collection of gmesh when
+                    # # passing into GAMer
+                    # gmesh.thisown = 0;
+
                     # # Collect boundary information
                     # for boundary_name, boundary in zip(boundaries.keys(), boundaries.values()):
                     #     boundary_markers.append((boundary["marker"], boundary_name))
 
-                    print("Mesh %s: num verts: %d numfaces: %d" %(obj_name, gmesh.sizeVertices(), gmesh.sizeFaces()))
+                    print("Mesh %s: num verts: %d numfaces: %d" %(obj_name, gmesh.nVertices, gmesh.nFaces))
                     # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
                     print("Closed: %d; Marker: %d"%(d.is_hole, d.marker))
 
                     globalInfo = gmesh.getRoot()
-                    globalInfo.closed = True
                     globalInfo.ishole = d.is_hole
                     globalInfo.marker = d.marker
                     globalInfo.useVolumeConstraint = d.constrain_vol
@@ -383,7 +384,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
 
                     # Add the mesh
-                    gmeshes.push_back(gmesh)
+                    gmeshes.append(gmesh)
 
             # Tetrahedralize mesh
             if len(gmeshes) > 0:
@@ -397,7 +398,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 print("TetGen quality string: " + quality_str)
                 print("========================================")
                 # Do the tetrahedralization
-                tetmesh = g.MakeTetMesh(gmeshes, quality_str)
+                tetmesh = g.makeTetMesh(gmeshes, quality_str)
 
                 # for i in range(0,5):
                 #     print("Laplacian smooth iteration.")

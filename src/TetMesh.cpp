@@ -39,7 +39,7 @@
 
 #include <casc/casc>
 
-#include "TetMesh.h"
+#include "gamer/TetMesh.h"
 
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<SurfaceMesh*> &surfmeshes,

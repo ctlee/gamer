@@ -25,8 +25,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "TetMesh.h"
-#include "Vertex.h"
+#include "gamer/TetMesh.h"
+#include "gamer/Vertex.h"
 
 namespace py = pybind11;
 

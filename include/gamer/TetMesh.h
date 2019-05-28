@@ -30,15 +30,15 @@
 #include <unordered_set>
 #include <utility>
 
-#include <gamer.h>
+#include <gamer/gamer.h>
 
 #define TETLIBRARY
 #include <tetgen.h>
 
 #include <casc/casc>
 
-#include "Vertex.h"
-#include "SurfaceMesh.h"
+#include "gamer/Vertex.h"
+#include "gamer/SurfaceMesh.h"
 
 namespace tetmesh
 {

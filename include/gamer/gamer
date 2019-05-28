@@ -1,7 +1,7 @@
 /*
  * ***************************************************************************
  * This file is part of the GAMer software.
- * Copyright (C) 2016-2019
+ * Copyright (C) 2016-2018
  * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
  *    and Michael Holst
  *
@@ -22,24 +22,13 @@
  * ***************************************************************************
  */
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
+#include "gamer/gamer.h"
+#include "gamer/tensor.h"
+#include "gamer/MarchingCube.h"
+#include "gamer/PDBReader.h"
+#include "gamer/stringutil.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/tensor.h"
 #include "gamer/TetMesh.h"
-
-namespace py = pybind11;
-using TetFace = tetmesh::Face;
-
-
-void init_TMFace(py::module& mod){
-    py::class_<TetFace> face(mod, "Face",
-        R"delim(
-            Wrapper around a :cpp:class:`Face`.
-        )delim"
-    );
-    face.def(py::init<>(), "Default constructor");
-    face.def(py::init<int, bool>(), "Construct with marker and selection");
-    face.def_readwrite("marker", &TetFace::marker, "Boundary marker value");
-    face.def_readwrite("selected", &TetFace::selected, "Selection status of face");
-    face.def("__repr__", &TetFace::to_string, "Pretty print");
-}
+#include "gamer/Vertex.h"

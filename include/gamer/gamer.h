@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "tensor.h"
+#include "gamer/tensor.h"
 
 // The number of rings to use to compute local structure tensor
 #define RINGS 1

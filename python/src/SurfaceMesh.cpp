@@ -25,8 +25,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "SurfaceMesh.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/Vertex.h"
 
 namespace py = pybind11;
 
@@ -46,6 +46,17 @@ void init_SurfaceMesh(py::module& mod){
     SurfMeshCls.def("addVertex",
         py::overload_cast<const Vertex&>(&SurfaceMesh::add_vertex),
         py::arg("data"),
+        R"delim(
+            Add a vertex to the mesh without specifying the key.
+        )delim"
+    );
+
+
+    SurfMeshCls.def("addVertex",
+        [](SurfaceMesh& mesh, double x, double y, double z, int marker, bool sel){
+            mesh.add_vertex(Vertex(x,y,z,marker,sel));
+        },
+        py::arg("x"), py::arg("y"), py::arg("z"), py::arg("marker"), py::arg("selected"),
         R"delim(
             Add a vertex to the mesh without specifying the key.
         )delim"
@@ -288,8 +299,6 @@ void init_SurfaceMesh(py::module& mod){
     /************************************
      *  UTILITY
      ************************************/
-    SurfMeshCls.def("__repr__", &print, "Pretty print the mesh.");
-
     SurfMeshCls.def_property_readonly("nVertices",
         py::overload_cast<>(&SurfaceMesh::size<1>, py::const_),
         R"delim(
@@ -420,8 +429,8 @@ void init_SurfaceMesh(py::module& mod){
         );
 
 
-    SurfMeshCls.def("smoothMesh", &smoothMesh,
-        py::arg("maxIter"), py::arg("preserveRidges"), py::arg("verbose"),
+    SurfMeshCls.def("smooth", &smoothMesh,
+        py::arg("max_iter")=6, py::arg("preserve_ridges")=false, py::arg("verbose")=true,
         R"delim(
             Perform mesh smoothing.
 
@@ -437,7 +446,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("coarse", &coarse,
-        py::arg("coarseRate"),
+        py::arg("rate"),
         py::arg("flatRate"),
         py::arg("denseWeight"),
         R"delim(
@@ -447,7 +456,7 @@ void init_SurfaceMesh(py::module& mod){
             retriangulates the resulting hole.
 
             Args:
-                coarseRate (float): Threshold value for coarsening
+                rate (float): Threshold value for coarsening
                 flatRate (float): Priority of decimating flat regions
                 denseWeight (float): Priority of decimating dense regions
         )delim"
@@ -458,7 +467,7 @@ void init_SurfaceMesh(py::module& mod){
         [](SurfaceMesh& mesh, double rate, int niter){
             for(int i = 0; i < niter; ++i) coarseIT(mesh, rate, 0.5, 0);
         },
-        py::arg("rate"), py::arg("numiter"),
+        py::arg("rate")=0.016, py::arg("numiter")=1,
         R"delim(
             Coarsen flat regions of a surface mesh.
 
@@ -473,7 +482,7 @@ void init_SurfaceMesh(py::module& mod){
         [](SurfaceMesh& mesh, double rate, int niter){
             for(int i = 0; i < niter; ++i) coarseIT(mesh, rate, 0, 10);
         },
-        py::arg("rate"), py::arg("numiter"),
+        py::arg("rate")=1.6, py::arg("numiter")=1,
         R"delim(
             Coarsen dense regions of a surface mesh.
 
@@ -497,6 +506,15 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+
+    SurfMeshCls.def("getVolume", &getVolume,
+        R"delim(
+            Get the volume of the surface mesh.
+
+            Returns:
+                float: Volume of the mesh
+        )delim"
+    );
 
     /************************************
      *  ORIENTATION

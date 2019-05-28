@@ -2,7 +2,7 @@
 #include <map>
 #include <cmath>
 #include <random>
-#include "Vertex.h"
+#include "gamer/Vertex.h"
 #include "gtest/gtest.h"
 
 
