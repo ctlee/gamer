@@ -136,8 +136,13 @@ set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
 
 include(GNUInstallDirs)
 # Install targets and headers
-install(TARGETS gamershared gamerstatic)
+install(TARGETS gamershared gamerstatic
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 install(DIRECTORY include/gamer DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h")
+
 
 #####################################################################
 # PYTHON EXTENSION AND BLENDER ADDON

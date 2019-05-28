@@ -36,7 +36,7 @@ list(APPEND PYGAMER_SOURCES
     "src/TMFace.cpp"
     "src/TMCell.cpp"
     "src/TMSimplexID.cpp"
-    "src/Tetmesh.cpp"
+    "src/TetMesh.cpp"
 
     "src/pygamer.cpp"
     )
