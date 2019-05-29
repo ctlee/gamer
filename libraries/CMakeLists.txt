@@ -42,7 +42,8 @@ endif()
 ###########################
 FetchContent_Declare(
     pybind11
-    URL https://github.com/pybind/pybind11/archive/v2.2.4.tar.gz
+    GIT_REPOSITORY  https://github.com/pybind/pybind11.git
+    GIT_TAG         v2.2.4
     SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
     BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build"
 )
@@ -67,7 +68,8 @@ endif()
 if(GETEIGEN)
     FetchContent_Declare(
         eigen
-        URL https://github.com/eigenteam/eigen-git-mirror/archive/3.3.7.tar.gz
+        GIT_REPOSITORY  https://github.com/eigenteam/eigen-git-mirror.git
+        GIT_TAG         3.3.7
         SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-src"
         BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-build"
     )
