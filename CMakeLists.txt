@@ -39,7 +39,7 @@ option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
 option(BLENDER_PLUGIN_INSTALL "Have CMake install the Blender plugin?" OFF)
 option(BLENDER_VERSION_STRICT "Have CMake verify compatibility of plugin with Blender?" OFF)
 
-option(GAMER_TEST "Build the GAMer tests?" OFF)
+option(GAMER_TESTS "Build the GAMer tests?" OFF)
 option(GETEIGEN "Download Eigen?" ON)
 
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
@@ -53,7 +53,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Define where to put the libraries and binaries
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+# set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 # Add path to custom modules
@@ -72,8 +72,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-# Required for linking correctly on Windows
-if(WIN32)
+# Required to tell MSVC to export symbols
+if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
@@ -132,7 +132,10 @@ set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
 # STATIC LIBRARY
 add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
 target_link_libraries(gamerstatic PUBLIC gamer_objlib)
-set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
+if(NOT WIN32)
+    # Shared and static libs will clobber each other on Windows
+    set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
+endif()
 
 include(GNUInstallDirs)
 # Install targets and headers

@@ -360,7 +360,7 @@ std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh){
         for(auto vertexID : mesh.get_level_id<1>()){
             center += *vertexID;
         }
-        center /= mesh.size<1>();
+        center /= static_cast<double>(mesh.size<1>());
 
         for(auto vertexID : mesh.get_level_id<1>()){
             Vector tmp = *vertexID - center;

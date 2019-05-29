@@ -24,7 +24,9 @@ include(FetchContent)
 FetchContent_Declare(
     googletest
     # URL https://github.com/google/googletest/archive/master.zip
-    URL https://github.com/google/googletest/archive/release-1.8.1.tar.gz
+    # URL https://github.com/google/googletest/archive/release-1.8.1.tar.gz
+    GIT_REPOSITORY    https://github.com/google/googletest.git
+    GIT_TAG           release-1.8.1
     SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
     BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
 )

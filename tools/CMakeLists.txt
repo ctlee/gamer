@@ -43,7 +43,15 @@ endif()
 # If strict then ensure system Python matches Blender's closely
 if(_BPY_STRICT)
     find_package(Blender REQUIRED)
-    if(NOT PYTHON_VERSION VERSION_EQUAL BLENDER_PYTHON_VERSION)
+    set(_PYTHON_CMP_VERSION "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
+        )
+    set(_BPY_CMP_VERSION "${BLENDER_PYTHON_VERSION_MAJOR}.${BLENDER_PYTHON_VERSION_MINOR}")
+    if(NOT WIN32)
+        # Linux and Mac do not link the python library and are thus less picky
+        set(_PYTHON_CMP_VERSION PYTHON_VERSION_MAJOR)
+        set(_BPY_CMP_VERSION BLENDER_PYTHON_VERSION_MAJOR)
+    endif()
+    if((WIN32 AND (NOT PYTHON_VERSION VERSION_EQUAL BLENDER_PYTHON_VERSION)))
         message(FATAL_ERROR
             "Blender Addon Config Failure: "
             "Blender embedded Python version (${BLENDER_PYTHON_VERSION}) "
@@ -108,7 +116,7 @@ add_custom_target(zip_plugin
     ALL
     COMMAND ${CMAKE_COMMAND} -E tar "cfv"
         ../${_ZIPNAME} --format=zip
-        ./gamer_addon
+        gamer_addon
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/plugin
     COMMENT "Zipping up addon components"
     VERBATIM
