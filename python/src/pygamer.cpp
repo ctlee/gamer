@@ -27,6 +27,7 @@
 
 #include "gamer/SurfaceMesh.h"
 #include "gamer/TetMesh.h"
+#include "gamer/PDBReader.h"
 
 namespace py = pybind11;
 
@@ -99,6 +100,28 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+
+    pygamer.def("readPDB_molsurf", &readPDB_molsurf,
+        py::arg("filename"),
+        R"delim(
+            Read a pdb file into a mesh.
+
+            Args:
+                filename (str): PDB file to read.
+        )delim"
+    );
+
+    pygamer.def("readPDB_gauss", &readPDB_gauss,
+        py::arg("filename"), py::arg("blobbyness"), py::arg("isovalue"),
+        R"delim(
+            Read a pdb file into a mesh.
+
+            Args:
+                filename (str): PDB file to read.
+                blobbyness (float): Blobbiness of the Gaussian
+                isovalue (float): The isocontour value to mesh
+        )delim"
+    );
 
     pygamer.def("writeOFF", py::overload_cast<const std::string&, const SurfaceMesh&>(&writeOFF),
         py::arg("filename"), py::arg("mesh"),

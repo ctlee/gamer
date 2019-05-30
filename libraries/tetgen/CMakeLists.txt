@@ -39,6 +39,7 @@ endif()
 # OBJECT LIBRARY: compiles the sources only once
 add_library(tet_objlib OBJECT tetgen.cxx predicates.cxx)
 target_compile_definitions(tet_objlib PRIVATE TETLIBRARY ${COMPILE_DEFS})
+target_compile_options(tet_objlib PRIVATE -w)   # Suppress warnings
 target_include_directories(tet_objlib INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>

@@ -63,6 +63,7 @@ if(NOT GETEIGEN)
         message(FATAL_ERROR "Could not find required library Eigen. Please append -DGETEIGEN=true to your cmake call and I will download Eigen for you.")
     endif()
     add_library(eigen ALIAS Eigen3::Eigen)
+    target_compile_options(eigen PRIVATE -w)   # Suppress warnings
 endif()
 
 if(GETEIGEN)
@@ -78,8 +79,10 @@ if(GETEIGEN)
         FetchContent_Populate(eigen)
         add_library (eigen INTERFACE)
         target_include_directories(eigen INTERFACE $<BUILD_INTERFACE:${eigen_SOURCE_DIR}>)
+        target_compile_options(eigen INTERFACE -w)   # Suppress warnings
     endif()
 endif()
+
 
 ###########################
 # Tetgen
