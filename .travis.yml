@@ -44,28 +44,11 @@ install:
 - |
   # Configure
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-    cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYTHONEXT=on -A x64 ..
+    cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYGAMER=on -A x64 ..
     cmake --build .
   else
-    cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYTHONEXT=on ..
+    cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYGAMER=on ..
     cmake --build . -- -j2
   fi
 script:
 - ctest -V
-after_success:
-- |
-  if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then
-    brew install doxygen
-    brew install graphviz
-    cmake ..
-    make doxy_docs
-  fi
-deploy:
-  provider: pages
-  local-dir: build/html
-  skip-cleanup: true
-  github-token: "$GITHUB_TOKEN"
-  keep-history: false
-  on:
-    branch: master
-    condition: "$TRAVIS_OS_NAME == osx"

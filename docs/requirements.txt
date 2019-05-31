@@ -1,3 +1,4 @@
 cmake
 breathe
 exhale
+sphinx-issues

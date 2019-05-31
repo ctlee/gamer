@@ -54,6 +54,10 @@ if(SPHINX_FOUND)
         "${CMAKE_CURRENT_BINARY_DIR}/conf.py"
         @ONLY)
 
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/conf.py"
+        @ONLY)
+
     add_custom_target(sphinx_docs
         ${SPHINX_EXECUTABLE}
             -M html

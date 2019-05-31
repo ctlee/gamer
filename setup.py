@@ -51,7 +51,7 @@ class CMakeBuild(build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cmake_args = ['-DBUILD_PYTHONEXT=ON',
+        cmake_args = ['-DBUILD_PYGAMER=ON',
                       '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
 
@@ -76,7 +76,7 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 setup(
-    name='gamer',
+    name='pygamer',
     version='2.0.1',
     author='Christopher T. Lee',
     author_email='ctlee@ucsd.edu',

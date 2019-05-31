@@ -10,9 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('@CMAKE_BINARY_DIR@/lib/'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('@CMAKE_BINARY_DIR@/lib/'))
+
+import pygamer
 
 # -- Project information -----------------------------------------------------
 
@@ -20,8 +22,8 @@ project = '@CMAKE_PROJECT_NAME@'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-# The full version, including alpha/beta/rc tags
-release = '@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@'
+version = '@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@'
+release = version
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,7 +34,11 @@ extensions = [
 'sphinx.ext.autosummary',
 'sphinx.ext.napoleon',
 'sphinx.ext.intersphinx',
+'sphinx_issues'
 ]
+
+# Github repo
+issues_github_path = 'ctlee/gamer'
 
 if(@DOXYGEN_TO_SPHINX@):
     extensions.extend(['breathe', 'exhale'])
@@ -43,18 +49,16 @@ breathe_default_project = "gamer_project"
 
 # -- Configuration for exhale ------------------------------------------------
 exhale_args = {
-    # These arguments are required
     "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/src/_cppapi",
     "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
-    "doxygenStripFromPath":  "..",
-    # Suggested optional arguments
+    "doxygenStripFromPath":  "@CMAKE_SOURCE_DIR@",
+    "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
-    # TIP: if using the sphinx-bootstrap-theme, you need
-    # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
     "exhaleDoxygenStdin":    "INPUT = @PROJECT_SOURCE_DIR@/include"
 }
+
 
 autosummary_generate = True
 
@@ -71,6 +75,13 @@ napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
 
+# If true, '()' will be appended to :func: etc. cross-reference text.
+add_function_parentheses = True
+
+# If true, sectionauthor and moduleauthor directives will be shown in the
+# output. They are ignored by default.
+show_authors = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/src/_templates']
 
@@ -78,7 +89,6 @@ templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/src/_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates']
-
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -100,5 +110,3 @@ html_context = {
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
-
-autodoc_mock_imports = ["bpy"]

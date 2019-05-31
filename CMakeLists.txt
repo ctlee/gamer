@@ -34,7 +34,7 @@ project(GAMer VERSION 2.0.2)
 #####################################################################
 option(SINGLE "Use single precision floating point numbers?" OFF)
 
-option(BUILD_PYTHONEXT "Build GAMer python extension?" OFF)
+option(BUILD_PYGAMER "Build GAMer python extension?" OFF)
 option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
 option(BLENDER_PLUGIN_INSTALL "Have CMake install the Blender plugin?" OFF)
 option(BLENDER_VERSION_STRICT "Have CMake verify compatibility of plugin with Blender?" OFF)
@@ -79,7 +79,7 @@ endif()
 
 # Blender Addon requires Python extension
 if(BUILD_BLENDER)
-    set(BUILD_PYTHONEXT ON)
+    set(BUILD_PYGAMER ON)
 endif()
 
 ## Print compile flags
@@ -151,8 +151,8 @@ install(DIRECTORY include/gamer DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MA
 #####################################################################
 # PYTHON EXTENSION AND BLENDER ADDON
 #####################################################################
-if(BUILD_PYTHONEXT)
-    add_subdirectory(python)
+if(BUILD_PYGAMER)
+    add_subdirectory(pygamer)
 endif()
 
 if(BUILD_BLENDER)

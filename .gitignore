@@ -52,5 +52,7 @@ debug/
 # Mac Files
 *.DS_Store
 
+# Files from setuptools
 .eggs/
 gamer.egg-info/
+dist/

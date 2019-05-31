@@ -59,9 +59,9 @@ add_test(NAME ObjectTests COMMAND objecttests)
 
 # Configure testing of Python module
 find_package(pytest)
-if(NOT PYTEST_FOUND AND BUILD_PYTHONEXT)
+if(NOT PYTEST_FOUND AND BUILD_PYGAMER)
     message(ERROR "pytest could not be found! Please install pytest to run python tests.")
-elseif(BUILD_PYTHONEXT)
+elseif(BUILD_PYGAMER)
     # Add a test for pytest
     add_test(NAME python-tests
       COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
@@ -70,9 +70,7 @@ elseif(BUILD_PYTHONEXT)
 endif()
 
 
-
 # add_executable(scratchtest scratchtest.cpp)
 # target_link_libraries(scratchtest gamershared)
 # # Profiling with gperftools
 # # target_link_libraries(scratchtest gamershared profiler)
-

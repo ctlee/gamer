@@ -17,7 +17,7 @@ install:
 - python -m pip install pytest numpy --no-warn-script-location
 - mkdir build_64
 - cd build_64
-- cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYTHONEXT=on -A x64 ..
+- cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYGAMER=on -A x64 ..
 build_script:
 - cmake --build . --config Release
 test_script:
