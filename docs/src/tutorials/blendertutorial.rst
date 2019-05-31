@@ -404,7 +404,7 @@ Refine Cube with GAMer
   ready to add boundaries and associated boundary markers to the mesh!
 
 
-Adding Cytolsolic Boundary
+Adding Cytosolic Boundary
 ---------------------------------------------
 
 - Return to the **GAMer** tab and choose the **Boundary Marking** tool
