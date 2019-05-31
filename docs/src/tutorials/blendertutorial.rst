@@ -28,7 +28,7 @@ Import OBJ File into Blender
 
 - Download the `obj file`_.
 
-.. _obj file: ../examples/tt-sr-mit.obj
+.. _obj file: https://github.ctlee/gamer/examples/tt-sr-mit.obj
 
 - Now we can open up this ".obj" file in blender.
 
