@@ -19,6 +19,7 @@
 import skbuild
 from skbuild import setup
 from distutils.version import LooseVersion
+from setuptools import find_packages
 
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues"]
 tests_require = ["pytest"]
@@ -32,10 +33,11 @@ setup(
     long_description='Python wrapper around the GAMer C++ library for mesh generation.',
     cmake_args=['-DBUILD_PYGAMER=ON'],
     zip_safe=False,
+    packages=find_packages(),
     setup_requires=["pytest-runner"],
     extras_require={
         "docs" : docs_require,
         "test" : tests_require,
         "dev"  : docs_require + tests_require
-    }
+    },
 )

@@ -28,6 +28,7 @@
 #include "gamer/SurfaceMesh.h"
 #include "gamer/TetMesh.h"
 #include "gamer/PDBReader.h"
+#include "gamer/version.h"
 
 namespace py = pybind11;
 
@@ -225,5 +226,16 @@ PYBIND11_MODULE(pygamer, pygamer) {
         R"delim(
             Call tetgen to make a TetMesh.
         )delim"
+    );
+
+    pygamer.def("getVersion_long",
+        [](){
+            return gVERSION;
+        }
+    );
+    pygamer.def("getVersion",
+         [](){
+            return gVERSION_SHORT;
+        }
     );
 }

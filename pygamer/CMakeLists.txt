@@ -47,4 +47,8 @@ pybind11_add_module(pygamer MODULE ${PYGAMER_SOURCES})
 # Link pygamer to gamer static
 target_link_libraries(pygamer PRIVATE gamerstatic)
 
+
+# python_extension_module(pygamer)
+install(TARGETS pygamer LIBRARY DESTINATION pygamer)
+
 # TODO: INSTALL?

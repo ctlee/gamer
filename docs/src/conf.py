@@ -12,7 +12,7 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/build/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/_skbuild/macosx-10.14-x86_64-3.6/cmake-build/lib/'))
 
 import pygamer
 
