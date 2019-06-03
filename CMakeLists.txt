@@ -22,12 +22,33 @@
 cmake_minimum_required(VERSION 3.12)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+# Add path to custom modules
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+if(SKBUILD)
+  message(STATUS "The project is built using scikit-build")
+endif()
 #####################################################################
 # Project GAMer
 #####################################################################
-set(PRERELEASE ON)
-set(PRE_VERSION alpha)
-project(GAMer VERSION 2.0.2)
+project(GAMer)
+
+include(GetGitRevisionDescription)
+git_describe(VERSION --tags --dirty=-d)
+
+#parse the version information into pieces.
+string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(-alpha|-beta|)-(.*)" "\\2" VERSION_SHA1 "${VERSION}")
+set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
+message(STATUS "GAMer version: ${VERSION}")
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/version.cpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+set(version_file "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
+list(APPEND GAMER_SOURCES "${version_file}")
 
 #####################################################################
 # Options
@@ -55,9 +76,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Define where to put the libraries and binaries
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-
-# Add path to custom modules
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
 # Override rules for MSVC static compiler flags
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)

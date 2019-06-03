@@ -56,3 +56,7 @@ debug/
 .eggs/
 gamer.egg-info/
 dist/
+_skbuild/
+
+*.whl
+*.egg-info

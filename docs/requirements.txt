@@ -1,4 +1,8 @@
+setuptools
+wheel
+scikit-build >= 0.10.0
 cmake
+ninja
 breathe
 exhale
 sphinx-issues

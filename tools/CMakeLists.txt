@@ -89,10 +89,7 @@ add_custom_target(stage_files
 add_dependencies(stage_files pygamer)
 
 # Generate the name of the build
-set(_ZIPNAME "gamer_addon-${GAMer_VERSION}-")
-if(PRERELEASE)
-    string(CONCAT _ZIPNAME ${_ZIPNAME} "${PRE_VERSION}-")
-endif()
+set(_ZIPNAME "gamer_addon-${VERSION_SHORT}-")
 string(CONCAT _ZIPNAME ${_ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
