@@ -23,9 +23,12 @@ cmake_minimum_required(VERSION 3.12)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 # Add path to custom modules
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-modules")
+
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 if(SKBUILD)
-  message(STATUS "The project is built using scikit-build")
+    message(STATUS "The project is built using scikit-build")
+    # find_package(PythonExtensions REQUIRED)
 endif()
 #####################################################################
 # Project GAMer
@@ -129,6 +132,8 @@ list(APPEND GAMER_SOURCES
     "src/PDBReader.cpp"
     "src/pdb2mesh.cpp"
 )
+
+message(STATUS ${GAMER_SOURCES})
 
 #####################################################################
 # LIBRARIES

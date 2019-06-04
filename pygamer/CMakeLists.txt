@@ -43,12 +43,15 @@ list(APPEND PYGAMER_SOURCES
 
 # Create the target
 pybind11_add_module(pygamer MODULE ${PYGAMER_SOURCES})
-
 # Link pygamer to gamer static
 target_link_libraries(pygamer PRIVATE gamerstatic)
 
-
-# python_extension_module(pygamer)
-install(TARGETS pygamer LIBRARY DESTINATION pygamer)
+if(SKBUILD)
+    # Install in the top level of egg if skbuildj
+    install(TARGETS pygamer LIBRARY DESTINATION .)
+else()
+    # Otherwise put in PREFIX/lib if conventionally installed
+    install(TARGETS pygamer LIBRARY DESTINATION lib)
+endif()
 
 # TODO: INSTALL?

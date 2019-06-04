@@ -230,11 +230,13 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
     pygamer.def("getVersion_long",
         [](){
+            extern const std::string gVERSION;
             return gVERSION;
         }
     );
     pygamer.def("getVersion",
          [](){
+            extern const std::string gVERSION_SHORT;
             return gVERSION_SHORT;
         }
     );

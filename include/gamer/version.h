@@ -26,5 +26,5 @@
 
 #include <string>
 
-extern const std::string gVERSION;
-extern const std::string gVERSION_SHORT;
+const std::string gVERSION;
+const std::string gVERSION_SHORT;
