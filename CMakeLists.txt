@@ -18,16 +18,41 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
-
 cmake_minimum_required(VERSION 3.12)
+# Set default buildtype
+set(CMAKE_BUILD_TYPE_INIT Release)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+# Add path to custom modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-modules")
+
+if(SKBUILD)
+    message(STATUS "The project is being built using scikit-build")
+endif()
+
+# Look for version from GIT
+include(GetGitRevisionDescription)
+git_describe(VERSION --tags --dirty=-d)
+
+#parse the version information into pieces.
+string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(-alpha|-beta|)-(.*)" "\\2" VERSION_SHA1 "${VERSION}")
+set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
 #####################################################################
 # Project GAMer
 #####################################################################
-set(PRERELEASE ON)
-set(PRE_VERSION alpha)
-project(GAMer VERSION 2.0.2)
+project(GAMer VERSION ${VERSION_SHORT})
+
+message(STATUS "GAMer version: ${VERSION_SHORT}")
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/version.cpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+set(version_file "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
+list(APPEND GAMER_SOURCES "${version_file}")
 
 #####################################################################
 # Options
@@ -56,21 +81,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-# Add path to custom modules
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
-
 # Override rules for MSVC static compiler flags
-set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/c_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/cxx_flag_overrides.cmake)
 
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Set build type to Release if none was defined
-if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "No build type was specified. Setting to 'Release'")
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
 
 # Required to tell MSVC to export symbols
 if(MSVC)
@@ -159,6 +175,9 @@ if(BUILD_BLENDER)
     add_subdirectory(tools)
 endif()
 
+#####################################################################
+# TESTING AND DOCUMENTATION
+#####################################################################
 if(GAMER_TEST)
     enable_testing()
     add_subdirectory(tests)

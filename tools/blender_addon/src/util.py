@@ -25,8 +25,8 @@ import bmesh
 import numpy as np
 from collections import deque
 
-import gamer_addon.pygamer as pygamer
-import gamer_addon.pygamer.surfacemesh as sm
+import blendgamer.pygamer as pygamer
+import blendgamer.pygamer.surfacemesh as sm
 
 # bpy.context.tool_settings.mesh_select_mode = (True, False, False)
 

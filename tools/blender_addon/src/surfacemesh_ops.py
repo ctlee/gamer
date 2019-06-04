@@ -25,9 +25,9 @@ from bpy.props import (
         FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty,
         PointerProperty, StringProperty, BoolVectorProperty)
 
-import gamer_addon.pygamer as g
-from gamer_addon.util import *
-from gamer_addon.markers import *
+import blendgamer.pygamer as g
+from blendgamer.util import *
+from blendgamer.markers import *
 
 
 # python imports

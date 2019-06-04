@@ -43,8 +43,32 @@ list(APPEND PYGAMER_SOURCES
 
 # Create the target
 pybind11_add_module(pygamer MODULE ${PYGAMER_SOURCES})
-
 # Link pygamer to gamer static
 target_link_libraries(pygamer PRIVATE gamerstatic)
 
-# TODO: INSTALL?
+
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
+    "from distutils import sysconfig as s;import sys;import struct;
+print(s.get_python_lib(plat_specific=True));
+"
+        RESULT_VARIABLE _PYTHON_SUCCESS
+        OUTPUT_VARIABLE _PYTHON_VALUES
+        ERROR_VARIABLE _PYTHON_ERROR_VALUE)
+
+if(NOT _PYTHON_SUCCESS MATCHES 0)
+    message(FATAL_ERROR
+        "Python config failure:\n${_PYTHON_ERROR_VALUE}")
+endif()
+
+
+# Convert the process output into a list
+string(REGEX REPLACE "\n" ";" _PYTHON_VALUES ${_PYTHON_VALUES})
+list(GET _PYTHON_VALUES 0 PYTHON_SITE_PACKAGES)
+
+if(SKBUILD)
+    # Install in the top level of egg if skbuild
+    install(TARGETS pygamer LIBRARY DESTINATION .)
+else()
+    # Otherwise put in PREFIX/lib if conventionally installed
+    install(TARGETS pygamer LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}")
+endif()

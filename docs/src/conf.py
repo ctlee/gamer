@@ -12,7 +12,7 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/build/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/_skbuild/macosx-10.14-x86_64-3.6/cmake-build/lib/'))
 
 import pygamer
 
@@ -22,7 +22,7 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.2'
+version = '2.0.1'
 release = version
 
 # -- General configuration ---------------------------------------------------
@@ -77,6 +77,10 @@ napoleon_use_rtype = True
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
+
+# If true, sectionauthor and moduleauthor directives will be shown in the
+# output. They are ignored by default.
+show_authors = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['/Users/ctlee/gamer/docs/src/_templates']

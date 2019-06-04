@@ -24,11 +24,11 @@ from bpy.props import (
         PointerProperty, StringProperty, BoolVectorProperty)
 import bmesh
 
-import gamer_addon.pygamer as g
-from gamer_addon.colormap import getColor
+import blendgamer.pygamer as g
+from blendgamer.colormap import getColor
 
-import gamer_addon.report as report
-from gamer_addon.util import *
+import blendgamer.report as report
+from blendgamer.util import *
 
 # we use per module class registration/unregistration
 def register():
