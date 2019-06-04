@@ -33,6 +33,11 @@ print(struct.calcsize('@P'));
         OUTPUT_VARIABLE _PYTHON_VALUES
         ERROR_VARIABLE _PYTHON_ERROR_VALUE)
 
+    if(NOT _PYTHON_SUCCESS MATCHES 0)
+        message(FATAL_ERROR
+            "Python config failure:\n${_PYTHON_ERROR_VALUE}")
+    endif()
+
     # Convert the process output into a list
     string(REGEX REPLACE "\n" ";" _PYTHON_VALUES ${_PYTHON_VALUES})
     list(GET _PYTHON_VALUES 0 PYTHON_VERSION)

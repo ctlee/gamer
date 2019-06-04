@@ -18,8 +18,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
-
 cmake_minimum_required(VERSION 3.12)
+# Set default buildtype
+set(CMAKE_BUILD_TYPE_INIT Release)
 # Disable in source builds
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 # Add path to custom modules
@@ -86,12 +87,6 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/c
 
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Set build type to Release if none was defined
-if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "No build type was specified. Setting to 'Release'")
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
 
 # Required to tell MSVC to export symbols
 if(MSVC)

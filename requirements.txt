@@ -1,7 +1,7 @@
 setuptools
 wheel
 scikit-build >= 0.10.0
-cmake
+cmake >= 3.11
 ninja
 breathe
 exhale
