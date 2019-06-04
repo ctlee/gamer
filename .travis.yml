@@ -5,6 +5,8 @@ notifications:
 language: cpp
 dist: xenial
 sudo: false
+git:
+  depth: false
 branches:
   only:
   - master
