@@ -25,16 +25,11 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 # Add path to custom modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-modules")
 
-message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 if(SKBUILD)
-    message(STATUS "The project is built using scikit-build")
-    # find_package(PythonExtensions REQUIRED)
+    message(STATUS "The project is being built using scikit-build")
 endif()
-#####################################################################
-# Project GAMer
-#####################################################################
-project(GAMer)
 
+# Look for version from GIT
 include(GetGitRevisionDescription)
 git_describe(VERSION --tags --dirty=-d)
 
@@ -45,7 +40,12 @@ string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VER
 string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(-alpha|-beta|)-(.*)" "\\2" VERSION_SHA1 "${VERSION}")
 set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
-message(STATUS "GAMer version: ${VERSION}")
+#####################################################################
+# Project GAMer
+#####################################################################
+project(GAMer VERSION ${VERSION_SHORT})
+
+message(STATUS "GAMer version: ${VERSION_SHORT}")
 
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/version.cpp.in
@@ -81,8 +81,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 # Override rules for MSVC static compiler flags
-set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_MODULE_PATH}/c_flag_overrides.cmake)
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/c_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/cxx_flag_overrides.cmake)
 
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -133,8 +133,6 @@ list(APPEND GAMER_SOURCES
     "src/pdb2mesh.cpp"
 )
 
-message(STATUS ${GAMER_SOURCES})
-
 #####################################################################
 # LIBRARIES
 #####################################################################
@@ -182,6 +180,9 @@ if(BUILD_BLENDER)
     add_subdirectory(tools)
 endif()
 
+#####################################################################
+# TESTING AND DOCUMENTATION
+#####################################################################
 if(GAMER_TEST)
     enable_testing()
     add_subdirectory(tests)

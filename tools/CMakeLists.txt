@@ -46,7 +46,7 @@ if(_BPY_STRICT)
     set(_PYTHON_CMP_VERSION "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
         )
     set(_BPY_CMP_VERSION "${BLENDER_PYTHON_VERSION_MAJOR}.${BLENDER_PYTHON_VERSION_MINOR}")
-    if(NOT PYTHON_VERSION VERSION_EQUAL BLENDER_PYTHON_VERSION)
+    if(NOT _PYTHON_CMP_VERSION VERSION_EQUAL _BPY_CMP_VERSION)
         message(FATAL_ERROR
             "Blender Addon Config Failure: "
             "Blender embedded Python version (${BLENDER_PYTHON_VERSION}) "
@@ -67,11 +67,11 @@ endif()
 # Stage files for Blender plugin packaging
 #####################################################################
 add_custom_target(stage_files
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pygamer> ${CMAKE_BINARY_DIR}/plugin/gamer_addon/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ${CMAKE_BINARY_DIR}/plugin/gamer_addon/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pygamer> ${CMAKE_BINARY_DIR}/plugin/blendgamer/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ${CMAKE_BINARY_DIR}/plugin/blendgamer/
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gameraddon_main.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/blendgamer.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/tetrahedralization.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/markers.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
@@ -84,7 +84,7 @@ add_custom_target(stage_files
 add_dependencies(stage_files pygamer)
 
 # Generate the name of the build
-set(_ZIPNAME "gamer_addon-${VERSION_SHORT}-")
+set(_ZIPNAME "blendgamer-${VERSION_SHORT}-")
 string(CONCAT _ZIPNAME ${_ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -103,12 +103,12 @@ endif()
 string(CONCAT _ZIPNAME ${_ZIPNAME} ".zip")
 
 configure_file(${CMAKE_SOURCE_DIR}/tools/blender_addon/__init__.in
-            ${CMAKE_BINARY_DIR}/plugin/gamer_addon/__init__.py @ONLY)
+            ${CMAKE_BINARY_DIR}/plugin/blendgamer/__init__.py @ONLY)
 add_custom_target(zip_plugin
     ALL
     COMMAND ${CMAKE_COMMAND} -E tar "cfv"
         ../${_ZIPNAME} --format=zip
-        gamer_addon
+        blendgamer
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/plugin
     COMMENT "Zipping up addon components"
     VERBATIM

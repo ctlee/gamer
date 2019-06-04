@@ -6,3 +6,4 @@ ninja
 breathe
 exhale
 sphinx-issues
+pytest

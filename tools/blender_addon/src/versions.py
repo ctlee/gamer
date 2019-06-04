@@ -23,7 +23,7 @@ import bpy
 import sys
 import re
 from ast import literal_eval
-from gamer_addon.util import *
+from blendgamer.util import *
 
 class GAMER_OT_prompt_update(bpy.types.Operator):
     bl_idname = "gamer.prompt_update"
@@ -102,7 +102,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
         return {'FINISHED'}
 
 def getGamerVersion():
-    return sys.modules['gamer_addon'].bl_info.get('version', (-1, -1, -1))
+    return sys.modules['blendgamer'].bl_info.get('version', (-1, -1, -1))
 
 def checkVersion():
     """

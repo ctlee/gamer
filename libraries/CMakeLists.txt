@@ -60,7 +60,8 @@ endif()
 if(NOT GETEIGEN)
     find_package (Eigen3 3.3 NO_MODULE)
     if(NOT Eigen3_FOUND)
-        message(FATAL_ERROR "Could not find required library Eigen. Please append -DGETEIGEN=true to your cmake call and I will download Eigen for you.")
+        message(FATAL_ERROR "Could not find required library Eigen."
+            "Please append -DGETEIGEN=true to your cmake call and I will download Eigen for you.")
     endif()
     add_library(eigen ALIAS Eigen3::Eigen)
     target_compile_options(eigen PRIVATE -w)   # Suppress warnings
