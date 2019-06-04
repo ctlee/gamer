@@ -30,8 +30,8 @@
  * ***************************************************************************
  */
 
-#include "SurfaceMesh.h"
-#include "PDBReader.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/PDBReader.h"
 #include <vector>
 #include <memory>
 #include <cmath>

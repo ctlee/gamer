@@ -22,8 +22,8 @@
 import bpy
 import bmesh
 
-import gamer_addon.report as report
-from gamer_addon.util import UNSETMARKER
+import blendgamer.report as report
+from blendgamer.util import UNSETMARKER
 
 # we use per module class registration/unregistration
 def register():

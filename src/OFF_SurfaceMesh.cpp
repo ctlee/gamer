@@ -23,7 +23,7 @@
  */
 
 
-#include "SurfaceMesh.h"
+#include "gamer/SurfaceMesh.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -49,7 +49,7 @@ int get_marker(float r, float g, float b)
         std::cerr << "Expected individual RGB value to be betwen 0 and 1." << std::endl;
         exit(1);
     }
-    return round(r * 10) * 121 + round(g * 10) * 11 + round(b * 10);
+    return static_cast<int>(round(r * 10) * 121 + round(g * 10) * 11 + round(b * 10));
 }
 
 //http://www.geomview.org/docs/html/OFF.html
@@ -240,9 +240,9 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
 
     fout << "OFF" << std::endl;
 
-    int numVertices = mesh.size<1>();
-    int numFaces = mesh.size<3>();
-    int numEdges = mesh.size<2>();
+    std::size_t numVertices = mesh.size<1>();
+    std::size_t numFaces = mesh.size<3>();
+    std::size_t numEdges = mesh.size<2>();
     fout    << numVertices << " "
             << numFaces << " "
             << numEdges << "\n";

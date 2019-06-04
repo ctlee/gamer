@@ -22,7 +22,8 @@
  * ***************************************************************************
  */
 
-
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <array>
 #include <algorithm>
 #include <cmath>
@@ -32,13 +33,13 @@
 #include <stdexcept>
 #include <strstream>
 #include <vector>
+#include <casc/casc>
 
-#include <libraries/casc/casc>
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
-#include "SurfaceMesh.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/Vertex.h"
 
 void print(const SurfaceMesh &mesh)
 {
@@ -74,21 +75,21 @@ void generateHistogram(const SurfaceMesh &mesh)
         Vertex b = *mesh.get_simplex_up<1>({vertexIDs[1]});
         Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
-        auto   binAngle = [&](double angle) -> int{
-                return std::floor(angle/10);
+        auto   binAngle = [&](double angle) -> std::size_t {
+                return static_cast<std::size_t>(std::floor(angle/10));
             };
         histogram[binAngle(angle(a, b, c))]++;
         histogram[binAngle(angle(b, a, c))]++;
         histogram[binAngle(angle(c, a, b))]++;
     }
 
-    int factor = mesh.size<3>()*3;
+    std::size_t factor = mesh.size<3>()*3;
     std::for_each(histogram.begin(), histogram.end(), [&factor](double &n){
         n = 100.0*n/factor;
     });
 
     std::cout << "Angle Distribution:" << std::endl;
-    for (int x = 0; x < 18; x++)
+    for (std::size_t x = 0; x < 18; x++)
         std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)
                   << std::fixed << histogram[x] << std::endl;
     std::cout << std::endl << std::endl;
@@ -129,7 +130,7 @@ void generateHistogram(const SurfaceMesh &mesh)
             n = 100.0*n/factor;
         });
 
-        for (int x = 0; x < 20; x++)
+        for (std::size_t x = 0; x < 20; x++)
             std::cout << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)
                       << std::fixed << histogramLength[x] << std::endl;
         std::cout << std::endl << std::endl;
@@ -196,8 +197,8 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh){
 
 std::tuple<double, double, int, int> getMinMaxAngles(
     const SurfaceMesh &mesh,
-    int maxMinAngle,
-    int minMaxAngle)
+    double maxMinAngle,
+    double minMaxAngle)
 {
     double minAngle = 360;
     double maxAngle = 0;
@@ -217,6 +218,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
             angles[2] = angle(a,c,b);
         }
         catch (std::runtime_error& e){
+            std::cout << e.what() << std::endl;
             throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area.");
         }
 
@@ -240,7 +242,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
 
 double getArea(const SurfaceMesh &mesh)
 {
-    double area;
+    double area = 0.0;
     for (auto faceID : mesh.get_level_id<3>())
         area += getArea(mesh, faceID);
     return area;
@@ -276,7 +278,7 @@ double getVolume(const SurfaceMesh &mesh)
         auto   c = (*mesh.get_simplex_up({name[2]})).position;
 
         Vector norm;
-        double tmp;
+        double tmp = 0.0;
         if ((*faceID).orientation == 1)
         {
             // a->b->c
@@ -358,7 +360,7 @@ std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh){
         for(auto vertexID : mesh.get_level_id<1>()){
             center += *vertexID;
         }
-        center /= mesh.size<1>();
+        center /= static_cast<double>(mesh.size<1>());
 
         for(auto vertexID : mesh.get_level_id<1>()){
             Vector tmp = *vertexID - center;
@@ -388,7 +390,7 @@ void normalSmooth(SurfaceMesh &mesh){
               << ", # Large Angles: " << nLarge << std::endl;
 }
 
-int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
+std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
     return mesh.get_cover(vertexID).size();
 }
@@ -730,7 +732,7 @@ std::unique_ptr<SurfaceMesh> sphere(int order){
         mesh = refineMesh(*mesh);
     }
 
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &data : mesh->get_level<3>())
             data.orientation *= -1;
@@ -773,7 +775,7 @@ std::unique_ptr<SurfaceMesh> cube(int order){
         mesh = refineMesh(*mesh);
     }
 
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &data : mesh->get_level<3>())
             data.orientation *= -1;

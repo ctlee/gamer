@@ -19,105 +19,66 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
+# - Find blender
+# This module attempts to find Blender software
+# FindBlender provides the following variables:
+#
+# BLENDER_FOUND                 - has Blender been found
+# BLENDER_EXECUTABLE            - Path to Blender executable
+# BLENDER_VERSION               - Version of Blender
+# BLENDER_SCRIPT_PATH           - Location of user script installation path
+# BLENDER_PYTHON_VERSION        - Version of Blender embedded python
+# BLENDER_PYTHON_EXECUTABLE     - Path to Blender embedded python
+# BLENDER_PYTHON_SIZEOF_VOID_P  - Number of bits for a void_p
 
-set(BLENDER_EXECUTABLE "")
-set(BLENDER_VERSION "")
-if(APPLE)
-    # First look to see if it's installed as an app bundle...
-    set(bundle "/Applications/Blender/blender.app")
-    if(EXISTS ${bundle} AND EXISTS "${bundle}/Contents/Info.plist")
-        # Parse Info.plist for exe and version
-        set(line_is_main_executable 0)
-        set(line_is_version 0)
-
-        set(eol_char "E")
-        file(READ "${bundle}/Contents/Info.plist" info_plist)
-        string(REPLACE ";" "\\;" info_plist "${info_plist}")
-        string(REPLACE "\n" "${eol_char};" info_plist "${info_plist}")
-        string(REPLACE "\r" "${eol_char};" info_plist "${info_plist}")
-
-        foreach(line ${info_plist})
-            if(line_is_main_executable)
-                string(REGEX REPLACE "^.*<string>(.*)</string>.*$" "\\1" bundle_executable "${line}")
-                set(line_is_main_executable 0)
-            elseif(line_is_version)
-                string(REGEX REPLACE "^.*<string>([0-9]*[.][0-9]*).*</string>.*$" "\\1" BLENDER_VERSION "${line}")
-                break()
-            endif()
-
-            if(line MATCHES "<key>CFBundleExecutable</key>")
-                set(line_is_main_executable 1)
-            elseif(line MATCHES "<key>CFBundleShortVersionString</key>")
-                set(line_is_version 1)
-            endif()
-        endforeach()
-        if(NOT "${bundle_executable}" STREQUAL "")
-            if(EXISTS "${bundle}/Contents/MacOS/${bundle_executable}")
-                set(BLENDER_EXECUTABLE "${bundle}/Contents/MacOS/${bundle_executable}")
-            endif()
-        endif()
-        if(NOT "${BLENDER_VERSION}" STREQUAL "")
-            if(EXISTS "${bundle}/Contents/Resources/${BLENDER_VERSION}/python")
-            endif()
-        endif()
-    endif()
-elseif(WIN32)
-    # TODO figure out how to best search for windows bin
-endif()
-
-# If we haven't found the exe, do a cmake search
-if("${BLENDER_EXECUTABLE}" STREQUAL "")
-    find_program(blender_exe
-            blender)
-    if(blender_exe)
-        set(BLENDER_EXECUTABLE ${blender_exe})
-        # Parse for the version by running blender
-        execute_process(COMMAND ${BLENDER_EXECUTABLE} -v
-                        OUTPUT_VARIABLE blender_version_long
-                        ERROR_QUIET
-                        OUTPUT_STRIP_TRAILING_WHITESPACE)
-        string(REGEX REPLACE "^.*Blender ([0-9]*.[0-9]*) \(.*\).*$" "\\1" BLENDER_VERSION "${blender_version_long}")
-    else()
-        message(FATAL_ERROR "Blender not found!")
-    endif()
-endif()
-
-message(STATUS "Found Blender: ${BLENDER_VERSION}")
+find_program(BLENDER_EXECUTABLE blender)
 
 if(BLENDER_EXECUTABLE)
     # Get the python path and version from blender
-    # This is kind of a hack... Is there a better way?
-    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b --factory-startup --python-expr "import sys;print('zz' + ';'.join([str(x) for x in sys.version_info[:3]]) + 'zz')"
-                    OUTPUT_VARIABLE blender_output
-                    ERROR_QUIET
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b --factory-startup --python-expr
+        "import sys;import struct;import bpy;
+print(str(bpy.app.version[0]) + '.' + str(bpy.app.version[1]) + '.' + str(bpy.app.version[2]))
+print(bpy.utils.script_path_user())
+print('.'.join(str(v) for v in sys.version_info[0:3]));
+print(bpy.app.binary_path_python)
+print(struct.calcsize('@P'))
+"
+                    RESULT_VARIABLE _BLENDER_SUCCESS
+                    OUTPUT_VARIABLE _BLENDER_VALUES
+                    ERROR_VARIABLE  _BLENDER_ERROR_VALUE)
 
-    set(eol_char "E")
-    string(REPLACE "\n" "${eol_char};" blender_output "${blender_output}")
-    string(REPLACE "\r" "${eol_char};" blender_output "${blender_output}")
-    string(REGEX REPLACE "^.*found bundled python: (.*python).*$" "\\1" BLENDER_PYTHON_ROOT "${blender_output}")
-    # string(REGEX REPLACE "(.*)/addons.*$" "\\1" BLENDER_ADDON_PATH "${blender_output}")
-    string(REGEX REPLACE "^.*zz(.*)zz.*$" "\\1" _VERSION "${blender_output}")
+    if(_BLENDER_SUCCESS MATCHES 0)
+        string(REGEX REPLACE "\n" ";" _BLENDER_VALUES ${_BLENDER_VALUES})
+        list(GET _BLENDER_VALUES 0 BLENDER_VERSION)
+        list(GET _BLENDER_VALUES 1 BLENDER_SCRIPT_PATH)
+        list(GET _BLENDER_VALUES 2 BLENDER_PYTHON_VERSION)
+        list(GET _BLENDER_VALUES 3 BLENDER_PYTHON_EXECUTABLE)
+        list(GET _BLENDER_VALUES 4 BLENDER_PYTHON_SIZEOF_VOID_P)
 
-    if(_VERSION)
-        string(REPLACE ";" "." BLENDER_PYTHON_VERSION_STRING "${_VERSION}")
-        list(GET _VERSION 0 BLENDER_PYTHON_VERSION_MAJOR)
-        list(GET _VERSION 1 BLENDER_PYTHON_VERSION_MINOR)
-        list(GET _VERSION 2 BLENDER_PYTHON_VERSION_PATCH)
-        if(PYTHON_VERSION_PATCH EQUAL 0)
-            # it's called "Python 2.7", not "2.7.0"
-            string(REGEX REPLACE "\\.0$" "" BLENDER_PYTHON_VERSION_STRING "${BLENDER_PYTHON_VERSION_STRING}")
-        endif()
-    endif()
-    if(APPLE)
-        set(BLENDER_ADDON_PATH "/Users/$ENV{USER}/Library/Application Support/Blender/${BLENDER_VERSION}/scripts")
-    elseif(WIN32)
-        set(BLENDER_ADDON_PATH "%USERPROFILE%\\AppData\\Roaming\\Blender Foundation\\Blender\\${BLENDER_VERSION}")
-    elseif(UNIX)
-        set(BLENDER_ADDON_PATH "$ENV{HOME}/.config/blender/${BLENDER_VERSION}/scripts")
+        string(REPLACE "." ";" _BLENDER_VERSION "${BLENDER_VERSION}")
+        list(GET _BLENDER_VERSION 0 BLENDER_VERSION_MAJOR)
+        list(GET _BLENDER_VERSION 1 BLENDER_VERSION_MINOR)
+        list(GET _BLENDER_VERSION 2 BLENDER_VERSION_PATCH)
+
+        string(REPLACE "." ";" _BPY_VERSION "${BLENDER_PYTHON_VERSION}")
+        list(GET _BPY_VERSION 0 BLENDER_PYTHON_VERSION_MAJOR)
+        list(GET _BPY_VERSION 1 BLENDER_PYTHON_VERSION_MINOR)
+        list(GET _BPY_VERSION 2 BLENDER_PYTHON_VERSION_PATCH)
+    elseif(NOT blender_FIND_QUIETLY)
+            message(WARNING "Blender config failure:\n${_BLENDER_ERROR_VALUE}")
     endif()
 endif()
 
-# message(STATUS "Blender python path: ${BLENDER_PYTHON_ROOT}")
-# message(STATUS "Blender python version: ${BLENDER_PYTHON_VERSION_STRING}")
-# message(STATUS "Blender sageddon path: ${BLENDER_ADDON_PATH}")
+include(FindPackageHandleStandardArgs)
+
+find_package_handle_standard_args(BLENDER
+        REQUIRED_VARS
+            BLENDER_EXECUTABLE
+            BLENDER_VERSION
+            BLENDER_SCRIPT_PATH
+            BLENDER_PYTHON_VERSION
+            BLENDER_PYTHON_EXECUTABLE
+            BLENDER_PYTHON_SIZEOF_VOID_P
+       VERSION_VAR BLENDER_VERSION
+       HANDLE_COMPONENTS
+    )

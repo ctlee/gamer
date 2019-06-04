@@ -1,0 +1,24 @@
+notifications:
+- provider: Slack
+  incoming_webhook:
+    secure: bmfSFbqVVCm0/XYaDqAVMGeBP6RNW1f/yzolevVJ1GXCZZHejnpU1aPG8LIYDskbaudyf1Obaf5ua5WTKRqQJm79EGCYiH6NGPq6qhTyMV0=
+version: 2.0.1.{build}
+image:
+- Visual Studio 2017
+platform:
+- x64
+environment:
+  matrix:
+  - PYTHON: "C:\\Python36-x64"
+install:
+- SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+- python --version
+- python -m pip install --upgrade pip wheel
+- python -m pip install pytest numpy --no-warn-script-location
+- mkdir build_64
+- cd build_64
+- cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYGAMER=on -A x64 ..
+build_script:
+- cmake --build . --config Release
+test_script:
+- ctest -C Release -V

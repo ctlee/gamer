@@ -32,10 +32,10 @@
 #include <vector>
 #include <limits>
 
-#include "SurfaceMesh.h"
-#include "MarchingCube.h"
-#include "PDBReader.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/MarchingCube.h"
+#include "gamer/PDBReader.h"
+#include "gamer/Vertex.h"
 
 
 /**

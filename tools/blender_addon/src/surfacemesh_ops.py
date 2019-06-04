@@ -25,9 +25,9 @@ from bpy.props import (
         FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty,
         PointerProperty, StringProperty, BoolVectorProperty)
 
-import gamer_addon.pygamer as g
-from gamer_addon.util import *
-from gamer_addon.markers import *
+import blendgamer.pygamer as g
+from blendgamer.util import *
+from blendgamer.markers import *
 
 
 # python imports
@@ -155,7 +155,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                g.coarse_dense(gmesh, rate=self.dense_rate, numiter=self.dense_iter)
+                gmesh.coarse_dense(rate=self.dense_rate, numiter=self.dense_iter)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
@@ -167,7 +167,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                g.coarse_flat(gmesh, rate=self.flat_rate)
+                gmesh.coarse_flat(rate=self.flat_rate)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
@@ -179,7 +179,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                g.smooth(gmesh, max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
+                gmesh.smooth(max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
@@ -191,7 +191,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                g.normalSmooth(gmesh)
+                gmesh.normalSmooth()
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
@@ -203,7 +203,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                g.fillHoles(gmesh)
+                gmesh.fillHoles()
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False

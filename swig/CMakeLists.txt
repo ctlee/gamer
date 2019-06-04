@@ -84,19 +84,18 @@ install(FILES ${CMAKE_BINARY_DIR}/swig/pygamer.py DESTINATION lib/site-packages)
 #####################################################################
 add_custom_target(stage_files
     # COMMAND ${CMAKE_COMMAND} -E make_directory plugin/gamer
-    # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/swig/__init__.py plugin/gamer_addon/
-    COMMAND ${CMAKE_COMMAND} -E copy swig/pygamer.py plugin/gamer_addon/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:_pygamer> plugin/gamer_addon/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ./plugin/gamer_addon/
+    # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/swig/__init__.py plugin/blendgamer/
+    COMMAND ${CMAKE_COMMAND} -E copy swig/pygamer.py plugin/blendgamer/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:_pygamer> plugin/blendgamer/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ./plugin/blendgamer/
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/gameraddon_main.py
+            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/blendgamer.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/tetrahedralization.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/markers.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/versions.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/surfacemesh_ops.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/report.py
             ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/ui.py
     COMMENT "Staging the GAMer Blender addon files"
     VERBATIM

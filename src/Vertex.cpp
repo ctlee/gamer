@@ -27,7 +27,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "Vertex.h"
+#include "gamer/Vertex.h"
 
 Vertex operator+(const Vertex& A, const Vector& B){
     Vertex rval(A);

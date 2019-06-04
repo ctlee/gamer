@@ -32,8 +32,8 @@
 #include <iostream>
 #include <vector>
 
-#include "stringutil.h"
-#include "SurfaceMesh.h"
+#include "gamer/stringutil.h"
+#include "gamer/SurfaceMesh.h"
 
 //https://en.wikipedia.org/wiki/Wavefront_.obj_file
 //http://paulbourke.net/dataformats/obj/
