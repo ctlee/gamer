@@ -2,7 +2,7 @@
 #include <iostream>
 #include <map>
 #include <cmath>
-#include "tensor.h"
+#include "gamer/tensor.h"
 #include "gtest/gtest.h"
 
 

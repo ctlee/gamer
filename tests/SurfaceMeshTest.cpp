@@ -5,8 +5,8 @@
 #include <vector>
 #include <array>
 #include <memory>
-#include "SurfaceMesh.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/Vertex.h"
 #include "gtest/gtest.h"
 
 
@@ -63,8 +63,8 @@ protected:
 };
 
 TEST_F(SurfaceMeshTest, Refinement){
-	int fbefore = mesh->size<3>(); 
+	int fbefore = mesh->size<3>();
 	mesh = refineMesh(*mesh);
-	int fafter = mesh->size<3>(); 
+	int fafter = mesh->size<3>();
 	EXPECT_EQ(fbefore*4, fafter);
 }

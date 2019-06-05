@@ -1,0 +1,4 @@
+_build/
+src/_doxyoutput/
+src/_cppapi/
+src/_pythonapi/

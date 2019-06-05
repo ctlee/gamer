@@ -22,8 +22,8 @@
 import bpy
 import bmesh
 
-import gamer_addon.report as report
-from gamer_addon.util import UNSETMARKER
+import blendgamer.report as report
+from blendgamer.util import UNSETMARKER
 
 # we use per module class registration/unregistration
 def register():
@@ -185,6 +185,23 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col.operator("gamer.meshstats_check_all", text="Generate Mesh Report")
 
         GAMER_PT_mesh_quality.draw_report(layout, context)
+
+        col=layout.column()
+        col.label(text="Curvature Calculations:")
+        row = col.row(align=True)
+        row.prop(qProps, "minCurve")
+        row.prop(qProps, "maxCurve")
+
+        col.operator("gamer.mean_curvature")
+        col.operator("gamer.gaussian_curvature")
+
+
+        col=layout.column()
+        col.label(text="Curvature Calculations:")
+        row = col.row(align=True)
+        row.prop(qProps, "minEnergy")
+        row.prop(qProps, "maxEnergy")
+        col.operator("gamer.helfrich_energy")
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):

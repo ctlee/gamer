@@ -25,7 +25,8 @@ import bmesh
 import numpy as np
 from collections import deque
 
-import gamer_addon.pygamer as g
+import blendgamer.pygamer as pygamer
+import blendgamer.pygamer.surfacemesh as sm
 
 # bpy.context.tool_settings.mesh_select_mode = (True, False, False)
 
@@ -128,16 +129,16 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         # Grab vertices
         vertices, selected_vertices = getMeshVertices(obj, get_selected_vertices = True)
         # Get world location and offset each vertex with this value
-        gmesh = g.SurfaceMesh()   # Init GAMer SurfaceMesh
+        gmesh = sm.SurfaceMesh()   # Init GAMer SurfaceMesh
 
         def addVertex(co, sel): # functor to addVertices
-            gmesh.addVertex(
+            gmesh.addVertex(sm.Vertex(
                 co[0],   # x position
                 co[1],   # y position
                 co[2],   # z position
                 0,
                 bool(sel)                 # selected flag
-            )
+            ))
 
         # If all vertices are selected
         if len(selected_vertices) == len(vertices):
@@ -162,7 +163,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
 
         edges = obj.data.edges
         for edge in edges:
-            gmesh.insertEdge(g.EdgeKey(edge.vertices), g.Edge(bool(edge.select)))
+            gmesh.insertEdge(list(edge.vertices), sm.Edge(bool(edge.select)))
 
         # Get list of faces
         faces = obj.data.polygons
@@ -183,14 +184,14 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
             if(vertices[0] < vertices[1]):
                 # 0 < 1 < 2
                 orientation = 1
-            gmesh.insertFace(g.FaceKey(vertices), g.Face(orientation, boundaries[face.index], bool(face.select)))
+            gmesh.insertFace(list(vertices), sm.Face(orientation, boundaries[face.index], bool(face.select)))
     # Ensure all face orientations are set
-    g.init_orientation(gmesh)
-    g.check_orientation(gmesh)
-    vol = g.getVolume(gmesh)
+    gmesh.init_orientation()
+    gmesh.check_orientation()
+    vol = gmesh.getVolume()
     if vol < 0:
         if autocorrect_normals:
-            g.flipNormals(gmesh)
+            gmesh.flipNormals()
         else:
             report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
             return None
@@ -201,8 +202,8 @@ def gamerToBlender(report, gmesh,
         obj = None,
         mesh_name="gamer_improved"):
     # Check arguments
-    if not isinstance(gmesh, g.SurfaceMesh):
-        report({'ERROR'}, "gamerToBlender expected a pygamer.surfacemesh object")
+    if not isinstance(gmesh, sm.SurfaceMesh):
+        report({'ERROR'}, "gamerToBlender expected a pygamer.surfacemesh.SurfaceMesh object")
         return False
 
     if not obj:
@@ -214,7 +215,7 @@ def gamerToBlender(report, gmesh,
 
     verts = []      # Array of vertex coordinates
     idxMap = {}     # Dictionary of gamer indices to renumbered indices
-    for i, vid in enumerate(gmesh.vertexIDs()):
+    for i, vid in enumerate(gmesh.vertexIDs):
         v = vid.data()
         verts.append((v[0], v[1], v[2]))
         idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
@@ -222,7 +223,7 @@ def gamerToBlender(report, gmesh,
     faces = []
     selectedFaces = []
     markersList = []
-    for i, fid in enumerate(gmesh.faceIDs()):
+    for i, fid in enumerate(gmesh.faceIDs):
         fName = gmesh.getName(fid)
         face = fid.data()
 

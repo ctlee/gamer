@@ -22,7 +22,8 @@
  * ***************************************************************************
  */
 
-
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <array>
 #include <algorithm>
 #include <cmath>
@@ -32,13 +33,13 @@
 #include <stdexcept>
 #include <strstream>
 #include <vector>
+#include <casc/casc>
 
-#include <libraries/casc/casc>
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
-#include "SurfaceMesh.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/Vertex.h"
 
 void print(const SurfaceMesh &mesh)
 {
@@ -74,21 +75,21 @@ void generateHistogram(const SurfaceMesh &mesh)
         Vertex b = *mesh.get_simplex_up<1>({vertexIDs[1]});
         Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
-        auto   binAngle = [&](double angle) -> int{
-                return std::floor(angle/10);
+        auto   binAngle = [&](double angle) -> std::size_t {
+                return static_cast<std::size_t>(std::floor(angle/10));
             };
         histogram[binAngle(angle(a, b, c))]++;
         histogram[binAngle(angle(b, a, c))]++;
         histogram[binAngle(angle(c, a, b))]++;
     }
 
-    int factor = mesh.size<3>()*3;
+    std::size_t factor = mesh.size<3>()*3;
     std::for_each(histogram.begin(), histogram.end(), [&factor](double &n){
         n = 100.0*n/factor;
     });
 
     std::cout << "Angle Distribution:" << std::endl;
-    for (int x = 0; x < 18; x++)
+    for (std::size_t x = 0; x < 18; x++)
         std::cout << x*10 << "-" << (x+1)*10 << ": " << std::setprecision(2)
                   << std::fixed << histogram[x] << std::endl;
     std::cout << std::endl << std::endl;
@@ -129,7 +130,7 @@ void generateHistogram(const SurfaceMesh &mesh)
             n = 100.0*n/factor;
         });
 
-        for (int x = 0; x < 20; x++)
+        for (std::size_t x = 0; x < 20; x++)
             std::cout << x*interval << "-" << (x+1)*interval << ": " << std::setprecision(2)
                       << std::fixed << histogramLength[x] << std::endl;
         std::cout << std::endl << std::endl;
@@ -196,8 +197,8 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh){
 
 std::tuple<double, double, int, int> getMinMaxAngles(
     const SurfaceMesh &mesh,
-    int maxMinAngle,
-    int minMaxAngle)
+    double maxMinAngle,
+    double minMaxAngle)
 {
     double minAngle = 360;
     double maxAngle = 0;
@@ -217,6 +218,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
             angles[2] = angle(a,c,b);
         }
         catch (std::runtime_error& e){
+            std::cout << e.what() << std::endl;
             throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area.");
         }
 
@@ -240,7 +242,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
 
 double getArea(const SurfaceMesh &mesh)
 {
-    double area;
+    double area = 0.0;
     for (auto faceID : mesh.get_level_id<3>())
         area += getArea(mesh, faceID);
     return area;
@@ -276,7 +278,7 @@ double getVolume(const SurfaceMesh &mesh)
         auto   c = (*mesh.get_simplex_up({name[2]})).position;
 
         Vector norm;
-        double tmp;
+        double tmp = 0.0;
         if ((*faceID).orientation == 1)
         {
             // a->b->c
@@ -358,7 +360,7 @@ std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh){
         for(auto vertexID : mesh.get_level_id<1>()){
             center += *vertexID;
         }
-        center /= mesh.size<1>();
+        center /= static_cast<double>(mesh.size<1>());
 
         for(auto vertexID : mesh.get_level_id<1>()){
             Vector tmp = *vertexID - center;
@@ -388,7 +390,7 @@ void normalSmooth(SurfaceMesh &mesh){
               << ", # Large Angles: " << nLarge << std::endl;
 }
 
-int getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
+std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
     return mesh.get_cover(vertexID).size();
 }
@@ -730,7 +732,7 @@ std::unique_ptr<SurfaceMesh> sphere(int order){
         mesh = refineMesh(*mesh);
     }
 
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &data : mesh->get_level<3>())
             data.orientation *= -1;
@@ -773,11 +775,154 @@ std::unique_ptr<SurfaceMesh> cube(int order){
         mesh = refineMesh(*mesh);
     }
 
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     if(getVolume(*mesh) < 0){
         for(auto &data : mesh->get_level<3>())
             data.orientation *= -1;
     }
     return mesh;
+}
+
+/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
+double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    Vertex center = *vertexID;
+    int vKey = mesh.get_name(vertexID)[0];
+
+    // Get 1-ring around vertexID and order it
+    std::vector<int> cover = mesh.get_cover(vertexID);
+    std::vector<SurfaceMesh::SimplexID<1>> orderedNbhd;
+
+    auto eID = mesh.get_simplex_up(vertexID, cover.back());
+    cover.pop_back();
+    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+
+    while(!cover.empty()){
+        auto ecover = mesh.get_cover(eID);
+        for(int nKey : ecover){
+            auto it = std::find(cover.begin(), cover.end(), nKey);
+            if(it != cover.end()){
+                eID = mesh.get_simplex_up(vertexID, *it);
+                cover.erase(it);
+                orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+                break;
+            }
+        }
+    }
+
+    double Amix = 0;
+    Vector curvature;
+    for(int i = 0; i < orderedNbhd.size(); ++i){
+        Vertex prev, curr, next;
+        if (i == 0){
+            prev = *orderedNbhd.back();
+        }else{
+            prev = *orderedNbhd[i-1];
+        }
+
+        curr = *orderedNbhd[i];
+
+        if (i+1 == orderedNbhd.size()){
+            next = *orderedNbhd.front();
+        }else{
+            next = *orderedNbhd[i+1];
+        }
+
+        // Consider the triangle vID, i, i+1 with wrapping
+        std::array<double, 3> ls;
+        ls[0] = distance(center, curr);
+        ls[1] = distance(center, next);
+        ls[2] = distance(curr, next);
+        std::sort(ls.begin(), ls.end());
+
+        if(ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2]){
+            // Triangle is obtuse!
+            if(angle(curr, center, next) > 90){
+                // The angle of T at center is obtuse
+                Amix += getArea(center, curr, next)/2;
+            }
+            else{
+                Amix += getArea(center, curr, next)/4;
+            }
+        }
+        else{
+            // Compute using voronoi formula
+            Amix += (pow(distance(center, curr),2)/tan(angleRad(center, next, curr))
+                    + pow(distance(center, next),2)/tan(angleRad(center, curr, next)))/8;
+        }
+        curvature += (1/tan(angleRad(center, prev, curr)) + 1/tan(angleRad(center, next, curr)))*(center - curr);
+    }
+    curvature /= (2*Amix);
+    return std::sqrt(curvature|curvature)/2;
+}
+
+
+/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
+double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    Vertex center = *vertexID;
+    int vKey = mesh.get_name(vertexID)[0];
+
+    std::vector<int> cover = mesh.get_cover(vertexID);
+    std::vector<SurfaceMesh::SimplexID<1>> orderedNbhd;
+
+    auto eID = mesh.get_simplex_up(vertexID, cover.back());
+    cover.pop_back();
+    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+
+    while(!cover.empty()){
+        auto ecover = mesh.get_cover(eID);
+        for(int nKey : ecover){
+            auto it = std::find(cover.begin(), cover.end(), nKey);
+            if(it != cover.end()){
+                eID = mesh.get_simplex_up(vertexID, *it);
+                cover.erase(it);
+                orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+                break;
+            }
+        }
+    }
+
+    double Amix = 0;
+    double angleSum = 0;
+    for(int i = 0; i < orderedNbhd.size(); ++i){
+        Vertex prev, curr, next;
+        if (i == 0){
+            prev = *orderedNbhd.back();
+        }else{
+            prev = *orderedNbhd[i-1];
+        }
+
+        curr = *orderedNbhd[i];
+
+        if (i+1 == orderedNbhd.size()){
+            next = *orderedNbhd.front();
+        }else{
+            next = *orderedNbhd[i+1];
+        }
+
+        // Consider the triangle vID, i, i+1 with wrapping
+        std::array<double, 3> ls;
+        ls[0] = distance(center, curr);
+        ls[1] = distance(center, next);
+        ls[2] = distance(curr, next);
+        std::sort(ls.begin(), ls.end());
+
+        if(ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2]){
+            // Triangle is obtuse!
+            if(angle(curr, center, next) > 90){
+                // The angle of T at center is obtuse
+                Amix += getArea(center, curr, next)/2;
+            }
+            else{
+                Amix += getArea(center, curr, next)/4;
+            }
+        }
+        else{
+            // Compute using voronoi formula
+            Amix += (pow(distance(center, curr),2)/tan(angleRad(center, next, curr))
+                    + pow(distance(center, next),2)/tan(angleRad(center, curr, next)))/8;
+        }
+        angleSum += angleRad(curr, center, next);
+    }
+    return (2*M_PI-angleSum)/Amix;
 }
 

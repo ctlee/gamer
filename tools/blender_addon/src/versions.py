@@ -23,6 +23,7 @@ import bpy
 import sys
 import re
 from ast import literal_eval
+from blendgamer.util import *
 
 class GAMER_OT_prompt_update(bpy.types.Operator):
     bl_idname = "gamer.prompt_update"
@@ -52,17 +53,33 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
 
     def execute(self, context):
         for obj in context.scene.objects:
-            bpy.context.scene.objects.active = obj
+            # bpy.context.scene.objects.active = obj
             if obj.type == 'MESH':
+                print("\n"+"="*30+"\n",obj,"\n"+"="*30)
+                if not 'boundaries' in obj:
+                    continue
+                hidden = False
+                if obj.hide:
+                    hidden = True
+                    obj.hide = False
                 obj.gamer.remove_all_boundaries(context)
                 for key, bdry in obj['boundaries'].items():
+                    print("Migrating boundary: %s"%(key))
+
+                    # First move the material...
+                    mat = bpy.data.materials[key+'_mat']
+                    newBdryID = context.scene.gamer.boundary_id_counter+1
+                    mat.name = materialNamer(newBdryID)
+                    mat.gamer.boundary_id = newBdryID
+                    mat.use_fake_user = True
+
                     obj.gamer.add_boundary(context)
                     newBdry = obj.gamer.boundary_list[obj.gamer.active_bnd_index]
 
-                    newBdry.boundary_name = key
+                    newBdry.boundary_name = 'NewBoundaryFrom_%s'%(key)
                     newBdry.marker = bdry['marker']
 
-                    # Deselect all
+                    # # Deselect all
                     bpy.ops.object.mode_set(mode='EDIT')
                     bpy.ops.mesh.select_all(action='DESELECT')
                     bpy.ops.object.mode_set(mode='OBJECT')
@@ -72,19 +89,20 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                         for i in faces:
                             obj.data.polygons[i].select = True
                     bpy.ops.object.mode_set(mode='EDIT')
-
                     newBdry.assign_boundary_faces(context)
-            del obj['boundaries']
-            if 'id_counter' in obj.gamer:
-                del obj.gamer['id_counter']
-            if 'include' in obj.gamer:
-                del obj.gamer['include']
-            context.scene.gamer.gamer_version = "(2,0,1)"
-            checkVersion()
+                    bpy.ops.object.mode_set(mode='OBJECT')
+                del obj['boundaries']
+                if 'id_counter' in obj.gamer:
+                    del obj.gamer['id_counter']
+                if 'include' in obj.gamer:
+                    del obj.gamer['include']
+                obj.hide = hidden
+        context.scene.gamer.gamer_version = "(2,0,1)"
+        checkVersion()
         return {'FINISHED'}
 
 def getGamerVersion():
-    return sys.modules['gamer_addon'].bl_info.get('version', (-1, -1, -1))
+    return sys.modules['blendgamer'].bl_info.get('version', (-1, -1, -1))
 
 def checkVersion():
     """
@@ -103,24 +121,33 @@ def checkVersion():
     currVer = getGamerVersion()
     scene.gamer.versionerror = compare_version(fileVer, currVer)
 
-    if scene.gamer.versionerror == -1:
-        # Update from 2.0.0 to current
-        if compare_version(fileVer, (2,0,0)) == 0:
-            print("Metadata version is out of date.",
-                    "Migrating from v(2, 0, 0) to v%s"%(str(currVer)))
-            for obj in bpy.data.objects:
-                if obj.type == 'MESH':
-                    # Migrate name to boundary_name
-                    for bdry in obj.gamer.boundary_list:
-                        bdry.boundary_name = bdry.name
-                        bdry.name = str(bdry.boundary_id)
-                        if 'boundaries' in obj.keys():
-                            del obj['boundaries']
-            scene.gamer.gamer_version = str(currVer)
-            scene.gamer.versionerror = 0
-        else:
-            bpy.ops.gamer.prompt_old_version()
-    elif scene.gamer.versionerror == 1:
+    while(scene.gamer.versionerror < 0):
+        if scene.gamer.versionerror == -1:
+            # Update from 2.0.0 to current
+            if compare_version(fileVer, (2,0,0)) == 0:
+                newver = (2,0,1)
+                print("Metadata version is out of date.",
+                        "Migrating from v(2,0,0) to v%s"%(str(newver)))
+                for obj in bpy.data.objects:
+                    if obj.type == 'MESH':
+                        # Migrate name to boundary_name
+                        for bdry in obj.gamer.boundary_list:
+                            bdry.boundary_name = bdry.name
+                            bdry.name = str(bdry.boundary_id)
+                            if 'boundaries' in obj.keys():
+                                del obj['boundaries']
+                scene.gamer.gamer_version = str(newver)
+            if compare_version(fileVer, (2,0,1)) == 0:
+                newver = (2,0,2)
+                print("Migrating from v(2,0,1) to v%s"%(str(newver)))
+                scene.gamer.gamer_version = str(newver)
+            else:
+                bpy.ops.gamer.prompt_old_version()
+                break
+        fileVer = literal_eval(scene.gamer.gamer_version)
+        scene.gamer.versionerror = compare_version(fileVer, currVer)
+
+    if scene.gamer.versionerror == 1:
         bpy.ops.gamer.prompt_update()
 
 

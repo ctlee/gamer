@@ -11,18 +11,9 @@
 #include <utility>
 #include <vector>
 
-#include "stringutil.h"
-#include "SurfaceMesh.h"
-#include "TetMesh.h"
-#include "Vertex.h"
-#include "tensor.h"
-#include "PDBReader.h"
+#include "gamer/gamer"
 
-#include <libraries/casc/include/CASCFunctions.h>
-#include <libraries/casc/include/SimplexSet.h>
-#include <libraries/casc/include/SimplexMap.h>
-#include <libraries/casc/include/SimplicialComplex.h>
-#include <libraries/casc/include/decimate.h>
+#include <casc/casc>
 #include <libraries/casc/include/typetraits.h>
 
 template <typename Complex>

@@ -32,10 +32,10 @@
 #include <vector>
 #include <limits>
 
-#include "SurfaceMesh.h"
-#include "MarchingCube.h"
-#include "PDBReader.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/MarchingCube.h"
+#include "gamer/PDBReader.h"
+#include "gamer/Vertex.h"
 
 
 /**
@@ -88,8 +88,6 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const
     }
     gridSAS(atoms.cbegin(), atoms.cend(), dim, dataset);
 
-
-
     std::vector<Vertex> holelist;
     std::unique_ptr<SurfaceMesh> SASmesh = std::move(marchingCubes(dataset, 5.0f, dim, span, 0.0f, std::back_inserter(holelist)));
 
@@ -138,6 +136,88 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
 	std::vector<Atom> atoms;
     // If readPDB errors return nullptr
     if(!readPDB(filename, std::back_inserter(atoms)))
+    {
+        mesh.reset();
+        return mesh;
+    }
+
+    std::cout << "Atoms: " << atoms.size() << std::endl;
+
+    f3Vector min, max;
+    getMinMax(atoms.cbegin(), atoms.cend(), min, max,
+            [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);});
+
+    float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
+
+    std::cout << "Min Dimension: " << min_dimension << std::endl;
+
+    i3Vector dim;
+
+    f3Vector maxMin = max-min;
+
+    dim = static_cast<i3Vector>((maxMin) + f3Vector({1,1,1})) * DIM_SCALE;
+
+    std::cout << "Dimension: " << dim << std::endl;
+    std::cout << "Min:" << min << std::endl;
+    std::cout << "Max:" << max << std::endl;
+
+    f3Vector span = (maxMin).ElementwiseDivision(static_cast<f3Vector>(dim) - f3Vector({1,1,1}));
+    std::cout << "Delta: " << span << std::endl;
+
+    float* dataset = new float[dim[0]*dim[1]*dim[2]]();
+
+    // Bring atoms to +++ quadrant
+    // for(auto& atom : atoms){
+    //     atom.pos = (atom.pos-min).ElementwiseDivision(span);
+    // }
+
+    std::cout << "Begin blurring coordinates" << std::endl;
+    blurAtoms(atoms.cbegin(), atoms.cend(), dataset, min, maxMin, dim, blobbyness);
+    std::cout << "Done blurring coords" << std::endl;
+
+    // float minval;
+    float maxval;
+    // minval = std::numeric_limits<float>::infinity();
+    maxval = -std::numeric_limits<float>::infinity();
+
+    for (int i = 0; i < dim[2] * dim[1] * dim[0]; ++i)
+    {
+        float cval = dataset[i];
+        // if (cval < minval){
+        //     minval = cval;
+        // }
+        if (cval > maxval){
+            maxval = cval;
+        }
+    }
+    // std::cout << "Min Density: " << minval << ", Max Density: " << maxval << std::endl;
+    float data_isoval = 0.44 * maxval; // Override the user's isovalue... is this a good idea?
+    if (data_isoval < isovalue)
+    {
+        isovalue = data_isoval;
+    }
+    std::cout << "Isovalue: " << isovalue << std::endl;
+
+    std::vector<Vertex> holelist;
+    mesh = std::move(marchingCubes(dataset, maxval, dim, span, isovalue, std::back_inserter(holelist)));
+    delete[] dataset;
+
+    // Translate back to the original position from the positive octant
+    for(auto& v : mesh->get_level<1>()){
+        v += min;
+    }
+    // TODO: (0) What to do with holelist...
+    return mesh;
+}
+
+std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string& filename,
+            const float blobbyness,
+            float isovalue){
+    std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+
+    std::vector<Atom> atoms;
+    // If readPDB errors return nullptr
+    if(!readPQR(filename, std::back_inserter(atoms)))
     {
         mesh.reset();
         return mesh;

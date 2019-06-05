@@ -19,14 +19,73 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-include(ExternalProject)
-ExternalProject_Add(
-    casc
-    URL https://github.com/ctlee/casc/archive/development.tar.gz
-    #URL_HASH SHA1=34cfe1ae39c4abd63f88e0056202d376c01ff190
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/casc
-    INSTALL_COMMAND ""
-)
+include(FetchContent)
 
-add_subdirectory(tetgen)
-# add_subdirectory(triangle)
+###########################
+# GET CASC
+###########################
+FetchContent_Declare(
+    casclib
+    GIT_REPOSITORY  https://github.com/ctlee/casc.git
+    GIT_TAG         v1.0.2
+    SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-src"
+    BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-build"
+)
+FetchContent_GetProperties(casclib)
+if(NOT casclib_POPULATED)
+  FetchContent_Populate(casclib)
+  add_subdirectory(${casclib_SOURCE_DIR} ${casclib_BINARY_DIR})
+endif()
+
+###########################
+# GET PYBIND11 2.2.4
+###########################
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY  https://github.com/pybind/pybind11.git
+    GIT_TAG         v2.2.4
+    SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
+    BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build"
+)
+FetchContent_GetProperties(pybind11)
+if(NOT pybind11_POPULATED)
+  FetchContent_Populate(pybind11)
+  add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+endif()
+
+
+###########################
+# FIND/GET EIGEN 3.3.7
+###########################
+if(NOT GETEIGEN)
+    find_package (Eigen3 3.3 NO_MODULE)
+    if(NOT Eigen3_FOUND)
+        message(FATAL_ERROR "Could not find required library Eigen."
+            "Please append -DGETEIGEN=true to your cmake call and I will download Eigen for you.")
+    endif()
+    add_library(eigen ALIAS Eigen3::Eigen)
+    target_compile_options(eigen PRIVATE -w)   # Suppress warnings
+endif()
+
+if(GETEIGEN)
+    FetchContent_Declare(
+        eigen
+        GIT_REPOSITORY  https://github.com/eigenteam/eigen-git-mirror.git
+        GIT_TAG         3.3.7
+        SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-src"
+        BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-build"
+    )
+    FetchContent_GetProperties(eigen)
+    if(NOT eigen_POPULATED)
+        FetchContent_Populate(eigen)
+        add_library (eigen INTERFACE)
+        target_include_directories(eigen INTERFACE $<BUILD_INTERFACE:${eigen_SOURCE_DIR}>)
+        target_compile_options(eigen INTERFACE -w)   # Suppress warnings
+    endif()
+endif()
+
+###########################
+# Tetgen
+###########################
+add_subdirectory(tetgen EXCLUDE_FROM_ALL)
+# add_subdirectory(triangle EXCLUDE_FROM_ALL)

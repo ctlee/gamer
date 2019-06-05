@@ -27,7 +27,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "Vertex.h"
+#include "gamer/Vertex.h"
 
 Vertex operator+(const Vertex& A, const Vector& B){
     Vertex rval(A);
@@ -94,3 +94,22 @@ double angle(const Vector& AB, const Vector& CB){
     return std::acos(ab|cb)*180/M_PI;
 }
 
+double angleRad(const Vertex& A, const Vertex& B, const Vertex& C){
+    Vector AB = A-B;
+    Vector CB = C-B;
+    return angleRad(AB,CB);
+}
+
+double angleRad(const Vector& AB, const Vector& CB){
+    auto ab = AB;
+    auto cb = CB;
+    double lenAB = magnitude(ab);
+    double lenCB = magnitude(cb);
+    if (lenAB == 0 || lenCB == 0){
+        // std::cerr << "Some length == 0, can't compute angle." << std::endl;
+        throw std::runtime_error("Some length == 0, cannot compute angle.");
+    }
+    ab /= lenAB;
+    cb /= lenCB;
+    return std::acos(ab|cb);
+}

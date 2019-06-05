@@ -26,7 +26,7 @@ from bpy.props import (
         FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty,
         PointerProperty, StringProperty, BoolVectorProperty)
 
-from gamer_addon.util import *
+from blendgamer.util import *
 
 # we use per module class registration/unregistration
 def register():

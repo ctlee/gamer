@@ -35,22 +35,24 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(gameraddon_main)
+    importlib.reload(blendgamer)
     importlib.reload(ui)
     importlib.reload(surfacemesh_ops)
     importlib.reload(markers)
     importlib.reload(tetrahedralization)
     importlib.reload(versions)
-    improtlib.reload(meshstats)
+    importlib.reload(meshstats)
+    importlib.reload(report)
 else:
     from . import (
-            gameraddon_main,
+            blendgamer,
             ui,
             markers,
             tetrahedralization,
             surfacemesh_ops,
             versions,
             meshstats,
+            report,
             )
 
 # General import
@@ -71,15 +73,15 @@ def remove_handler(handler_list, handler_function):
 def register():
     bpy.utils.register_module(__name__)
     types = bpy.types
-    types.Scene.gamer = PointerProperty(type=gameraddon_main.GAMerAddonProperties)
+    types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)
     types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
     types.Material.gamer = PointerProperty(type=markers.GAMerBoundaryMaterial)
 
     # Add the load_post handlers
-    add_handler(bpy.app.handlers.load_post, gameraddon_main.gamer_load_post)
+    add_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
 
 def unregister():
-    remove_handler(bpy.app.handlers.load_post, gameraddon_main.gamer_load_post)
+    remove_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
     types = bpy.types
     del types.Material.gamer
     del types.Object.gamer

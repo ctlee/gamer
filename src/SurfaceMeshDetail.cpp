@@ -31,12 +31,12 @@
 #include <stdexcept>
 #include <vector>
 
-#include <libraries/casc/casc>
-#include <libraries/Eigen/Dense>
-#include <libraries/Eigen/Eigenvalues>
+#include <casc/casc>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
-#include "SurfaceMesh.h"
-#include "Vertex.h"
+#include "gamer/SurfaceMesh.h"
+#include "gamer/Vertex.h"
 
 
 namespace surfacemesh_detail{
@@ -71,14 +71,14 @@ tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
 }
 
 double getMeanEdgeLength(SurfaceMesh& mesh){
-    auto avgLen = 0;
+    double avgLen = 0;
     for (auto edgeID : mesh.get_level_id<2>()){
         auto name =  mesh.get_name(edgeID);
         auto v = *mesh.get_simplex_down(edgeID, name[0])
                  - *mesh.get_simplex_down(edgeID, name[1]);
         avgLen += std::sqrt(v|v);
     }
-    return avgLen / mesh.size<2>();
+    return avgLen / double(mesh.size<2>());
 }
 
 void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
