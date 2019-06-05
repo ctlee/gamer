@@ -469,7 +469,7 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
         //markDecimatedEdge(mesh, decimatedList, edge, .5);
         if (isBoundaryEdge(*it, mesh)) {
             std::cout << "Warning: boundary edges being collapsed, raise threshold" << std::endl;
-            continue;
+            break;
         }
         edgeCollapse(mesh, *it, .5, Callback<TetMesh>());
         //int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
