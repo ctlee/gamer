@@ -22,7 +22,7 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.1'
+version = '2.0.2'
 release = version
 
 # -- General configuration ---------------------------------------------------
