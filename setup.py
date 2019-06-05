@@ -15,8 +15,16 @@
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
+import os
+import sys
+
+# If building on readthedocs.io build with unix makefiles
+_on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if(_on_rtd):
+    sys.argv.extend(['-G','Unix Makefiles'])
 
 from skbuild import setup
+
 
 build_require = ["setuptools", "wheel", "scikit-build >= 0.10.0", "cmake", "ninja"]
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues"]
@@ -24,7 +32,7 @@ tests_require = ["pytest"]
 
 setup(
     name='pygamer',
-    version='2.0.1',
+    version='2.0.2',
     author='Christopher T. Lee',
     author_email='ctlee@ucsd.edu',
     description='GAMer: Geometry-preserving Adaptive Mesher',
