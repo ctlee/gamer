@@ -62,7 +62,7 @@ be well documented.
 To build the documentation you need the dependencies from the file
 ``docs/requirements.txt`` which you can install via pip::
 
-   pip install -r docs/requirements.txt
+   pip install -r docs/rtd-requirements.txt
 
 afterwards reconfigure your build with CMake you are ready to build the documentation::
 

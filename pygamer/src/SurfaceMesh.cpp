@@ -590,4 +590,77 @@ void init_SurfaceMesh(py::module& mod){
             Set normals to be outward facing.
         )delim"
     );
+
+
+    SurfMeshCls.def("toNdarray",
+        [](const SurfaceMesh& mesh){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+            typename SurfaceMesh::KeyType cnt = 0;
+
+            double *vertices = new double[3*mesh.size<1>()];
+            int    *edges = new int[2*mesh.size<2>()];
+            int    *faces = new int[3*mesh.size<3>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                std::size_t o = 3*i;
+                sigma[mesh.get_name(vertexID)[0]] = i++;
+                vertices[o]     = vertexID[0];
+                vertices[o+1]   = vertexID[1];
+                vertices[o+2]   = vertexID[2];
+            }
+
+            i = 0;
+            for(const auto edgeID : mesh.get_level_id<2>()){
+                std::size_t o = 2*i;
+                auto name = mesh.get_name(edgeID);
+
+                edges[o]    = sigma[name[0]];
+                edges[o+1]  = sigma[name[1]];
+                ++i;
+            }
+
+            i = 0;
+            for(const auto faceID : mesh.get_level_id<2>()){
+                std::size_t o = 3*i;
+                auto name = mesh.get_name(faceID);
+
+                faces[o]    = sigma[name[0]];
+                faces[o+1]  = sigma[name[1]];
+                faces[o+2]  = sigma[name[2]];
+                ++i;
+            }
+
+            auto free_int_array = py::capsule(v, [](void *v) { delete reinterpret_cast<int*>(v); });
+            auto free_double_array = py::capsule(v, [](void *v) { delete reinterpret_cast<double*>(v); });
+
+            return make_tuple(
+                        py::array_t<double>(
+                            {mesh.size<1>(), 3}, // shape
+                            {3*sizeof(double), sizeof(double)}, // strides
+                            vertices, // data pointer
+                            free_double_array
+                        ),
+                        py::array_t<int>(
+                            {mesh.size<2>(), 2},
+                            {2*sizeof(int), sizeof(int)},
+                            edges,
+                            free_int_array
+                        ),
+                        py::array_t<int>(
+                            {mesh.size<3>(), 3},
+                            {3*sizeof(int), sizeof(int)},
+                            faces,
+                            free_int_array
+                        ));
+        },
+        R"delim(
+            FOO
+        )delim"
+    );
 }
+
+
+
+
+

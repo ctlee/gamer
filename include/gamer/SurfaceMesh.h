@@ -605,9 +605,9 @@ void triangulateHoleHelper(SurfaceMesh &mesh,
  *             vertices.
  *
  * @param      mesh      Surface mesh
- * @param      boundary  List of boundary edges
+ * @param      sortedVerts  List of boundary edges
  * @param[in]  fdata     Data to store on each face
- * @param[in]  iter      Back inserter to store new edges and boundary edges
+ * @param[in]  edgeList  Back inserter to store new edges and boundary edges
  */
 void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &sortedVerts,

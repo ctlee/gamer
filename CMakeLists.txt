@@ -72,7 +72,7 @@ option(GAMER_TESTS "Build the GAMer tests?" OFF)
 option(GETEIGEN "Download Eigen?" ON)
 option(GETPYBIND11 "Download pybind11?" ON)
 
-option(GETTUTORIALS "Download the tutorials?" OFF)
+option(GAMER_DOCS "Download and configure documentation?" OFF)
 
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 
@@ -191,4 +191,6 @@ if(GAMER_TEST)
 endif()
 
 # Configure documentation builders
-add_subdirectory(docs)
+if(GAMER_DOCS)
+    add_subdirectory(docs)
+endif()

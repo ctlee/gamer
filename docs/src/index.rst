@@ -31,8 +31,7 @@ Technical Features:
    :maxdepth: 2
    :caption: Tutorials and Examples:
 
-   tutorials/blendertutorial.rst
-   tutorials/meshingprotein.ipynb
+   tutorial
 
 .. toctree::
    :maxdepth: 2

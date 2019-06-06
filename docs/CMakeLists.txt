@@ -23,17 +23,15 @@ include(FetchContent)
 ###########################
 # GET TUTORIALS
 ###########################
-if(GETTUTORIALS)
-    FetchContent_Declare(
-        gamer_tutorials
-        GIT_REPOSITORY  https://github.com/ctlee/gamer_tutorials.git
-        GIT_TAG         origin/master
-        SOURCE_DIR      "${CMAKE_CURRENT_LIST_DIR}/src/tutorials"
-    )
-    FetchContent_GetProperties(gamer_tutorials)
-    if(NOT gamer_tutorials_POPULATED)
-      FetchContent_Populate(gamer_tutorials)
-    endif()
+FetchContent_Declare(
+    gamer_tutorials
+    GIT_REPOSITORY  https://github.com/ctlee/gamer_tutorials.git
+    GIT_TAG         origin/master
+    SOURCE_DIR      "${CMAKE_CURRENT_SOURCE_DIR}/src/tutorials"
+)
+FetchContent_GetProperties(gamer_tutorials)
+if(NOT gamer_tutorials_POPULATED)
+    FetchContent_Populate(gamer_tutorials)
 endif()
 
 #####################################################################
@@ -94,5 +92,3 @@ set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/_doxyoutput"
         "${CMAKE_CURRENT_BINARY_DIR}/doctrees"
         "${CMAKE_CURRENT_BINARY_DIR}/html")
-
-

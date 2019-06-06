@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/build/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/_skbuild/macosx-10.14-x86_64-3.6/cmake-build/lib/'))
 
 import os
 import pygamer
@@ -49,19 +49,19 @@ if(True):
     extensions.extend(['breathe', 'exhale'])
 
 # -- Configuration for breathe -----------------------------------------------
-breathe_projects = { "gamer_project": "/Users/ctlee/gamer/docs/src/_doxyoutput/xml" }
+breathe_projects = { "gamer_project": "/Users/ctlee/gamer/gamer/docs/src/_doxyoutput/xml" }
 breathe_default_project = "gamer_project"
 
 # -- Configuration for exhale ------------------------------------------------
 exhale_args = {
-    "containmentFolder":     "/Users/ctlee/gamer/docs/src/_cppapi",
+    "containmentFolder":     "/Users/ctlee/gamer/gamer/docs/src/_cppapi",
     "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
-    "doxygenStripFromPath":  "/Users/ctlee/gamer",
+    "doxygenStripFromPath":  "/Users/ctlee/gamer/gamer",
     "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = /Users/ctlee/gamer/include"
+    "exhaleDoxygenStdin":    "INPUT = /Users/ctlee/gamer/gamer/include"
 }
 
 
@@ -88,7 +88,7 @@ add_function_parentheses = True
 show_authors = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['/Users/ctlee/gamer/docs/src/_templates']
+templates_path = ['/Users/ctlee/gamer/gamer/docs/src/_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -105,7 +105,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['/Users/ctlee/gamer/docs/src/_static']
+html_static_path = ['/Users/ctlee/gamer/gamer/docs/src/_static']
 
 html_context = {
     'css_files': [
