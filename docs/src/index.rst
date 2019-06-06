@@ -23,29 +23,30 @@ Technical Features:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation:
+   :caption: First Steps:
 
    install
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials:
+   :caption: Tutorials and Examples:
 
    tutorials/blendertutorial.rst
+   tutorials/meshingprotein.ipynb
 
 .. toctree::
    :maxdepth: 2
-   :caption: Development:
-
-   changelog
-   development
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Documentation:
+   :caption: API Documentation:
 
    _cppapi/root
    pygamer
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Developer Documentation:
+
+   changelog
+   development
 
 Indices and tables
 ==================

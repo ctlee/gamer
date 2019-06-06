@@ -25,8 +25,7 @@ if(_on_rtd):
 
 from skbuild import setup
 
-
-build_require = ["setuptools", "wheel", "scikit-build >= 0.10.0", "cmake", "ninja"]
+build_require = ["setuptools", "wheel", "scikit-build >= 0.10.0", "cmake >= 3.11", "ninja"]
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues"]
 tests_require = ["pytest"]
 

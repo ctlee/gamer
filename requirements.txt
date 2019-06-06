@@ -1,8 +1,0 @@
-setuptools
-wheel
-scikit-build >= 0.10.0
-cmake >= 3.11
-breathe
-exhale
-sphinx-issues
-pytest

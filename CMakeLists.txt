@@ -18,7 +18,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
+
+# 3.12 required for FetchContent and objectlib INTERFACE include inheritance
 cmake_minimum_required(VERSION 3.12)
+
 # Set default buildtype
 set(CMAKE_BUILD_TYPE_INIT Release)
 # Disable in source builds
@@ -48,6 +51,7 @@ project(GAMer VERSION ${VERSION_SHORT})
 
 message(STATUS "GAMer version: ${VERSION_SHORT}")
 
+# Configure version.cpp to give access to version in code
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/version.cpp.in
         ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)

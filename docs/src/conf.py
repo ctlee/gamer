@@ -9,12 +9,15 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/_skbuild/macosx-10.14-x86_64-3.6/cmake-build/lib/'))
 
+# Add the local lib to path if desired
+# import sys
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/build/lib/'))
+
+import os
 import pygamer
+
+_on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # -- Project information -----------------------------------------------------
 
@@ -31,10 +34,12 @@ release = version
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-'sphinx.ext.autosummary',
-'sphinx.ext.napoleon',
-'sphinx.ext.intersphinx',
-'sphinx_issues'
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
+    'sphinx_issues',
+    'nbsphinx',
+    'jupyter_sphinx.embed_widgets',
 ]
 
 # Github repo
