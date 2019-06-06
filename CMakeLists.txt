@@ -70,6 +70,9 @@ option(BLENDER_VERSION_STRICT "Have CMake verify compatibility of plugin with Bl
 
 option(GAMER_TESTS "Build the GAMer tests?" OFF)
 option(GETEIGEN "Download Eigen?" ON)
+option(GETPYBIND11 "Download pybind11?" ON)
+
+option(GETTUTORIALS "Download the tutorials?" OFF)
 
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 
