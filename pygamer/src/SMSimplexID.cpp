@@ -45,6 +45,16 @@ void init_SMSimplexID(py::module& mod){
     );
     vid.def(py::init<>());
 
+    vid.def_property_readonly("dataro",
+        py::overload_cast<>(&SMVertexID::data),
+        R"delim(
+                Access the data stored on the 1-simplex.
+
+                Returns:
+                    :py:class:`Vertex`: Vertex data
+        )delim"
+    );
+
     vid.def("data",
             py::overload_cast<>(&SMVertexID::data),
             py::return_value_policy::reference_internal,
@@ -81,6 +91,15 @@ void init_SMSimplexID(py::module& mod){
             reference to the actual object.
         )delim"
     );
+    eid.def_property_readonly("dataro",
+        py::overload_cast<>(&SMEdgeID::data),
+        R"delim(
+            Access the data stored on the edge.
+
+            Returns:
+                :py:class:`Edge`: Edge data
+        )delim"
+    );
     eid.def("data", py::overload_cast<>(&SMEdgeID::data),
         py::return_value_policy::reference_internal,
             R"delim(
@@ -114,6 +133,15 @@ void init_SMSimplexID(py::module& mod){
 
             This is a token to represent a 3-simplex object. It serves as a
             reference to the actual object.
+        )delim"
+    );
+    fid.def_property_readonly("dataro",
+        py::overload_cast<>(&SMFaceID::data),
+        R"delim(
+            Access the data stored on the 3-simplex
+
+            Returns:
+                :py:class:`Face`: Face data
         )delim"
     );
     fid.def("data",

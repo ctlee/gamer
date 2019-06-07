@@ -25,6 +25,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
+#include <pybind11/iostream.h>
 
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
@@ -432,6 +433,8 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("smooth", &smoothMesh,
         py::arg("max_iter")=6, py::arg("preserve_ridges")=false, py::arg("verbose")=true,
+        py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>(),
         R"delim(
             Perform mesh smoothing.
 
@@ -447,9 +450,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("coarse", &coarse,
-        py::arg("rate"),
-        py::arg("flatRate"),
-        py::arg("denseWeight"),
+        py::arg("rate"), py::arg("flatRate"), py::arg("denseWeight"),
         R"delim(
             Coarsen a surface mesh.
 
@@ -522,7 +523,14 @@ void init_SurfaceMesh(py::module& mod){
             Get the center and radius of a surface mesh.
 
             Returns:
+                vector, int: Center of the mesh and radius
+        )delim"
+    );
 
+    SurfMeshCls.def("translate",
+        py::overload_cast<SurfaceMesh&, Vector>(&translate),
+        R"delim(
+            Translate the mesh...
         )delim"
     );
 
@@ -625,10 +633,17 @@ void init_SurfaceMesh(py::module& mod){
             for(const auto faceID : mesh.get_level_id<3>()){
                 std::size_t o = 3*i;
                 auto name = mesh.get_name(faceID);
-
-                faces[o]    = sigma[name[0]];
-                faces[o+1]  = sigma[name[1]];
-                faces[o+2]  = sigma[name[2]];
+                int orient = (*faceID).orientation;
+                if(orient == 1){
+                    faces[o]    = sigma[name[0]];
+                    faces[o+1]  = sigma[name[1]];
+                    faces[o+2]  = sigma[name[2]];
+                }
+                else{
+                    faces[o]    = sigma[name[2]];
+                    faces[o+1]  = sigma[name[1]];
+                    faces[o+2]  = sigma[name[0]];
+                }
                 ++i;
             }
 
