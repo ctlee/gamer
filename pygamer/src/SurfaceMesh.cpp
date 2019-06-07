@@ -23,6 +23,7 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
 #include "gamer/SurfaceMesh.h"
@@ -592,10 +593,9 @@ void init_SurfaceMesh(py::module& mod){
     );
 
 
-    SurfMeshCls.def("toNdarray",
+    SurfMeshCls.def("to_ndarray",
         [](const SurfaceMesh& mesh){
             std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
-            typename SurfaceMesh::KeyType cnt = 0;
 
             double *vertices = new double[3*mesh.size<1>()];
             int    *edges = new int[2*mesh.size<2>()];
@@ -605,9 +605,10 @@ void init_SurfaceMesh(py::module& mod){
             for(const auto vertexID : mesh.get_level_id<1>()){
                 std::size_t o = 3*i;
                 sigma[mesh.get_name(vertexID)[0]] = i++;
-                vertices[o]     = vertexID[0];
-                vertices[o+1]   = vertexID[1];
-                vertices[o+2]   = vertexID[2];
+                auto vertex = vertexID.data();
+                vertices[o]     = vertex[0];
+                vertices[o+1]   = vertex[1];
+                vertices[o+2]   = vertex[2];
             }
 
             i = 0;
@@ -621,7 +622,7 @@ void init_SurfaceMesh(py::module& mod){
             }
 
             i = 0;
-            for(const auto faceID : mesh.get_level_id<2>()){
+            for(const auto faceID : mesh.get_level_id<3>()){
                 std::size_t o = 3*i;
                 auto name = mesh.get_name(faceID);
 
@@ -631,31 +632,49 @@ void init_SurfaceMesh(py::module& mod){
                 ++i;
             }
 
-            auto free_int_array = py::capsule(v, [](void *v) { delete reinterpret_cast<int*>(v); });
-            auto free_double_array = py::capsule(v, [](void *v) { delete reinterpret_cast<double*>(v); });
+            auto free_vertices  = py::capsule(
+                                    vertices,
+                                    [](void *vertices) {
+                                        delete[] reinterpret_cast<double*>(vertices);
+                                 });
+            auto free_edges     = py::capsule(
+                                    edges,
+                                    [](void *edges) {
+                                        delete[] reinterpret_cast<int*>(edges);
+                                  });
+            auto free_faces     = py::capsule(
+                                    faces,
+                                    [](void *faces) {
+                                        delete[] reinterpret_cast<int*>(faces);
+                                  });
 
             return make_tuple(
                         py::array_t<double>(
-                            {mesh.size<1>(), 3}, // shape
-                            {3*sizeof(double), sizeof(double)}, // strides
-                            vertices, // data pointer
-                            free_double_array
+                            std::array<std::size_t, 2>({mesh.size<1>(), 3}),
+                            {3*sizeof(double), sizeof(double)},
+                            vertices,
+                            free_vertices
                         ),
                         py::array_t<int>(
-                            {mesh.size<2>(), 2},
+                            std::array<std::size_t, 2>({mesh.size<2>(), 2}),
                             {2*sizeof(int), sizeof(int)},
                             edges,
-                            free_int_array
+                            free_edges
                         ),
                         py::array_t<int>(
-                            {mesh.size<3>(), 3},
+                            std::array<std::size_t, 2>({mesh.size<3>(), 3}),
                             {3*sizeof(int), sizeof(int)},
                             faces,
-                            free_int_array
+                            free_faces
                         ));
         },
         R"delim(
-            FOO
+            Converts the Surface Mesh into sets of numpy arrays.
+
+            Returns:
+                np.ndarray: (nVertices, 3) array of vertex coordinates
+                np.ndarray: (nEdges, 2) array of indices of vertices making up edges
+                np.ndarray: (nFaces, 3) array of indices of vertices making up faces
         )delim"
     );
 }
