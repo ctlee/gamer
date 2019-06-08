@@ -27,7 +27,7 @@ include(FetchContent)
 FetchContent_Declare(
     casclib
     GIT_REPOSITORY  https://github.com/ctlee/casc.git
-    GIT_TAG         v1.0.2
+    GIT_TAG         origin/boundarycheck
     SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-src"
     BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-build"
 )

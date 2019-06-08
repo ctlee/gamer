@@ -324,6 +324,158 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+    SurfMeshCls.def("to_ndarray",
+        [](const SurfaceMesh& mesh){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            double *vertices = new double[3*mesh.size<1>()];
+            int    *edges = new int[2*mesh.size<2>()];
+            int    *faces = new int[3*mesh.size<3>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                std::size_t o = 3*i;
+                sigma[mesh.get_name(vertexID)[0]] = i++;
+                auto vertex = vertexID.data();
+                vertices[o]     = vertex[0];
+                vertices[o+1]   = vertex[1];
+                vertices[o+2]   = vertex[2];
+            }
+
+            i = 0;
+            for(const auto edgeID : mesh.get_level_id<2>()){
+                std::size_t o = 2*i;
+                auto name = mesh.get_name(edgeID);
+
+                edges[o]    = sigma[name[0]];
+                edges[o+1]  = sigma[name[1]];
+                ++i;
+            }
+
+            i = 0;
+            for(const auto faceID : mesh.get_level_id<3>()){
+                std::size_t o = 3*i;
+                auto name = mesh.get_name(faceID);
+                int orient = (*faceID).orientation;
+                if(orient == 1){
+                    faces[o]    = sigma[name[0]];
+                    faces[o+1]  = sigma[name[1]];
+                    faces[o+2]  = sigma[name[2]];
+                }
+                else{
+                    faces[o]    = sigma[name[2]];
+                    faces[o+1]  = sigma[name[1]];
+                    faces[o+2]  = sigma[name[0]];
+                }
+                ++i;
+            }
+
+            auto free_vertices  = py::capsule(
+                                    vertices,
+                                    [](void *vertices) {
+                                        delete[] reinterpret_cast<double*>(vertices);
+                                 });
+            auto free_edges     = py::capsule(
+                                    edges,
+                                    [](void *edges) {
+                                        delete[] reinterpret_cast<int*>(edges);
+                                  });
+            auto free_faces     = py::capsule(
+                                    faces,
+                                    [](void *faces) {
+                                        delete[] reinterpret_cast<int*>(faces);
+                                  });
+
+            return make_tuple(
+                        py::array_t<double>(
+                            std::array<std::size_t, 2>({mesh.size<1>(), 3}),
+                            {3*sizeof(double), sizeof(double)},
+                            vertices,
+                            free_vertices
+                        ),
+                        py::array_t<int>(
+                            std::array<std::size_t, 2>({mesh.size<2>(), 2}),
+                            {2*sizeof(int), sizeof(int)},
+                            edges,
+                            free_edges
+                        ),
+                        py::array_t<int>(
+                            std::array<std::size_t, 2>({mesh.size<3>(), 3}),
+                            {3*sizeof(int), sizeof(int)},
+                            faces,
+                            free_faces
+                        ));
+        },
+        R"delim(
+            Converts the Surface Mesh into sets of numpy arrays.
+
+            Returns:
+                np.ndarray: (nVertices, 3) array of vertex coordinates
+                np.ndarray: (nEdges, 2) array of indices of vertices making up edges
+                np.ndarray: (nFaces, 3) array of indices of vertices making up faces
+        )delim"
+    );
+
+
+    SurfMeshCls.def("onBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<1>>(&SurfaceMesh::onBoundary<1>, py::const_),
+        R"delim(
+            Check if a vertex is on a boundary
+
+            Returns:
+                bool: True if vertex is a member of an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("onBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<2>>(&SurfaceMesh::onBoundary<2>, py::const_),
+        R"delim(
+            Check if an edge is on a boundary
+
+            Returns:
+                bool: True if edge is a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("onBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<3>>(&SurfaceMesh::onBoundary<3>, py::const_),
+        R"delim(
+            Check if a face is on a boundary
+
+            Returns:
+                bool: True if face has an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("nearBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<1>>(&SurfaceMesh::nearBoundary<1>, py::const_),
+        R"delim(
+            Check if a vertex is near a boundary.
+
+            Returns:
+                bool: True if vertex is a member of an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("nearBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<2>>(&SurfaceMesh::nearBoundary<2>, py::const_),
+        R"delim(
+            Check if an edge is on a boundary
+
+            Returns:
+                bool: True if edge is a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("nearBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<3>>(&SurfaceMesh::nearBoundary<3>, py::const_),
+        R"delim(
+            Check if a face is on a boundary
+
+            Returns:
+                bool: True if face has an edge on a boundary.
+        )delim"
+    );
 
     /************************************
      *  ITERATORS
@@ -599,102 +751,4 @@ void init_SurfaceMesh(py::module& mod){
             Set normals to be outward facing.
         )delim"
     );
-
-
-    SurfMeshCls.def("to_ndarray",
-        [](const SurfaceMesh& mesh){
-            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
-
-            double *vertices = new double[3*mesh.size<1>()];
-            int    *edges = new int[2*mesh.size<2>()];
-            int    *faces = new int[3*mesh.size<3>()];
-
-            std::size_t i = 0;
-            for(const auto vertexID : mesh.get_level_id<1>()){
-                std::size_t o = 3*i;
-                sigma[mesh.get_name(vertexID)[0]] = i++;
-                auto vertex = vertexID.data();
-                vertices[o]     = vertex[0];
-                vertices[o+1]   = vertex[1];
-                vertices[o+2]   = vertex[2];
-            }
-
-            i = 0;
-            for(const auto edgeID : mesh.get_level_id<2>()){
-                std::size_t o = 2*i;
-                auto name = mesh.get_name(edgeID);
-
-                edges[o]    = sigma[name[0]];
-                edges[o+1]  = sigma[name[1]];
-                ++i;
-            }
-
-            i = 0;
-            for(const auto faceID : mesh.get_level_id<3>()){
-                std::size_t o = 3*i;
-                auto name = mesh.get_name(faceID);
-                int orient = (*faceID).orientation;
-                if(orient == 1){
-                    faces[o]    = sigma[name[0]];
-                    faces[o+1]  = sigma[name[1]];
-                    faces[o+2]  = sigma[name[2]];
-                }
-                else{
-                    faces[o]    = sigma[name[2]];
-                    faces[o+1]  = sigma[name[1]];
-                    faces[o+2]  = sigma[name[0]];
-                }
-                ++i;
-            }
-
-            auto free_vertices  = py::capsule(
-                                    vertices,
-                                    [](void *vertices) {
-                                        delete[] reinterpret_cast<double*>(vertices);
-                                 });
-            auto free_edges     = py::capsule(
-                                    edges,
-                                    [](void *edges) {
-                                        delete[] reinterpret_cast<int*>(edges);
-                                  });
-            auto free_faces     = py::capsule(
-                                    faces,
-                                    [](void *faces) {
-                                        delete[] reinterpret_cast<int*>(faces);
-                                  });
-
-            return make_tuple(
-                        py::array_t<double>(
-                            std::array<std::size_t, 2>({mesh.size<1>(), 3}),
-                            {3*sizeof(double), sizeof(double)},
-                            vertices,
-                            free_vertices
-                        ),
-                        py::array_t<int>(
-                            std::array<std::size_t, 2>({mesh.size<2>(), 2}),
-                            {2*sizeof(int), sizeof(int)},
-                            edges,
-                            free_edges
-                        ),
-                        py::array_t<int>(
-                            std::array<std::size_t, 2>({mesh.size<3>(), 3}),
-                            {3*sizeof(int), sizeof(int)},
-                            faces,
-                            free_faces
-                        ));
-        },
-        R"delim(
-            Converts the Surface Mesh into sets of numpy arrays.
-
-            Returns:
-                np.ndarray: (nVertices, 3) array of vertex coordinates
-                np.ndarray: (nEdges, 2) array of indices of vertices making up edges
-                np.ndarray: (nFaces, 3) array of indices of vertices making up faces
-        )delim"
-    );
 }
-
-
-
-
-
