@@ -14,26 +14,29 @@
 #include "gamer/gamer"
 
 #include <casc/casc>
-#include <libraries/casc/include/typetraits.h>
 
 int  main(int argc, char *argv[])
 {
-    auto v = Vertex(1,2,3);
-    std::cout << type_name<decltype(&Vertex::position)>() << std::endl;
+    auto mesh = readPDB_molsurf("2jho.pdb");
+    compute_orientation(*mesh);
+    smoothMesh(*mesh, 10, true, false);
 
-    // auto mesh = readPDB_molsurf("5kp9_bioassembly1.pdb");
+    auto vol = getVolume(*mesh);
+    if (vol < 0){
+        flipNormals(*mesh);
+    }
 
-    // smoothMesh(*mesh, 10, true, false);
-
-    // writeOFF("5kp9_bioassembly1.off", *mesh);
-
-    // auto mesh = readOFF(argv[1]);
-
-    // auto vol = getVolume(*mesh);
-    // if (vol < 0){
-    //     flipNormals(*mesh);
-    // }
-
+    auto lid = mesh->get_level_id<1>();
+    for(auto vid = lid.begin(); vid != lid.end();){
+        std::cout << *vid << std::endl;
+        if((*(*vid))[1] > 1){
+            auto value = *vid;
+            ++vid;
+            mesh->remove(value);
+            continue;
+        }
+        ++vid;
+    }
 
     // double max = 0;
     // for (auto s : mesh->get_level_id<1>()){
