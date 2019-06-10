@@ -729,3 +729,22 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
 std::unique_ptr<SurfaceMesh> cube(int order);
 
 std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
+
+
+template <typename Complex>
+struct CopyHelper
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
+
+    template <std::size_t k>
+    static void apply(Complex& before,
+            Complex& after,
+            const SimplexSet& S){
+        for (auto sID : casc::get<k>(S)){
+            auto name = before.get_name(sID);
+            auto data = *sID;
+            after.insert(name, data);
+        }
+    }
+};

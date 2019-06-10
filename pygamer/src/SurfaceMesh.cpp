@@ -505,6 +505,15 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+    SurfMeshCls.def("splitSurfaces",
+        &splitSurfaces,
+        py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>(),
+        R"delim(
+            Split surfaces...
+        )delim"
+    );
+
     /************************************
      *  ITERATORS
      ************************************/

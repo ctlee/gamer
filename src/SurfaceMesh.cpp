@@ -927,26 +927,61 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
 }
 
 std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
+    // Queue to store the next edges to visit
     std::deque<SurfaceMesh::SimplexID<2>> frontier;
+    // Set of visited edges
     std::set<SurfaceMesh::SimplexID<2>> visited;
 
+    std::vector<std::unique_ptr<SurfaceMesh>> meshes;
+
+    using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
+    SimplexSet surface;
+
     int connected_components = 0;
-    for(auto outer : mesh.get_level_id<k>())
+    for(auto edgeID : mesh.get_level_id<2>())
     {
-        if(visited.find(outer) == visited.end())
+        // This is a new edge if we haven't visited before
+        if(visited.find(edgeID) == visited.end())
         {
             ++connected_components;
-            frontier.push_back(outer);
+            frontier.push_back(edgeID);
+            surface.insert(edgeID);
 
+            // Traverse across connected edges.
             while(!frontier.empty())
             {
-                typename Complex::template SimplexID<k> curr = frontier.front();
+                SurfaceMesh::SimplexID<2> curr = frontier.front();
                 if(visited.find(curr) == visited.end())
                 {
                     visited.insert(curr);
+                    surface.insert(curr);
+                    neighbors_up(mesh, curr, std::back_inserter(frontier));
                 }
                 frontier.pop_front();
             }
+
+            // Extract out the surface
+            SimplexSet tmp;
+            casc::getClosure(mesh, surface, tmp);
+            casc::getStar(mesh, tmp, surface);
+
+            std::unique_ptr<SurfaceMesh> newSMPtr(new SurfaceMesh);
+            auto& newSM = *newSMPtr;
+
+            util::int_for_each<std::size_t, typename SimplexSet::cLevelIndex>(CopyHelper<SurfaceMesh>(), mesh, newSM, surface);
+
+            compute_orientation(newSM);
+            if(getVolume(newSM) < 0){
+                flipNormals(newSM);
+            }
+
+            std::cout << "Number of verts... " << newSM.size<1>() << std::endl;
+            std::cout << "Volume " << getVolume(newSM) << std::endl;
+
+            meshes.push_back(std::move(newSMPtr));
+            surface.clear();
         }
     }
+
+    return meshes;
 }

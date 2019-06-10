@@ -74,6 +74,24 @@ void init_SMSimplexID(py::module& mod){
                 bool: True if valid.
         )delim"
     );
+    vid.def("indices",
+        &SMVertexID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
+        )delim"
+    );
+    vid.def("cover",
+        &SMVertexID::cover,
+        R"delim(
+            Get the coboundary relations of this simplex.
+
+            Returns:
+                list: Indices of coboundary relations
+        )delim"
+    );
     vid.def("__repr__",
         [](const SMVertexID vid){
             std::ostringstream out;
@@ -81,6 +99,7 @@ void init_SMSimplexID(py::module& mod){
             return out.str();
         }
     );
+
 
     // Bindings for SMEdgeID
     py::class_<SMEdgeID> eid(mod, "EdgeID",
@@ -118,6 +137,24 @@ void init_SMSimplexID(py::module& mod){
                 bool: True if valid.
         )delim"
     );
+    eid.def("indices",
+        &SMEdgeID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
+        )delim"
+    );
+    eid.def("cover",
+        &SMEdgeID::cover,
+        R"delim(
+            Get the coboundary relations of this simplex.
+
+            Returns:
+                list: Indices of coboundary relations
+        )delim"
+    );
     eid.def("__repr__",
         [](const SMEdgeID eid){
             std::ostringstream out;
@@ -125,6 +162,7 @@ void init_SMSimplexID(py::module& mod){
             return out.str();
         }
     );
+
 
     // Bindings for SMFaceID
     py::class_<SMFaceID> fid(mod, "FaceID",
@@ -161,6 +199,15 @@ void init_SMSimplexID(py::module& mod){
 
             Returns:
                 bool: True if valid.
+        )delim"
+    );
+    fid.def("indices",
+        &SMFaceID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
         )delim"
     );
     fid.def("__repr__",
