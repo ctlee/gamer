@@ -26,6 +26,7 @@
 #include <pybind11/stl.h>
 
 #include "gamer/TetMesh.h"
+#include "gamer/SurfaceMesh.h"
 
 namespace py = pybind11;
 
@@ -465,6 +466,19 @@ void init_TetMesh(py::module& mod){
 
             Returns:
                 bool: True if cell touches a boundary
+        )delim"
+    );
+
+    TetMeshCls.def("extractSurface",
+        &extractSurface,
+        R"delim(
+            Extract the surface of the TetMesh.
+
+            Args:
+                tetmesh (TetMesh): Tetrahedral mesh to extract from
+
+            Returns:
+                SurfaceMesh: Surface mesh of surface
         )delim"
     );
 
