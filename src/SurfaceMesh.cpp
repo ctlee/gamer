@@ -581,7 +581,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
     // TODO: Check if all polygons are closed (0)
-    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
+    // std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 
     // Compute the average edge length
     double avgLen = 0;
@@ -624,18 +624,18 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         }
     }
 
-    std::cout << toRemove.size() << " vertices are marked to be removed." << std::endl;
+    // std::cout << toRemove.size() << " vertices are marked to be removed." << std::endl;
 
     for(auto vertexID : toRemove){
         surfacemesh_detail::decimateVertex(mesh, vertexID);
     }
 
-    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
+    // std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 }
 
 
 void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
-    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
+    // std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 
     // Compute the average edge length
     double avgLen = 0;
@@ -679,7 +679,7 @@ void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double dens
         }
     }
 
-    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
+    // std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 }
 
 void fillHoles(SurfaceMesh &mesh){
@@ -926,3 +926,27 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     return (2*M_PI-angleSum)/Amix;
 }
 
+std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
+    std::deque<SurfaceMesh::SimplexID<2>> frontier;
+    std::set<SurfaceMesh::SimplexID<2>> visited;
+
+    int connected_components = 0;
+    for(auto outer : mesh.get_level_id<k>())
+    {
+        if(visited.find(outer) == visited.end())
+        {
+            ++connected_components;
+            frontier.push_back(outer);
+
+            while(!frontier.empty())
+            {
+                typename Complex::template SimplexID<k> curr = frontier.front();
+                if(visited.find(curr) == visited.end())
+                {
+                    visited.insert(curr);
+                }
+                frontier.pop_front();
+            }
+        }
+    }
+}

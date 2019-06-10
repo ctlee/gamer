@@ -276,10 +276,10 @@ void init_SurfaceMesh(py::module& mod){
             Get the name of the vertex
 
             Args:
-                SimplexID  (:py:class`VertexID`): VertexID to get the name of.
+                SimplexID  (:py:class`EdgeID`): VertexID to get the name of.
 
             Returns:
-                key (list): Name of the vertex.
+                key (list): Name of the edge.
         )delim"
     );
 
@@ -287,13 +287,41 @@ void init_SurfaceMesh(py::module& mod){
     SurfMeshCls.def("getName",
         py::overload_cast<SurfaceMesh::SimplexID<3>>(&SurfaceMesh::get_name<3>, py::const_),
         R"delim(
-            Get the name of the vertex
+            Get the name of the face
 
             Args:
                 SimplexID  (:py:class`FaceID`): FaceID to get the name of.
 
             Returns:
                 key (list): List of vertex indices which make up the face.
+        )delim"
+    );
+
+
+    SurfMeshCls.def("getCover",
+        py::overload_cast<SurfaceMesh::SimplexID<1>>(&SurfaceMesh::get_cover<1>, py::const_),
+        R"delim(
+            Get the cover of the vertex.
+
+            Args:
+                SimplexID  (:py:class`VertexID`): VertexID to get the cover of.
+
+            Returns:
+                key (list): Cover of the vertex.
+        )delim"
+    );
+
+
+    SurfMeshCls.def("getCover",
+        py::overload_cast<SurfaceMesh::SimplexID<2>>(&SurfaceMesh::get_cover<2>, py::const_),
+        R"delim(
+            Get the cover of the edge
+
+            Args:
+                SimplexID  (:py:class`VertexID`): VertexID to get the cover of.
+
+            Returns:
+                key (list): Cover of the edge.
         )delim"
     );
 

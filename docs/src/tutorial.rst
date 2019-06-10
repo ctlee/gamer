@@ -11,7 +11,7 @@ pyGAMer Jupyter Notebook Tutorials
 .. toctree::
    :maxdepth: 1
 
-   tutorials/tutorials/meshingprotein.ipynb
+   tutorials/notebooks/meshingprotein.ipynb
 
 BlendGAMer Tutorials
 --------------------

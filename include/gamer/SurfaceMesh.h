@@ -728,3 +728,4 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
  */
 std::unique_ptr<SurfaceMesh> cube(int order);
 
+std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
