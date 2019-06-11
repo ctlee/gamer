@@ -38,7 +38,7 @@ include(GetGitRevisionDescription)
 git_describe(VERSION --tags --dirty=.dirty --always)
 
 #parse the version information into pieces.
-string(REGEX MATCH "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)-*(alpha|beta|dev|)-*([A-Za-z0-9_-]*)\\.*(dirty)*$" MATCH_RESULT "${VERSION}")
+string(REGEX MATCH "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)-*(alpha|beta|dev|)-*([A-Za-z0-9_-]*)\\.*(dirty|)$" MATCH_RESULT "${VERSION}")
 
 if(MATCH_RESULT)
     # message(STATUS "Results: ${CMAKE_MATCH_0} ${CMAKE_MATCH_1} ${CMAKE_MATCH_2} ${CMAKE_MATCH_3} ${CMAKE_MATCH_4} ${CMAKE_MATCH_5} ${CMAKE_MATCH_6}")
