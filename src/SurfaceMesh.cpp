@@ -963,6 +963,7 @@ std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
             // Extract out the surface
             SimplexSet tmp;
             casc::getClosure(mesh, surface, tmp);
+            surface.clear();
             casc::getStar(mesh, tmp, surface);
 
             std::unique_ptr<SurfaceMesh> newSMPtr(new SurfaceMesh);
@@ -974,9 +975,6 @@ std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
             if(getVolume(newSM) < 0){
                 flipNormals(newSM);
             }
-
-            std::cout << "Number of verts... " << newSM.size<1>() << std::endl;
-            std::cout << "Volume " << getVolume(newSM) << std::endl;
 
             meshes.push_back(std::move(newSMPtr));
             surface.clear();
