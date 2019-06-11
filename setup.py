@@ -24,6 +24,39 @@ It enables users to perform mesh generation and manipulation tasks via Python sc
 
 import os
 import sys
+import subprocess
+import re
+
+# Return the git revision as a string
+def git_version():
+    def _minimal_ext_cmd(cmd):
+        # construct minimal environment
+        env = {}
+        for k in ['SYSTEMROOT', 'PATH', 'HOME']:
+            v = os.environ.get(k)
+            if v is not None:
+                env[k] = v
+        # LANGUAGE is used on win32
+        env['LANGUAGE'] = 'C'
+        env['LANG'] = 'C'
+        env['LC_ALL'] = 'C'
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, env=env)
+        return out
+
+    try:
+        out = _minimal_ext_cmd(['git', 'describe', '--tags', '--dirty=.dirty', '--always'])
+        GIT_REVISION = out.strip().decode('ascii')
+    except (subprocess.SubprocessError, OSError):
+        GIT_REVISION = "Unknown"
+
+    return GIT_REVISION
+
+version = git_version()
+
+if not version == "Unknown":
+    match = re.search('v(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)-*(.*)', version)
+    if match:
+        version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
 
 cmake_args=['-DBUILD_PYGAMER=ON']
 
@@ -61,7 +94,7 @@ tests_require = ["pytest"]
 
 setup(
     name='pygamer',
-    version='2.0.2',
+    version=version,
     maintainer='Christopher T. Lee',
     maintainer_email='ctlee@ucsd.edu',
     author='The GAMer Team',

@@ -237,7 +237,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
-    pygamer.def("getVersion_long",
+    pygamer.def("__version__",
         [](){
             extern const std::string gVERSION;
             return gVERSION;

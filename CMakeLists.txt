@@ -35,13 +35,13 @@ endif()
 
 # Look for version from GIT
 include(GetGitRevisionDescription)
-git_describe(VERSION --tags --dirty=-d)
+git_describe(VERSION --tags --dirty=.dirty --always)
 
 #parse the version information into pieces.
 string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(-alpha|-beta|)-(.*)" "\\2" VERSION_SHA1 "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(-alpha|-beta|-dev)-(.*)" "\\2" VERSION_SHA1 "${VERSION}")
 set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 #####################################################################
@@ -49,7 +49,7 @@ set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 #####################################################################
 project(GAMer VERSION ${VERSION_SHORT})
 
-message(STATUS "GAMer version: ${VERSION_SHORT}")
+message(STATUS "GAMer version: ${VERSION}")
 
 # Configure version.cpp to give access to version in code
 configure_file(

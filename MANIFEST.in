@@ -1,0 +1,7 @@
+include pygamer/*
+include libraries/*
+include include/*
+include src/*
+include tools/*
+
+include CMakeLists.txt
