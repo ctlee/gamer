@@ -52,11 +52,20 @@ def git_version():
     return GIT_REVISION
 
 version = git_version()
-
 if not version == "Unknown":
-    match = re.search('v(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)-*(.*)', version)
+    match = re.search('v(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)-*([A-Za-z0-9_-]*)\.*(dirty|)', version)
     if match:
         version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
+    else:
+        version = "0.0.0"
+else:
+    with open('VERSION', 'r') as f:
+       version = f.readline()
+    match = re.search('(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)', version)
+    if match:
+        version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
+    else:
+        version = "0.0.0"
 
 cmake_args=['-DBUILD_PYGAMER=ON']
 
@@ -66,7 +75,7 @@ CLASSIFIERS = """\
 Development Status :: 4 - Beta
 Environment :: Console
 Intended Audience :: Science/Research
-License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv22+)
+License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)
 Natural Language :: English
 Operating System :: OS Independent
 Programming Language :: C++
@@ -98,7 +107,7 @@ setup(
     maintainer='Christopher T. Lee',
     maintainer_email='ctlee@ucsd.edu',
     author='The GAMer Team',
-    author_email='',
+    author_email='ctlee@ucsd.edu',
     url='https://github.com/cltee/gamer',
     license='LGPLv2+',
     description=DOCLINES[0],

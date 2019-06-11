@@ -26,7 +26,7 @@ include(FetchContent)
 FetchContent_Declare(
     gamer_tutorials
     GIT_REPOSITORY  https://github.com/ctlee/gamer_tutorials.git
-    GIT_TAG         origin/meshprotein
+    GIT_TAG         origin/master
     SOURCE_DIR      "${CMAKE_CURRENT_SOURCE_DIR}/src/tutorials"
 )
 FetchContent_GetProperties(gamer_tutorials)
