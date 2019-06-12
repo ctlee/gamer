@@ -514,6 +514,38 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+
+    SurfMeshCls.def("meanCurvature",
+        [](const SurfaceMesh& mesh){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            double *curvature = new double[mesh.size<1>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                sigma[mesh.get_name(vertexID)[0]] = i++;
+                curvature[i] = getMeanCurvature(mesh, vertexID);
+            }
+
+            auto free_curvature  = py::capsule(
+                                    curvature,
+                                    [](void *curvature) {
+                                        delete[] reinterpret_cast<double*>(curvature);
+                                 });
+            return  py::array_t<double>(
+                        std::array<std::size_t, 1>({mesh.size<1>()}),
+                        {sizeof(double)},
+                        curvature,
+                        free_curvature);
+        },
+        R"delim(
+            Gets the mean curvature of vertices in the mesh
+
+            Returns:
+                np.ndarray: (nVertices) Curvature of each vertex
+        )delim"
+    );
+
     /************************************
      *  ITERATORS
      ************************************/
@@ -656,7 +688,7 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("coarse_flat",
         [](SurfaceMesh& mesh, double rate, int niter){
-            for(int i = 0; i < niter; ++i) coarseIT(mesh, rate, 0.5, 0);
+            for(int i = 0; i < niter; ++i) coarse(mesh, rate, 0.5, 0);
         },
         py::arg("rate")=0.016, py::arg("numiter")=1,
         R"delim(
@@ -671,7 +703,7 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("coarse_dense",
         [](SurfaceMesh& mesh, double rate, int niter){
-            for(int i = 0; i < niter; ++i) coarseIT(mesh, rate, 0, 10);
+            for(int i = 0; i < niter; ++i) coarse(mesh, rate, 0, 10);
         },
         py::arg("rate")=1.6, py::arg("numiter")=1,
         R"delim(

@@ -21,8 +21,17 @@ branches:
 # BUILD MATRIX
 matrix:
   fast_finish: true
-  include:
+  allow_failures:
+  # These xcode versions have a llvm defect
+  - os: osx
+    osx_image: xcode9
+  - os: osx
+    osx_image: xcode9.1
+  - os: osx
+    osx_image: xcode9.2
 
+  include:
+  # OSX
   - os: osx
     osx_image: xcode8.3
 
@@ -46,6 +55,9 @@ matrix:
 
   - os: osx
     osx_image: xcode10.1
+
+  - os: osx
+    osx_image: xcode10.2
 
   # LINUX GCC
   - os: linux

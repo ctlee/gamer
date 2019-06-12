@@ -216,7 +216,7 @@ def gamerToBlender(report, gmesh,
     verts = []      # Array of vertex coordinates
     idxMap = {}     # Dictionary of gamer indices to renumbered indices
     for i, vid in enumerate(gmesh.vertexIDs):
-        v = vid.data
+        v = vid.data()
         verts.append((v[0], v[1], v[2]))
         idxMap[gmesh.getName(vid)[0]] = i    # Reindex starting at 0
 
@@ -225,7 +225,7 @@ def gamerToBlender(report, gmesh,
     markersList = []
     for i, fid in enumerate(gmesh.faceIDs):
         fName = gmesh.getName(fid)
-        face = fid.data
+        face = fid.data()
 
         if face.selected:
             selectedFaces.append(i)

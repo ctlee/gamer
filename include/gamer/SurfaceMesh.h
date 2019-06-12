@@ -685,16 +685,6 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
  */
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
-/**
- * @brief      Coarsen the mesh in one loop. Faster but uses more memory.
- *
- * @param      mesh         The mesh
- * @param[in]  coarseRate   The coarse rate
- * @param[in]  flatRate     The flat rate
- * @param[in]  denseWeight  The dense weight
- */
-void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
-
 void normalSmooth(SurfaceMesh &mesh);
 
 void fillHoles(SurfaceMesh &mesh);

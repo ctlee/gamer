@@ -216,7 +216,7 @@ endif()
 #####################################################################
 # TESTING AND DOCUMENTATION
 #####################################################################
-if(GAMER_TEST)
+if(GAMER_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
