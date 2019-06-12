@@ -384,13 +384,13 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Select faces with angles less than this criteria")
 
     minCurve = FloatProperty(
-        name="Minimum curvature", default=-1000,
-        description="Lower bound threshold of curvatures"
+        name="Minimum curvature", default=0,
+        description="Lower bound percentile truncation"
         )
 
     maxCurve = FloatProperty(
-        name="Minimum curvature", default=1000,
-        description="Upper bound threshold of curvatures"
+        name="Maximum curvature", default=1000,
+        description="Upper bound percnetile truncation"
         )
 
     minEnergy = FloatProperty(
@@ -407,9 +407,11 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = np.zeros(gmesh.nVertices)
-            for i, vID in enumerate(gmesh.vertexIDs):
-                curvatures[i] = gmesh.getMeanCurvature(vID)
+
+            curvatures = gmesh.meanCurvature()
+            # curvatures = np.zeros(gmesh.nVertices)
+            # for i, vID in enumerate(gmesh.vertexIDs):
+            #     curvatures[i] = gmesh.getMeanCurvature(vID)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)
@@ -431,9 +433,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def gaussian_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = np.zeros(gmesh.nVertices)
-            for i, vID in enumerate(gmesh.vertexIDs):
-                curvatures[i] = gmesh.getGaussianCurvature(vID)
+            curvatures = gmesh.gaussianCurvature()
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)

@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/_skbuild/macosx-10.14-x86_64-3.6/cmake-build/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build/lib/'))
 
 import os
 import pygamer
@@ -42,6 +42,8 @@ extensions = [
     'jupyter_sphinx.embed_widgets',
 ]
 
+# Never run jupyter-notebooks!
+nbsphinx_execute = 'never'
 # Github repo
 issues_github_path = 'ctlee/gamer'
 
@@ -93,7 +95,7 @@ templates_path = ['/Users/ctlee/gamer/gamer/docs/src/_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates', '**.ipynb_checkpoints']
 
 # -- Options for HTML output -------------------------------------------------
 

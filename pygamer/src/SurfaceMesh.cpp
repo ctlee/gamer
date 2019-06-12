@@ -546,6 +546,38 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+    SurfMeshCls.def("gaussianCurvature",
+        [](const SurfaceMesh& mesh){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            double *curvature = new double[mesh.size<1>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                sigma[mesh.get_name(vertexID)[0]] = i++;
+                curvature[i] = getGaussianCurvature(mesh, vertexID);
+            }
+
+            auto free_curvature  = py::capsule(
+                                    curvature,
+                                    [](void *curvature) {
+                                        delete[] reinterpret_cast<double*>(curvature);
+                                 });
+            return  py::array_t<double>(
+                        std::array<std::size_t, 1>({mesh.size<1>()}),
+                        {sizeof(double)},
+                        curvature,
+                        free_curvature);
+        },
+        R"delim(
+            Gets the gaussian curvature of vertices in the mesh
+
+            Returns:
+                np.ndarray: (nVertices) Curvature of each vertex
+        )delim"
+    );
+
+
     /************************************
      *  ITERATORS
      ************************************/
