@@ -3,7 +3,7 @@ Tutorials and Examples
 
 Here is a collection of different tutorials to help you learn GAMer.
 
-pyGAMer Jupyter Notebook Tutorials
+PyGAMer Jupyter Notebook Tutorials
 ----------------------------------
 
  .. _ref-pygamernotebooks:

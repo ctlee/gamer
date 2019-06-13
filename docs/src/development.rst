@@ -69,3 +69,14 @@ afterwards reconfigure your build with CMake you are ready to build the document
    make sphinx_docs
 
 The documentation can be found in ``{builddir}/docs/html/``.
+
+Embedding Widgets in Jupyter-Notebooks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A notebook file may be saved with the current widget state as metadata. This allows the notebook file to be rendered with rendered widgets. To save a notebook with the current widget state, use the `Save Notebook Widget State` menu item.
+
+In order to delete old saved state and save new state to the notebook, do the following in order:
+
+1. Use the `Clear Notebook Widget State` menu and save the notebook. This clears the metadata from the notebook file.
+2. Restart the kernel and refresh the page. This clears the old widget state from the widget manager on the page.
+3. Create whatever widgets you'd like, and use `Save Notebook Widget State` and save the notebook. This saves the new widget state to the notebook file.
