@@ -581,7 +581,6 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
 
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
     // TODO: Check if all polygons are closed (0)
-    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 
     // Compute the average edge length
     double avgLen = 0;
@@ -592,9 +591,18 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     double sparsenessRatio = 1;
     double flatnessRatio = 1;
 
-    // Construct list of vertices to decimate
-    std::vector<SurfaceMesh::SimplexID<1> > toRemove;
-    for(auto vertexID : mesh.get_level_id<1>()){
+    auto range = mesh.get_level_id<1>();
+
+    for(auto vertexIDIT = range.begin(); vertexIDIT != range.end();){
+        // Immediately cache vertexID and increment IT so destruction of
+        // vertexID won't invalidate the iterator.
+        auto vertexID = *vertexIDIT;
+        ++vertexIDIT;
+
+        if((*vertexID).selected == false){
+            continue;
+        }
+
         // Sparseness as coarsening criteria
         if(denseWeight > 0){
             // Get max length of edges.
@@ -620,66 +628,9 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
 
         // Add vertex to delete list
         if(sparsenessRatio * flatnessRatio < coarseRate){
-            toRemove.push_back(vertexID);
-        }
-    }
-
-    std::cout << toRemove.size() << " vertices are marked to be removed." << std::endl;
-
-    for(auto vertexID : toRemove){
-        surfacemesh_detail::decimateVertex(mesh, vertexID);
-    }
-
-    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
-}
-
-
-void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight){
-    std::cout << "Before coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
-
-    // Compute the average edge length
-    double avgLen = 0;
-    if (denseWeight > 0){
-        avgLen = surfacemesh_detail::getMeanEdgeLength(mesh);
-    }
-
-    double sparsenessRatio = 1;
-    double flatnessRatio = 1;
-
-    // Backup vertices so we can modify in place
-    auto range = mesh.get_level_id<1>();
-    const std::vector<SurfaceMesh::SimplexID<1> > Vertices(range.begin(), range.end());
-    for(auto vertexID : Vertices) {
-        // Sparseness as coarsening criteria
-        if(denseWeight > 0){
-            // Get max length of edges.
-            auto edges = mesh.up(vertexID);
-            double maxLen = 0;
-            for(auto edgeID : edges){
-                auto name =  mesh.get_name(edgeID);
-                auto v = *mesh.get_simplex_down(edgeID, name[0])
-                         - *mesh.get_simplex_down(edgeID, name[1]);
-                double tmpLen = std::sqrt(v|v);
-                if(tmpLen > maxLen) maxLen = tmpLen;
-            }
-            sparsenessRatio = std::pow(maxLen/avgLen, denseWeight);
-        }
-
-        // Curvature as coarsening criteria
-        if(flatRate > 0){
-            auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, RINGS);
-            auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
-            // The closer this ratio is to 0 the flatter the local region.
-            flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
-        }
-
-        // Check if we should delete
-        if(sparsenessRatio * flatnessRatio < coarseRate){
             surfacemesh_detail::decimateVertex(mesh, vertexID);
         }
     }
-
-    std::cout << "After coarsening: " << mesh.size<1>() << " " << mesh.size<2>() << " " << mesh.size<3>() << std::endl;
 }
 
 void fillHoles(SurfaceMesh &mesh){
@@ -926,3 +877,60 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     return (2*M_PI-angleSum)/Amix;
 }
 
+std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
+    // Queue to store the next edges to visit
+    std::deque<SurfaceMesh::SimplexID<2>> frontier;
+    // Set of visited edges
+    std::set<SurfaceMesh::SimplexID<2>> visited;
+
+    std::vector<std::unique_ptr<SurfaceMesh>> meshes;
+
+    using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
+    SimplexSet surface;
+
+    int connected_components = 0;
+    for(auto edgeID : mesh.get_level_id<2>())
+    {
+        // This is a new edge if we haven't visited before
+        if(visited.find(edgeID) == visited.end())
+        {
+            ++connected_components;
+            frontier.push_back(edgeID);
+            surface.insert(edgeID);
+
+            // Traverse across connected edges.
+            while(!frontier.empty())
+            {
+                SurfaceMesh::SimplexID<2> curr = frontier.front();
+                if(visited.find(curr) == visited.end())
+                {
+                    visited.insert(curr);
+                    surface.insert(curr);
+                    neighbors_up(mesh, curr, std::back_inserter(frontier));
+                }
+                frontier.pop_front();
+            }
+
+            // Extract out the surface
+            SimplexSet tmp;
+            casc::getClosure(mesh, surface, tmp);
+            surface.clear();
+            casc::getStar(mesh, tmp, surface);
+
+            std::unique_ptr<SurfaceMesh> newSMPtr(new SurfaceMesh);
+            auto& newSM = *newSMPtr;
+
+            util::int_for_each<std::size_t, typename SimplexSet::cLevelIndex>(CopyHelper<SurfaceMesh>(), mesh, newSM, surface);
+
+            compute_orientation(newSM);
+            if(getVolume(newSM) < 0){
+                flipNormals(newSM);
+            }
+
+            meshes.push_back(std::move(newSMPtr));
+            surface.clear();
+        }
+    }
+
+    return meshes;
+}

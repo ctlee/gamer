@@ -1,0 +1,11 @@
+scikit-build >= 0.10.0
+setuptools
+wheel
+cmake >= 3.11
+breathe
+exhale
+sphinx-issues
+nbsphinx
+jupyter_sphinx
+threevis
+pytest

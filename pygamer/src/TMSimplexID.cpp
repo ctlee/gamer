@@ -69,6 +69,24 @@ void init_TMSimplexID(py::module& mod){
                 bool: True if valid.
         )delim"
     );
+    vid.def("indices",
+        &TMVertexID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
+        )delim"
+    );
+    vid.def("cover",
+        &TMVertexID::cover,
+        R"delim(
+            Get the coboundary relations of this simplex.
+
+            Returns:
+                list: Indices of coboundary relations
+        )delim"
+    );
     vid.def("__repr__",
         [](const TMVertexID vid){
             std::ostringstream out;
@@ -106,6 +124,24 @@ void init_TMSimplexID(py::module& mod){
                 bool: True if valid.
         )delim"
     );
+    eid.def("indices",
+        &TMEdgeID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
+        )delim"
+    );
+    eid.def("cover",
+        &TMEdgeID::cover,
+        R"delim(
+            Get the coboundary relations of this simplex.
+
+            Returns:
+                list: Indices of coboundary relations
+        )delim"
+    );
     eid.def("__repr__",
         [](const TMEdgeID eid){
             std::ostringstream out;
@@ -113,6 +149,7 @@ void init_TMSimplexID(py::module& mod){
             return out.str();
         }
     );
+
 
     /************************************
      *  Binding TMFaceID
@@ -142,6 +179,24 @@ void init_TMSimplexID(py::module& mod){
 
             Returns:
                 bool: True if valid.
+        )delim"
+    );
+    fid.def("indices",
+        &TMFaceID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
+        )delim"
+    );
+    fid.def("cover",
+        &TMFaceID::cover,
+        R"delim(
+            Get the coboundary relations of this simplex.
+
+            Returns:
+                list: Indices of coboundary relations
         )delim"
     );
     fid.def("__repr__",
@@ -181,6 +236,15 @@ void init_TMSimplexID(py::module& mod){
 
             Returns:
                 bool: True if valid.
+        )delim"
+    );
+    cid.def("indices",
+        &TMCellID::indices,
+        R"delim(
+            Get the indices of this simplex.
+
+            Returns:
+                list: Indices
         )delim"
     );
     cid.def("__repr__",

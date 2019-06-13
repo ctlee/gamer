@@ -8,6 +8,7 @@ Changelog
 
 - Move from SWIG to use Pybind11 to generate Python binding (:pr:`30`).
 - Now using FetchContent to populate external libraries (:pr:`30`).
+- Generalized decimation for Tetrahedral meshes (:pr:`33`). Thanks to :user:`ishantimalsina`.
 
 **Fixes**:
 

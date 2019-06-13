@@ -23,7 +23,9 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 #include <pybind11/stl.h>
+#include <pybind11/iostream.h>
 
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
@@ -274,10 +276,10 @@ void init_SurfaceMesh(py::module& mod){
             Get the name of the vertex
 
             Args:
-                SimplexID  (:py:class`VertexID`): VertexID to get the name of.
+                SimplexID  (:py:class`EdgeID`): VertexID to get the name of.
 
             Returns:
-                key (list): Name of the vertex.
+                key (list): Name of the edge.
         )delim"
     );
 
@@ -285,13 +287,41 @@ void init_SurfaceMesh(py::module& mod){
     SurfMeshCls.def("getName",
         py::overload_cast<SurfaceMesh::SimplexID<3>>(&SurfaceMesh::get_name<3>, py::const_),
         R"delim(
-            Get the name of the vertex
+            Get the name of the face
 
             Args:
                 SimplexID  (:py:class`FaceID`): FaceID to get the name of.
 
             Returns:
                 key (list): List of vertex indices which make up the face.
+        )delim"
+    );
+
+
+    SurfMeshCls.def("getCover",
+        py::overload_cast<SurfaceMesh::SimplexID<1>>(&SurfaceMesh::get_cover<1>, py::const_),
+        R"delim(
+            Get the cover of the vertex.
+
+            Args:
+                SimplexID  (:py:class`VertexID`): VertexID to get the cover of.
+
+            Returns:
+                key (list): Cover of the vertex.
+        )delim"
+    );
+
+
+    SurfMeshCls.def("getCover",
+        py::overload_cast<SurfaceMesh::SimplexID<2>>(&SurfaceMesh::get_cover<2>, py::const_),
+        R"delim(
+            Get the cover of the edge
+
+            Args:
+                SimplexID  (:py:class`VertexID`): VertexID to get the cover of.
+
+            Returns:
+                key (list): Cover of the edge.
         )delim"
     );
 
@@ -319,6 +349,279 @@ void init_SurfaceMesh(py::module& mod){
         py::overload_cast<>(&SurfaceMesh::size<3>, py::const_),
         R"delim(
             Get the number of faces.
+        )delim"
+    );
+
+    SurfMeshCls.def("to_ndarray",
+        [](const SurfaceMesh& mesh){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            double *vertices = new double[3*mesh.size<1>()];
+            int    *edges = new int[2*mesh.size<2>()];
+            int    *faces = new int[3*mesh.size<3>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                std::size_t o = 3*i;
+                sigma[mesh.get_name(vertexID)[0]] = i++;
+                auto vertex = vertexID.data();
+                vertices[o]     = vertex[0];
+                vertices[o+1]   = vertex[1];
+                vertices[o+2]   = vertex[2];
+            }
+
+            i = 0;
+            for(const auto edgeID : mesh.get_level_id<2>()){
+                std::size_t o = 2*i;
+                auto name = mesh.get_name(edgeID);
+
+                edges[o]    = sigma[name[0]];
+                edges[o+1]  = sigma[name[1]];
+                ++i;
+            }
+
+            i = 0;
+            for(const auto faceID : mesh.get_level_id<3>()){
+                std::size_t o = 3*i;
+                auto name = mesh.get_name(faceID);
+                int orient = (*faceID).orientation;
+                if(orient == 1){
+                    faces[o]    = sigma[name[0]];
+                    faces[o+1]  = sigma[name[1]];
+                    faces[o+2]  = sigma[name[2]];
+                }
+                else{
+                    faces[o]    = sigma[name[2]];
+                    faces[o+1]  = sigma[name[1]];
+                    faces[o+2]  = sigma[name[0]];
+                }
+                ++i;
+            }
+
+            auto free_vertices  = py::capsule(
+                                    vertices,
+                                    [](void *vertices) {
+                                        delete[] reinterpret_cast<double*>(vertices);
+                                 });
+            auto free_edges     = py::capsule(
+                                    edges,
+                                    [](void *edges) {
+                                        delete[] reinterpret_cast<int*>(edges);
+                                  });
+            auto free_faces     = py::capsule(
+                                    faces,
+                                    [](void *faces) {
+                                        delete[] reinterpret_cast<int*>(faces);
+                                  });
+
+            return make_tuple(
+                        py::array_t<double>(
+                            std::array<std::size_t, 2>({mesh.size<1>(), 3}),
+                            {3*sizeof(double), sizeof(double)},
+                            vertices,
+                            free_vertices
+                        ),
+                        py::array_t<int>(
+                            std::array<std::size_t, 2>({mesh.size<2>(), 2}),
+                            {2*sizeof(int), sizeof(int)},
+                            edges,
+                            free_edges
+                        ),
+                        py::array_t<int>(
+                            std::array<std::size_t, 2>({mesh.size<3>(), 3}),
+                            {3*sizeof(int), sizeof(int)},
+                            faces,
+                            free_faces
+                        ));
+        },
+        R"delim(
+            Converts the Surface Mesh into sets of numpy arrays.
+
+            Returns:
+                np.ndarray: (nVertices, 3) array of vertex coordinates
+                np.ndarray: (nEdges, 2) array of indices of vertices making up edges
+                np.ndarray: (nFaces, 3) array of indices of vertices making up faces
+        )delim"
+    );
+
+
+    SurfMeshCls.def("onBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<1>>(&SurfaceMesh::onBoundary<1>, py::const_),
+        R"delim(
+            Check if a vertex is on a boundary
+
+            Returns:
+                bool: True if vertex is a member of an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("onBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<2>>(&SurfaceMesh::onBoundary<2>, py::const_),
+        R"delim(
+            Check if an edge is on a boundary
+
+            Returns:
+                bool: True if edge is a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("onBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<3>>(&SurfaceMesh::onBoundary<3>, py::const_),
+        R"delim(
+            Check if a face is on a boundary
+
+            Returns:
+                bool: True if face has an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("nearBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<1>>(&SurfaceMesh::nearBoundary<1>, py::const_),
+        R"delim(
+            Check if a vertex is near a boundary.
+
+            Returns:
+                bool: True if vertex is a member of an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("nearBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<2>>(&SurfaceMesh::nearBoundary<2>, py::const_),
+        R"delim(
+            Check if an edge is on a boundary
+
+            Returns:
+                bool: True if edge is a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("nearBoundary",
+        py::overload_cast<const SurfaceMesh::SimplexID<3>>(&SurfaceMesh::nearBoundary<3>, py::const_),
+        R"delim(
+            Check if a face is on a boundary
+
+            Returns:
+                bool: True if face has an edge on a boundary.
+        )delim"
+    );
+
+    SurfMeshCls.def("splitSurfaces",
+        &splitSurfaces,
+        py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>(),
+        R"delim(
+            Split surfaces...
+        )delim"
+    );
+
+
+    SurfMeshCls.def("meanCurvature",
+        [](const SurfaceMesh& mesh, bool smooth, std::size_t nIter){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            double *curvature = new double[mesh.size<1>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                sigma[vertexID.indices()[0]] = i++;
+                curvature[i] = getMeanCurvature(mesh, vertexID);
+            }
+
+
+            if(smooth){
+                double* smoothed = new double[mesh.size<1>()];
+                for(int round = 0; round < nIter; ++round){
+                    // Smoothing
+                    for(const auto vertexID : mesh.get_level_id<1>()) {
+                        i = sigma[vertexID.indices()[0]];
+                        // double value = scale*curvature[i];
+                        double value = curvature[i];
+                        auto neighbors = vertexID.cover();
+                        for(std::size_t nbor : neighbors) {
+                            value += curvature[sigma[nbor]];
+                            // value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
+                        }
+                        // smoothed[i] = value;
+                        smoothed[i] = value/static_cast<double>(neighbors.size()+1);
+
+                    }
+                    for(std::size_t i = 0; i < mesh.size<1>(); ++i){
+                        curvature[i] = smoothed[i];
+                    }
+                }
+                delete[] smoothed;
+            }
+
+            auto free_curvature  = py::capsule(
+                                    curvature,
+                                    [](void *curvature) {
+                                        delete[] reinterpret_cast<double*>(curvature);
+                                 });
+            return  py::array_t<double>(
+                        std::array<std::size_t, 1>({mesh.size<1>()}),
+                        {sizeof(double)},
+                        curvature,
+                        free_curvature);
+        },
+        R"delim(
+            Gets the mean curvature of vertices in the mesh
+
+            Returns:
+                np.ndarray: (nVertices) Curvature of each vertex
+        )delim"
+    );
+
+    SurfMeshCls.def("gaussianCurvature",
+        [](const SurfaceMesh& mesh, bool smooth, std::size_t nIter){
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            double *curvature = new double[mesh.size<1>()];
+
+            std::size_t i = 0;
+            for(const auto vertexID : mesh.get_level_id<1>()){
+                sigma[vertexID.indices()[0]] = i++;
+                curvature[i] = getGaussianCurvature(mesh, vertexID);
+            }
+
+            if(smooth){
+                double* smoothed = new double[mesh.size<1>()];
+                for(int round = 0; round < nIter; ++round){
+                    // Smoothing
+                    for(const auto vertexID : mesh.get_level_id<1>()) {
+                        i = sigma[vertexID.indices()[0]];
+                        // double value = scale*curvature[i];
+                        double value = curvature[i];
+                        auto neighbors = vertexID.cover();
+                        for(std::size_t nbor : neighbors) {
+                            value += curvature[sigma[nbor]];
+                            // value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
+                        }
+                        // smoothed[i] = value;
+                        smoothed[i] = value/static_cast<double>(neighbors.size()+1);
+                    }
+                    for(std::size_t i = 0; i < mesh.size<1>(); ++i){
+                        curvature[i] = smoothed[i];
+                    }
+                }
+                delete[] smoothed;
+            }
+
+            auto free_curvature  = py::capsule(
+                                    curvature,
+                                    [](void *curvature) {
+                                        delete[] reinterpret_cast<double*>(curvature);
+                                 });
+            return  py::array_t<double>(
+                        std::array<std::size_t, 1>({mesh.size<1>()}),
+                        {sizeof(double)},
+                        curvature,
+                        free_curvature);
+        },
+        R"delim(
+            Gets the gaussian curvature of vertices in the mesh
+
+            Returns:
+                np.ndarray: (nVertices) Curvature of each vertex
         )delim"
     );
 
@@ -431,6 +734,8 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("smooth", &smoothMesh,
         py::arg("max_iter")=6, py::arg("preserve_ridges")=false, py::arg("verbose")=true,
+        py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>(),
         R"delim(
             Perform mesh smoothing.
 
@@ -446,9 +751,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("coarse", &coarse,
-        py::arg("rate"),
-        py::arg("flatRate"),
-        py::arg("denseWeight"),
+        py::arg("rate"), py::arg("flatRate"), py::arg("denseWeight"),
         R"delim(
             Coarsen a surface mesh.
 
@@ -465,7 +768,7 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("coarse_flat",
         [](SurfaceMesh& mesh, double rate, int niter){
-            for(int i = 0; i < niter; ++i) coarseIT(mesh, rate, 0.5, 0);
+            for(int i = 0; i < niter; ++i) coarse(mesh, rate, 0.5, 0);
         },
         py::arg("rate")=0.016, py::arg("numiter")=1,
         R"delim(
@@ -480,7 +783,7 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("coarse_dense",
         [](SurfaceMesh& mesh, double rate, int niter){
-            for(int i = 0; i < niter; ++i) coarseIT(mesh, rate, 0, 10);
+            for(int i = 0; i < niter; ++i) coarse(mesh, rate, 0, 10);
         },
         py::arg("rate")=1.6, py::arg("numiter")=1,
         R"delim(
@@ -521,7 +824,14 @@ void init_SurfaceMesh(py::module& mod){
             Get the center and radius of a surface mesh.
 
             Returns:
+                vector, int: Center of the mesh and radius
+        )delim"
+    );
 
+    SurfMeshCls.def("translate",
+        py::overload_cast<SurfaceMesh&, Vector>(&translate),
+        R"delim(
+            Translate the mesh...
         )delim"
     );
 

@@ -18,7 +18,10 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
+
+# 3.12 required for FetchContent and objectlib INTERFACE include inheritance
 cmake_minimum_required(VERSION 3.12)
+
 # Set default buildtype
 set(CMAKE_BUILD_TYPE_INIT Release)
 # Disable in source builds
@@ -32,13 +35,44 @@ endif()
 
 # Look for version from GIT
 include(GetGitRevisionDescription)
-git_describe(VERSION --tags --dirty=-d)
+git_describe(VERSION --tags --dirty=.dirty --always)
 
 #parse the version information into pieces.
-string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(-alpha|-beta|)-(.*)" "\\2" VERSION_SHA1 "${VERSION}")
+string(REGEX MATCH "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)-*(alpha|beta|dev|)-*([A-Za-z0-9_-]*)\\.*(dirty|)$" MATCH_RESULT "${VERSION}")
+
+if(MATCH_RESULT)
+    # message(STATUS "Results: ${CMAKE_MATCH_0} ${CMAKE_MATCH_1} ${CMAKE_MATCH_2} ${CMAKE_MATCH_3} ${CMAKE_MATCH_4} ${CMAKE_MATCH_5} ${CMAKE_MATCH_6}")
+    set(VERSION_MAJOR ${CMAKE_MATCH_1})
+    set(VERSION_MINOR ${CMAKE_MATCH_2})
+    set(VERSION_PATCH ${CMAKE_MATCH_3})
+    set(VERSION_INFO ${CMAKE_MATCH_4})
+    set(VERSION_SHA1 ${CMAKE_MATCH_5})
+    set(VERSION_DIRTY ${CMAKE_MATCH_6})
+
+    set(VERSION_DUMP "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+    if(VERSION_INFO)
+        string(CONCAT VERSION_DUMP ${VERSION_DUMP} "-${VERSION_INFO}")
+    endif()
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/VERSION.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
+else()
+    message(STATUS "No GIT VCS found pulling version from file")
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/VERSION VERSION NEWLINE_CONSUME)
+    string(REGEX MATCH "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)-*(alpha|beta|dev|)$" MATCH_RESULT "${VERSION}")
+    if(MATCH_RESULT)
+        set(VERSION_MAJOR ${CMAKE_MATCH_1})
+        set(VERSION_MINOR ${CMAKE_MATCH_2})
+        set(VERSION_PATCH ${CMAKE_MATCH_3})
+        set(VERSION_INFO ${CMAKE_MATCH_4})
+    else()
+        # default values
+        set(VERSION_MAJOR "0")
+        set(VERSION_MINOR "0")
+        set(VERSION_PATCH "0")
+    endif()
+endif()
+
 set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 #####################################################################
@@ -46,8 +80,9 @@ set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 #####################################################################
 project(GAMer VERSION ${VERSION_SHORT})
 
-message(STATUS "GAMer version: ${VERSION_SHORT}")
+message(STATUS "GAMer version: ${VERSION}")
 
+# Configure version.cpp to give access to version in code
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules/version.cpp.in
         ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
@@ -66,6 +101,9 @@ option(BLENDER_VERSION_STRICT "Have CMake verify compatibility of plugin with Bl
 
 option(GAMER_TESTS "Build the GAMer tests?" OFF)
 option(GETEIGEN "Download Eigen?" ON)
+option(GETPYBIND11 "Download pybind11?" ON)
+
+option(GAMER_DOCS "Download and configure documentation?" OFF)
 
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 
@@ -178,10 +216,12 @@ endif()
 #####################################################################
 # TESTING AND DOCUMENTATION
 #####################################################################
-if(GAMER_TEST)
+if(GAMER_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
 # Configure documentation builders
-add_subdirectory(docs)
+if(GAMER_DOCS)
+    add_subdirectory(docs)
+endif()

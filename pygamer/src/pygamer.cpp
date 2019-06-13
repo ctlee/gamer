@@ -24,6 +24,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/iostream.h>
 
 #include "gamer/SurfaceMesh.h"
 #include "gamer/TetMesh.h"
@@ -223,12 +224,20 @@ PYBIND11_MODULE(pygamer, pygamer) {
     );
 
     pygamer.def("makeTetMesh", &makeTetMesh,
+        py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>(),
         R"delim(
             Call tetgen to make a TetMesh.
+
+            Args:
+                meshes (list): List of meshes with filled metadata
+
+            Returns:
+                :py:class:`TetMesh`: resulting tetrahedral mesh
         )delim"
     );
 
-    pygamer.def("getVersion_long",
+    pygamer.def("__version__",
         [](){
             extern const std::string gVERSION;
             return gVERSION;

@@ -236,6 +236,8 @@ std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<SurfaceMesh*> &surfmeshes,
         std::string tetgen_params);
 
+std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& mesh);
+
 
 void smoothMesh(TetMesh & mesh);
 void writeVTK(const std::string& filename, const TetMesh &mesh);

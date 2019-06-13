@@ -189,6 +189,8 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col=layout.column()
         col.label(text="Curvature Calculations:")
         row = col.row(align=True)
+        row.prop(qProps, "niter")
+        row = col.row(align=True)
         row.prop(qProps, "minCurve")
         row.prop(qProps, "maxCurve")
 

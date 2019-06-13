@@ -27,7 +27,7 @@ include(FetchContent)
 FetchContent_Declare(
     casclib
     GIT_REPOSITORY  https://github.com/ctlee/casc.git
-    GIT_TAG         v1.0.2
+    GIT_TAG         v1.0.3
     SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-src"
     BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-build"
 )
@@ -40,19 +40,26 @@ endif()
 ###########################
 # GET PYBIND11 2.2.4
 ###########################
-FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY  https://github.com/pybind/pybind11.git
-    GIT_TAG         v2.2.4
-    SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
-    BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build"
-)
-FetchContent_GetProperties(pybind11)
-if(NOT pybind11_POPULATED)
-  FetchContent_Populate(pybind11)
-  add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+if(NOT GETPYBIND11)
+    find_package(pybind11)
+    if(NOT pybind11_FOUND)
+        message(FATAL_ERROR "Could not find required library pybind11."
+            "Please append -DGETPYBIND11=ON to your cmake call and I will download pybind11 for you.")
+    endif()
+else()
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY  https://github.com/pybind/pybind11.git
+        GIT_TAG         v2.2.4
+        SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
+        BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build"
+    )
+    FetchContent_GetProperties(pybind11)
+    if(NOT pybind11_POPULATED)
+      FetchContent_Populate(pybind11)
+      add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+    endif()
 endif()
-
 
 ###########################
 # FIND/GET EIGEN 3.3.7
@@ -61,13 +68,11 @@ if(NOT GETEIGEN)
     find_package (Eigen3 3.3 NO_MODULE)
     if(NOT Eigen3_FOUND)
         message(FATAL_ERROR "Could not find required library Eigen."
-            "Please append -DGETEIGEN=true to your cmake call and I will download Eigen for you.")
+            "Please append -DGETEIGEN=on to your cmake call and I will download Eigen for you.")
     endif()
     add_library(eigen ALIAS Eigen3::Eigen)
     target_compile_options(eigen PRIVATE -w)   # Suppress warnings
-endif()
-
-if(GETEIGEN)
+else()
     FetchContent_Declare(
         eigen
         GIT_REPOSITORY  https://github.com/eigenteam/eigen-git-mirror.git
@@ -83,7 +88,6 @@ if(GETEIGEN)
         target_compile_options(eigen INTERFACE -w)   # Suppress warnings
     endif()
 endif()
-
 
 ###########################
 # Tetgen

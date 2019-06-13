@@ -26,6 +26,7 @@
 #include <pybind11/stl.h>
 
 #include "gamer/TetMesh.h"
+#include "gamer/SurfaceMesh.h"
 
 namespace py = pybind11;
 
@@ -387,6 +388,99 @@ void init_TetMesh(py::module& mod){
         )delim"
     );
 
+    TetMeshCls.def("onBoundary",
+        py::overload_cast<const TetMesh::SimplexID<1>>(&TetMesh::onBoundary<1>, py::const_),
+        R"delim(
+            Check if a vertex is on a boundary
+
+            Returns:
+                bool: True if vertex is a member of a face on a boundary.
+        )delim"
+    );
+
+
+    TetMeshCls.def("onBoundary",
+        py::overload_cast<const TetMesh::SimplexID<2>>(&TetMesh::onBoundary<2>, py::const_),
+        R"delim(
+            Check if an edge is on a boundary
+
+            Returns:
+                bool: True if edge is a member of a face on a boundary.
+        )delim"
+    );
+
+    TetMeshCls.def("onBoundary",
+        py::overload_cast<const TetMesh::SimplexID<3>>(&TetMesh::onBoundary<3>, py::const_),
+        R"delim(
+            Check if a face is on a boundary
+
+            Returns:
+                bool: True if face is on a boundary.
+        )delim"
+    );
+
+    TetMeshCls.def("onBoundary",
+        py::overload_cast<const TetMesh::SimplexID<4>>(&TetMesh::onBoundary<4>, py::const_),
+        R"delim(
+            Check if a cell is on a boundary
+
+            Returns:
+                bool: True if cell has a face on a boundary.
+        )delim"
+    );
+
+    TetMeshCls.def("nearBoundary",
+        py::overload_cast<const TetMesh::SimplexID<1>>(&TetMesh::nearBoundary<1>, py::const_),
+        R"delim(
+            Check if a vertex is near a boundary.
+
+            Returns:
+                bool: True if vertex touches a boundary
+        )delim"
+    );
+
+    TetMeshCls.def("nearBoundary",
+        py::overload_cast<const TetMesh::SimplexID<2>>(&TetMesh::nearBoundary<2>, py::const_),
+        R"delim(
+            Check if an edge is on a boundary
+
+            Returns:
+                bool: True if edge touches a boundary
+        )delim"
+    );
+
+    TetMeshCls.def("nearBoundary",
+        py::overload_cast<const TetMesh::SimplexID<3>>(&TetMesh::nearBoundary<3>, py::const_),
+        R"delim(
+            Check if a face is on a boundary
+
+            Returns:
+                bool: True if face touches a boundary
+        )delim"
+    );
+
+    TetMeshCls.def("nearBoundary",
+        py::overload_cast<const TetMesh::SimplexID<4>>(&TetMesh::nearBoundary<4>, py::const_),
+        R"delim(
+            Check if a cell is on a boundary
+
+            Returns:
+                bool: True if cell touches a boundary
+        )delim"
+    );
+
+    TetMeshCls.def("extractSurface",
+        &extractSurface,
+        R"delim(
+            Extract the surface of the TetMesh.
+
+            Args:
+                tetmesh (TetMesh): Tetrahedral mesh to extract from
+
+            Returns:
+                SurfaceMesh: Surface mesh of surface
+        )delim"
+    );
 
     /************************************
      *  ITERATORS

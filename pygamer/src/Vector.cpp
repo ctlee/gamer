@@ -35,6 +35,10 @@ void init_Vector(py::module& mod){
     //     }
     // );
 
+    vector.def("__neg__",
+        [](Vector& v) { return -1*v; }
+    );
+
     vector.def("__getitem__",
         [](const Vector &v, std::size_t i) -> const double& {
             if (i >= 3) throw py::index_error("Vector only contains three coordinates");

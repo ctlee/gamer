@@ -16,26 +16,113 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+"""PyGAMer: Geometry-preserving Adaptive Mesher
+
+PyGAMer is a wrapper around the `GAMer <https://github.com/ctlee/gamer/`_ C++ library.
+It enables users to perform mesh generation and manipulation tasks via Python scripts.
+"""
+
+import os
+import sys
+import subprocess
+import re
+
+# Return the git revision as a string
+def git_version():
+    def _minimal_ext_cmd(cmd):
+        # construct minimal environment
+        env = {}
+        for k in ['SYSTEMROOT', 'PATH', 'HOME']:
+            v = os.environ.get(k)
+            if v is not None:
+                env[k] = v
+        # LANGUAGE is used on win32
+        env['LANGUAGE'] = 'C'
+        env['LANG'] = 'C'
+        env['LC_ALL'] = 'C'
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, env=env)
+        return out
+
+    try:
+        out = _minimal_ext_cmd(['git', 'describe', '--tags', '--dirty=.dirty', '--always'])
+        GIT_REVISION = out.strip().decode('ascii')
+    except (subprocess.SubprocessError, OSError):
+        GIT_REVISION = "Unknown"
+
+    return GIT_REVISION
+
+version = git_version()
+if not version == "Unknown":
+    match = re.search('v(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)-*([A-Za-z0-9_-]*)\.*(dirty|)', version)
+    if match:
+        version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
+    else:
+        version = "0.0.0"
+else:
+    with open('VERSION', 'r') as f:
+       version = f.readline()
+    match = re.search('(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)', version)
+    if match:
+        version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
+    else:
+        version = "0.0.0"
+
+cmake_args=['-DBUILD_PYGAMER=ON']
+
+DOCLINES = __doc__.split("\n")
+
+CLASSIFIERS = """\
+Development Status :: 4 - Beta
+Environment :: Console
+Intended Audience :: Science/Research
+License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)
+Natural Language :: English
+Operating System :: OS Independent
+Programming Language :: C++
+Programming Language :: Python :: 3 :: Only
+Programming Language :: Python :: Implementation :: CPython
+Topic :: Scientific/Engineering :: Bio-Informatics
+Topic :: Scientific/Engineering :: Chemistry
+Topic :: Scientific/Engineering :: Mathematics
+Topic :: Scientific/Engineering :: Physics
+Topic :: Scientific/Engineering :: Visualization
+
+"""
+
+# If building on readthedocs.io build with unix makefiles
+_on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if(_on_rtd):
+    sys.argv.extend(['-G','Unix Makefiles'])
+    cmake_args.append('-DGAMER_DOCS=ON')
+
 from skbuild import setup
 
-build_require = ["setuptools", "wheel", "scikit-build >= 0.10.0", "cmake", "ninja"]
+build_require = ["setuptools", "wheel", "scikit-build >= 0.10.0", "cmake >= 3.11", "ninja"]
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues"]
 tests_require = ["pytest"]
 
 setup(
     name='pygamer',
-    version='2.0.1',
-    author='Christopher T. Lee',
+    version=version,
+    maintainer='Christopher T. Lee',
+    maintainer_email='ctlee@ucsd.edu',
+    author='The GAMer Team',
     author_email='ctlee@ucsd.edu',
-    description='GAMer: Geometry-preserving Adaptive Mesher',
+    url='https://github.com/cltee/gamer',
+    license='LGPLv2+',
+    description=DOCLINES[0],
     long_description='Python wrapper around the GAMer C++ library for mesh generation.',
-    cmake_args=['-DBUILD_PYGAMER=ON'],
-    zip_safe=False,
+    platforms=["Windows", "Linux", "Mac OS-X", "Unix"],
+    classifiers=[c for c in CLASSIFIERS.split('\n') if c],
+    keywords='Mesh Generation',
+    cmake_args=cmake_args,
     setup_requires=["pytest-runner"],
+    install_requires=["numpy>=1.8.0"],
     extras_require={
         "docs" : docs_require,
         "test" : tests_require,
         "build": build_require,
         "dev"  : docs_require + tests_require + build_require
     },
+    zip_safe=False,
 )

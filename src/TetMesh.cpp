@@ -40,6 +40,7 @@
 #include <casc/casc>
 
 #include "gamer/TetMesh.h"
+#include "gamer/SurfaceMesh.h"
 
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<SurfaceMesh*> &surfmeshes,
@@ -327,6 +328,28 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
     }
     compute_orientation(*mesh);
     return mesh;
+}
+
+std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& tetmesh){
+    // Create a new surface mesh
+    std::unique_ptr<SurfaceMesh> surfmesh(new SurfaceMesh);
+
+    for(auto faceID : tetmesh.get_level_id<3>()){
+        if(tetmesh.onBoundary(faceID)){
+            auto data = *faceID;
+            auto name = tetmesh.get_name(faceID);
+            surfmesh->insert(name, Face(data.marker, data.selected));
+        }
+    }
+
+    for(auto vertexID : surfmesh->get_level_id<1>()){
+        auto& data = *vertexID;
+        auto name = surfmesh->get_name(vertexID); // Same as in tetmesh
+        data.position = (*tetmesh.get_simplex_up(name)).position;
+    }
+
+    compute_orientation(*surfmesh);
+    return surfmesh;
 }
 
 void writeVTK(const std::string& filename, const TetMesh &mesh){

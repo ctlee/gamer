@@ -605,9 +605,9 @@ void triangulateHoleHelper(SurfaceMesh &mesh,
  *             vertices.
  *
  * @param      mesh      Surface mesh
- * @param      boundary  List of boundary edges
+ * @param      sortedVerts  List of boundary edges
  * @param[in]  fdata     Data to store on each face
- * @param[in]  iter      Back inserter to store new edges and boundary edges
+ * @param[in]  edgeList  Back inserter to store new edges and boundary edges
  */
 void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &sortedVerts,
@@ -685,16 +685,6 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
  */
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
-/**
- * @brief      Coarsen the mesh in one loop. Faster but uses more memory.
- *
- * @param      mesh         The mesh
- * @param[in]  coarseRate   The coarse rate
- * @param[in]  flatRate     The flat rate
- * @param[in]  denseWeight  The dense weight
- */
-void coarseIT(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
-
 void normalSmooth(SurfaceMesh &mesh);
 
 void fillHoles(SurfaceMesh &mesh);
@@ -728,3 +718,23 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
  */
 std::unique_ptr<SurfaceMesh> cube(int order);
 
+std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
+
+
+template <typename Complex>
+struct CopyHelper
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
+
+    template <std::size_t k>
+    static void apply(Complex& before,
+            Complex& after,
+            const SimplexSet& S){
+        for (auto sID : casc::get<k>(S)){
+            auto name = before.get_name(sID);
+            auto data = *sID;
+            after.insert(name, data);
+        }
+    }
+};
