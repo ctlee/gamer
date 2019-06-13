@@ -408,15 +408,10 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="How many iterations of curvature smoothing?"
         )
 
-    smoothScale = FloatProperty(
-        name = "Strength of smoothing", default = 0.5,
-        description = "Strength of smoothing", min = 0, max = 1
-        )
-
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = gmesh.meanCurvature(True, self.smoothScale, self.niter)
+            curvatures = gmesh.meanCurvature(True, self.niter)
             # curvatures = np.zeros(gmesh.nVertices)
             # for i, vID in enumerate(gmesh.vertexIDs):
             #     curvatures[i] = gmesh.getMeanCurvature(vID)
@@ -441,7 +436,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def gaussian_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = gmesh.gaussianCurvature(True, self.smoothScale, self.niter)
+            curvatures = gmesh.gaussianCurvature(True, self.niter)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)

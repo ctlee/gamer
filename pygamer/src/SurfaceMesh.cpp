@@ -516,7 +516,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("meanCurvature",
-        [](const SurfaceMesh& mesh, bool smooth, double scale, std::size_t nIter){
+        [](const SurfaceMesh& mesh, bool smooth, std::size_t nIter){
             std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
 
             double *curvature = new double[mesh.size<1>()];
@@ -529,22 +529,27 @@ void init_SurfaceMesh(py::module& mod){
 
 
             if(smooth){
+                double* smoothed = new double[mesh.size<1>()];
                 for(int round = 0; round < nIter; ++round){
-                    double smoothed[mesh.size<1>()];
                     // Smoothing
                     for(const auto vertexID : mesh.get_level_id<1>()) {
                         i = sigma[vertexID.indices()[0]];
-                        double value = scale*curvature[i];
+                        // double value = scale*curvature[i];
+                        double value = curvature[i];
                         auto neighbors = vertexID.cover();
                         for(std::size_t nbor : neighbors) {
-                            value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
+                            value += curvature[sigma[nbor]];
+                            // value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
                         }
-                        smoothed[i] = value;
+                        // smoothed[i] = value;
+                        smoothed[i] = value/static_cast<double>(neighbors.size()+1);
+
                     }
                     for(std::size_t i = 0; i < mesh.size<1>(); ++i){
                         curvature[i] = smoothed[i];
                     }
                 }
+                delete[] smoothed;
             }
 
             auto free_curvature  = py::capsule(
@@ -567,7 +572,7 @@ void init_SurfaceMesh(py::module& mod){
     );
 
     SurfMeshCls.def("gaussianCurvature",
-        [](const SurfaceMesh& mesh, bool smooth, double scale, std::size_t nIter){
+        [](const SurfaceMesh& mesh, bool smooth, std::size_t nIter){
             std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
 
             double *curvature = new double[mesh.size<1>()];
@@ -579,22 +584,26 @@ void init_SurfaceMesh(py::module& mod){
             }
 
             if(smooth){
+                double* smoothed = new double[mesh.size<1>()];
                 for(int round = 0; round < nIter; ++round){
-                    double smoothed[mesh.size<1>()];
                     // Smoothing
                     for(const auto vertexID : mesh.get_level_id<1>()) {
                         i = sigma[vertexID.indices()[0]];
-                        double value = scale*curvature[i];
+                        // double value = scale*curvature[i];
+                        double value = curvature[i];
                         auto neighbors = vertexID.cover();
                         for(std::size_t nbor : neighbors) {
-                            value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
+                            value += curvature[sigma[nbor]];
+                            // value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
                         }
-                        smoothed[i] = value;
+                        // smoothed[i] = value;
+                        smoothed[i] = value/static_cast<double>(neighbors.size()+1);
                     }
                     for(std::size_t i = 0; i < mesh.size<1>(); ++i){
                         curvature[i] = smoothed[i];
                     }
                 }
+                delete[] smoothed;
             }
 
             auto free_curvature  = py::capsule(
