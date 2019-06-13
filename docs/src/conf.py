@@ -46,7 +46,24 @@ extensions = [
 # Github repo
 issues_github_path = 'ctlee/gamer'
 
+if(True):
+    extensions.extend(['breathe', 'exhale'])
 
+# -- Configuration for breathe -----------------------------------------------
+breathe_projects = { "gamer_project": "/Users/ctlee/gamer/gamer/docs/src/_doxyoutput/xml" }
+breathe_default_project = "gamer_project"
+
+# -- Configuration for exhale ------------------------------------------------
+exhale_args = {
+    "containmentFolder":     "/Users/ctlee/gamer/gamer/docs/src/_cppapi",
+    "rootFileName":          "root.rst",
+    "rootFileTitle":         "C++ API Reference",
+    "doxygenStripFromPath":  "/Users/ctlee/gamer/gamer",
+    "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
+    "createTreeView":        True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleDoxygenStdin":    "INPUT = /Users/ctlee/gamer/gamer/include"
+}
 
 
 # -----------------------------------------------------------------------------
