@@ -55,7 +55,7 @@ version = git_version()
 if not version == "Unknown":
     match = re.search('v(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)-*([A-Za-z0-9_-]*)\.*(dirty|)', version)
     if match:
-        version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
+        version = "%s.%s.%s"%(match.group(1), match.group(2), match.group(3))
     else:
         version = "0.0.0"
 else:
@@ -63,9 +63,11 @@ else:
        version = f.readline()
     match = re.search('(\d+)\.(\d+)\.(\d+)-*(alpha|beta|dev|)', version)
     if match:
-        version = F"{match.group(1)}.{match.group(2)}.{match.group(3)}"
+        version = "%s.%s.%s"%(match.group(1), match.group(2), match.group(3))
     else:
         version = "0.0.0"
+
+version = "0.0.14"
 
 cmake_args=['-DBUILD_PYGAMER=ON']
 
@@ -97,8 +99,8 @@ if(_on_rtd):
 
 from skbuild import setup
 
-build_require = ["setuptools", "wheel", "scikit-build >= 0.10.0", "cmake >= 3.11", "ninja"]
-docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues"]
+docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues", "nbsphinx",
+"jupyter_sphinx", "threevis"]
 tests_require = ["pytest"]
 
 setup(
@@ -108,21 +110,22 @@ setup(
     maintainer_email='ctlee@ucsd.edu',
     author='The GAMer Team',
     author_email='ctlee@ucsd.edu',
-    url='https://github.com/cltee/gamer',
+    url='https://github.com/ctlee/gamer',
     license='LGPLv2+',
+    packages=["pygamer"],
+    # py_modules=["pygamer"],
+    # package_dir = {'':'lib'},
     description=DOCLINES[0],
     long_description='Python wrapper around the GAMer C++ library for mesh generation.',
     platforms=["Windows", "Linux", "Mac OS-X", "Unix"],
     classifiers=[c for c in CLASSIFIERS.split('\n') if c],
     keywords='Mesh Generation',
     cmake_args=cmake_args,
-    setup_requires=["pytest-runner"],
+    setup_requires=["setuptools", "wheel", "scikit-build >= 0.10.0", "pytest-runner", "cmake >= 3.11"],
     install_requires=["numpy>=1.8.0"],
     extras_require={
         "docs" : docs_require,
         "test" : tests_require,
-        "build": build_require,
-        "dev"  : docs_require + tests_require + build_require
     },
     zip_safe=False,
 )

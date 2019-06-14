@@ -52,11 +52,13 @@ debug/
 # Mac Files
 *.DS_Store
 
-# Files from setuptools
+# Files from setuptools and python
 .eggs/
 gamer.egg-info/
 dist/
 _skbuild/
+*/__pycache__/
+MANIFEST
 
 *.whl
 *.egg-info

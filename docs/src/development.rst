@@ -80,3 +80,10 @@ In order to delete old saved state and save new state to the notebook, do the fo
 1. Use the `Clear Notebook Widget State` menu and save the notebook. This clears the metadata from the notebook file.
 2. Restart the kernel and refresh the page. This clears the old widget state from the widget manager on the page.
 3. Create whatever widgets you'd like, and use `Save Notebook Widget State` and save the notebook. This saves the new widget state to the notebook file.
+
+
+Release
+-------
+
+`python setup.py sdist bdist_wheel`
+`twine upload -r pypitest dist/*`
