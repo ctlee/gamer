@@ -42,7 +42,7 @@ Technical Features:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Developer Documentation:
+   :caption: For Developers:
 
    changelog
    development

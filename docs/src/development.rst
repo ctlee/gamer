@@ -1,6 +1,6 @@
-=================
+*****************
 Developer's Guide
-=================
+*****************
 
 Contributing
 ============
@@ -42,11 +42,8 @@ C++ respectively. All tests can be run using ctest after a successful build:
 
 Documentation
 -------------
-Every function, class, and module that you write must be documented. Please check out
-
-    https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
-
-how to do this. In short, after every function (class, module) header, there should
+Every function, class, and module that you write must be documented.
+In short, after every function (class, module) header, there should
 be a docstring enclosed by """ ... """, containing a short and long description what
 the function does, a clear description of the input parameters, and the return value,
 and any relevant cross-references or citations. You can include Latex-style math
@@ -82,24 +79,28 @@ In order to delete old saved state and save new state to the notebook, do the fo
 3. Create whatever widgets you'd like, and use `Save Notebook Widget State` and save the notebook. This saves the new widget state to the notebook file.
 
 
-Release
--------
+Publishing a new official release
+---------------------------------
+
+1. merge the `development` branch into `master`.::
+
+  git checkout master; git merge development
+
+2. make a new tag 'v{major}.{minor}.{patch}'. To determine the new version follow the guidelines outlined by `Semantic Versioning <https://semver.org/>`__.::
+
+  git tag -a v2.0.1 -m "Description of the release"
+
+3. Push the new tag to the remote repository.::
+
+  git push origin v2.0.1
+
+4. Update PyPi distribution. First test the distribution package accordingly.
 
 .. code-block:: bash
-    [distutils]
-    index-servers =
-      pypi
-      pypitest
 
-    [pypi]
-    username={VALUE}
-    password={VALUE}
+  python setup.py sdist bdist_wheel
+  twine upload -r pypitest dist/*
+  pip install --index-url https://test.pypi.org/simple/ pygamer==0.0.14
 
-    [pypitest]
-    repository=https://test.pypi.org/legacy/
-    username={VALUE}
-    password={VALUE}
-
-`python setup.py sdist bdist_wheel`
-`twine upload -r pypitest dist/*`
-`pip install --index-url https://test.pypi.org/simple/ pygamer==0.0.14`
+It may be helpful to declare `export PIP_NO_BUILD_ISOLATION=false` since many projects are not available on the test PyPi server.
+In accord with PEP518 and PEP517, pip will attempt to grab build depdencies in isolation and will throw errors when a required library cannot be found.

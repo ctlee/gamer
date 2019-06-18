@@ -20,12 +20,12 @@ GAMer has the following main features:
 
 
 ## Build Status
-### Master:
+**Master:**<br/>
 [![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
 [![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/master?svg=true)](https://ci.appveyor.com/project/ctlee/gamer)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
 
-### Development:
+**Development:**<br/>
 [![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
 [![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
 

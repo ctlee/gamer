@@ -18,7 +18,7 @@
 
 """PyGAMer: Geometry-preserving Adaptive Mesher
 
-PyGAMer is a wrapper around the `GAMer <https://github.com/ctlee/gamer/`_ C++ library.
+PyGAMer is a wrapper around the `GAMer <https://github.com/ctlee/gamer/`__ C++ library.
 It enables users to perform mesh generation and manipulation tasks via Python scripts.
 """
 
@@ -67,8 +67,6 @@ else:
     else:
         version = "0.0.0"
 
-version = "0.0.16"
-
 cmake_args=['-DBUILD_PYGAMER=ON']
 
 DOCLINES = __doc__.split("\n")
@@ -113,10 +111,9 @@ setup(
     url='https://github.com/ctlee/gamer',
     license='LGPLv2+',
     packages=["pygamer"],
-    # py_modules=["pygamer"],
-    # package_dir = {'':'lib'},
     description=DOCLINES[0],
     long_description=open('README.md', encoding='utf8').read(),
+    long_description_content_type="text/markdown",
     platforms=["Windows", "Linux", "Mac OS-X", "Unix"],
     classifiers=[c for c in CLASSIFIERS.split('\n') if c],
     keywords='meshing ',

@@ -65,12 +65,12 @@ endif()
 string(REGEX REPLACE "\n" ";" _PYTHON_VALUES ${_PYTHON_VALUES})
 list(GET _PYTHON_VALUES 0 PYTHON_SITE_PACKAGES)
 
-file(GENERATE OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
              INPUT ${CMAKE_SOURCE_DIR}/cmake-modules/__init__.py.in)
 
 if(SKBUILD)
-    # Install in the top level of egg if skbuild
     install(TARGETS pygamer LIBRARY DESTINATION pygamer)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py DESTINATION pygamer)
 else()
     # Otherwise put in PREFIX/lib if conventionally installed
     install(TARGETS pygamer LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}")
