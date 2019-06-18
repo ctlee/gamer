@@ -1,5 +1,6 @@
 include VERSION
 include README.md
+include pyproject.toml
 
 # CMake Helpers
 include cmake-modules/*
@@ -10,8 +11,19 @@ include include/gamer/*
 include src/*
 recursive-include libraries *
 
-recursive-include pygamer/*
+# PyGAMer sources
+recursive-include pygamer *
+
+# Unit Tests
 include tests/*
 
 # Blender addon
 recursive-include tools *
+
+# Documentation
+recursive-include docs *
+prune docs/src/_cppapi
+prune docs/src/_doxyoutput
+prune docs/src/_pythonapi
+prune docs/src/tutorials
+exclude docs/src/conf.py

@@ -85,5 +85,21 @@ In order to delete old saved state and save new state to the notebook, do the fo
 Release
 -------
 
+.. code-block:: bash
+    [distutils]
+    index-servers =
+      pypi
+      pypitest
+
+    [pypi]
+    username={VALUE}
+    password={VALUE}
+
+    [pypitest]
+    repository=https://test.pypi.org/legacy/
+    username={VALUE}
+    password={VALUE}
+
 `python setup.py sdist bdist_wheel`
 `twine upload -r pypitest dist/*`
+`pip install --index-url https://test.pypi.org/simple/ pygamer==0.0.14`

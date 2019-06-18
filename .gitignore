@@ -4,7 +4,7 @@
 *.swp
 .~
 
-# Ignore the build directory
+# Ignore some build directory patterns
 build/
 release/
 debug/
@@ -59,6 +59,14 @@ dist/
 _skbuild/
 */__pycache__/
 MANIFEST
+pygamer/__init__.py
 
 *.whl
 *.egg-info
+
+# Dont save generated/linked documentation files
+docs/src/_doxyoutput/
+docs/src/_cppapi/
+docs/src/_pythonapi/
+docs/src/tutorials/
+docs/src/conf.py

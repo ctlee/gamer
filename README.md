@@ -3,48 +3,65 @@
 
 GAMer is a surface mesh improvement library developed to condition surface meshes derived from noisy biological imaging data.
 Using Tetgen, GAMer can generate tetrahedral meshes suitable for finite elements simulations of reaction-diffusion systems among others.
-Currently this version of GAMer is available only as a library, Blender addon, and python module.
-In the future, we will reintroduce CLI programs for mesh processing.
+GAMer has the following main features:
+
+* Surface mesh improvement and decimation algorithms
+* Boundary marking and other features
+* Estimation of surface curvatures
+* Generation of mesh surfaces around biological molecules
+
+**Technical Features:**
+
+* Code is implemented in C++ and supports Python using a pybind11 wrapper (pygamer).
+* Cross system compilation using CMake and runs on Linux (64 bit), Windows (32 or 64 bit) or MacOS (64 bit).
+* Blender addon which enables easy access to GAMer features using the pygamer API.
+* Uses the Colored Abstract Simplicial Complex data ([CASC](http://github.com/ctlee/casc/) structure as the flexible underlying representation of surface and tetrahedral meshes.
+* Code is hosted by [GitHub](http://github.com/ctlee/gamer/) under the Lesser GNU public license (LGPLv2). Please post issues or reports there.
+
 
 ## Build Status
-Master: [![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
-Development: [![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
-Pybind11:[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/pybind11?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/pybind11)
+### Master:
+[![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
+[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/master?svg=true)](https://ci.appveyor.com/project/ctlee/gamer)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
 
-## Installing
-Prebuilt binaries of the GAMer Blender-addon are available under [releases](https://github.com/ctlee/gamer/releases).
-Download the corresponding `.zip` for your platform and follow Blender's instructions to [install from file](https://docs.blender.org/manual/fi/dev/preferences/addons.html#header).
-
-### Prerequisites
-To build the GAMer library you will need access to a working C++ compiler with full C++14 support.
-<!-- If you wish to use build and use the GAMer Python extensions, you will also need [SWIG > 3.0](http://www.swig.org/), access to a python intepreter, and the corresponding python shared library (`python.so` or `python.dylib`). -->
-In order to use the GAMer Blender addon you should also have a working installation of Blender.
+### Development:
+[![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
+[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
 
 ## Acknowledging your use of GAMer
 Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know.
 
-Please cite the above Zenodo DOI to acknowledge the software version and cite the following paper:\
+Please cite the above Zenodo DOI to acknowledge the software version and cite the following paper:<br/>
 [Lee, C. T.; Laughlin, J. G.; Angliviel de La Beaumelle, N.; Amaro, R.; McCammon, J. A.; Ramamoorthi, R.; Holst, M. J.; Rangamani, P. GAMer 2: A System for 3D Mesh Processing of Cellular Electron Micrographs. bioRxiv 2019, 534479.](https://www.biorxiv.org/content/10.1101/534479v1)
 
-## Authors
-**[Christopher Lee](https://github.com/ctlee)**\
-Department of Chemistry & Biochemistry\
-University of California, San Diego
+## Installation
+The following instructions are to build the base GAMer library.
+If you wish to additionally compile the Blender GAMer addon, GAMer documentation, or other features please refer to the Additional Options section prior to building.
 
-**John Moody**\
-Department of Mathematics\
-University of California, San Diego
+First, download a copy of the source from [releases](https://github.com/ctlee/gamer/releases) or clone the master branch.<br/>
+```bash
+git clone https://github.com/ctlee/gamer.git
+cd gamer
+```
 
-### Contributors to GAMer
-* Zeyun Yu (UCSD) and Yuhui Cheng(UCSD)\
-Development of GAMer v1. To acknowledge your use of GAMer 1, please cite:\
-[Yu, Z.; Holst, M. J.; Cheng, Y.; McCammon, J. A. Feature-Preserving Adaptive Mesh Generation for Molecular Shape Modeling and Simulation. J. Mol. Graph. Model. 2008, 26 (8), 1370–1380.](https://doi.org/10.1016/j.jmgm.2008.01.007)
+Linux and Mac:
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DGAMER_TESTS=on -DCMAKE_BUILD_TYPE=Release ..
+make
+```
 
-* Tom Bartol (Salk Institute) and Johan Hake\
-Development of Blender GAMer addon.
+For Windows, we support building using Microsoft Visual Studio (MSVS) through the use of CMake generators:
+```bash
+mkdir build64
+cd build64
+cmake -DBUILD_BLENDER=TRUE -G "Visual Studio 15 2017 Win64" -A x64 ..
+cmake --build . --config Release
+```
 
-See also the list of [contributors](https://github.com/ctlee/gamer/contributors) who participated in this project.
+For a complete guide to installation, including configuration of PyGAMer and BlendGAMer please checkout the [online installation documentation](https://gamer.readthedocs.io/en/latest/install.html).
 
 ## External libraries bundled/downloaded with/by GAMer
 * GAMer uses [Tetgen](http://wias-berlin.de/software/tetgen/) to generate
@@ -58,7 +75,7 @@ complex data structure.
 
 * GAMer uses [GoogleTest](https://github.com/google/googletest) to handle testing.
 
-* GAMer uses Pybind11...
+* GAMer uses [Pybind11](https://pybind11.readthedocs.io/en/stable/)
 
 * Mesh checks in the GAMer Blender addon are inspired or borrowed from 3D Print Toolbox by Campbell Barton and Meshalyzer from CellBlender.
 

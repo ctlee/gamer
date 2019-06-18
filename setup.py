@@ -67,7 +67,7 @@ else:
     else:
         version = "0.0.0"
 
-version = "0.0.14"
+version = "0.0.16"
 
 cmake_args=['-DBUILD_PYGAMER=ON']
 
@@ -116,10 +116,10 @@ setup(
     # py_modules=["pygamer"],
     # package_dir = {'':'lib'},
     description=DOCLINES[0],
-    long_description='Python wrapper around the GAMer C++ library for mesh generation.',
+    long_description=open('README.md', encoding='utf8').read(),
     platforms=["Windows", "Linux", "Mac OS-X", "Unix"],
     classifiers=[c for c in CLASSIFIERS.split('\n') if c],
-    keywords='Mesh Generation',
+    keywords='meshing ',
     cmake_args=cmake_args,
     setup_requires=["setuptools", "wheel", "scikit-build >= 0.10.0", "pytest-runner", "cmake >= 3.11"],
     install_requires=["numpy>=1.8.0"],

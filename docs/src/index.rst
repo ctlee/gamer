@@ -2,11 +2,11 @@
 GAMer - Geometry-preserving Adaptive Mesher
 ###########################################
 
-GAMer is a surface mesh improvement library developed to condition surface
-meshes derived from noisy biological imaging data. Using Tetgen, GAMer can
+GAMer is a surface mesh improvement library developed to condition surface meshes derived from noisy biological imaging data.
+Using Tetgen, GAMer can
 generate tetrahedral meshes suitable for finite elements simulations of
-reaction-diffusion systems among other applications. GAMer has the following
-main features:
+reaction-diffusion systems among other applications.
+GAMer has the following main features:
 
 * Surface mesh improvement and decimation algorithms
 * Boundary marking and other features
