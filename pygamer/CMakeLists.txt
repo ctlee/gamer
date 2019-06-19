@@ -73,5 +73,6 @@ if(SKBUILD)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py DESTINATION pygamer)
 else()
     # Otherwise put in PREFIX/lib if conventionally installed
-    install(TARGETS pygamer LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}")
+    install(TARGETS pygamer LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pygamer")
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py DESTINATION "${PYTHON_SITE_PACKAGES}/pygamer")
 endif()
