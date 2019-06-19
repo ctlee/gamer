@@ -3,8 +3,8 @@ Installation
 ############
 
 GAMer is first and foremost a C++ library.
-If you are an experienced C++ developer and wish to link to libGAMer start at :ref:`Building libGAMer`.
-For other users, many of the functions and types provided by GAMer can be accessed through the Python API wrapper (PyGAMer) or can be called through an interactive Blender plugin (BlendGAMer).
+If you are an experienced C++ developer and wish to link to ``libGAMer`` start at :ref:`Building libGAMer`.
+For other users, many of the functions and types provided by GAMer can be accessed through the Python API wrapper (``PyGAMer``) or can be called through an interactive Blender plugin (``BlendGAMer``).
 Check out the :ref:`Getting PyGAMer` and :ref:`Getting BlendGAMer` sections for details on how to install these tools on your system.
 
 
@@ -14,20 +14,20 @@ Check out the :ref:`Getting PyGAMer` and :ref:`Getting BlendGAMer` sections for 
 Prerequisites
 *************
 
-In order to build GAMer, PyGAMer, and BlendGAMer, you will need several tools and libraries on your system.
+In order to build GAMer, ``PyGAMer``, and ``BlendGAMer``, you will need several tools and libraries on your system.
 Other than the build toolchain and
 
   * ``C++ compiler``: supporting C++14 standard or newer.
   * ``CMake``: version 3.11 or newer.
   * ``Eigen 3``: CMake can download and locally configure Eigen for you.
   * ``CASC``: CMake can download and locally configure CASC for you.
-  * ``pybind11``: (Required for PyGAMer and BlendGAMer) CMake can download and locally configure PyBind11 for you.
-  * ``Python Headers``: (Required for PyGAMer and BlendGAMer) This is often available by default on your system. Alternatively Python environments can be configured using `Anaconda <https://www.anaconda.com/>`__.
+  * ``pybind11``: (Required for ``PyGAMer`` and ``BlendGAMer``) CMake can download and locally configure PyBind11 for you.
+  * ``Python Headers``: (Required for ``PyGAMer`` and ``BlendGAMer``) This is often available by default on your system. Alternatively Python environments can be configured using `Anaconda <https://www.anaconda.com/>`__.
 
   * ``Blender``: (Optional) To build the Blender addon, it is preferable to have a working installation of `Blender <https://www.blender.org/>`__ on your path. This way CMake can verify addon compatibility prior to packaging.
 
   * ``Doxygen``: (Optional) is necessary to build the standalone C++ API documentation.
-  * ``Breathe``, ``Exhale``, ``Sphinx``: (Optional) Python libraries are used to build the Python/C++ API documentation. Other Python dependencies such as those necessary for building are handled by pip and setuptools.
+  * ``Breathe``, ``Exhale``, ``Sphinx``: (Optional) Python libraries are used to build the Python/C++ API documentation. Other Python dependencies such as those necessary for building are handled by ``pip`` and ``setuptools``.
 
 .. _Building libGAMer:
 
@@ -41,46 +41,47 @@ There is very little overhead to compiling both libraries since we are taking ad
 If you wish to additionally compile the Blender GAMer addon, GAMer documentation, or other features please refer to the :ref:`Additional CMake Options` section prior to building.
 If you are compiling on Windows using Microsoft Visual Studio please also refer to the :ref:`Compiling on Windows` section.
 
-1. Download a copy of the source from `GitHub Releases <https://github.com/ctlee/gamer/releases>`__ or by cloning the master/development branch.
+#.  Download a copy of the source from `GitHub Releases <https://github.com/ctlee/gamer/releases>`__ or by cloning the master/development branch.
 
-::
+    .. code-block:: sh
 
-  git clone https://github.com/ctlee/gamer.git
+      git clone https://github.com/ctlee/gamer.git
 
-2. For a traditional build and installation, create an out of source folder.
+#.  For a traditional build and installation, create an out of source folder.
 
-::
+    .. code-block:: sh
 
-  cd gamer
-  mkdir build; cd build
+      cd gamer
+      mkdir build; cd build
 
-3. Run CMake to configure and build the project.
+#.  Run CMake to configure and build the project.
 
-::
+    .. code-block:: sh
 
-  cmake -DGAMER_TESTS=on -DCMAKE_BUILD_TYPE=Release ..
-  cmake --build . --config Release -j 2
+      cmake -DGAMER_TESTS=on -DCMAKE_BUILD_TYPE=Release ..
+      cmake --build . --config Release -j 2
 
-4. Run the unit tests to ensure successful compilation.
+#.  Run the unit tests to ensure successful compilation.
 
-::
+    .. code-block:: sh
 
-  ctest -C Release -V
+      ctest -C Release -V
 
-5. Install the libraries and headers.
+#.  Install the libraries and headers.
 
-::
+    .. code-block:: sh
 
-  cmake --build . --target install
+      cmake --build . --target install
 
+.. _Alternative Python Build:
 
-Alternative Python build
+Alternative Python Build
 ========================
 
 Alternatively you can use ``setup.py`` which is configured to use ``scikit-build`` and interfaces with CMake to build the library.
 This should work without modification on all supported platforms.
 
-::
+.. code-block:: sh
 
   python setup.py build
   python setup.py install
@@ -89,7 +90,7 @@ This performs approximately the same CMake build steps as above, however in an a
 You can pass :ref:`Additional CMake Options` through the setup by appending them to the setup call.
 Other details about the scikit-build process can be found `here <https://scikit-build.readthedocs.io/en/latest/>`__.
 
-::
+.. code-block:: sh
 
   python setup.py build -- -DCMAKEOPT=...
 
@@ -106,7 +107,7 @@ Compiling on Windows
 For Windows, we support building using Microsoft Visual Studio (MSVS).
 The process is essentially the same as the traditional build except that the `CMake MSVS generator`_ expects an architecture.
 To build a 64-bit library you need only append ``-A x64`` to the initial CMake configure.
-You can also use the alternative Python build process with no additional modifications.
+You can also use the alternative Python build process with no additional modifications as it detects your Python bit version and matches it.
 
 .. _CMake MSVS generator: https://cmake.org/cmake/help/latest/generator/Visual%20Studio%2015%202017.html
 
@@ -140,12 +141,12 @@ These can be used in addition to the standard `CMake flags`_.
 
   * - Explanation
     - CMake Directive
-  * -  Build the pygamer extension.
+  * -  Build the ``PyGAMer`` extension.
     - ``-DBUILD_PYGAMER=on``
   * - Specify the Python executable path.
     - ``-DPYTHON_EXECUTABLE:FILEPATH=/path/to/python3``
   * - Package the Blender addon. This flag automatically builds the Python extension.
-    - ``-DBUILD_BLENDER=on``
+    - ``-DBUILD_BLENDGAMER=on``
   * - Use single precision floating point numbers.
     - ``-DSINGLE=on``
   * - Download the external GAMer documentation.
@@ -167,12 +168,14 @@ These can be used in addition to the standard `CMake flags`_.
 
   * - Explanation
     - CMake Directive
-  * - Install BlendGAMer to the user Blender addon path. This requires Blender to be on your systems PATH.
+  * - Install ``BlendGAMer`` to the user Blender addon path. This requires Blender to be on your systems PATH.
     - ``-DBLENDER_PLUGIN_INSTALL=on``
   * - Enforce strict Python version matching with Blender.
     - ``-DBLENDER_VERSION_STRICT=on``
   * - Compile the Tetgen binary.
     - ``-DBUILD_TETGEN_BIN=on``
+  * - Specify the installation prefix for GAMer headers and libraries
+    - ``-DCMAKE_INSTALL_PREFIX=/usr/local``
 
 .. _Getting PyGAMer:
 
@@ -180,34 +183,38 @@ These can be used in addition to the standard `CMake flags`_.
 Getting PyGAMer
 ***************
 
+.. _PyGAMer the Easy Way:
+
 The Easy Way
 ============
 
-We recommend that you install PyGAMer using the pip utility.
+We recommend that you install ``PyGAMer`` using the ``pip`` utility.
 
-::
+.. code-block:: sh
 
   pip install pygamer
 
 The pip utility will automatically sort out the package dependencies for you and potentially build the library.
-Unfortunately pip is not traditionally bundled with the prepackaged Blender installation consult the :ref:`Getting BlendGAMer` section for instructions on how to build BlendGAMer.
+Unfortunately ``pip`` is not traditionally bundled with the prepackaged Blender installation consult the :ref:`Getting BlendGAMer` section for instructions on how to build ``BlendGAMer``.
+
+.. _PyGAMer the Harder Way:
 
 The Harder Way
 ==============
 
-You can also build PyGAMer using setuptools on your own using the alternative build instructions.
-By default, the Python setup enables the compilation of the PyGAMer Python extension module.
+You can also build ``PyGAMer`` using ``setuptools`` on your own using the alternative build instructions.
+By default, the Python setup enables the compilation of the ``PyGAMer`` Python extension module.
 
-::
+.. code-block:: sh
 
   python setup.py build
   python setup.py install
 
-If you insist on it, it is also possible to build and install PyGAMer using CMake directly.
+If you insist on it, it is also possible to build and install ``PyGAMer`` using CMake directly.
 This will place the plugin into ``${PYTHON_SITE_PACKAGES}/pygamer/*``.
-Although the CMake Python module installation is available, it can be error prone and therefore we recommend building using setuptools and scikit-build.
+Although the CMake Python module installation is available, it can be error prone and therefore we recommend building using ``setuptools``.
 
-::
+.. code-block:: sh
 
   mkdir build; cd build
   cmake -DBUILD_PYTHONEXT=on ..
@@ -221,23 +228,114 @@ Although the CMake Python module installation is available, it can be error pron
 Getting BlendGAMer
 ******************
 
+.. _BlendGAMer the Easy Way:
+
 The Easy Way
 ============
 
-If you seek to use GAMer in an interactive way through Blender. The easiest way
-to get a working copy is to download and install one of the prebuilt binaries
-of the GAMer Blender addon are available under `github releases`_. The zip file
-can be installed by following the traditional `Blender addon installation instructions`_.
+If you seek to use GAMer in an interactive way through Blender.
+The easiest way to get a working copy is to download and install one of the prebuilt binaries of the GAMer Blender addon are available under `github releases`_.
+These zip files contain prebuilt ``PyGAMer`` binaries which correspond to specific Blender release versions published by the Blender Foundation.
+The zip file can be installed by following the traditional `Blender addon installation instructions`_.
+
+.. Warning::
+  If you are using a non-standard installation, such as Blender you have compiled yourself or from a package distribution (i.e., ``apt`` or ``yum``), the precompiled zip addons may not work for you.
+  This is because the Python extension module version must be compiled using Python version matching Blender's bundled Python version.
+  Package distributions often use Python versions already available on your system and therefore the precompiled binaries may not match.
+  To resolve this, you will need to install :ref:`BlendGAMer the Harder Way`.
 
 .. _github releases: https://github.com/ctlee/gamer/releases
 
 .. _Blender addon installation instructions: https://docs.blender.org/manual/en/latest/preferences/addons.html#header
 
+
+.. _BlendGAMer the Harder Way:
+
 The Harder Way
 ==============
 
-You can build BlendGAMer yourself using CMake to help...
+You can build ``BlendGAMer`` yourself using CMake.
+Owing to the complexities of building Python extension modules, it is preferable to have a working installation of Blender on your system.
+While this is not strictly necessary, it enables CMake to verify that the Python versions will be compatible.
+Note that the prebuilt Blender binaries from the Blender Foundation do not contain Python header files and are therefore unsuitable for compilation.
 
+#.  Ensure you have a working Blender installation. And if possible append the Blender executable to your systems ``PATH``.
+    Follow instructions online for `Getting Blender <https://docs.blender.org/manual/en/latest/getting_started/installing/introduction.html#install-blender>`__.
+
+    On Mac add the following commands to ``~/.bash_profile`` pointing to the directory with Blender's binary:
+
+    .. code-block:: sh
+
+      export PATH="/Applications/blender/blender.app/Contents/MacOS:${PATH}"
+
+    On Linux add the following command to ``~/.bashrc`` or ``~/.profile`` pointing to the directory with Blender's binary:
+
+    .. code-block:: sh
+
+      export PATH=/path/to/blender/directory/bin:$PATH
+
+    On Windows, execute from the command line:
+
+    .. code-block:: sh
+
+      blender -r
+
+#.  Check if your version of Blender is bundled with its own Python.
+
+    .. code-block:: sh
+
+      blender -b --factory-startup --python-expr "import bpy; print(bpy.app.binary_path_python);"
+
+    - A)  If the printed string indicates a Python binary inside of a Blender folder e.g., ``/Applications/blender/blender.app/Contents/Resources/2.79/python/bin/python3.5m`` or ``/usr/local/blender/2.79b/2.79/python/bin/python3.5m``, this indicative of a bundled Python.
+
+    - B)  If the Python binary path is not under a Blender folder e.g., ``/usr/bin/python3.6m`` then Blender is using some other Python distribution.
+
+#.  Setup your Python development environment.
+
+    - A)  For Blender with bundled Python you will need to get a separate Python development environment.
+          To get a compatible Python suitable for building ``BlendGAMer`` we recommend using `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__.
+          Check the table below to verify the Python version for your target Blender version.
+
+          ===============  ==============
+          Blender Version  Python Version
+          ===============  ==============
+          2.79b            3.5
+          ===============  ==============
+
+          Create a new environment corresponding to the Python version.
+
+          .. code-block:: sh
+
+             conda create --name py35 python=3.5
+             conda activate py35
+
+          .. note:: Don't forget to activate your new Python environment if you open a new shell.
+
+    - B)  Depending on your configuration you may need to install the development headers and ``numpy``. For example:
+
+          .. code-block:: sh
+
+             apt install python3.6-dev python3-numpy
+
+#.  Configure, and build ``libGAMer``, ``PyGAMer``, and ``BlendGAMer``.
+
+    .. code-block:: sh
+
+       cmake -DBUILD_BLENDGAMER=on -DGAMER_TESTS=on -DCMAKE_BUILD_TYPE=Release ..
+       cmake --build . --config Release -j 2
+
+
+#.  Install! At this point you should have a packaged ``.zip`` at the root of your out-of-source build directory.
+    Follow the `Blender addon installation instructions`_ to install.
+
+    Alternatively you can have CMake install the addon into Blender's User addons folder.
+
+    .. code-block:: sh
+
+       cmake -DBLENDER_PLUGIN_INSTALL=on ..
+       cmake --build . --target install
+
+#.  Load up Blender and verify that ``BlendGAMer`` is working maybe by following one of our illustrative :ref:`BlendGAMer Tutorials`.
 
 .. _Building the Documentation:
 
@@ -245,16 +343,20 @@ You can build BlendGAMer yourself using CMake to help...
 Building the Documentation
 **************************
 
-The preferred way to build the documentation is through the use of setuptools.
+You can always read the latest documentation online on `Read The Docs <https://gamer.readthedocs.io>`__.
+The preferred way to build the documentation is through the use of ``setuptools``.
+Be sure to append ``-DGAMER_DOCS=on`` to your call to download the external repository of tutorials.
 
-.. code-block:: bash
+.. code-block:: sh
 
     python setup.py install -- -DGAMER_DOCS=on
     python setup.py build_sphinx
 
+Other options to ``setuptools`` can be found at `Sphinx setuptools integration <https://www.sphinx-doc.org/en/master/usage/advanced/setuptools.html>`__.
+
 It is also possible to compile the documentation using CMake by building target ``sphinx_docs``.
 
 .. note::
-    If you are getting a module import error, this is indicative that Python cannot find an installed copy of PyGAMer to retrieve docstring from.
-    You can either manually append the location of the PyGAMer extension module to the PYTHONPATH in ``docs/conf.py.in``.
-    Alternatively you can install PyGAMer in a more conventional location.
+    If you are getting a module import error, this is indicative that Python cannot find an installed copy of ``PyGAMer`` to retrieve docstrings from.
+    You can either manually append the location of the ``PyGAMer`` extension module to the PYTHONPATH in ``docs/conf.py.in``.
+    Alternatively you can install ``PyGAMer`` in a more conventional location.

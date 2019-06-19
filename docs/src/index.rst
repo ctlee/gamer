@@ -13,7 +13,7 @@ GAMer has the following main features:
 * Estimation of surface curvatures
 * Generation of mesh surfaces around biological molecules
 
-Technical Features:
+**Technical Features:**
 
 * Code is implemented in C++ and supports Python using a pybind11 wrapper (pygamer).
 * Cross system compilation using CMake and runs on Linux (64 bit), Windows (32 or 64 bit) or MacOS (64 bit).
@@ -23,9 +23,10 @@ Technical Features:
 
 .. toctree::
    :maxdepth: 2
-   :caption: First Steps:
+   :caption: Getting Started:
 
    install
+   changelog
 
 .. toctree::
    :maxdepth: 2
@@ -44,7 +45,6 @@ Technical Features:
    :maxdepth: 2
    :caption: For Developers:
 
-   changelog
    development
 
 Indices and tables

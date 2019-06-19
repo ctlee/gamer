@@ -1,22 +1,28 @@
+######################
 Tutorials and Examples
-======================
+######################
 
 Here is a collection of different tutorials to help you learn GAMer.
 
-PyGAMer Jupyter Notebook Tutorials
-----------------------------------
+.. _PyGAMer Tutorials:
 
- .. _ref-pygamernotebooks:
+**********************************
+PyGAMer Jupyter Notebook Tutorials
+**********************************
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    tutorials/notebooks/meshingprotein.ipynb
 
+
+.. _BlendGAMer Tutorials:
+
+********************
 BlendGAMer Tutorials
---------------------
- .. _ref-blendgamertutorials:
+********************
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    tutorials/tutorials/blendertutorial

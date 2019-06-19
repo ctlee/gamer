@@ -57,7 +57,7 @@ For Windows, we support building using Microsoft Visual Studio (MSVS) through th
 ```bash
 mkdir build64
 cd build64
-cmake -DBUILD_BLENDER=TRUE -G "Visual Studio 15 2017 Win64" -A x64 ..
+cmake -DBUILD_BLENDGAMER=TRUE -G "Visual Studio 15 2017 Win64" -A x64 ..
 cmake --build . --config Release
 ```
 

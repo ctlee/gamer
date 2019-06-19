@@ -11,6 +11,8 @@ pip3 install -r requirements.txt
 python3 setup.py build -- -DBUILD_BLENDER=on
 
 
+-DSPHINXOPTS=-j12 -n
+
 ## Authors
 **[Christopher Lee](https://github.com/ctlee)**<br />
 Department of Chemistry & Biochemistry<br />

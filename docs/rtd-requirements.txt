@@ -9,3 +9,4 @@ nbsphinx
 jupyter_sphinx
 threevis
 pytest
+pandoc

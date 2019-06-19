@@ -25,8 +25,8 @@ project = '@CMAKE_PROJECT_NAME@'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@'
-release = version
+version = '@VERSION_SHORT@'
+release = '@VERSION@'
 
 # -- General configuration ---------------------------------------------------
 

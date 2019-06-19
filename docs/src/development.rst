@@ -67,6 +67,9 @@ afterwards reconfigure your build with CMake you are ready to build the document
 
 The documentation can be found in ``{builddir}/docs/html/``.
 
+- allow github issues and users to easily be referenced using :issue:`XY` and :user:`username` markups.
+This functionality is enabled by the sphinx-issue sphinx extension.
+
 Embedding Widgets in Jupyter-Notebooks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
