@@ -22,6 +22,12 @@
  * ***************************************************************************
  */
 
+
+/**
+ * @file gamer.h
+ * @brief Contains various global definitions for the overall project
+ */
+
 #pragma once
 
 #include "gamer/tensor.h"
@@ -48,8 +54,31 @@ using Vector = tensor<REAL,3,1>;
 using d3Vector = tensor<double,3,1>;
 using f3Vector = tensor<float,3,1>;
 using i3Vector = tensor<int,3,1>;
+using szt3Vector = tensor<std::size_t,3,1>;
 
-template <class T>
-std::size_t Vect2Index(const T i, const T j, const T k, const i3Vector& dim){
+/**
+ * @brief      Convert 3D array indices to the index of a flat
+ *             array.
+ *
+ * As a convention use the following loop structure to optimize
+ * cache efficiency:
+ * ~~~~~~~~~~~~~~~{.cpp}
+ *  for (int k;...; k++){
+ *    for (int j;...; j++){
+ *      for (int i;...; i++){
+ *  }}}
+ * ~~~~~~~~~~~~~~~
+ * In short, index i should occupy the inner most scope followed
+ * by j then k.
+ *
+ * @param[in]  i     Value of the first index
+ * @param[in]  j     Value of the second index
+ * @param[in]  k     Value of the third index
+ * @param[in]  dim   Dimensions of the 3D array
+ *
+ * @return     Index of flat array corresponding to indices in
+ *             3D array.
+ */
+inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const szt3Vector& dim){
     return k*dim[0]*dim[1] + j*dim[0] + i;
 }

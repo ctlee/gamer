@@ -9,7 +9,8 @@ ninja
 pytest
 
 # For building documentation
-breathe
+sphinx>=2.0
+breathe>=4.13.0
 exhale
 pandoc
 sphinx-issues

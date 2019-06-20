@@ -315,7 +315,7 @@ Note that the prebuilt Blender binaries from the Blender Foundation do not conta
 
           .. code-block:: sh
 
-             apt install python3.6-dev python3-numpy
+             sudo apt install python3.6-dev python3-numpy python3-pip
 
 #.  Configure, and build ``libGAMer``, ``PyGAMer``, and ``BlendGAMer``.
 
