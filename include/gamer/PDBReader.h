@@ -13,7 +13,7 @@
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * Lesser General Public License for more pdbreader_details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
@@ -27,6 +27,8 @@
  * Bajaj's group at The University of Texas at Austin for GAMer by Zeyun Yu.
  */
 
+#pragma once
+
 #include <algorithm>
 #include <regex>
 #include <iostream>
@@ -38,7 +40,7 @@
 #include "gamer/Vertex.h"
 
 
-namespace detail
+namespace pdbreader_detail
 {
     const double EPSILON    = 1e-3;
     static const std::regex PDB(".*.pdb", std::regex::icase | std::regex::optimize);
@@ -233,7 +235,7 @@ namespace detail
     };
 
     static std::map<std::string, std::map<std::string, PDBelementInformation>> PDBelementMap;
-} // End namespace detail
+} // End namespace pdbreader_detail
 
 
 struct Atom {
@@ -243,13 +245,13 @@ struct Atom {
 
 static void initElementMap(){
     // If the element map is empty build it...
-    if(detail::PDBelementMap.size() == 0)
+    if(pdbreader_detail::PDBelementMap.size() == 0)
     {
-        for(int i = 0; i < detail::MAX_BIOCHEM_ELEMENTS; ++i)
+        for(int i = 0; i < pdbreader_detail::MAX_BIOCHEM_ELEMENTS; ++i)
         {
-            const std::string atomName    = detail::PDBelementTable[i].atomName;
-            const std::string residueName = detail::PDBelementTable[i].residueName;
-            detail::PDBelementMap[residueName][atomName] = detail::PDBelementTable[i];
+            const std::string atomName    = pdbreader_detail::PDBelementTable[i].atomName;
+            const std::string residueName = pdbreader_detail::PDBelementTable[i].residueName;
+            pdbreader_detail::PDBelementMap[residueName][atomName] = pdbreader_detail::PDBelementTable[i];
         }
     }
 }
@@ -267,7 +269,7 @@ bool readPDB(const std::string& filename, Inserter inserter)
         while (std::getline(infile, line))
         {
             std::smatch match;
-            if (std::regex_match(line, match, detail::atom))
+            if (std::regex_match(line, match, pdbreader_detail::atom))
             {
                 Atom atom;
                 // See PDB file formatting guidelines
@@ -280,9 +282,9 @@ bool readPDB(const std::string& filename, Inserter inserter)
                 std::string atomName = line.substr(12,4);
                 std::string residueName = line.substr(17,3);
 
-                auto innerMapIT = detail::PDBelementMap.find(residueName);
+                auto innerMapIT = pdbreader_detail::PDBelementMap.find(residueName);
 
-                if(innerMapIT != detail::PDBelementMap.end()){
+                if(innerMapIT != pdbreader_detail::PDBelementMap.end()){
                     auto innerMap = innerMapIT->second;
                     auto typeIT = innerMap.find(atomName);
                     if(typeIT != innerMap.end()){
@@ -325,7 +327,7 @@ bool readPQR(const std::string& filename, Inserter inserter)
         while (std::getline(infile, line))
         {
             std::smatch match;
-            if (std::regex_match(line, match, detail::atom))
+            if (std::regex_match(line, match, pdbreader_detail::atom))
             {
                 Atom atom;
                 // See PDB file formatting guidelines
@@ -376,7 +378,7 @@ void getMinMax(Iterator begin, Iterator end, f3Vector& min, f3Vector& max, BlurF
         if (max[2] < z)
             max[2] = z;
 
-        tmpRad = f(curr->radius); // * sqrt(1.0 + log(detail::EPSILON) / blobbyness);
+        tmpRad = f(curr->radius); // * sqrt(1.0 + log(pdbreader_detail::EPSILON) / blobbyness);
         if (maxRad < tmpRad)
             maxRad = tmpRad;
     }
@@ -417,7 +419,7 @@ void blurAtoms(Iterator begin, Iterator end,
     f3Vector span;
     span = (maxMin).ElementwiseDivision(static_cast<f3Vector>((dim - i3Vector({1,1,1}))));
 
-    float radFactor = sqrt(1.0 + log(detail::EPSILON)/(2.0 * blobbyness));
+    float radFactor = sqrt(1.0 + log(pdbreader_detail::EPSILON)/(2.0 * blobbyness));
 
     for (auto curr = begin; curr != end; ++curr){
         float maxRad = curr->radius * radFactor;

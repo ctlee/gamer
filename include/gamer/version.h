@@ -22,6 +22,11 @@
  * ***************************************************************************
  */
 
+/**
+ * @file  version.h
+ * @brief Definitions of library version
+ */
+
 #pragma once
 
 #include <string>

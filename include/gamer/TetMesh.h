@@ -22,6 +22,12 @@
  * ***************************************************************************
  */
 
+/**
+ * @file  TetMesh.h
+ * @brief Tetrahedral mesh definition and associated functions
+ */
+
+
 #pragma once
 
 #include <sstream>
@@ -40,6 +46,7 @@
 #include "gamer/Vertex.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for tetmesh objects
 namespace tetmesh
 {
 /**
@@ -47,17 +54,32 @@ namespace tetmesh
  */
 struct Global
 {
-    bool higher_order;
+    bool higher_order;  /// Is this a higher_order mesh?
 };
 
+/**
+ * @brief      { struct_description }
+ */
 struct VertexProperties
 {
-    double error;
+    double error;    /// Error
 
+    /**
+     * @brief      Default constructor
+     */
     VertexProperties() : error(-1) {}
+
+    /**
+     * @brief      Constructor
+     *
+     * @param[in]  error  The error
+     */
     VertexProperties(double error) : error(error) {}
 };
 
+/**
+ * @brief      { struct_description }
+ */
 struct TetVertex : Vertex, VertexProperties
 {
     TetVertex(): TetVertex(Vertex(),VertexProperties()) {}
@@ -98,6 +120,9 @@ struct TetVertex : Vertex, VertexProperties
 };
 
 
+/**
+ * @brief      { struct_description }
+ */
 struct Edge : Vertex
 {
     using Vertex::Vertex;
@@ -137,8 +162,8 @@ struct Edge : Vertex
  */
 struct FaceProperties
 {
-    int  marker;   /**< @brief Marker */
-    bool selected;
+    int  marker;    /// Boundary marker value
+    bool selected;  /// Selected property
 };
 
 /**
@@ -170,6 +195,11 @@ struct Face : FaceProperties
         return output;
     }
 
+    /**
+     * @brief      Returns a string representation of the object.
+     *
+     * @return     String representation of the object.
+     */
     std::string to_string() const{
         std::ostringstream output;
         output  << *this;
@@ -177,12 +207,18 @@ struct Face : FaceProperties
     }
 };
 
+/**
+ * @brief      { struct_description }
+ */
 struct CellProperties
 {
-    int marker;
-    bool selected;
+    int marker;     /// Marker value
+    bool selected;  /// Selected property
 };
 
+/**
+ * @brief      { struct_description }
+ */
 struct Cell : casc::Orientable, CellProperties
 {
     Cell() : Cell(-1,false) {}
@@ -200,6 +236,11 @@ struct Cell : casc::Orientable, CellProperties
         return output;
     }
 
+    /**
+     * @brief      Returns a string representation of the object.
+     *
+     * @return     String representation of the object.
+     */
     std::string to_string() const{
         std::ostringstream output;
         output  << *this;
@@ -230,23 +271,85 @@ using TetMesh = casc::simplicial_complex<tetmesh::complex_traits>;
 /// Forward class declaration
 class tetgenio;
 
+/**
+ * @brief      { function_description }
+ *
+ * @param      tetio  The tetio
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
 
+/**
+ * @brief      Makes a tet mesh.
+ *
+ * @param[in]  surfmeshes     The surfmeshes
+ * @param[in]  tetgen_params  The tetgen parameters
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<SurfaceMesh*> &surfmeshes,
         std::string tetgen_params);
 
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& mesh);
 
 
+/**
+ * @brief      { function_description }
+ *
+ * @param      mesh  The mesh
+ */
 void smoothMesh(TetMesh & mesh);
+
+/**
+ * @brief      Writes a vtk.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
 void writeVTK(const std::string& filename, const TetMesh &mesh);
+
+/**
+ * @brief      Writes off.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
 void writeOFF(const std::string& filename, const TetMesh &mesh);
+
+/**
+ * @brief      Writes a dolfin.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
+
+/**
+ * @brief      Writes a triangle.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
 void writeTriangle(const std::string &filename, const TetMesh &mesh);
 
 //void writeMCSF(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack
 //void writeCARP
 
+/**
+ * @brief      Reads a dolfin.
+ *
+ * @param[in]  filename  The filename
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::unique_ptr<TetMesh> readDolfin(const std::string&filename);

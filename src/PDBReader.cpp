@@ -145,7 +145,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename,
 
     f3Vector min, max;
     getMinMax(atoms.cbegin(), atoms.cend(), min, max,
-            [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);});
+            [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(pdbreader_detail::EPSILON) / blobbyness);});
 
     float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
 
@@ -227,7 +227,7 @@ std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string& filename,
 
     f3Vector min, max;
     getMinMax(atoms.cbegin(), atoms.cend(), min, max,
-            [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(detail::EPSILON) / blobbyness);});
+            [&blobbyness](const float atomRadius)->float{return atomRadius * sqrt(1.0 + log(pdbreader_detail::EPSILON) / blobbyness);});
 
     float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
 

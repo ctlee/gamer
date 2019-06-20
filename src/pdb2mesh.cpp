@@ -1010,7 +1010,7 @@ void getMinMax(Iterator begin,
         max[2] = std::max(max[2], z);
 
         // Definition of surface boundary
-        tempRad = curr->radius * sqrt(1.0 + log(detail::EPSILON) / BLOBBYNESS);
+        tempRad = curr->radius * sqrt(1.0 + log(pdbreader_detail::EPSILON) / BLOBBYNESS);
 
         maxRad = std::max(maxRad, tempRad);
     }

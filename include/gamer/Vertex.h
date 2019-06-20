@@ -22,6 +22,10 @@
  * ***************************************************************************
  */
 
+/**
+ * @file  Vertex.h
+ * @brief Vertex class definitions
+ */
 
 #pragma once
 
@@ -38,9 +42,9 @@
  */
 struct Vertex
 {
-    Vector position;    /**< @brief a 3 tensor for x, y, z */
-    int marker = 0;                 /**< @brief Boundary marking ID */
-    bool selected = false;          /**< @brief Selection flag */
+    Vector position;            /**< @brief a 3 tensor for x, y, z */
+    int marker = 0;             /**< @brief Boundary marking ID */
+    bool selected = false;      /**< @brief Selection flag */
 
     /**
      * @brief      Default constructor with x,y,z = 0
@@ -242,22 +246,134 @@ struct Vertex
     }
 };
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 Vertex operator+(const Vertex& A, const Vector& B);
+
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 Vector operator+(const Vertex& A, const Vertex& B);
+
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 Vertex operator-(const Vertex& A, const Vector& B);
+
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 Vector operator-(const Vertex& A, const Vertex& B);
+
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  x     { parameter_description }
+ * @param[in]  A     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 Vertex operator*(double x, const Vertex& A);
+
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  x     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 Vertex operator/(const Vertex& A, double x);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 double distance(const Vertex& A, const Vertex& B);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ * @param[in]  C     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 double angle(const Vertex& A, const Vertex& B, const Vertex& C);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  AB    { parameter_description }
+ * @param[in]  CB    { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 double angle(const Vector& AB, const Vector& CB);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  A     { parameter_description }
+ * @param[in]  B     { parameter_description }
+ * @param[in]  C     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 double angleRad(const Vertex& A, const Vertex& B, const Vertex& C);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  AB    { parameter_description }
+ * @param[in]  CB    { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 double angleRad(const Vector& AB, const Vector& CB);
 
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  A     { parameter_description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 inline double magnitude(const Vector& A){
     return  std::sqrt(A|A);
 }
 
+/**
+ * @brief      { function_description }
+ *
+ * @param      A     { parameter_description }
+ */
 inline void normalize(Vector& A){
     double mag = magnitude(A);
     if (mag == 0)

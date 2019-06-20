@@ -25,35 +25,43 @@
 
 /**
  * @file gamer.h
- * @brief Contains various global definitions for the overall project
+ * @brief Contains various global definitions and type definitions used in
+ *        the overall project.
  */
 
 #pragma once
 
 #include "gamer/tensor.h"
 
-// The number of rings to use to compute local structure tensor
+/// The number of rings to use to compute local structure tensor
 #define RINGS 1
 
-/** @brief Blurring blobyness used in conversion from PDB/PQR to 3D volumes */
+/// Blurring blobbyness to use in conversion from PDB/PQR to 3D volumes
 #define BLOBBYNESS        -0.2f
 
-/** @brief Discretization rate of 3D volumes */
+/// Discretization rate of 3D volumes
 #define DIM_SCALE         1.99
 
-/** @brief The minimal volumes (in voxels) of islands to be removed */
+/// The minimal volume (in voxels) of islands to be automatically removed
 #define MIN_VOLUME        333333
 
 #ifdef SINGLE
-#define REAL float
+  /// Defines REAL to be float
+  #define REAL float
 #else
-#define REAL double
+  /// Defines REAL to be double
+  #define REAL double
 #endif
 
+/// Floating point vector with precision defined by user at compile time
 using Vector = tensor<REAL,3,1>;
+/// 3 Vector of doubles
 using d3Vector = tensor<double,3,1>;
+/// 3 Vector of floats
 using f3Vector = tensor<float,3,1>;
+/// 3 Vector of integers
 using i3Vector = tensor<int,3,1>;
+/// 3 Vector of std::size_t
 using szt3Vector = tensor<std::size_t,3,1>;
 
 /**

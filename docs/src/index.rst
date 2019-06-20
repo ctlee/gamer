@@ -33,19 +33,23 @@ To acknowledge our contributions please cite the following:
 
 **Technical manuscript:**
 
-  ::
+.. code-block:: sh
 
-    @article {Lee_gamer2_534479,
-      author = {Lee, Christopher T. and Laughlin, Justin G. and Angliviel de La Beaumelle, Nils and Amaro, Rommie and McCammon, J. Andrew and Ramamoorthi, Ravi and Holst, Michael J. and Rangamani, Padmini},
-      title = {GAMer 2: A System for 3D Mesh Processing of Cellular Electron Micrographs},
-      elocation-id = {534479},
-      year = {2019},
-      doi = {10.1101/534479},
-      publisher = {Cold Spring Harbor Laboratory},
-      URL = {https://www.biorxiv.org/content/early/2019/01/29/534479},
-      eprint = {https://www.biorxiv.org/content/early/2019/01/29/534479.full.pdf},
-      journal = {bioRxiv}
-    }
+  @article {Lee_gamer2_534479,
+    author = {Lee, Christopher T. and Laughlin, Justin G.
+              and Angliviel de La Beaumelle, Nils and Amaro, Rommie
+              and McCammon, J. Andrew and Ramamoorthi, Ravi
+              and Holst, Michael J. and Rangamani, Padmini},
+    title = {GAMer 2: A System for 3D Mesh Processing of
+             Cellular Electron Micrographs},
+    elocation-id = {534479},
+    year = {2019},
+    doi = {10.1101/534479},
+    publisher = {Cold Spring Harbor Laboratory},
+    URL = {https://www.biorxiv.org/content/early/2019/01/29/534479},
+    eprint = {https://www.biorxiv.org/content/early/2019/01/29/534479.full.pdf},
+    journal = {bioRxiv}
+  }
 
 .. |GAMer Zenodo| image:: https://zenodo.org/badge/122682242.svg
    :target: https://zenodo.org/badge/latestdoi/122682242
@@ -54,27 +58,28 @@ To acknowledge our contributions please cite the following:
 Legacy Contributions
 ====================
 
-* `GAMer 1 <http://fetk.org/codes/gamer/>`__ was originally developed by Zeyun Yu, Yuhui Cheng, and Michael Holst.
-To acknowledge your use of ``GAMer 1`` please cite:
+*   `GAMer 1 <http://fetk.org/codes/gamer/>`__ was originally developed by Zeyun Yu, Yuhui Cheng, and Michael Holst.
+    To acknowledge your use of ``GAMer 1`` please cite:
 
-  ::
+    .. code-block::
 
-    @article{Yu_gamer_2008,
-      author = {Yu, Zeyun and Holst, Michael J. and Cheng, Yuhui and McCammon, J. Andrew},
-      title = {{Feature-Preserving Adaptive Mesh Generation for Molecular Shape Modeling and Simulation}},
-      journal = {J. Mol. Graph. Model.},
-      issn = {10933263},
-      year = {2008},
-      month = jun,
-      volume = {26},
-      number = {8},
-      pages = {1370--1380},
-      doi = {10.1016/j.jmgm.2008.01.007},
-      url = {https://dx.doi.org/10.1016/j.jmgm.2008.01.007},
-    }
+      @article{Yu_gamer_2008,
+        author = {Yu, Zeyun and Holst, Michael J.
+                  and Cheng, Yuhui and McCammon, J. Andrew},
+        title = {{Feature-Preserving Adaptive Mesh Generation for
+                  Molecular Shape Modeling and Simulation}},
+        journal = {J. Mol. Graph. Model.},
+        issn = {10933263},
+        year = {2008},
+        month = jun,
+        volume = {26},
+        number = {8},
+        pages = {1370--1380},
+        doi = {10.1016/j.jmgm.2008.01.007},
+        url = {https://dx.doi.org/10.1016/j.jmgm.2008.01.007},
+      }
 
-
-* The ``BlendGAMer`` addon is inspired by work from Tom Bartol (Salk Institute) and Johan Hake who developed the original addon for ``GAMer 1``.
+*   The ``BlendGAMer`` addon is inspired by work from Tom Bartol (Salk Institute) and Johan Hake who developed the original addon for ``GAMer 1``.
 
 .. toctree::
    :maxdepth: 1

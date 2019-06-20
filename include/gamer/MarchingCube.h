@@ -22,6 +22,13 @@
  * ***************************************************************************
  */
 
+/**
+ * @file MarchingCube.h
+ * @brief Implementation of marching cubes algorithm
+ */
+
+#pragma once
+
 
 #include <algorithm>
 #include <bitset>
@@ -745,8 +752,8 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     	mesh->insert<3>(triangles[i]);
     }
 
-    delete[] vertices;
-    delete[] triangles;
+  delete[] vertices;
+  delete[] triangles;
 	delete[] mask;
 	delete[] edges;
 

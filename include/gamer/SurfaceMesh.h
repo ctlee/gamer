@@ -22,6 +22,11 @@
  * ***************************************************************************
  */
 
+/**
+ * @file SurfaceMesh.h
+ * @brief Surface mesh functionality and definition
+ */
+
 #pragma once
 
 #include <iostream>
@@ -211,7 +216,8 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  */
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
-
+/// @cond detail
+/// Namespace for surface mesh detail functions
 namespace surfacemesh_detail{
 /**
  * @brief      Gets the mean edge length.
@@ -400,6 +406,9 @@ struct orientHoleHelper<std::integral_constant<std::size_t, k>>
     }
 };
 
+/**
+ * @brief      Terminal case
+ */
 template <>
 struct orientHoleHelper<std::integral_constant<std::size_t, SurfaceMesh::topLevel>>{
     template <typename Iterator>
@@ -615,13 +624,14 @@ void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<2>>  &edgeList);
 
 } // end namespace surfacemesh_detail
+/// @endcond
 
 /**
- * @brief      Reads in a GeomView OFF file.
+ * @brief      Reads in a GeomView OFF file
  *
- * @param[in]  filename  The filename.
+ * @param[in]  filename  Filename of file of interest
  *
- * @return     Returns a unique_ptr to the SurfaceMesh.
+ * @return     Returns a unique_ptr to the SurfaceMesh
  */
 std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
 
@@ -634,35 +644,188 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
  */
 void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
 
-// Wavefront OBJ
+/**
+ * @brief      Reads an obj file.
+ *
+ * @param[in]  filename  The filename
+ *
+ * @return     Unique pointer to SurfaceMesh
+ */
 std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
+
+
+/**
+ * @brief      Writes a mesh to obj file format.
+ *
+ * @param[in]  filename  The filename to write out to
+ * @param[in]  mesh      Surface mesh to output
+ */
 void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
 
+/**
+ * @brief      Pretty print the mesh.
+ *
+ * @param[in]  mesh  The mesh to print
+ */
 void print(const SurfaceMesh &mesh);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
 void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh);
+
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  mesh  The mesh
+ */
 void generateHistogram(const SurfaceMesh &mesh);
+
+/**
+ * @brief      Gets the minimum maximum angles.
+ *
+ * @param[in]  mesh         The mesh
+ * @param[in]  maxMinAngle  The maximum minimum angle
+ * @param[in]  minMaxAngle  The minimum maximum angle
+ *
+ * @return     The minimum maximum angles.
+ */
 std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
     double maxMinAngle, double minMaxAngle);
+
+/**
+ * @brief      Gets the area.
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @return     The area.
+ */
 double getArea(const SurfaceMesh &mesh);
+
+/**
+ * @brief      Gets the area.
+ *
+ * @param[in]  mesh    The mesh
+ * @param[in]  faceID  The face id
+ *
+ * @return     The area.
+ */
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+
+/**
+ * @brief      Gets the area.
+ *
+ * @param[in]  a     { parameter_description }
+ * @param[in]  b     { parameter_description }
+ * @param[in]  c     { parameter_description }
+ *
+ * @return     The area.
+ */
 double getArea(Vertex a, Vertex b, Vertex c);
+
+/**
+ * @brief      Gets the volume.
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @return     The volume.
+ */
 double getVolume(const SurfaceMesh &mesh);
+
+/**
+ * @brief      Determines if a surface mesh contains holes.
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @return     True if has hole, False otherwise.
+ */
 bool hasHole(const SurfaceMesh &mesh);
 
+/**
+ * @brief      Gets the number of edges connected to a vertex.
+ *
+ * @param[in]  mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ *
+ * @return     The valence.
+ */
 std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
+/**
+ * @brief      Gets the mean curvature.
+ *
+ * @param[in]  mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ *
+ * @return     The mean curvature.
+ */
 double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+/**
+ * @brief      Gets the gaussian curvature.
+ *
+ * @param[in]  mesh      The mesh
+ * @param[in]  vertexID  The vertex id
+ *
+ * @return     The gaussian curvature.
+ */
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 
-// These exist for the a potential python interface
+//
+// @param      mesh  The mesh
+// @param[in]  v     Displacement vector
+//
 void translate(SurfaceMesh &mesh, Vector v);
+/**
+ * @brief      Translate the mesh
+ *
+ * @param      mesh  The mesh
+ * @param[in]  dx    Distance to move in x direction
+ * @param[in]  dy    Distance to move in y direction
+ * @param[in]  dz    Distance to move in z direction
+ */
 void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
+/**
+ * @brief      Scale mesh anisotropically
+ *
+ * @param      mesh  The mesh
+ * @param[in]  v     Vector with components representing the anisotropic scaling
+ *                   factors.
+ */
 void scale(SurfaceMesh &mesh, Vector v);
+/**
+ * @brief      Scale a mesh anisotropically
+ *
+ * @param      mesh  The mesh
+ * @param[in]  sx    Scale factor for x axis
+ * @param[in]  sy    Scale factor for y axis
+ * @param[in]  sz    Scale factor for z axis
+ */
 void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
+/**
+ * @brief      Scale a mesh isotropically
+ *
+ * @param      mesh  The mesh
+ * @param[in]  s     Scale factor
+ */
 void scale(SurfaceMesh &mesh, double s);
 
+/**
+ * @brief      Compute the center and radius of the mesh
+ *
+ * @param      mesh  The mesh
+ *
+ * @return     The center and radius.
+ */
 std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
+/**
+ * @brief      Center the mesh on its center of mass
+ *
+ * @param      mesh  The mesh
+ */
 void centeralize(SurfaceMesh &mesh);
 
 /**
@@ -685,10 +848,25 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
  */
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
 
+/**
+ * @brief      Perform smoothing of the mesh normals
+ *
+ * @param      mesh  The mesh
+ */
 void normalSmooth(SurfaceMesh &mesh);
 
+/**
+ * @brief      Fill holes in the mesh
+ *
+ * @param      mesh  The mesh
+ */
 void fillHoles(SurfaceMesh &mesh);
 
+/**
+ * @brief      Flip the normals of the mesh
+ *
+ * @param      mesh  The mesh
+ */
 void flipNormals(SurfaceMesh &mesh);
 
 /**
@@ -718,6 +896,13 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
  */
 std::unique_ptr<SurfaceMesh> cube(int order);
 
+/**
+ * @brief      Splits surfaces.
+ *
+ * @param      mesh  The mesh
+ *
+ * @return     { description_of_the_return_value }
+ */
 std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
 
 

@@ -22,6 +22,11 @@
  * ***************************************************************************
  */
 
+/**
+ * @file 	tensor.h
+ * @brief Basic tensor library
+ */
+
 #pragma once
 
 #include <algorithm>
@@ -34,6 +39,8 @@
 #include <sstream>
 
 // TODO: rename this namespace to something else...
+
+/// @cond detail
 namespace util
 {
 namespace detail
@@ -136,6 +143,15 @@ namespace detail {
 		constexpr static std::size_t value = 1;
 	};
 }
+/// @endcond
+
+/**
+ * @brief      Class for tensor.
+ *
+ * @tparam     _ElemType          { description }
+ * @tparam     _vector_dimension  { description }
+ * @tparam     _index_dimension   { description }
+ */
 template <typename _ElemType, std::size_t _vector_dimension, std::size_t _index_dimension>
 class tensor {
 public:
@@ -146,9 +162,17 @@ public:
 	using IndexType = std::array<std::size_t, index_dimension>;
 	using DataType  = std::array<ElemType, total_dimension>;
 
+	/**
+	 * @brief      { struct_description }
+	 */
 	struct index_iterator : public std::iterator<std::bidirectional_iterator_tag, IndexType>
 	{
 		using super = std::iterator<std::bidirectional_iterator_tag, IndexType>;
+		/**
+		 * @brief      { function_description }
+		 *
+		 * @param[in]  iter  The iterator
+		 */
 		index_iterator(const index_iterator& iter)
 			: i(iter.i)
 		{}
@@ -165,6 +189,11 @@ public:
 			i.fill(0);
 		}
 
+		/**
+		 * @brief      { operator_description }
+		 *
+		 * @return     { description_of_the_return_value }
+		 */
 		index_iterator& operator++()
 		{
 			std::size_t k = i.size() - 1;
@@ -184,7 +213,20 @@ public:
 			}
 			return *this;
 		}
+		/**
+		 * @brief      { operator_description }
+		 *
+		 * @param[in]  <unnamed>  { parameter_description }
+		 *
+		 * @return     { description_of_the_return_value }
+		 */
 		index_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
+
+		/**
+		 * @brief      { operator_description }
+		 *
+		 * @return     { description_of_the_return_value }
+		 */
 		index_iterator& operator--()
 		{
 			std::size_t k = index_dimension - 1;
@@ -204,7 +246,23 @@ public:
 			}
 			return *this;
 		}
+
+		/**
+		 * @brief      { operator_description }
+		 *
+		 * @param[in]  <unnamed>  { parameter_description }
+		 *
+		 * @return     { description_of_the_return_value }
+		 */
 		index_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
+
+		/**
+		 * @brief      { operator_description }
+		 *
+		 * @param[in]  j     { parameter_description }
+		 *
+		 * @return     { description_of_the_return_value }
+		 */
 		bool operator==(index_iterator j) const
 		{
 			for(std::size_t k = 0; k < index_dimension; ++k)
@@ -216,7 +274,16 @@ public:
 			}
 			return true;
 		}
+
+		/**
+		 * @brief      { operator_description }
+		 *
+		 * @param[in]  j     { parameter_description }
+		 *
+		 * @return     { description_of_the_return_value }
+		 */
 		bool operator!=(index_iterator j) const { return !(*this == j); }
+
 		typename super::reference operator*() { return i; }
 		typename super::pointer operator->() { return i; }
 	protected:
@@ -239,6 +306,11 @@ public:
 
 	tensor(const tensor& x) : _data(x._data) {}
 
+	/**
+	 * @brief      Constructs the object.
+	 *
+	 * @param[in]  x     { parameter_description }
+	 */
 	tensor(const tensor&& x) : _data(std::move(x._data)) {}
 
 /*
@@ -274,70 +346,147 @@ public:
 		return output;
 	}
 
-	std::string as_string() const {
+	/**
+	 * @brief      Returns a string representation of the object.
+	 *
+	 * @return     String representation of the object.
+	 */
+	std::string to_string() const {
 		std::ostringstream output;
 		output << *this;
 		return output.str();
 	}
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @param      index  The index
+	 *
+	 * @tparam     Ts     { description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	template <typename... Ts>
 	const _ElemType& get(Ts&&... index) const
 	{
 		return _data[get_index(std::forward<Ts>(index)...)];
 	}
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @param      index  The index
+	 *
+	 * @tparam     Ts     { description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	template <typename... Ts>
 	_ElemType& get(Ts&&... index)
 	{
 		return _data[get_index(std::forward<Ts>(index)...)];
 	}
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  index  The index
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	const _ElemType& operator[](const IndexType& index) const
 	{
 		return _data[get_index(index)];
 	}
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  index  The index
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	_ElemType& operator[](const IndexType& index)
 	{
 		return _data[get_index(index)];
 	}
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  index  The index
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	const _ElemType& operator[](std::size_t index) const
 	{
 		static_assert(_index_dimension == 1, "operator[] with integer index only allowed on 1-tensors");
 		return _data[index];
 	}
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  index  The index
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	_ElemType& operator[](std::size_t index)
 	{
 		static_assert(_index_dimension == 1, "operator[] with integer index only allowed on 1-tensors");
 		return _data[index];
 	}
 
-    bool operator==(const tensor& rhs) const
-    {
-        auto rhs_curr = rhs.begin();
-        for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-        {
-             if(*tcurr != *rhs_curr) return false;
-        }
-        return true;
-    }
+  /**
+   * @brief      { operator_description }
+   *
+   * @param[in]  rhs   The right hand side
+   *
+   * @return     { description_of_the_return_value }
+   */
+  bool operator==(const tensor& rhs) const
+  {
+      auto rhs_curr = rhs.begin();
+      for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+      {
+           if(*tcurr != *rhs_curr) return false;
+      }
+      return true;
+  }
 
-    bool operator!=(const tensor& rhs) const
-    {
-    	return !(*this == rhs);
-    }
+  /**
+   * @brief      { operator_description }
+   *
+   * @param[in]  rhs   The right hand side
+   *
+   * @return     { description_of_the_return_value }
+   */
+  bool operator!=(const tensor& rhs) const
+  {
+  	return !(*this == rhs);
+  }
 
-    void operator=(const tensor& rhs)
-    {
-        auto rhs_curr = rhs.begin();
-        for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-        {
-            *tcurr = *rhs_curr;
-        }
-    }
+  /**
+   * @brief      { operator_description }
+   *
+   * @param[in]  rhs   The right hand side
+   */
+  void operator=(const tensor& rhs)
+  {
+      auto rhs_curr = rhs.begin();
+      for(auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+      {
+          *tcurr = *rhs_curr;
+      }
+  }
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  rhs   The right hand side
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor& operator+=(const tensor& rhs)
 	{
 		typename DataType::const_iterator rhs_curr = rhs.begin();
@@ -348,6 +497,13 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  rhs   The right hand side
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor& operator-=(const tensor& rhs)
 	{
 		typename DataType::const_iterator rhs_curr = rhs.begin();
@@ -358,6 +514,13 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief      { operator_description }
+	 *
+	 * @param[in]  x     { parameter_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor& operator*=(ElemType x)
 	{
 		for(auto& a : *this)
@@ -399,6 +562,13 @@ public:
 		return rhs;
 	}
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @param[in]  rhs   The right hand side
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor ElementwiseProduct(const tensor& rhs) const{
 		tensor ret;
 		typename DataType::iterator ret_curr = ret.begin();
@@ -410,6 +580,13 @@ public:
 		return ret;
 	}
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @param[in]  rhs   The right hand side
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	tensor ElementwiseDivision(const tensor& rhs) const{
 		tensor ret;
 		typename DataType::iterator ret_curr = ret.begin();
@@ -421,24 +598,82 @@ public:
 		return ret;
 	}
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	auto data()
 	{
 		return _data.data();
 	}
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	index_iterator index_begin() { return index_iterator(0); }
+
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	index_iterator index_end()   { return index_iterator(); }
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	index_iterator index_begin() const { return index_iterator(0); }
+
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	index_iterator index_end()   const { return index_iterator(); }
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	typename DataType::iterator       begin()       { return _data.begin(); }
+
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	typename DataType::iterator       end()         { return _data.end();   }
 
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	typename DataType::const_iterator begin() const { return _data.begin(); }
+
+	/**
+	 * @brief      { function_description }
+	 *
+	 * @return     { description_of_the_return_value }
+	 */
 	typename DataType::const_iterator end()   const { return _data.end();   }
 
 private:
+	/**
+	 * @brief      Gets the index.
+	 *
+	 * @param[in]  args  The arguments
+	 *
+	 * @tparam     Ts    { description }
+	 *
+	 * @return     The index.
+	 */
 	template <typename... Ts>
 	std::size_t get_index(Ts... args) const
 	{
@@ -453,6 +688,17 @@ private:
 	DataType  _data;
 };
 
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  A         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> Sym(const tensor<ElemType,D,N>& A)
 {
@@ -481,6 +727,15 @@ tensor<ElemType,D,N> Sym(const tensor<ElemType,D,N>& A)
 	return rval;
 }
 
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  arr   The arr
+ *
+ * @tparam     N     { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <std::size_t N>
 int sgn(const std::array<std::size_t,N>& arr)
 {
@@ -507,6 +762,17 @@ int sgn(const std::array<std::size_t,N>& arr)
 	return rval;
 }
 
+/**
+ * @brief      { function_description }
+ *
+ * @param[in]  A         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 {
@@ -535,6 +801,19 @@ tensor<ElemType,D,N> Alt(const tensor<ElemType,D,N>& A)
 	return rval;
 }
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ * @tparam     M         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType,D,N+M> operator*(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,M>& B)
 {
@@ -571,6 +850,18 @@ tensor<ElemType,D,N> operator+(const tensor<ElemType,D,N>& A, const tensor<ElemT
 	return rval;
 }
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> operator-(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,N>& B)
 {
@@ -579,6 +870,19 @@ tensor<ElemType,D,N> operator-(const tensor<ElemType,D,N>& A, const tensor<ElemT
 	return rval;
 }
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A           { parameter_description }
+ * @param[in]  x           { parameter_description }
+ *
+ * @tparam     ScalarType  { description }
+ * @tparam     ElemType    { description }
+ * @tparam     D           { description }
+ * @tparam     N           { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ScalarType, typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> operator*(const tensor<ElemType,D,N>& A, ScalarType x)
 {
@@ -587,6 +891,19 @@ tensor<ElemType,D,N> operator*(const tensor<ElemType,D,N>& A, ScalarType x)
 	return rval;
 }
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  x           { parameter_description }
+ * @param[in]  A           { parameter_description }
+ *
+ * @tparam     ScalarType  { description }
+ * @tparam     ElemType    { description }
+ * @tparam     D           { description }
+ * @tparam     N           { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ScalarType, typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> operator*(ScalarType x, const tensor<ElemType,D,N>& A)
 {
@@ -595,6 +912,19 @@ tensor<ElemType,D,N> operator*(ScalarType x, const tensor<ElemType,D,N>& A)
 	return rval;
 }
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A           { parameter_description }
+ * @param[in]  x           { parameter_description }
+ *
+ * @tparam     ScalarType  { description }
+ * @tparam     ElemType    { description }
+ * @tparam     D           { description }
+ * @tparam     N           { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ScalarType, typename ElemType, std::size_t D, std::size_t N>
 tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ScalarType x)
 {
@@ -603,6 +933,19 @@ tensor<ElemType,D,N> operator/(const tensor<ElemType,D,N>& A, ScalarType x)
 	return rval;
 }
 
+/**
+ * @brief      { operator_description }
+ *
+ * @param[in]  A         { parameter_description }
+ * @param[in]  B         { parameter_description }
+ *
+ * @tparam     ElemType  { description }
+ * @tparam     D         { description }
+ * @tparam     N         { description }
+ * @tparam     M         { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType,D,N+M> operator^(const tensor<ElemType,D,N>& A, const tensor<ElemType,D,M>& B)
 {
