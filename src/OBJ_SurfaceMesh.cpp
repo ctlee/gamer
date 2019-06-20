@@ -35,6 +35,10 @@
 #include "gamer/stringutil.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 //https://en.wikipedia.org/wiki/Wavefront_.obj_file
 //http://paulbourke.net/dataformats/obj/
 std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename)
@@ -158,3 +162,5 @@ void writeOBJ(const std::string& filename, const SurfaceMesh& mesh){
     fout.close();
 
 }
+
+} // end namespace gamer

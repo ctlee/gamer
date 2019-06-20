@@ -28,6 +28,10 @@
 #include "gamer/TetMesh.h"
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_TMVertex(py::module& mod){
@@ -68,3 +72,5 @@ void init_TMVertex(py::module& mod){
     vertex.def_readwrite("error", &tetmesh::TetVertex::error, "Error value");
     vertex.def("__repr__", &tetmesh::TetVertex::to_string);
 }
+
+} // end namespace gamer

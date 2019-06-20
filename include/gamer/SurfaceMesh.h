@@ -42,6 +42,11 @@
 
 #include "gamer/Vertex.h"
 
+
+/// Namespace for all things gamer
+namespace gamer
+{
+
 /**
  * @brief      Type for containing root metadata
  */
@@ -923,3 +928,5 @@ struct CopyHelper
         }
     }
 };
+
+} // end namespace gamer

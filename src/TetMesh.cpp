@@ -42,6 +42,10 @@
 #include "gamer/TetMesh.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 std::unique_ptr<TetMesh> makeTetMesh(
         const std::vector<SurfaceMesh*> &surfmeshes,
         std::string tetgen_params){
@@ -816,18 +820,4 @@ std::unique_ptr<TetMesh> readDolfin(const std::string&filename){
     return mesh;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} // end namespace gamer

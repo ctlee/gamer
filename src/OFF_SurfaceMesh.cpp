@@ -33,6 +33,10 @@
 #include <cmath>
 #include <vector>
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 /**
  * @brief      Converts the color from float(0-1) to a marker value
  *
@@ -290,3 +294,4 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     fout.close();
 }
 
+} // end namespace gamer

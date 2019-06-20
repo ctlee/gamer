@@ -27,6 +27,10 @@
 
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_SMFace(py::module& mod){
@@ -43,3 +47,5 @@ void init_SMFace(py::module& mod){
     face.def_readwrite("selected", &Face::selected, "Selection status of face");
     face.def("__repr__", &Face::to_string, "Pretty print");
 }
+
+} // end namespace gamer

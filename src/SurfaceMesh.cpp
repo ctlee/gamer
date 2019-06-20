@@ -41,6 +41,10 @@
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 void print(const SurfaceMesh &mesh)
 {
     std::cout << "Level: 1" << std::endl;
@@ -934,3 +938,5 @@ std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
 
     return meshes;
 }
+
+} // end namespace gamer

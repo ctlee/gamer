@@ -27,6 +27,10 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 using TetFace = tetmesh::Face;
 
@@ -43,3 +47,5 @@ void init_TMFace(py::module& mod){
     face.def_readwrite("selected", &TetFace::selected, "Selection status of face");
     face.def("__repr__", &TetFace::to_string, "Pretty print");
 }
+
+} // end namespace gamer

@@ -27,6 +27,10 @@
 
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_SMFunctions(py::module& mod){
@@ -57,3 +61,5 @@ void init_SMFunctions(py::module& mod){
         )delim"
     );
 }
+
+} // end namespace gamer

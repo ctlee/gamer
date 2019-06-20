@@ -27,6 +27,10 @@
 
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 using SMVertexID = SurfaceMesh::SimplexID<1>;
@@ -218,3 +222,5 @@ void init_SMSimplexID(py::module& mod){
         }
     );
 }
+
+} // end namespace gamer

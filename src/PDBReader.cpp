@@ -37,6 +37,9 @@
 #include "gamer/PDBReader.h"
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
 
 /**
  * @brief      WIP. Compute the Connolly surface using a distance grid based
@@ -291,3 +294,5 @@ std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string& filename,
     // TODO: (0) What to do with holelist...
     return mesh;
 }
+
+} // end namespace gamer

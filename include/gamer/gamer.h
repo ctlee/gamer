@@ -33,6 +33,9 @@
 
 #include "gamer/tensor.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
 /// The number of rings to use to compute local structure tensor
 #define RINGS 1
 
@@ -90,3 +93,4 @@ using szt3Vector = tensor<std::size_t,3,1>;
 inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const szt3Vector& dim){
     return k*dim[0]*dim[1] + j*dim[0] + i;
 }
+} // end namespace gamer

@@ -5,6 +5,10 @@
 #include "gamer/Vertex.h"
 #include "gtest/gtest.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 
 // Tests of the constructor
 TEST(VertexTest,TestConstructor)
@@ -105,3 +109,5 @@ INSTANTIATE_TEST_CASE_P(RandomDoubles,
 #else
 TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
 #endif // GTEST_HAS_PARAM_TEST
+
+} // end namespace gamer

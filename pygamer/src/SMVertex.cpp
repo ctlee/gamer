@@ -27,6 +27,10 @@
 
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_SMVertex(py::module& mod){
@@ -66,3 +70,5 @@ void init_SMVertex(py::module& mod){
     vertex.def_readwrite("selected", &Vertex::selected, "Selection status of vertex");
     vertex.def("__repr__", &Vertex::to_string);
 }
+
+} // end namespace gamer

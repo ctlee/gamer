@@ -15,6 +15,11 @@
 
 #include <casc/casc>
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
+
 int  main(int argc, char *argv[])
 {
     auto mesh = readPDB_molsurf("2jho.pdb");
@@ -52,3 +57,5 @@ int  main(int argc, char *argv[])
     // writeDolfin("test.xml", *mesh);
     std::cout << "EOF" << std::endl;
 }
+
+} // end namespace gamer

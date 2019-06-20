@@ -24,5 +24,11 @@
 
 #include "gamer/version.h" //update as appropriate
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 const std::string gVERSION = "@VERSION@";
 const std::string gVERSION_SHORT = "@VERSION_SHORT@";
+
+} // end namespace gamer

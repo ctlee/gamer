@@ -35,6 +35,11 @@
 #include <string>
 #include <vector>
 
+
+/// Namespace for all things gamer
+namespace gamer
+{
+
 /// Namespace for string utilities
 namespace stringutil
 {
@@ -107,4 +112,5 @@ namespace stringutil_detail{
         ltrim(s);
         rtrim(s);
     }
-}
+} // end namespace stringutil
+} // end namespace gamer

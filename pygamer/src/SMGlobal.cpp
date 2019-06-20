@@ -27,6 +27,10 @@
 
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_SMGlobal(py::module& mod){
@@ -41,3 +45,5 @@ void init_SMGlobal(py::module& mod){
     global.def_readwrite("useVolumeConstraint", &Global::useVolumeConstraint, "Use a volume constraint when tetrahedralizing.");
     global.def_readwrite("ishole", &Global::ishole, "Does this domain represent a hole or not?");
 }
+
+} // end namespace gamer

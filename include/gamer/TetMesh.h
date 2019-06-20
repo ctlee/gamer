@@ -46,6 +46,13 @@
 #include "gamer/Vertex.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Forward class declaration
+class tetgenio;
+
+/// Namespace for all things gamer
+namespace gamer
+{
+
 /// Namespace for tetmesh objects
 namespace tetmesh
 {
@@ -267,10 +274,6 @@ struct complex_traits
 
 using TetMesh = casc::simplicial_complex<tetmesh::complex_traits>;
 
-
-/// Forward class declaration
-class tetgenio;
-
 /**
  * @brief      { function_description }
  *
@@ -353,3 +356,5 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh);
  * @return     { description_of_the_return_value }
  */
 std::unique_ptr<TetMesh> readDolfin(const std::string&filename);
+
+} // end namespace gamer

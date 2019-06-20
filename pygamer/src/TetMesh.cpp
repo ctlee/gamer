@@ -28,6 +28,10 @@
 #include "gamer/TetMesh.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_TetMesh(py::module& mod){
@@ -618,3 +622,5 @@ void init_TetMesh(py::module& mod){
         )delim"
     );
 }
+
+} // end namespace gamer

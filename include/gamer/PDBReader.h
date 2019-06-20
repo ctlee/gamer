@@ -40,6 +40,10 @@
 #include "gamer/Vertex.h"
 
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace pdbreader_detail
 {
     const double EPSILON    = 1e-3;
@@ -558,3 +562,5 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string& filename, float bl
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string& filename, const float radius);
 
 std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string& filename, float blobbyness, float isovalue);
+
+} // end namespace gamer

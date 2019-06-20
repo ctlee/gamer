@@ -27,6 +27,10 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 using TMVertexID = TetMesh::SimplexID<1>;
@@ -255,3 +259,5 @@ void init_TMSimplexID(py::module& mod){
         }
     );
 }
+
+} // end namespace gamer

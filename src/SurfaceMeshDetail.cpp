@@ -38,6 +38,9 @@
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
 
 namespace surfacemesh_detail{
 tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
@@ -808,3 +811,4 @@ void edgeRingToVertices(const SurfaceMesh &mesh,
 }
 
 } // END namespace surfacemesh_detail
+} // end namespace gamer

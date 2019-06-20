@@ -37,6 +37,9 @@
 #include "gamer/gamer.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
 
 /// Marching cubes tables
 static const int edgeTable[256]={
@@ -760,4 +763,4 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 	compute_orientation(*mesh);
 	return mesh;
 }
-
+} // end namespace gamer

@@ -27,6 +27,10 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_TMEdge(py::module& mod){
@@ -38,3 +42,5 @@ void init_TMEdge(py::module& mod){
     edge.def(py::init<>(), "Default constructor.");
     edge.def_readwrite("selected", &tetmesh::Edge::selected, "Selection status of edge.");
 }
+
+} // end namespace gamer

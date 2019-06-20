@@ -31,5 +31,11 @@
 
 #include <string>
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 extern const std::string gVERSION;
 extern const std::string gVERSION_SHORT;
+
+} // end namespace gamer

@@ -9,6 +9,10 @@
 #include "gamer/Vertex.h"
 #include "gtest/gtest.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 
 class SurfaceMeshTest : public testing::Test {
 protected:
@@ -68,3 +72,5 @@ TEST_F(SurfaceMeshTest, Refinement){
 	int fafter = mesh->size<3>();
 	EXPECT_EQ(fbefore*4, fafter);
 }
+
+} // end namespace gamer

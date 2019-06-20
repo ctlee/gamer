@@ -31,6 +31,10 @@
 #include "gamer/PDBReader.h"
 #include "gamer/version.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 // Forward function declarations
@@ -250,3 +254,5 @@ PYBIND11_MODULE(pygamer, pygamer) {
         }
     );
 }
+
+} // end namespace gamer

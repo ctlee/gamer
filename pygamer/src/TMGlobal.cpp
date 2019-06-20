@@ -27,6 +27,10 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_TMGlobal(py::module& mod){
@@ -38,3 +42,5 @@ void init_TMGlobal(py::module& mod){
 
     global.def_readwrite("higher_order", &tetmesh::Global::higher_order, "Whether or not this is a higher order mesh.");
 }
+
+} // end namespace gamer

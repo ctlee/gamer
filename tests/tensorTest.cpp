@@ -5,6 +5,10 @@
 #include "gamer/tensor.h"
 #include "gtest/gtest.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 
 TEST(TensorTest,MathOperations){
     tensor<double, 3, 1> v0;
@@ -25,3 +29,5 @@ TEST(TensorTest,MathOperations){
 
     // TODO: (0) add test for elementwise division etc...
 }
+
+} // end namespace gamer

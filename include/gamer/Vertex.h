@@ -36,6 +36,10 @@
 #include "gamer/gamer.h"
 #include "gamer/tensor.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 
 /**
  * @brief      Vertex class
@@ -381,3 +385,4 @@ inline void normalize(Vector& A){
     A /= mag;
 }
 
+} //end namespace gamer

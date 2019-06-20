@@ -38,11 +38,14 @@
 #include <vector>
 #include <sstream>
 
-// TODO: rename this namespace to something else...
-
-/// @cond detail
-namespace util
+/// Namespace for all things gamer
+namespace gamer
 {
+/// Namespace for tensor array mangement utilities
+namespace array_util
+{
+/// @cond detail
+/// Namespace for tensor array management details
 namespace detail
 {
 template <typename S, std::size_t depth, std::size_t N, typename T>
@@ -59,6 +62,7 @@ void fill_arrayH(std::array<S, N> &arr, S head, Ts... tail)
     fill_arrayH<S, depth+1, N, Ts...>(arr, tail ...);
 }
 } // end namespace detail
+/// @endcond
 
 /**
  * @brief      Fill an array with a list of values.
@@ -77,7 +81,7 @@ void fill_array(std::array<S, N> &arr, Ts... args)
     detail::fill_arrayH<S, 0, N, Ts...>(arr, args ...);
 }
 
-
+/// @cond detail
 namespace detail
 {
 template <typename Fn, typename ... Ts>
@@ -112,7 +116,17 @@ struct flattenH<Fn, std::array<T, K>, Ts...> {
     }
 };
 } // end namespace detail
+/// @endcond
 
+/**
+ * @brief      Flatten an array
+ *
+ * @param[in]  f     { parameter_description }
+ * @param[in]  args  The arguments
+ *
+ * @tparam     Fn    { description }
+ * @tparam     Ts    { description }
+ */
 template <typename Fn, typename ... Ts>
 void flatten(Fn f, Ts... args)
 {
@@ -293,7 +307,7 @@ public:
 	template <typename... Ts>
 	tensor(Ts... args)
 	{
-		util::fill_array(_dimensions, args...);
+		array_util::fill_array(_dimensions, args...);
 		resize(_dimensions);
 	}
 */
@@ -678,7 +692,7 @@ private:
 	std::size_t get_index(Ts... args) const
 	{
 		std::size_t rval = 0;
-		util::flatten([&rval](std::size_t ignored, std::size_t i){
+		array_util::flatten([&rval](std::size_t ignored, std::size_t i){
 			rval *= vector_dimension;
 			rval += i;
 		}, args...);
@@ -1060,3 +1074,4 @@ tensor<ElemType,3,1> cross(const tensor<ElemType,3,1>& x, const tensor<ElemType,
 	rval[2] = x[0]*y[1] - y[0]*x[1];
 	return rval;
 }
+} // end namespace gamer

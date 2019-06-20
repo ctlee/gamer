@@ -36,6 +36,11 @@
 #include <memory>
 #include <cmath>
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
+
 #define IndexVect1(i, j, k) ((k) * xdim1 * ydim1 + (j) * xdim1 + (i))
 #define MaxVal            999999
 #define MaxAtom           10
@@ -1828,3 +1833,5 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
 
     return total;
 }
+
+} // end namespace gamer

@@ -27,6 +27,10 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 using Cell = tetmesh::Cell;
@@ -45,3 +49,5 @@ void init_TMCell(py::module& mod){
     cell.def_readwrite("selected", &Cell::selected, "Selection status of cell");
     cell.def("__repr__", &Cell::to_string, "Pretty print");
 }
+
+} // end namespace gamer

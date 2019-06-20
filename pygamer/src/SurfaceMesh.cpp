@@ -30,6 +30,10 @@
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_SurfaceMesh(py::module& mod){
@@ -901,3 +905,5 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 }
+
+} // end namespace gamer

@@ -29,6 +29,10 @@
 
 #include "gamer/Vertex.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 Vertex operator+(const Vertex& A, const Vector& B){
     Vertex rval(A);
     rval += B;
@@ -113,3 +117,5 @@ double angleRad(const Vector& AB, const Vector& CB){
     cb /= lenCB;
     return std::acos(ab|cb);
 }
+
+} // end namespace gamer
