@@ -15,47 +15,12 @@
 
 #include <casc/casc>
 
-/// Namespace for all things gamer
-namespace gamer
-{
-
 
 int  main(int argc, char *argv[])
 {
-    auto mesh = readPDB_molsurf("2jho.pdb");
-    compute_orientation(*mesh);
-    smoothMesh(*mesh, 10, true, false);
+    gamer::tensor<double, 3, 3> v0;
 
-    auto vol = getVolume(*mesh);
-    if (vol < 0){
-        flipNormals(*mesh);
-    }
+    std::cout << gamer::Alt(v0) << std::endl;
 
-    auto lid = mesh->get_level_id<1>();
-    for(auto vid = lid.begin(); vid != lid.end();){
-        std::cout << *vid << std::endl;
-        if((*(*vid))[1] > 1){
-            auto value = *vid;
-            ++vid;
-            mesh->remove(value);
-            continue;
-        }
-        ++vid;
-    }
-
-    // double max = 0;
-    // for (auto s : mesh->get_level_id<1>()){
-    //     auto curve = getGaussianCurvature(*mesh, s);
-    //     std::cout << s << ": curvature = " << curve << std::endl;
-    //     if (curve > max)
-    //         max = curve;
-    // }
-    // std::cout << "Max: " << max << std::endl;
-    //
-    // auto mesh = readDolfin(argv[1]);
-
-    // writeDolfin("test.xml", *mesh);
     std::cout << "EOF" << std::endl;
 }
-
-} // end namespace gamer

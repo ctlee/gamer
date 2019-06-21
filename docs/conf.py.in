@@ -62,7 +62,9 @@ exhale_args = {
     "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = @PROJECT_SOURCE_DIR@/include"
+    "exhaleDoxygenStdin":    """INPUT = @PROJECT_SOURCE_DIR@/include
+                                FULL_PATH_NAMES = YES
+                             """,
 }
 
 

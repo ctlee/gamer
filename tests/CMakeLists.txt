@@ -70,7 +70,7 @@ elseif(BUILD_PYGAMER)
 endif()
 
 
-# add_executable(scratchtest scratchtest.cpp)
-# target_link_libraries(scratchtest gamerstatic)
+add_executable(scratchtest scratchtest.cpp)
+target_link_libraries(scratchtest gamerstatic)
 # Profiling with gperftools
 # target_link_libraries(scratchtest gamershared profiler)

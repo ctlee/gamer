@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.2'
-release = 'v2.0.2-dev-9-gdf75b66.dirty'
+release = 'v2.0.2-dev-10-gf44eeb9.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -62,7 +62,9 @@ exhale_args = {
     "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = /Users/ctlee/gamer/gamer/include"
+    "exhaleDoxygenStdin":    """INPUT = /Users/ctlee/gamer/gamer/include
+                                FULL_PATH_NAMES = YES
+                             """,
 }
 
 

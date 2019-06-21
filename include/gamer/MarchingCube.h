@@ -29,7 +29,6 @@
 
 #pragma once
 
-
 #include <algorithm>
 #include <bitset>
 #include <type_traits>
