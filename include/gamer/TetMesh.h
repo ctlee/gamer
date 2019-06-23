@@ -46,13 +46,14 @@
 #include "gamer/Vertex.h"
 #include "gamer/SurfaceMesh.h"
 
+/// @cond detail
 /// Forward class declaration
 class tetgenio;
+/// @endcond
 
 /// Namespace for all things gamer
 namespace gamer
 {
-
 /**
  * @brief      Type for containing root metadata
  */
@@ -185,17 +186,26 @@ struct TMFace : TMFaceProperties
     /**
      * @brief      Constructor
      *
-     * @param[in]  marker    The marker
+     * @param[in]  marker    Marker value
+     * @param[in]  selected  Selection status
      */
     TMFace(int marker, bool selected) : TMFace(TMFaceProperties{marker, selected}) {}
 
     /**
      * @brief      Constructor
      *
-     * @param[in]  prop    Properties of a face
+     * @param[in]  prop  Properties of a face
      */
     TMFace(TMFaceProperties prop) : TMFaceProperties(prop) {}
 
+    /**
+     * @brief      Print operator overload
+     *
+     * @param      output  The output
+     * @param[in]  f       Face data of interest
+     *
+     * @return     Output
+     */
     friend std::ostream &operator<<(std::ostream &output, const TMFace &f)
     {
         output << "TMFace("
@@ -227,17 +237,50 @@ struct TMCellProperties
 };
 
 /**
- * @brief      { struct_description }
+ * @brief      Cell data
  */
 struct TMCell : casc::Orientable, TMCellProperties
 {
+    /// Default constructor
     TMCell() : TMCell(-1, false) {}
+
+
+    /**
+     * @brief      Constructor overload initializes marker and selection.
+     *
+     * @param[in]  marker    Marker value
+     * @param[in]  selected  Selection status
+     */
     TMCell(int marker, bool selected) : TMCell(0, marker, selected) {}
+
+
+    /**
+     * @brief      Constructor overload initializes orientation, marker, and selectino.
+     *
+     * @param[in]  orient    Orientation of the cell
+     * @param[in]  marker    Marker value
+     * @param[in]  selected  Selection status
+     */
     TMCell(int orient, int marker, bool selected) : TMCell(Orientable{orient}, TMCellProperties{marker, selected}) {}
+
+    /**
+     * @brief      Operator overload
+     *
+     * @param[in]  orient  Orientation
+     * @param[in]  prop    Cell properties
+     */
     TMCell(Orientable orient, TMCellProperties prop)
         : Orientable(orient), TMCellProperties(prop)
     {}
 
+    /**
+     * @brief      Print operator overload
+     *
+     * @param      output  The output
+     * @param[in]  c       Cell of interest
+     *
+     * @return     Output
+     */
     friend std::ostream &operator<<(std::ostream &output, const TMCell &c)
     {
         output << "tetmesh::Cell("
@@ -260,7 +303,9 @@ struct TMCell : casc::Orientable, TMCellProperties
     }
 };
 
-
+/// @cond detail
+/// Namespace for tetmesh details
+namespace tetmesh_detail{
 /**
  * @brief      A helper struct containing the traits/types in the simplicial
  *             complex
@@ -274,49 +319,52 @@ struct tetmesh_traits
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable, casc::Orientable>;
 };
+} // end namespace tetmesh_detail
+/// @endcond
 
-using TetMesh = casc::simplicial_complex<tetmesh_traits>;
+/// Tetrahedral mesh data structure
+using TetMesh = casc::simplicial_complex<tetmesh_detail::tetmesh_traits>;
 
 /**
- * @brief      { function_description }
+ * @brief      Convert tetgenio from TetGen to TetMesh
  *
- * @param      tetio  The tetio
+ * @param      tetio  Tetgenio data
  *
- * @return     { description_of_the_return_value }
+ * @return     Tetrahedral mesh
  */
 std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
 
 /**
- * @brief      Makes a tet mesh.
+ * @brief      Call TetGen to make a tetrahedral mesh from a stack of surface meshes.
  *
- * @param[in]  surfmeshes     The surfmeshes
- * @param[in]  tetgen_params  The tetgen parameters
+ * @param[in]  surfmeshes     List of surface meshes
+ * @param[in]  tetgen_params  TetGen parameters
  *
- * @return     { description_of_the_return_value }
+ * @return     Tetrahedral mesh
  */
 std::unique_ptr<TetMesh> makeTetMesh(
     const std::vector<SurfaceMesh*> &surfmeshes,
     std::string                      tetgen_params);
 
 /**
- * @brief      { function_description }
+ * @brief      Extracts the boundary surface of a tetrahedral mesh
  *
  * @param[in]  mesh  The mesh
  *
- * @return     { description_of_the_return_value }
+ * @return     Bounding surface mesh
  */
 std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh &mesh);
 
 
 /**
- * @brief      { function_description }
+ * @brief      Laplacian smoothing of tetrahedral mesh
  *
  * @param      mesh  The mesh
  */
 void smoothMesh(TetMesh &mesh);
 
 /**
- * @brief      Writes a vtk.
+ * @brief      Writes the mesh out in VTK format.
  *
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
@@ -324,7 +372,7 @@ void smoothMesh(TetMesh &mesh);
 void writeVTK(const std::string &filename, const TetMesh &mesh);
 
 /**
- * @brief      Writes off.
+ * @brief      Writes the mesh out in OFF format.
  *
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
@@ -332,7 +380,7 @@ void writeVTK(const std::string &filename, const TetMesh &mesh);
 void writeOFF(const std::string &filename, const TetMesh &mesh);
 
 /**
- * @brief      Writes a dolfin.
+ * @brief      Writes the mesh out in dolfin XML format.
  *
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
@@ -340,7 +388,7 @@ void writeOFF(const std::string &filename, const TetMesh &mesh);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
 
 /**
- * @brief      Writes a triangle.
+ * @brief      Writes the mesh out in triangle format.
  *
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
@@ -352,12 +400,11 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh);
 //void writeCARP
 
 /**
- * @brief      Reads a dolfin.
+ * @brief      Reads in a mesh in dolfin XML format
  *
  * @param[in]  filename  The filename
  *
- * @return     { description_of_the_return_value }
+ * @return     Tetrahedral mesh
  */
 std::unique_ptr<TetMesh> readDolfin(const std::string &filename);
-
 } // end namespace gamer

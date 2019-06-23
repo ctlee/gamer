@@ -40,8 +40,15 @@ void init_SMFace(py::module& mod){
         )delim"
     );
     face.def(py::init<>(), "Default constructor");
-    face.def(py::init<int, bool>(), "Construct with marker and selection");
-    face.def(py::init<int, int, bool>(), "Construct with orientation, marker, and selection");
+    face.def(py::init<int, bool>(),
+        py::arg("marker") = -1,
+        py::arg("selected") = false,
+        "Construct with marker and selection");
+    face.def(py::init<int, int, bool>(),
+        py::arg("orientation") = 0,
+        py::arg("marker") = -1,
+        py::arg("selected") = false,
+        "Construct with orientation, marker, and selection");
     face.def_readwrite("orientation", &SMFace::orientation, "The orientation of the face");
     face.def_readwrite("marker", &SMFace::marker, "Boundary marker value");
     face.def_readwrite("selected", &SMFace::selected, "Selection status of face");

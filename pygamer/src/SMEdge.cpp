@@ -41,7 +41,7 @@ void init_SMEdge(py::module& mod){
     );
     edge.def(py::init<>(), "Default constructor.");
     edge.def(py::init<bool>(),
-        py::arg("selected"),
+        py::arg("selected") = false,
         "Constructor defining selection.");
     edge.def_readwrite("selected", &SMEdge::selected, "Selection status of edge.");
 }

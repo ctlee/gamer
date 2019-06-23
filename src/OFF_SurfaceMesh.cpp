@@ -56,14 +56,14 @@ int get_marker(float r, float g, float b)
 }
 
 //http://www.geomview.org/docs/html/OFF.html
-std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
+std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename)
 {
     // Instantiate mesh!
     //auto mesh = new SurfaceMesh();
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
-    std::ifstream fin(filename);
-    if(!fin.is_open())
+    std::ifstream                fin(filename);
+    if (!fin.is_open())
     {
         std::cerr << "Read Error: File '" << filename << "' could not be read." << std::endl;
         mesh.reset();
@@ -76,37 +76,44 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
     // we only read OFF's in 3 space... simplicial_complex only does triangles
     getline(fin, line);
     // Assume the first line must end with 'OFF\n'
-    if(!(line.find("OFF", line.size()-4) == std::string::npos)){
+    if (!(line.find("OFF", line.size()-4) == std::string::npos))
+    {
         std::cerr << "File Format Error: File '" << filename << "' does not look like a valid OFF file." << std::endl;
         std::cerr << "Expected 'OFF' at end of line, found: '" << line << "'." << std::endl;
         mesh.reset();
         return mesh;
     }
 
-    // Have the support for reading in various things. Currently we are ignoring them though...
+    // Have the support for reading in various things. Currently we are ignoring
+    // them though...
     bool textureCoords = false;
-    if(!(line.find("ST") == std::string::npos)){
+    if (!(line.find("ST") == std::string::npos))
+    {
         std::cout << "Found vertex texture coordinates flag." << std::endl;
         textureCoords = true;
     }
     bool vertexColors = false;
-    if(!(line.find("C") == std::string::npos)){
+    if (!(line.find("C") == std::string::npos))
+    {
         std::cout << "Found vertex colors flag." << std::endl;
         vertexColors = true;
     }
     bool vertexNormals = false;
-    if(!(line.find("N") == std::string::npos)){
+    if (!(line.find("N") == std::string::npos))
+    {
         std::cout << "Found vertex normals flag." << std::endl;
         vertexNormals = true;
     }
     int dimension = 3;
-    if(!(line.find("4") == std::string::npos)){
+    if (!(line.find("4") == std::string::npos))
+    {
         std::cout << "Found dimension flag." << std::endl;
         dimension = 4;
     }
 
-    if(!(line.find("n") == std::string::npos)){
-        getline(fin,line);  // Assume no comments here yet...
+    if (!(line.find("n") == std::string::npos))
+    {
+        getline(fin, line);  // Assume no comments here yet...
         int tempDim = std::stoi(line);
         if (dimension == 4)
             dimension = tempDim + 1;
@@ -115,32 +122,37 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
     }
 
     // Lambda function to split the string
-    auto split = [](const std::string& cstr, std::vector<char> delim = {' ','\t'}) -> std::vector<std::string>{
-        std::string str = cstr;
-        for (auto i=1; i< delim.size(); i++){
-            std::replace(str.begin(), str.end(),delim[i], delim[0]);
-        }
-        std::vector<std::string> result;
-        auto begin = str.begin();
-        do{
-            auto end = begin;
-            while(*end != delim[0] && end != str.end())
-                end++;
-            if(end != begin)
-                result.push_back(std::string(begin,end));
-            begin = end;
-        } while (begin++ != str.end());
-        return result;
-    };
+    auto split = [](const std::string &cstr, std::vector<char> delim = {' ', '\t'}) -> std::vector<std::string> {
+            std::string str = cstr;
+            for (auto i = 1; i < delim.size(); i++)
+            {
+                std::replace(str.begin(), str.end(), delim[i], delim[0]);
+            }
+            std::vector<std::string> result;
+            auto                     begin = str.begin();
+            do
+            {
+                auto end = begin;
+                while (*end != delim[0] && end != str.end())
+                    end++;
+                if (end != begin)
+                    result.push_back(std::string(begin, end));
+                begin = end;
+            }
+            while (begin++ != str.end());
+            return result;
+        };
 
     std::vector<std::string> arr;
     // Allow some comments denoted by #...
-    while(getline(fin,line)){
-        if (line.find("#") == 0) {
+    while (getline(fin, line))
+    {
+        if (line.find("#") == 0)
+        {
             continue;
         }
         arr = split(line, {'#'});
-        if(arr[0].length() != 0) // Assume that comments are over
+        if (arr[0].length() != 0) // Assume that comments are over
             break;
     }
 
@@ -161,21 +173,23 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
 
     // Parse the vertices
     /*
-     x[0]  y[0]  z[0]
-        # Vertices, possibly with normals,
-        # colors, and/or texture coordinates, in that order,
-        # if the prefixes N, C, ST
-        # are present.
-        # If 4OFF, each vertex has 4 components,
-        # including a final homogeneous component.
-        # If nOFF, each vertex has Ndim components.
-        # If 4nOFF, each vertex has Ndim+1 components.
-    */
-    for(int i = 0; i < numVertices; i++){
+       x[0]  y[0]  z[0]
+     # Vertices, possibly with normals,
+     # colors, and/or texture coordinates, in that order,
+     # if the prefixes N, C, ST
+     # are present.
+     # If 4OFF, each vertex has 4 components,
+     # including a final homogeneous component.
+     # If nOFF, each vertex has Ndim components.
+     # If 4nOFF, each vertex has Ndim+1 components.
+     */
+    for (int i = 0; i < numVertices; i++)
+    {
         getline(fin, line);
         //std::cout << line << std::endl;
         arr = split(line);
-        if(arr.size() < dimension){
+        if (arr.size() < dimension)
+        {
             std::cerr << "Parse Error: Vertex line has fewer dimensions than expected (" << dimension << ")" << std::endl;
             mesh.reset();
             return mesh;
@@ -183,34 +197,38 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         double x = std::stod(arr[0]);
         double y = std::stod(arr[1]);
         double z = std::stod(arr[2]);
-        mesh->insert<1>({i}, SMVertex(x,y,z));
+        mesh->insert<1>({i}, SMVertex(x, y, z));
     }
 
     // Parse Faces
     /*
-        # Faces
-        # Nv = # vertices on this face
-        # v[0] ... v[Nv-1]: vertex indices
-        #       in range 0..NVertices-1
+     # Faces
+     # Nv = # vertices on this face
+     # v[0] ... v[Nv-1]: vertex indices
+     #       in range 0..NVertices-1
 
         TODO: This should parse the number of vertices in each face (10)
         TODO: (10) Get orientation from the OFF file
-    */
-    for(int i = 0; i < numFaces; i++){
+     */
+    for (int i = 0; i < numFaces; i++)
+    {
         getline(fin, line);
         arr = split(line);
-        if(std::stoi(arr[0]) != 3 && arr.size() < dimension+1){
+        if (std::stoi(arr[0]) != 3 && arr.size() < dimension+1)
+        {
             std::cerr << "Unsupported: Found face that is not a triangle!" << std::endl;
             mesh.reset();
             return mesh;
         }
-        else if(arr.size() == dimension+1){
+        else if (arr.size() == dimension+1)
+        {
             auto v0 = std::stoi(arr[1]);
             auto v1 = std::stoi(arr[2]);
             auto v2 = std::stoi(arr[3]);
-            mesh->insert<3>({v0,v1,v2});
+            mesh->insert<3>({v0, v1, v2});
         }
-        else if(arr.size() == dimension+5){
+        else if (arr.size() == dimension+5)
+        {
             auto v0 = std::stoi(arr[1]);
             auto v1 = std::stoi(arr[2]);
             auto v2 = std::stoi(arr[3]);
@@ -219,9 +237,10 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
             auto g = std::stod(arr[5]);
             auto b = std::stod(arr[6]);
             //auto k = std::stod(arr[7]);
-            mesh->insert<3>({v0,v1,v2}, SMFace(get_marker(r,g,b),false));
+            mesh->insert<3>({v0, v1, v2}, SMFace(get_marker(r, g, b), false));
         }
-        else {
+        else
+        {
             std::cerr << "Parse Error: Couldn't interpret face: '" << line << "'." << std::endl;
             mesh.reset();
             return mesh;
@@ -232,12 +251,13 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
     return mesh;
 }
 
-void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
+void writeOFF(const std::string &filename, const SurfaceMesh &mesh)
+{
     std::ofstream fout(filename);
-    if(!fout.is_open())
+    if (!fout.is_open())
     {
-        std::cerr   << "File '" << filename
-                    << "' could not be writen to." << std::endl;
+        std::cerr << "File '" << filename
+                  << "' could not be writen to." << std::endl;
         exit(1);
     }
 
@@ -246,46 +266,52 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     std::size_t numVertices = mesh.size<1>();
     std::size_t numFaces = mesh.size<3>();
     std::size_t numEdges = mesh.size<2>();
-    fout    << numVertices << " "
-            << numFaces << " "
-            << numEdges << "\n";
+    fout << numVertices << " "
+         << numFaces << " "
+         << numEdges << "\n";
 
-    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+    std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> sigma;
     typename SurfaceMesh::KeyType cnt = 0;
 
     fout.precision(10);
     // Get the vertex data directly
     // TODO: (3) Will this always print in order?
-    for(const auto vertexID : mesh.get_level_id<1>()){
+    for (const auto vertexID : mesh.get_level_id<1>())
+    {
         sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto vertex = *vertexID;
 
-        fout    << vertex[0] << " "
-                << vertex[1] << " "
-                << vertex[2] << " "
-                << "\n";
+        fout << vertex[0] << " "
+             << vertex[1] << " "
+             << vertex[2] << " "
+             << "\n";
     }
 
     bool orientationError = false;
 
     // Get the face nodes
-    for(auto faceNodeID : mesh.get_level_id<3>()){
+    for (auto faceNodeID : mesh.get_level_id<3>())
+    {
         auto w = mesh.get_name(faceNodeID);
 
         auto orientation = (*faceNodeID).orientation;
-        if (orientation == 1){
+        if (orientation == 1)
+        {
             fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
-        else if(orientation == -1){
+        else if (orientation == -1)
+        {
             fout << "3 " << sigma[w[2]] << " " << sigma[w[1]] << " " << sigma[w[0]] << "\n";
 
         }
-        else{
+        else
+        {
             orientationError = true;
             fout << "3 " << sigma[w[0]] << " " << sigma[w[1]] << " " << sigma[w[2]] << "\n";
         }
     }
-    if(orientationError){
+    if (orientationError)
+    {
         std::cerr << "WARNING(writeOFF): The orientation of one or more faces "
                   << "is not defined. Did you run compute_orientation()?"
                   << std::endl;

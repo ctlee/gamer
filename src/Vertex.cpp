@@ -33,65 +33,77 @@
 namespace gamer
 {
 
-Vertex operator+(const Vertex& A, const Vector& B){
+Vertex operator+(const Vertex &A, const Vector &B)
+{
     Vertex rval(A);
     rval += B;
     return rval;
 }
 
-Vertex operator-(const Vertex& A, const Vector& B){
+Vertex operator-(const Vertex &A, const Vector &B)
+{
     Vertex rval(A);
     rval -= B;
     return rval;
 }
 
-Vector operator-(const Vertex& A, const Vertex& B){
+Vector operator-(const Vertex &A, const Vertex &B)
+{
     return A.position - B.position;
 }
 
-Vertex operator*(REAL x, const Vertex& A){
+Vertex operator*(REAL x, const Vertex &A)
+{
     Vertex rval(A);
     rval *= x;
     return rval;
 }
 
-Vertex operator*(const Vertex& A, REAL x){
+Vertex operator*(const Vertex &A, REAL x)
+{
     return x*A;
 }
 
-Vertex operator/(const Vertex& A, REAL x){
+Vertex operator/(const Vertex &A, REAL x)
+{
     Vertex rval(A);
     rval /= x;
     return rval;
 }
 
-REAL distance(const Vertex& A, const Vertex& B){
+REAL distance(const Vertex &A, const Vertex &B)
+{
     return length(A - B);
 }
 
-REAL angle(const Vertex& A, const Vertex& B, const Vertex& C){
+REAL angle(const Vertex &A, const Vertex &B, const Vertex &C)
+{
     Vector AB(A-B);
     Vector CB(C-B);
-    return angle(AB,CB);
+    return angle(AB, CB);
 }
 
-REAL angle(const Vector& AB, const Vector& CB){
+REAL angle(const Vector &AB, const Vector &CB)
+{
 
     return angleRad(AB, CB)*180/M_PI;
 }
 
-REAL angleRad(const Vertex& A, const Vertex& B, const Vertex& C){
+REAL angleRad(const Vertex &A, const Vertex &B, const Vertex &C)
+{
     Vector AB(A-B);
     Vector CB(C-B);
-    return angleRad(AB,CB);
+    return angleRad(AB, CB);
 }
 
-REAL angleRad(const Vector& AB, const Vector& CB){
+REAL angleRad(const Vector &AB, const Vector &CB)
+{
     Vector ab(AB);
     Vector cb(CB);
-    REAL lenAB = length(ab);
-    REAL lenCB = length(cb);
-    if (lenAB == 0 || lenCB == 0){
+    REAL   lenAB = length(ab);
+    REAL   lenCB = length(cb);
+    if (lenAB == 0 || lenCB == 0)
+    {
         throw std::runtime_error("Some length == 0, cannot compute angle.");
     }
     ab /= lenAB;

@@ -63,7 +63,7 @@ void init_TetMesh(py::module& mod){
 
             Args:
                 key (list): Array [1] of vertex key.
-                data (:py:class:`Vertex`, optional): Vertex data.
+                data (tetmesh.Vertex): Vertex data.
         )delim"
     );
 
@@ -76,7 +76,7 @@ void init_TetMesh(py::module& mod){
 
             Args:
                 key (list): Array [2] of edge key.
-                data (Edge): Edge data.
+                data (tetmesh.Edge): Edge data.
         )delim"
     );
 
@@ -89,7 +89,7 @@ void init_TetMesh(py::module& mod){
 
             Args:
                 key (list): Array [3] of face key.
-                data (Face): Face data.
+                data (tetmesh.Face): Face data.
         )delim"
     );
 

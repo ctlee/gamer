@@ -123,16 +123,17 @@ struct SMFace : casc::Orientable, SMFaceProperties
     /**
      * @brief      Constructor
      *
-     * @param[in]  marker    The marker
-     * @param[in]  selected  The selected
+     * @param[in]  marker    Marker value
+     * @param[in]  selected  Selection status
      */
     SMFace(int marker, bool selected) : SMFace(Orientable{0}, SMFaceProperties{marker, selected}) {}
 
     /**
      * @brief      Constructor
      *
-     * @param[in]  marker    The marker
-     * @param[in]  selected  The selected
+     * @param[in]  orient    Orientation of the simplex
+     * @param[in]  marker    Marker value
+     * @param[in]  selected  Selection status
      */
     SMFace(int orient, int marker, bool selected) : SMFace(Orientable{orient}, SMFaceProperties{marker, selected}) {}
 

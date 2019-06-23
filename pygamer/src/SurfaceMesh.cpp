@@ -89,7 +89,7 @@ void init_SurfaceMesh(py::module& mod){
 
             Args:
                 key (list): Array [2] of edge key.
-                data (Edge): Edge data.
+                data (surfacemesh.Edge): Edge data.
         )delim"
     );
 
@@ -102,7 +102,7 @@ void init_SurfaceMesh(py::module& mod){
 
             Args:
                 key (list): Array [3] of edge key.
-                data (Face): Face data.
+                data (surfacemesh.Face): Face data.
         )delim"
     );
 
