@@ -36,7 +36,6 @@
 /// Namespace for all things gamer
 namespace gamer
 {
-
 /**
  * @brief      Converts the color from float(0-1) to a marker value
  *
@@ -184,7 +183,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
         double x = std::stod(arr[0]);
         double y = std::stod(arr[1]);
         double z = std::stod(arr[2]);
-        mesh->insert<1>({i},Vertex(x,y,z));
+        mesh->insert<1>({i}, SMVertex(x,y,z));
     }
 
     // Parse Faces
@@ -220,7 +219,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename)
             auto g = std::stod(arr[5]);
             auto b = std::stod(arr[6]);
             //auto k = std::stod(arr[7]);
-            mesh->insert<3>({v0,v1,v2}, Face(get_marker(r,g,b),false));
+            mesh->insert<3>({v0,v1,v2}, SMFace(get_marker(r,g,b),false));
         }
         else {
             std::cerr << "Parse Error: Couldn't interpret face: '" << line << "'." << std::endl;
@@ -293,5 +292,4 @@ void writeOFF(const std::string& filename, const SurfaceMesh& mesh){
     }
     fout.close();
 }
-
 } // end namespace gamer

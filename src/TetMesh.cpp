@@ -165,16 +165,16 @@ std::unique_ptr<TetMesh> makeTetMesh(
         normal /= std::sqrt(normal|normal);
 
         auto fname = surfmesh->get_name(faceID);
-        auto a = *surfmesh->get_simplex_up({fname[0]});
-        auto b = *surfmesh->get_simplex_up({fname[1]});
-        auto c = *surfmesh->get_simplex_up({fname[2]});
+        Vector a = (*surfmesh->get_simplex_up({fname[0]})).position;
+        Vector b = (*surfmesh->get_simplex_up({fname[1]})).position;
+        Vector c = (*surfmesh->get_simplex_up({fname[2]})).position;
 
         Vector d = a-b;
         double weight = std::sqrt(d|d);
 
         // flip normal and scale by weight
         normal *= weight;
-        Vector regionPoint = (a+b+c)/3 - normal;
+        Vector regionPoint((a+b+c)/3.0 - normal);
 
         std::cout << "Region point: " << regionPoint << std::endl;
 
@@ -279,7 +279,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
         // TODO: (0) Do we need to set the orientation?
         // std::cout << casc::to_string(std::array<int,4>({ptr[0], ptr[1], ptr[2], ptr[3]})) << std::endl;
         mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]},
-                tetmesh::Cell(0, marker));
+                TMCell(0, marker));
     }
 
     // std::cout << "Number of vertices: " << mesh->size<1>() << std::endl;
@@ -295,7 +295,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
         if (vertex != nullptr){
             auto &vdata = *vertex;
             // std::cout << casc::to_string(std::array<double,3>({ptr[0],ptr[1],ptr[2]})) << std::endl;
-            vdata = tetmesh::TetVertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
+            vdata = TMVertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
         }
     }
 
@@ -330,7 +330,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio){
             }
         }
     }
-    compute_orientation(*mesh);
+    casc::compute_orientation(*mesh);
     return mesh;
 }
 
@@ -342,7 +342,7 @@ std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& tetmesh){
         if(tetmesh.onBoundary(faceID)){
             auto data = *faceID;
             auto name = tetmesh.get_name(faceID);
-            surfmesh->insert(name, Face(data.marker, data.selected));
+            surfmesh->insert(name, SMFace(data.marker, data.selected));
         }
     }
 
@@ -352,7 +352,7 @@ std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& tetmesh){
         data.position = (*tetmesh.get_simplex_up(name)).position;
     }
 
-    compute_orientation(*surfmesh);
+    casc::compute_orientation(*surfmesh);
     return surfmesh;
 }
 

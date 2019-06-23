@@ -41,7 +41,6 @@
 /// Namespace for all things gamer
 namespace gamer
 {
-
 namespace surfacemesh_detail{
 tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
         const SurfaceMesh::SimplexID<1> vertexID,
@@ -71,17 +70,6 @@ tensor<double,3,2> computeLocalStructureTensor(const SurfaceMesh &mesh,
     //     std::cout << "\n";
     // }
     return lst;
-}
-
-double getMeanEdgeLength(SurfaceMesh& mesh){
-    double avgLen = 0;
-    for (auto edgeID : mesh.get_level_id<2>()){
-        auto name =  mesh.get_name(edgeID);
-        auto v = *mesh.get_simplex_down(edgeID, name[0])
-                 - *mesh.get_simplex_down(edgeID, name[1]);
-        avgLen += std::sqrt(v|v);
-    }
-    return avgLen / double(mesh.size<2>());
 }
 
 void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
@@ -160,7 +148,7 @@ void decimateVertex(SurfaceMesh & mesh, SurfaceMesh::SimplexID<1> vertexID){
 
 void triangulateHoleHelper(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &boundary,
-        const Face &fdata,
+        const SMFace &fdata,
         std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> edgeListIT){
     // Terminal case
     if(boundary.size() == 3){
@@ -220,7 +208,7 @@ void triangulateHoleHelper(SurfaceMesh &mesh,
 
 void triangulateHole(SurfaceMesh &mesh,
         std::vector<SurfaceMesh::SimplexID<1>> &sortedVerts,
-        const Face &fdata,
+        const SMFace &fdata,
         std::vector<SurfaceMesh::SimplexID<2>> &holeEdges){
     // backup sortedVerts
     std::vector<SurfaceMesh::SimplexID<1>> backupVerts = sortedVerts;
@@ -233,14 +221,14 @@ void triangulateHole(SurfaceMesh &mesh,
         keys.insert(mesh.get_name(vertexID)[0]);
     }
 
-    orientHoleHelper<std::integral_constant<size_t, 1>>::apply(mesh, std::move(keys), backupVerts.begin(), backupVerts.end());
+    initLocalOrientation<std::integral_constant<size_t, 1>>::apply(mesh, std::move(keys), backupVerts.begin(), backupVerts.end());
 
-    if(!computeHoleOrientation(mesh, holeEdges)){
+    if(!computeLocalOrientation(mesh, holeEdges)){
         throw std::runtime_error("ERROR(triangulateHole): Mesh became non-orientable");
     }
 }
 
-bool computeHoleOrientation(SurfaceMesh &mesh,
+bool computeLocalOrientation(SurfaceMesh &mesh,
         const std::vector<SurfaceMesh::SimplexID<2> > &edgeList)
 {
     std::deque<SurfaceMesh::SimplexID<2> > frontier;
@@ -306,7 +294,7 @@ bool computeHoleOrientation(SurfaceMesh &mesh,
                         }
                     }
                     else{
-                        std::cerr << "ERROR(computeHoleOrientation): Found an edge"
+                        std::cerr << "ERROR(computeLocalOrientation): Found an edge"
                                   << " connected to " << w.size() << " faces. The SurfaceMesh "
                                   << "is no longer a surface mesh." << std::endl;
                         return false;
@@ -319,13 +307,13 @@ bool computeHoleOrientation(SurfaceMesh &mesh,
     return orientable;
 }
 
-Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat)
+Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> &mat)
 {
     Eigen::Map<Eigen::Matrix3d> emat(mat.data());
     // TODO: (99) How much optimization can we get from having a persistent eigensolver?
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(emat);
     if (eigensolver.info() != Eigen::Success)
-        abort();
+        abort(); // TODO: (0) Replace this with a throw
     return eigensolver;
 }
 
@@ -383,7 +371,7 @@ void weightedVertexSmooth(SurfaceMesh &mesh,
         double alpha = (pS|nS) + 1;
 
         // Check if vertices are colinear
-        if (magnitude(bisector) == 0 || alpha < 1e-6 || fabs(alpha-2) < 1e-6){
+        if (length(bisector) == 0 || alpha < 1e-6 || fabs(alpha-2) < 1e-6){
             perpNorm = pS;
             normalize(perpNorm);
         }
@@ -535,7 +523,7 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     mesh.up(edgeID, faces.begin());
 
     // Assume flipped edges are always selected
-    auto fdata = Face(0, true);
+    auto fdata = SMFace(0, true);
     if((*faces[0]).marker == (*faces[1]).marker){
         fdata.marker = (*faces[0]).marker;
     }
@@ -694,33 +682,43 @@ void findHoles(const SurfaceMesh& mesh,
     while(bdryEdges.size() > 0){
         // Container to store ring
         std::vector<SurfaceMesh::SimplexID<2>> bdryRing;
-        // Pop first edge from remaining edges
-        auto it = bdryEdges.begin();
-        auto firstEdge = *it;
-        bdryRing.push_back(firstEdge);
-        bdryEdges.erase(it);
-
+        // // Pop first edge from remaining edges
+        // auto it = bdryEdges.begin();
+        // auto firstEdge = *it;
+        // bdryRing.push_back(firstEdge);
+        // bdryEdges.erase(it);
         std::vector<SurfaceMesh::SimplexID<1>> visitedVerts;
-        mesh.down(firstEdge, std::back_inserter(visitedVerts));
-
-        if(!findHoleHelper(mesh, bdryEdges, visitedVerts, bdryRing)){
+        // mesh.down(firstEdge, std::back_inserter(visitedVerts));
+        // Try to complete the ring
+        if(!orderBoundaryEdgeRing(mesh, bdryEdges, visitedVerts, bdryRing)){
             throw std::runtime_error("Couldn't connect ring");
         }
         holeList.push_back(bdryRing);
     }
 }
 
-bool findHoleHelper(const SurfaceMesh&mesh,
+bool orderBoundaryEdgeRing(const SurfaceMesh&mesh,
         std::set<SurfaceMesh::SimplexID<2>>& unvisitedBdryEdges,
         std::vector<SurfaceMesh::SimplexID<1>>& visitedVerts,
         std::vector<SurfaceMesh::SimplexID<2>>& bdryRing)
 {
+    if (visitedVerts.empty() && bdryRing.empty()){
+        // Pop first edge from unvisited edges
+        auto it = unvisitedBdryEdges.begin();
+        auto firstEdge = *it;
+        // Push the edge into the ring
+        bdryRing.push_back(firstEdge);
+        unvisitedBdryEdges.erase(it);
+        // Push vertices of edge into visited vertices
+        mesh.down(firstEdge, std::back_inserter(visitedVerts));
+    }
+
     auto firstEdge = bdryRing.front();
     auto currEdge = bdryRing.back();
     auto currVert = visitedVerts.back();
 
     std::vector<SurfaceMesh::SimplexID<2>> nbors;
-    neighbors(mesh,currEdge, std::back_inserter(nbors));
+    neighbors(mesh, currEdge, std::back_inserter(nbors));
 
     // Look for connected unvisited boundary edge
     for (auto nbor : nbors){
@@ -761,7 +759,7 @@ bool findHoleHelper(const SurfaceMesh&mesh,
                 bdryRing.push_back(nextEdge);
                 unvisitedBdryEdges.erase(result);
 
-                if(findHoleHelper(mesh, unvisitedBdryEdges, visitedVerts, bdryRing)){
+                if(orderBoundaryEdgeRing(mesh, unvisitedBdryEdges, visitedVerts, bdryRing)){
                     return true;
                 }
             }

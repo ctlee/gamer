@@ -10,17 +10,37 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <array>
+#include <memory>
 
 #include "gamer/gamer"
 
-#include <casc/casc>
+// #include <casc/casc>
 
 
 int  main(int argc, char *argv[])
 {
-    gamer::tensor<double, 3, 3> v0;
+    auto mesh = gamer::readOFF("icosa.off");
 
-    std::cout << gamer::Alt(v0) << std::endl;
+    int i = 0;
+    for(auto v : mesh->get_level_id<1>()){
+        auto data = *v;
+        std::cout << "mesh->insert({" << i++
+            << "}, SMVertex("
+            << data[0] << ", "
+            << data[1] << ", "
+            << data[2] << "));" << std::endl;
+    }
+
+    for(auto f : mesh->get_level_id<3>()){
+        auto name = f.indices();
+        std::cout << "mesh->insert({"
+            << name[0] << ","
+            << name[1] << ","
+            << name[2]
+        << "});" << std::endl;
+    }
+
 
     std::cout << "EOF" << std::endl;
 }

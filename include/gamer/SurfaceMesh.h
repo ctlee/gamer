@@ -50,7 +50,7 @@ namespace gamer
 /**
  * @brief      Type for containing root metadata
  */
-struct Global
+struct SMGlobal
 {
     /// Domain marker to be used when tetrahedralizing.
     int   marker;
@@ -61,38 +61,64 @@ struct Global
     /// Flag that determines if the mesh represents a hole or not
     bool  ishole;
 
-    // Default constructor
-    Global(int marker=-1, float volumeConstraint=-1, bool useVolumeConstraint=false, bool ishole=false) :
+    /**
+     * @brief      Default constructor
+     *
+     * @param[in]  marker               Global marker value
+     * @param[in]  volumeConstraint     Value of volume constraint to use
+     * @param[in]  useVolumeConstraint  Whether or not a volume constraint
+     *                                  should be applied when tetrahedralizing
+     * @param[in]  ishole               Is this domain a hole?
+     */
+    SMGlobal(int marker = -1, float volumeConstraint = -1, bool useVolumeConstraint = false, bool ishole = false) :
         marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
 };
 
+struct SMVertex : Vertex { using Vertex::Vertex; };
 
-struct Edge{
+/**
+ * @brief      Edge data
+ */
+struct SMEdge{
+    /// Selection status of the edge
     bool selected;
-    // Default constructor
-    Edge() : Edge(0) {}
-    Edge(bool select) : selected(select) {}
+
+    /// Default constructor constructs unselected edge
+    SMEdge() : SMEdge(0) {}
+
+    /**
+     * @brief      Overload constructor constructs edge with
+     *
+     * @param[in]  select  Selection status
+     */
+    SMEdge(bool select) : selected(select) {}
 };
 
 /**
  * @brief      Properties that Faces should have
  */
-struct FaceProperties
+struct SMFaceProperties
 {
     int  marker;   /**< @brief Marker */
     bool selected; /**< @brief Selection flag */
 
-    FaceProperties(int marker, bool selected) :
+    /**
+     * @brief      Face properties constructor
+     *
+     * @param[in]  marker    The marker
+     * @param[in]  selected  The selected
+     */
+    SMFaceProperties(int marker, bool selected) :
         marker(marker), selected(selected) {}
 };
 
 /**
- * @brief      Face object
+ * @brief      SMFace object
  */
-struct Face : casc::Orientable, FaceProperties
+struct SMFace : casc::Orientable, SMFaceProperties
 {
     /// Default constructor
-    Face() : Face(Orientable{0}, FaceProperties{-1, false}) {}
+    SMFace() : SMFace(Orientable{0}, SMFaceProperties{-1, false}) {}
 
     /**
      * @brief      Constructor
@@ -100,7 +126,7 @@ struct Face : casc::Orientable, FaceProperties
      * @param[in]  marker    The marker
      * @param[in]  selected  The selected
      */
-    Face(int marker, bool selected) : Face(Orientable{0}, FaceProperties{marker, selected}) {}
+    SMFace(int marker, bool selected) : SMFace(Orientable{0}, SMFaceProperties{marker, selected}) {}
 
     /**
      * @brief      Constructor
@@ -108,7 +134,7 @@ struct Face : casc::Orientable, FaceProperties
      * @param[in]  marker    The marker
      * @param[in]  selected  The selected
      */
-    Face(int orient, int marker, bool selected) : Face(Orientable{orient}, FaceProperties{marker, selected}) {}
+    SMFace(int orient, int marker, bool selected) : SMFace(Orientable{orient}, SMFaceProperties{marker, selected}) {}
 
     /**
      * @brief      Constructor
@@ -116,41 +142,63 @@ struct Face : casc::Orientable, FaceProperties
      * @param[in]  orient  Orientable object
      * @param[in]  prop    Properties of a face
      */
-    Face(Orientable orient, FaceProperties prop)
-        : Orientable(orient), FaceProperties(prop)
+    SMFace(Orientable orient, SMFaceProperties prop)
+        : Orientable(orient), SMFaceProperties(prop)
     {}
 
-    friend std::ostream& operator<<(std::ostream& output, const Face& f){
-        output  << "Face("
-                << "m:" << f.marker
-                << ";sel:" << std::boolalpha << f.selected
-                << ";o:" << f.orientation << ")";
+    /**
+     * @brief      Print operator overload
+     *
+     * @param      output  The output
+     * @param[in]  f       Face to print
+     *
+     * @return     Output stream
+     */
+    friend std::ostream &operator<<(std::ostream &output, const SMFace &f)
+    {
+        output << "SMFace("
+               << "m:" << f.marker
+               << ";sel:" << std::boolalpha << f.selected
+               << ";o:" << f.orientation << ")";
         return output;
     }
 
-    std::string to_string() const{
+    /**
+     * @brief      Returns a string representation of the object.
+     *
+     * @return     String representation of the object.
+     */
+    std::string to_string() const
+    {
         std::ostringstream output;
-        output  << *this;
+        output << *this;
         return output.str();
     }
 
 };
 
+
+/// @cond detail
+namespace surfmesh_detail
+{
 /**
  * @brief      A helper struct containing the traits/types in the simplicial
  *             complex
  */
-struct complex_traits
+struct surfmesh_traits
 {
     /// The index type
     using KeyType = int;
     /// The types of each node
-    using NodeTypes = util::type_holder<Global, Vertex, Edge, Face>;
+    using NodeTypes = util::type_holder<SMGlobal, SMVertex, SMEdge, SMFace>;
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable>;
 };
+} // end namespace surfmesh_detail
+/// @endcond
 
-using SurfaceMesh = casc::simplicial_complex<complex_traits>;
+/// Surface Mesh Object
+using SurfaceMesh = casc::simplicial_complex<surfmesh_detail::surfmesh_traits>;
 
 /**
  * @brief      Compute the tangent to a vertex.
@@ -223,28 +271,29 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
 /// @cond detail
 /// Namespace for surface mesh detail functions
-namespace surfacemesh_detail{
+namespace surfacemesh_detail
+{
 /**
- * @brief      Gets the mean edge length.
- *
- * @param      mesh  Surface mesh of interest
- *
- * @return     The mean edge length.
- */
-double getMeanEdgeLength(SurfaceMesh& mesh);
-
-/**
- * @brief      Remove a vertex form mesh and triangulate the resulting hole.
+ * @brief      Remove a vertex from mesh and triangulate the resulting hole.
  *
  * @param      mesh      The mesh
  * @param[in]  vertexID  The vertex id
  */
 void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
 
-tensor<double,3,2> computeLocalStructureTensor(
-        const SurfaceMesh &mesh,
-        const SurfaceMesh::SimplexID<1> vertexID,
-        const int rings);
+/**
+ * @brief      Computes the local structure tensor
+ *
+ * @param[in]  mesh      Surface mesh of interest
+ * @param[in]  vertexID  Vertex of interest
+ * @param[in]  rings     Number of neighborhood rings to consider
+ *
+ * @return     The local structure tensor.
+ */
+tensor<double, 3, 2> computeLocalStructureTensor(
+    const SurfaceMesh              &mesh,
+    const SurfaceMesh::SimplexID<1> vertexID,
+    const int                       rings);
 
 /**
  * @brief      Terminal case
@@ -253,7 +302,7 @@ tensor<double,3,2> computeLocalStructureTensor(
  * @param[in]  origin     The origin
  * @param[in]  curr       The curr
  *
- * @tparam     dimension  { description }
+ * @tparam     dimension  Vector space dimension
  *
  * @return     The tangent h.
  */
@@ -273,8 +322,8 @@ auto getTangentH(const SurfaceMesh &mesh,
  * @param[in]  origin     The origin
  * @param[in]  curr       The curr
  *
- * @tparam     level      { description }
- * @tparam     dimension  { description }
+ * @tparam     level      Level of the complex currently traversed
+ * @tparam     dimension  Vector dimension
  *
  * @return     The tangent h.
  */
@@ -352,15 +401,21 @@ auto getTangentF(const SurfaceMesh &mesh,
 }
 
 /**
- * @brief      General template
+ * @brief      General template for function to initialize the local orientation
+ *             of a mesh.
  *
- * @tparam     K     { description }
+ * @tparam     K     Class template intended for storing level
  */
 template <class K>
-struct orientHoleHelper {};
+struct initLocalOrientation {};
 
+/**
+ * @brief      Specialization to initialize the local orientation of a mesh
+ *
+ * @tparam     k     The current level traversed
+ */
 template <std::size_t k>
-struct orientHoleHelper<std::integral_constant<std::size_t, k>>
+struct initLocalOrientation<std::integral_constant<std::size_t, k> >
 {
     /**
      * @brief      Set the orientation of a filled hole
@@ -373,62 +428,66 @@ struct orientHoleHelper<std::integral_constant<std::size_t, k>>
      * @tparam     Iterator   Typename of the iterator
      */
     template <typename Iterator>
-    static void apply(SurfaceMesh & mesh,
-            const std::set<int> &&names,
-            Iterator begin,
-            Iterator end)
+    static void apply(SurfaceMesh          &mesh,
+                      const std::set<int> &&names,
+                      Iterator              begin,
+                      Iterator              end)
     {
-        std::vector<SurfaceMesh::SimplexID<k+1>> next;
-        for(auto curr = begin; curr != end; ++curr)
+        std::vector<SurfaceMesh::SimplexID<k+1> > next;
+        for (auto curr = begin; curr != end; ++curr)
         {
             auto currSimplexID = *curr;
-            for(auto a : mesh.get_cover(currSimplexID))
+            for (auto a : mesh.get_cover(currSimplexID))
             {
                 // Look for key a in names
                 auto find = names.find(a);
-                if(find != names.end())
+                if (find != names.end())
                 {
                     next.push_back(mesh.get_simplex_up(currSimplexID, a));
 
                     int orient = 1;
-                    for(auto b : mesh.get_name(currSimplexID)){
-                        if(a > b){
-                            if(a > b)
+                    for (auto b : mesh.get_name(currSimplexID))
+                    {
+                        if (a > b)
+                        {
+                            if (a > b)
                             {
                                 orient *= -1;
                             }
-                            else{
+                            else
+                            {
                                 break;
                             }
                         }
                     }
-                    //std::cout << casc::to_string(mesh.get_name(*curr)) << " " << a << " " << orient << std::endl;
-                    (*mesh.get_edge_up(currSimplexID,a)).orientation = orient;
+                    (*mesh.get_edge_up(currSimplexID, a)).orientation = orient;
                 }
             }
         }
-        orientHoleHelper<std::integral_constant<std::size_t,k+1>>::apply(mesh, std::move(names), next.begin(), next.end());
+        initLocalOrientation<std::integral_constant<std::size_t, k+1> >::apply(mesh, std::move(names), next.begin(), next.end());
     }
 };
 
 /**
- * @brief      Terminal case
+ * @brief      Terminal case. The top level does not need to be initialized.
  */
 template <>
-struct orientHoleHelper<std::integral_constant<std::size_t, SurfaceMesh::topLevel>>{
+struct initLocalOrientation<std::integral_constant<std::size_t, SurfaceMesh::topLevel> > {
     template <typename Iterator>
     static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){}
 };
 
 /**
- * @brief      Calculates the orientation of simplices of a hole
+ * @brief      Calculates the orientation of faces around a local region
  *
- * @param      mesh       The mesh
- * @param[in]  <unnamed>  { parameter_description }
+ * @param      mesh      Surface mesh of interest
+ * @param[in]  edgeList  List of edges around which the orientation fill is
+ *                       restricted.
  *
- * @return     The hole orientation.
+ * @return     True if the hole was orientable, False if an inconsistent
+ *             orientation was found.
  */
-bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
+bool computeLocalOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
 
 /**
  * @brief      Compute the eigenvalues of a 3x3 matrix.
@@ -437,7 +496,7 @@ bool computeHoleOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::Si
  *
  * @return     Returns an Eigen::SelfAdjointEigenSolver containing the results
  */
-Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> mat);
+Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> &mat);
 
 /**
  * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
@@ -477,26 +536,30 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
 template <class Inserter>
 void selectFlipEdges(const SurfaceMesh &mesh,
                      bool preserveRidges,
-                     std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> && checkFlip,
-                     Inserter iter){
+                     std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> &&checkFlip,
+                     Inserter iter)
+{
     casc::NodeSet<SurfaceMesh::SimplexID<2> > ignoredEdges;
 
     for (auto edgeID : mesh.get_level_id<2>())
     {
-        if ((*edgeID).selected == true){
+        if ((*edgeID).selected == true)
+        {
             if (!ignoredEdges.count(edgeID))
             {
                 auto up = mesh.get_cover(edgeID);
                 // The mesh is not a surface mesh...
                 if (up.size() > 2)
                 {
-                    // std::cerr << "This edge participates in more than 2 faces. "
+                    // std::cerr << "This edge participates in more than 2
+                    // faces. "
                     //           << "Returning..." << std::endl;
                     throw std::runtime_error("SurfaceMesh is not pseudomanifold. Found an edge connected to more than 2 faces.");
                 }
                 else if (up.size() < 2) // Edge is a boundary
                 {
-                    // std::cerr << "This edge participates in fewer than 2 faces. "
+                    // std::cerr << "This edge participates in fewer than 2
+                    // faces. "
                     //           << "Returning..." << std::endl;
                     continue;
                 }
@@ -533,14 +596,18 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                 // TODO: (5) Change to check link condition
                 // Check if the triangles make a wedge shape. Flipping this can
                 // cause knife faces.
-                auto f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
-                auto f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
-                auto f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
-                auto f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
-                auto area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
-                auto areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
+                auto   f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
+                auto   f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
+                auto   f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
+                auto   f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
+                auto   area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
+                auto   areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
                 double edgeFlipCriterion = 1.001;
-                if (areaFlip/area > edgeFlipCriterion) continue; // If area changes by a lot then continue
+                if (areaFlip/area > edgeFlipCriterion)
+                    continue;                                    // If area
+                                                                 // changes by a
+                                                                 // lot then
+                                                                 // continue
 
                 // Check the flip using user function
                 if (checkFlip(mesh, edgeID))
@@ -552,12 +619,14 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                     std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
                     kneighbors(mesh, edgeID, 3, tmpIgnored);
                     ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
-                    // neighbors(mesh, edgeID, std::inserter(ignoredEdges, ignoredEdges.end()));
+                    // neighbors(mesh, edgeID, std::inserter(ignoredEdges,
+                    // ignoredEdges.end()));
                 }
             }
         }
     }
 }
+
 /**
  * @brief      Check if we should flip an edge to improve the angles.
  *
@@ -580,7 +649,14 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  */
 bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
 
-void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double k);
+/**
+ * @brief      Apply normal smoothing to a region around a vertex
+ *
+ * @param      mesh      The mesh
+ * @param[in]  vertexID  Vertex of interest
+ * @param[in]  k         Anisotropic smoothing factor
+ */
+void normalSmoothH(SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID, const double k);
 
 /**
  * @brief      Traverse mesh and find holes
@@ -588,31 +664,40 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double
  * @param[in]  mesh      SurfaceMesh
  * @param      holeList  List of list of edge rings to store holes in
  */
-void findHoles(const SurfaceMesh &mesh,
-    std::vector<std::vector<SurfaceMesh::SimplexID<2>>>& holeList);
+void findHoles(const SurfaceMesh                                     &mesh,
+               std::vector<std::vector<SurfaceMesh::SimplexID<2> > > &holeList);
 
 /**
- * @brief      Recursive DFS of edges defining hole ring.
+ * @brief      Sort a list of boundary edges into ring order.
+ *
+ *             Recursive DFS of edges to find the ring ordering. Note that this
+ *             function assumes that the existing content in @p visitedVerts and
+ *             @p BdryRings are sorted in ring order. Also, @p
+ *             unvisitedBdryEdges can contain edges from other holes. These
+ *             other edges will remain in @p univistedBdryEdges post operation.
+ *             When first called, if \p visitedVerts and \p bdryRing are empty,
+ *             the first \p univistedBdryEdge will be used to seed the hole.
  *
  * @param[in]  mesh                SurfaceMesh of interest
- * @param      unvisitedBdryEdges  Set of unvisited boundary edges
- * @param      bdryRing            Stack of ordered boundary edges
+ * @param[in]  unvisitedBdryEdges  Set of unvisited boundary edges
+ * @param      visitedVerts        Visited vertices in order
+ * @param[out] bdryRing            Stack of ordered boundary edges
  *
  * @return     True if hole ring found. False otherwise.
  */
-bool findHoleHelper(const SurfaceMesh &mesh,
-        std::set<SurfaceMesh::SimplexID<2>>& unvisitedBdryEdges,
-        std::vector<SurfaceMesh::SimplexID<1>>& visitedVerts,
-        std::vector<SurfaceMesh::SimplexID<2>>& bdryRing);
+bool orderBoundaryEdgeRing(const SurfaceMesh                       &mesh,
+                           std::set<SurfaceMesh::SimplexID<2> >    &unvisitedBdryEdges,
+                           std::vector<SurfaceMesh::SimplexID<1> > &visitedVerts,
+                           std::vector<SurfaceMesh::SimplexID<2> > &bdryRing);
 
-void edgeRingToVertices(const SurfaceMesh &mesh,
-        std::vector<SurfaceMesh::SimplexID<2>>& edgeRing,
-        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<1>>> iter);
+void edgeRingToVertices(const SurfaceMesh                                                  &mesh,
+                        std::vector<SurfaceMesh::SimplexID<2> >                            &edgeRing,
+                        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<1> > > iter);
 
-void triangulateHoleHelper(SurfaceMesh &mesh,
-        std::vector<SurfaceMesh::SimplexID<1>> &boundary,
-        const Face &fdata,
-        std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2>>> iter);
+void triangulateHoleHelper(SurfaceMesh                                                        &mesh,
+                           std::vector<SurfaceMesh::SimplexID<1> >                            &boundary,
+                           const SMFace                                                       &fdata,
+                           std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2> > > iter);
 
 /**
  * @brief      Recursively triangulate hole by connecting lowest valence
@@ -623,11 +708,30 @@ void triangulateHoleHelper(SurfaceMesh &mesh,
  * @param[in]  fdata     Data to store on each face
  * @param[in]  edgeList  Back inserter to store new edges and boundary edges
  */
-void triangulateHole(SurfaceMesh &mesh,
-        std::vector<SurfaceMesh::SimplexID<1>> &sortedVerts,
-        const Face &fdata,
-        std::vector<SurfaceMesh::SimplexID<2>>  &edgeList);
+void triangulateHole(SurfaceMesh                             &mesh,
+                     std::vector<SurfaceMesh::SimplexID<1> > &sortedVerts,
+                     const SMFace                            &fdata,
+                     std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
 
+template <typename Complex>
+struct CopyHelper
+{
+    using SimplexSet = typename casc::SimplexSet<Complex>;
+    using KeyType = typename Complex::KeyType;
+
+    template <std::size_t k>
+    static void apply(Complex          &before,
+                      Complex          &after,
+                      const SimplexSet &S)
+    {
+        for (auto sID : casc::get<k>(S))
+        {
+            auto name = before.get_name(sID);
+            auto data = *sID;
+            after.insert(name, data);
+        }
+    }
+};
 } // end namespace surfacemesh_detail
 /// @endcond
 
@@ -698,8 +802,8 @@ void generateHistogram(const SurfaceMesh &mesh);
  *
  * @return     The minimum maximum angles.
  */
-std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
-    double maxMinAngle, double minMaxAngle);
+std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh &mesh,
+                                                     double maxMinAngle, double minMaxAngle);
 
 /**
  * @brief      Gets the area.
@@ -881,7 +985,6 @@ void flipNormals(SurfaceMesh &mesh);
  */
 std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
 
-
 /**
  * @brief      Create a triangulated octahedron
  *
@@ -890,7 +993,6 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
  * @return     Pointer to resulting mesh
  */
 std::unique_ptr<SurfaceMesh> sphere(int order);
-
 
 /**
  * @brief      Create a triangulated cube
@@ -902,31 +1004,13 @@ std::unique_ptr<SurfaceMesh> sphere(int order);
 std::unique_ptr<SurfaceMesh> cube(int order);
 
 /**
- * @brief      Splits surfaces.
+ * @brief      Split connected surfaces from a single mesh.
+ *
+ *             Note that this function creates new meshes from surfaces
  *
  * @param      mesh  The mesh
  *
- * @return     { description_of_the_return_value }
+ * @return     Vector of surface meshes
  */
-std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
-
-
-template <typename Complex>
-struct CopyHelper
-{
-    using SimplexSet = typename casc::SimplexSet<Complex>;
-    using KeyType = typename Complex::KeyType;
-
-    template <std::size_t k>
-    static void apply(Complex& before,
-            Complex& after,
-            const SimplexSet& S){
-        for (auto sID : casc::get<k>(S)){
-            auto name = before.get_name(sID);
-            auto data = *sID;
-            after.insert(name, data);
-        }
-    }
-};
-
+std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh);
 } // end namespace gamer

@@ -42,7 +42,7 @@
 /// Namespace for all things gamer
 namespace gamer
 {
-/// Namespace for tensor array mangement utilities
+/// Namespace for tensor array management utilities
 namespace array_util
 {
 /// @cond detail
@@ -85,9 +85,22 @@ void fill_array(std::array<S, N> &arr, Ts... args)
 /// @cond detail
 namespace detail
 {
+/**
+ * @brief      Base case
+ *
+ * @tparam     Fn    Functor
+ * @tparam     Ts    Arguments list
+ */
 template <typename Fn, typename ... Ts>
 struct flattenH {};
 
+/**
+ * @brief      Pass each element of sequence into functor(N, head)
+ *
+ * @tparam     Fn    Functor
+ * @tparam     T     Typename of head which is passed to the functor
+ * @tparam     Ts    Arguments list
+ */
 template <typename Fn, typename T, typename ... Ts>
 struct flattenH<Fn, T, Ts...> {
     template <std::size_t N>
@@ -98,12 +111,20 @@ struct flattenH<Fn, T, Ts...> {
     }
 };
 
+/**
+ * @brief      Overload for call with no arguments
+ *
+ * @tparam     Fn    Functor
+ */
 template <typename Fn>
 struct flattenH<Fn> {
     template <std::size_t N>
     static void apply(Fn f) {}
 };
 
+/**
+ * @brief      Overload for processing array plus Ts...
+ */
 template <typename Fn, std::size_t K, typename T, typename ... Ts>
 struct flattenH<Fn, std::array<T, K>, Ts...> {
     template <std::size_t N>
@@ -120,13 +141,13 @@ struct flattenH<Fn, std::array<T, K>, Ts...> {
 /// @endcond
 
 /**
- * @brief      Flatten an array
+ * @brief      Apply a functor to a sequence
  *
- * @param[in]  f     { parameter_description }
- * @param[in]  args  The arguments
+ * @param[in]  f     Functor to apply with prototype void f(type, type)
+ * @param[in]  args  The arguments, array, or sequence
  *
- * @tparam     Fn    { description }
- * @tparam     Ts    { description }
+ * @tparam     Fn    Typename of the functor
+ * @tparam     Ts    Typenames of arguments
  */
 template <typename Fn, typename ... Ts>
 void flatten(Fn f, Ts... args)
@@ -257,8 +278,6 @@ class tensor
             /**
              * @brief      Postfix incrementation of the index
              *
-             * @param[in]  <unnamed>  Ignored
-             *
              * @return     Iterator to the next index
              */
             index_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
@@ -272,32 +291,34 @@ class tensor
             {
                 std::size_t k = tensor_rank - 1;
 
-            	if (i[k] > 0)
-            	{
-            		--(i[k]);
-            	}
-            	else {
-            		std::size_t p = 1;
-            		while(k > 0){
-            			--k;
-            			++p;
-            			if(i[k] > 0){
-            				--(i[k]);
-            				for(std::size_t j = 1; j < p; ++j){
-            					i[k+j] = vector_dimension - 1;
-            				}
-            				break;
-            			}
-            		}
-            	}
+                if (i[k] > 0)
+                {
+                    --(i[k]);
+                }
+                else
+                {
+                    std::size_t p = 1;
+                    while (k > 0)
+                    {
+                        --k;
+                        ++p;
+                        if (i[k] > 0)
+                        {
+                            --(i[k]);
+                            for (std::size_t j = 1; j < p; ++j)
+                            {
+                                i[k+j] = vector_dimension - 1;
+                            }
+                            break;
+                        }
+                    }
+                }
 
                 return *this;
             }
 
             /**
              * @brief      Postfix decrementation of the index
-             *
-             * @param[in]  <unnamed>  Ignored
              *
              * @return     Iterator to the previous index
              */
@@ -346,7 +367,7 @@ class tensor
             typename super::pointer operator->() { return i; }
 
             protected:
-            	/// Array of indices
+                /// Array of indices
                 IndexType i;
         };
 
@@ -354,6 +375,13 @@ class tensor
          * @brief     Default constructor initializes to zero
          */
         tensor() { _data.fill(0); }
+
+        /**
+         * @brief      Constructor fill with same value
+         *
+         * @param[in]  s     Value to fill
+         */
+        tensor(const ElemType &s) { _data.fill(s); }
 
         /**
          * @brief      Constructor from flat array

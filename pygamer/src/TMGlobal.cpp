@@ -34,13 +34,13 @@ namespace gamer
 namespace py = pybind11;
 
 void init_TMGlobal(py::module& mod){
-    py::class_<tetmesh::Global> global(mod, "Global",
+    py::class_<TMGlobal> global(mod, "Global",
         R"delim(
             Wrapper around a :cpp:class:`Global`.
         )delim"
     );
 
-    global.def_readwrite("higher_order", &tetmesh::Global::higher_order, "Whether or not this is a higher order mesh.");
+    global.def_readwrite("higher_order", &TMGlobal::higher_order, "Whether or not this is a higher order mesh.");
 }
 
 } // end namespace gamer

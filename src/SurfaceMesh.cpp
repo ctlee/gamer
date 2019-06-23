@@ -44,7 +44,6 @@
 /// Namespace for all things gamer
 namespace gamer
 {
-
 void print(const SurfaceMesh &mesh)
 {
     std::cout << "Level: 1" << std::endl;
@@ -108,7 +107,7 @@ void generateHistogram(const SurfaceMesh &mesh)
         auto   t2  = *(++vertexIDs.cbegin());
         auto   v1  = *t1;
         auto   v2  = *t2;
-        double len = magnitude(v2-v1);
+        double len = length(v2-v1);
         lengths.push_back(len);
     }
     std::sort(lengths.begin(), lengths.end());
@@ -543,10 +542,10 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh){
 
     for(auto edge : mesh.get_level_id<2>()){
         auto edgeName = mesh.get_name(edge);
-        auto v1 = *mesh.get_simplex_up({edgeName[0]});
-        auto v2 = *mesh.get_simplex_up({edgeName[1]});
+        Vector v1 = (*mesh.get_simplex_up({edgeName[0]})).position;
+        Vector v2 = (*mesh.get_simplex_up({edgeName[1]})).position;
 
-        auto newVertex = refinedMesh->add_vertex(Vertex(0.5*(v1+v2)));
+        auto newVertex = refinedMesh->add_vertex(SMVertex(std::move(0.5*(v1+v2))));
         edgeMap.emplace(std::make_pair(edgeName, newVertex));
     }
 
@@ -589,7 +588,13 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     // Compute the average edge length
     double avgLen = 0;
     if (denseWeight > 0){
-        avgLen = surfacemesh_detail::getMeanEdgeLength(mesh);
+        for (auto edgeID : mesh.get_level_id<2>()){
+            auto name =  mesh.get_name(edgeID);
+            auto v = *mesh.get_simplex_down(edgeID, name[0])
+                     - *mesh.get_simplex_down(edgeID, name[1]);
+            avgLen += length(v);
+        }
+        avgLen /= static_cast<double>(mesh.size<2>());
     }
 
     double sparsenessRatio = 1;
@@ -645,7 +650,7 @@ void fillHoles(SurfaceMesh &mesh){
         std::vector<SurfaceMesh::SimplexID<1>> sortedVertices;
         surfacemesh_detail::edgeRingToVertices(mesh, holeEdges, std::back_inserter(sortedVertices));
 
-        surfacemesh_detail::triangulateHole(mesh, sortedVertices, Face(), holeEdges);
+        surfacemesh_detail::triangulateHole(mesh, sortedVertices, SMFace(), holeEdges);
     }
 }
 
@@ -668,12 +673,12 @@ bool hasHole(const SurfaceMesh &mesh){
 std::unique_ptr<SurfaceMesh> sphere(int order){
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
-    mesh->insert({0}, Vertex(0,0,-1));
-    mesh->insert({1}, Vertex(-1,-1,0));
-    mesh->insert({2}, Vertex(-1,1,0));
-    mesh->insert({3}, Vertex(1,1,0));
-    mesh->insert({4}, Vertex(1,-1,0));
-    mesh->insert({5}, Vertex(0,0,1));
+    mesh->insert({0}, SMVertex(0,0,-1));
+    mesh->insert({1}, SMVertex(-1,-1,0));
+    mesh->insert({2}, SMVertex(-1,1,0));
+    mesh->insert({3}, SMVertex(1,1,0));
+    mesh->insert({4}, SMVertex(1,-1,0));
+    mesh->insert({5}, SMVertex(0,0,1));
 
     mesh->insert({0,1,2});
     mesh->insert({0,2,3});
@@ -698,15 +703,15 @@ std::unique_ptr<SurfaceMesh> sphere(int order){
 std::unique_ptr<SurfaceMesh> cube(int order){
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
-    mesh->insert({0}, Vertex(-1,-1,-1));
-    mesh->insert({1}, Vertex(-1,1,-1));
-    mesh->insert({2}, Vertex(1,1,-1));
-    mesh->insert({3}, Vertex(1,-1,-1));
+    mesh->insert({0}, SMVertex(-1,-1,-1));
+    mesh->insert({1}, SMVertex(-1,1,-1));
+    mesh->insert({2}, SMVertex(1,1,-1));
+    mesh->insert({3}, SMVertex(1,-1,-1));
 
-    mesh->insert({4}, Vertex(-1,-1,1));
-    mesh->insert({5}, Vertex(-1,1,1));
-    mesh->insert({6}, Vertex(1,1,1));
-    mesh->insert({7}, Vertex(1,-1,1));
+    mesh->insert({4}, SMVertex(-1,-1,1));
+    mesh->insert({5}, SMVertex(-1,1,1));
+    mesh->insert({6}, SMVertex(1,1,1));
+    mesh->insert({7}, SMVertex(1,-1,1));
 
     mesh->insert({0,1,5});
     mesh->insert({0,4,5});
@@ -924,7 +929,7 @@ std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
             std::unique_ptr<SurfaceMesh> newSMPtr(new SurfaceMesh);
             auto& newSM = *newSMPtr;
 
-            util::int_for_each<std::size_t, typename SimplexSet::cLevelIndex>(CopyHelper<SurfaceMesh>(), mesh, newSM, surface);
+            util::int_for_each<std::size_t, typename SimplexSet::cLevelIndex>(surfacemesh_detail::CopyHelper<SurfaceMesh>(), mesh, newSM, surface);
 
             compute_orientation(newSM);
             if(getVolume(newSM) < 0){
@@ -938,5 +943,4 @@ std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh){
 
     return meshes;
 }
-
 } // end namespace gamer

@@ -49,23 +49,23 @@ namespace gamer
 #define MIN_VOLUME        333333
 
 #ifdef SINGLE
-  /// Defines REAL to be float
+/// Defines REAL to be float
   #define REAL float
 #else
-  /// Defines REAL to be double
+/// Defines REAL to be double
   #define REAL double
 #endif
 
 /// Floating point vector with precision defined by user at compile time
-using Vector = tensor<REAL,3,1>;
+using Vector = tensor<REAL, 3, 1>;
 /// 3 Vector of doubles
-using d3Vector = tensor<double,3,1>;
+using d3Vector = tensor<double, 3, 1>;
 /// 3 Vector of floats
-using f3Vector = tensor<float,3,1>;
+using f3Vector = tensor<float, 3, 1>;
 /// 3 Vector of integers
-using i3Vector = tensor<int,3,1>;
+using i3Vector = tensor<int, 3, 1>;
 /// 3 Vector of std::size_t
-using szt3Vector = tensor<std::size_t,3,1>;
+using szt3Vector = tensor<std::size_t, 3, 1>;
 
 /**
  * @brief      Convert 3D array indices to the index of a flat
@@ -90,7 +90,8 @@ using szt3Vector = tensor<std::size_t,3,1>;
  * @return     Index of flat array corresponding to indices in
  *             3D array.
  */
-inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const szt3Vector& dim){
+inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const szt3Vector &dim)
+{
     return k*dim[0]*dim[1] + j*dim[0] + i;
 }
 } // end namespace gamer

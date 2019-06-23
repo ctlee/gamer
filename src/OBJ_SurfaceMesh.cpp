@@ -38,7 +38,6 @@
 /// Namespace for all things gamer
 namespace gamer
 {
-
 //https://en.wikipedia.org/wiki/Wavefront_.obj_file
 //http://paulbourke.net/dataformats/obj/
 std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename)
@@ -78,7 +77,7 @@ std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename)
 	    	{
 		    	// List of geometric vertices, with (x,y,z[,w]) coordinates, w is optional and defaults to 1.0.
         		arr = stringutil::split(line, {' '});
-        		Vertex v = Vertex(
+        		SMVertex v = SMVertex(
     					std::stod(arr[1]),
     					std::stod(arr[2]),
     					std::stod(arr[3])
@@ -162,5 +161,4 @@ void writeOBJ(const std::string& filename, const SurfaceMesh& mesh){
     fout.close();
 
 }
-
 } // end namespace gamer

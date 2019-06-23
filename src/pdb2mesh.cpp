@@ -1406,7 +1406,7 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         float y = GLOBAL_vertex[i].y * span[1] + orig[1];
         float z = GLOBAL_vertex[i].z * span[2] + orig[2];
 
-        mesh->insert<1>({i}, Vertex({x,y,z}));
+        mesh->insert<1>({i}, SMVertex({x,y,z}));
     }
 
     // write triangles

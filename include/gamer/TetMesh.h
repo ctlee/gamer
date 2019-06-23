@@ -53,13 +53,10 @@ class tetgenio;
 namespace gamer
 {
 
-/// Namespace for tetmesh objects
-namespace tetmesh
-{
 /**
  * @brief      Type for containing root metadata
  */
-struct Global
+struct TMGlobal
 {
     bool higher_order;  /// Is this a higher_order mesh?
 };
@@ -67,33 +64,33 @@ struct Global
 /**
  * @brief      { struct_description }
  */
-struct VertexProperties
+struct TMVertexProperties
 {
     double error;    /// Error
 
     /**
      * @brief      Default constructor
      */
-    VertexProperties() : error(-1) {}
+    TMVertexProperties() : error(-1) {}
 
     /**
      * @brief      Constructor
      *
      * @param[in]  error  The error
      */
-    VertexProperties(double error) : error(error) {}
+    TMVertexProperties(double error) : error(error) {}
 };
 
 /**
  * @brief      { struct_description }
  */
-struct TetVertex : Vertex, VertexProperties
+struct TMVertex : Vertex, TMVertexProperties
 {
-    TetVertex(): TetVertex(Vertex(),VertexProperties()) {}
-    template<typename... Args>
-    TetVertex(Args&&... args) : TetVertex(Vertex(std::forward<Args>(args)...)) {}
-    TetVertex(Vertex v) : TetVertex(v, VertexProperties(-1)) {}
-    TetVertex(Vertex v, VertexProperties p) : Vertex(v), VertexProperties(p) {}
+    TMVertex() : TMVertex(Vertex(), TMVertexProperties()) {}
+    template<typename ... Args>
+    TMVertex(Args && ... args) : TMVertex(Vertex(std::forward<Args>(args)...)) {}
+    TMVertex(Vertex v) : TMVertex(v, TMVertexProperties(-1)) {}
+    TMVertex(Vertex v, TMVertexProperties p) : Vertex(v), TMVertexProperties(p) {}
 
     /**
      * @brief      Operator<< overload
@@ -103,14 +100,15 @@ struct TetVertex : Vertex, VertexProperties
      *
      * @return     the stream
      */
-    friend std::ostream& operator<<(std::ostream& output, const TetVertex& v){
-        output  << "tetmesh::TetVertex(x:" << v[0]
-                << ",y:" << v[1]
-                << ",z:" << v[2]
-                << ";m:" << v.marker
-                << ";sel:" << v.selected
-                << ";err:" << v.error
-                << ")";
+    friend std::ostream &operator<<(std::ostream &output, const TMVertex &v)
+    {
+        output << "TMVertex(x:" << v[0]
+               << ",y:" << v[1]
+               << ",z:" << v[2]
+               << ";m:" << v.marker
+               << ";sel:" << v.selected
+               << ";err:" << v.error
+               << ")";
         return output;
     }
 
@@ -119,9 +117,10 @@ struct TetVertex : Vertex, VertexProperties
      *
      * @return     String representation of the object.
      */
-    std::string to_string() const{
+    std::string to_string() const
+    {
         std::ostringstream output;
-        output  << *this;
+        output << *this;
         return output.str();
     }
 };
@@ -130,7 +129,7 @@ struct TetVertex : Vertex, VertexProperties
 /**
  * @brief      { struct_description }
  */
-struct Edge : Vertex
+struct TMEdge : Vertex
 {
     using Vertex::Vertex;
 
@@ -142,13 +141,14 @@ struct Edge : Vertex
      *
      * @return     the stream
      */
-    friend std::ostream& operator<<(std::ostream& output, const Edge& v){
-        output  << "tetmesh::Edge(x:" << v[0]
-                << ",y:" << v[1]
-                << ",z:" << v[2]
-                << ";m:" << v.marker
-                << ";sel:" << v.selected
-                << ")";
+    friend std::ostream &operator<<(std::ostream &output, const TMEdge &v)
+    {
+        output << "TMEdge(x:" << v[0]
+               << ",y:" << v[1]
+               << ",z:" << v[2]
+               << ";m:" << v.marker
+               << ";sel:" << v.selected
+               << ")";
         return output;
     }
 
@@ -157,9 +157,10 @@ struct Edge : Vertex
      *
      * @return     String representation of the object.
      */
-    std::string to_string() const{
+    std::string to_string() const
+    {
         std::ostringstream output;
-        output  << *this;
+        output << *this;
         return output.str();
     }
 };
@@ -167,7 +168,7 @@ struct Edge : Vertex
 /**
  * @brief      Properties that Faces should have
  */
-struct FaceProperties
+struct TMFaceProperties
 {
     int  marker;    /// Boundary marker value
     bool selected;  /// Selected property
@@ -176,29 +177,30 @@ struct FaceProperties
 /**
  * @brief      Face object
  */
-struct Face : FaceProperties
+struct TMFace : TMFaceProperties
 {
     /// Default constructor
-    Face() : Face(FaceProperties{-1, false}) {}
+    TMFace() : TMFace(TMFaceProperties{-1, false}) {}
 
     /**
      * @brief      Constructor
      *
      * @param[in]  marker    The marker
      */
-    Face(int marker, bool selected) : Face(FaceProperties{marker, selected}) {}
+    TMFace(int marker, bool selected) : TMFace(TMFaceProperties{marker, selected}) {}
 
     /**
      * @brief      Constructor
      *
      * @param[in]  prop    Properties of a face
      */
-    Face(FaceProperties prop) : FaceProperties(prop) {}
+    TMFace(TMFaceProperties prop) : TMFaceProperties(prop) {}
 
-    friend std::ostream& operator<<(std::ostream& output, const Face& f){
-        output  << "tetmesh::Face("
-                << "m:" << f.marker
-                << ";sel:" << f.selected << ")";
+    friend std::ostream &operator<<(std::ostream &output, const TMFace &f)
+    {
+        output << "TMFace("
+               << "m:" << f.marker
+               << ";sel:" << f.selected << ")";
         return output;
     }
 
@@ -207,9 +209,10 @@ struct Face : FaceProperties
      *
      * @return     String representation of the object.
      */
-    std::string to_string() const{
+    std::string to_string() const
+    {
         std::ostringstream output;
-        output  << *this;
+        output << *this;
         return output.str();
     }
 };
@@ -217,29 +220,30 @@ struct Face : FaceProperties
 /**
  * @brief      { struct_description }
  */
-struct CellProperties
+struct TMCellProperties
 {
-    int marker;     /// Marker value
+    int  marker;    /// Marker value
     bool selected;  /// Selected property
 };
 
 /**
  * @brief      { struct_description }
  */
-struct Cell : casc::Orientable, CellProperties
+struct TMCell : casc::Orientable, TMCellProperties
 {
-    Cell() : Cell(-1,false) {}
-    Cell(int marker, bool selected) : Cell(0, marker, selected) {}
-    Cell(int orient, int marker, bool selected) : Cell(Orientable{orient}, CellProperties{marker, selected}) {}
-    Cell(Orientable orient, CellProperties prop)
-        : Orientable(orient), CellProperties(prop)
+    TMCell() : TMCell(-1, false) {}
+    TMCell(int marker, bool selected) : TMCell(0, marker, selected) {}
+    TMCell(int orient, int marker, bool selected) : TMCell(Orientable{orient}, TMCellProperties{marker, selected}) {}
+    TMCell(Orientable orient, TMCellProperties prop)
+        : Orientable(orient), TMCellProperties(prop)
     {}
 
-    friend std::ostream& operator<<(std::ostream& output, const Cell& c){
-        output  << "tetmesh::Cell("
-                << "m:" << c.marker
-                << ";sel:" << std::boolalpha << c.selected
-                << ";o:" << c.orientation << ")";
+    friend std::ostream &operator<<(std::ostream &output, const TMCell &c)
+    {
+        output << "tetmesh::Cell("
+               << "m:" << c.marker
+               << ";sel:" << std::boolalpha << c.selected
+               << ";o:" << c.orientation << ")";
         return output;
     }
 
@@ -248,9 +252,10 @@ struct Cell : casc::Orientable, CellProperties
      *
      * @return     String representation of the object.
      */
-    std::string to_string() const{
+    std::string to_string() const
+    {
         std::ostringstream output;
-        output  << *this;
+        output << *this;
         return output.str();
     }
 };
@@ -260,19 +265,17 @@ struct Cell : casc::Orientable, CellProperties
  * @brief      A helper struct containing the traits/types in the simplicial
  *             complex
  */
-struct complex_traits
+struct tetmesh_traits
 {
     /// The index type
     using KeyType = int;
     /// The types of each node
-    using NodeTypes = util::type_holder<Global, TetVertex, Edge, Face, Cell>;
+    using NodeTypes = util::type_holder<TMGlobal, TMVertex, TMEdge, TMFace, TMCell>;
     /// The types of each edge
     using EdgeTypes = util::type_holder<casc::Orientable, casc::Orientable, casc::Orientable, casc::Orientable>;
 };
-} // END namespace tetmesh
 
-
-using TetMesh = casc::simplicial_complex<tetmesh::complex_traits>;
+using TetMesh = casc::simplicial_complex<tetmesh_traits>;
 
 /**
  * @brief      { function_description }
@@ -292,8 +295,8 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
  * @return     { description_of_the_return_value }
  */
 std::unique_ptr<TetMesh> makeTetMesh(
-        const std::vector<SurfaceMesh*> &surfmeshes,
-        std::string tetgen_params);
+    const std::vector<SurfaceMesh*> &surfmeshes,
+    std::string                      tetgen_params);
 
 /**
  * @brief      { function_description }
@@ -302,7 +305,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
  *
  * @return     { description_of_the_return_value }
  */
-std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& mesh);
+std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh &mesh);
 
 
 /**
@@ -310,7 +313,7 @@ std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh& mesh);
  *
  * @param      mesh  The mesh
  */
-void smoothMesh(TetMesh & mesh);
+void smoothMesh(TetMesh &mesh);
 
 /**
  * @brief      Writes a vtk.
@@ -318,7 +321,7 @@ void smoothMesh(TetMesh & mesh);
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
  */
-void writeVTK(const std::string& filename, const TetMesh &mesh);
+void writeVTK(const std::string &filename, const TetMesh &mesh);
 
 /**
  * @brief      Writes off.
@@ -326,7 +329,7 @@ void writeVTK(const std::string& filename, const TetMesh &mesh);
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
  */
-void writeOFF(const std::string& filename, const TetMesh &mesh);
+void writeOFF(const std::string &filename, const TetMesh &mesh);
 
 /**
  * @brief      Writes a dolfin.
@@ -355,6 +358,6 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh);
  *
  * @return     { description_of_the_return_value }
  */
-std::unique_ptr<TetMesh> readDolfin(const std::string&filename);
+std::unique_ptr<TetMesh> readDolfin(const std::string &filename);
 
 } // end namespace gamer

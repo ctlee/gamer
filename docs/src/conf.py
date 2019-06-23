@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.2'
-release = 'v2.0.2-dev-10-gf44eeb9.dirty'
+release = 'v2.0.2-dev-11-g9e9b436.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -49,28 +49,39 @@ issues_github_path = 'ctlee/gamer'
 if(True):
     extensions.extend(['breathe', 'exhale'])
 
-# -- Configuration for breathe -----------------------------------------------
+##############################
+# Breathe Settings
+##############################
 breathe_projects = { "gamer_project": "/Users/ctlee/gamer/gamer/docs/src/_doxyoutput/xml" }
 breathe_default_project = "gamer_project"
 
-# -- Configuration for exhale ------------------------------------------------
+##############################
+# Exhale Settings
+##############################
+
+doxystdin = \
+"""
+INPUT = /Users/ctlee/gamer/gamer/include
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+"""
+# ENABLED_SECTIONS       = detail
+
 exhale_args = {
     "containmentFolder":     "/Users/ctlee/gamer/gamer/docs/src/_cppapi",
     "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
     "doxygenStripFromPath":  "/Users/ctlee/gamer/gamer",
-    "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
+    # "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    """INPUT = /Users/ctlee/gamer/gamer/include
-                                FULL_PATH_NAMES = YES
-                             """,
+    "exhaleDoxygenStdin":    doxystdin,
 }
 
 
-# -----------------------------------------------------------------------------
-# Autosummary
-# -----------------------------------------------------------------------------
+##############################
+# Autosummary Settings
+##############################
 
 autosummary_generate = True
 # autodoc_default_flags = ['members', 'inherited-members']
@@ -136,7 +147,9 @@ autosummary_generate = True
 #         raise e
 
 
-# Napoleon settings
+##############################
+# Napoleon Settings
+##############################
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True
@@ -164,11 +177,13 @@ templates_path = ['/Users/ctlee/gamer/gamer/docs/src/_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates', '**.ipynb_checkpoints']
 
-# -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
+
+##############################
+# HTML Output Settings
+##############################
+
+# Try to load sphinx_rtd_theme otherwise fallback on default
 try:
     import sphinx_rtd_theme
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
@@ -186,6 +201,10 @@ html_context = {
         '_static/theme_overrides.css',  # override wide tables in RTD theme
         ],
      }
+
+##############################
+# Intersphinx Settings
+##############################
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}

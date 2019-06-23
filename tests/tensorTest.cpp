@@ -97,5 +97,13 @@ TEST(TensorTest, Constructor){
     for(std::size_t i = 0; i < 3; ++i){
         ASSERT_EQ(v0[i], i);
     }
+
+    tensor<std::size_t, 3, 3> v3(5);
+    for (auto it = v3.index_begin(); it != v3.index_end(); it++){
+        // Test three methods of index accession...
+        ASSERT_EQ(v3.get(*it), 5);
+        ASSERT_EQ(v3[*it], 5);
+        ASSERT_EQ(v3.get((*it)[0],(*it)[1],(*it)[2]), 5);
+    }
 }
 } // end namespace gamer
