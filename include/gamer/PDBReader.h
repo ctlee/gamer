@@ -54,6 +54,9 @@ static const std::regex XYZR(".*.xyzr", std::regex::icase | std::regex::optimize
 static const std::regex atom("ATOM.*\n*", std::regex::optimize);
 /// @endcond
 
+/**
+ * @brief      PDB element information
+ */
 struct PDBelementInformation
 {
     const char  * atomName;
@@ -66,7 +69,10 @@ struct PDBelementInformation
     unsigned char residueIndex;
 };
 
+/// Total number of elements in the table
 static const std::size_t     MAX_BIOCHEM_ELEMENTS = 167;
+
+/// Lookup table
 static PDBelementInformation PDBelementTable[MAX_BIOCHEM_ELEMENTS] =
 {
     {" N  ", "GLY", 1.625f, 0.0f, 0.0f, 1.0f,  1, 10 },
@@ -240,15 +246,23 @@ static PDBelementInformation PDBelementTable[MAX_BIOCHEM_ELEMENTS] =
     // {" O  ", "UNL", 1.480f, 1.0f, 0.0f, 0.0f,  1, 27 }
 };
 
+/// Map of residueName, atomName to PDBelementInformation
 static std::map<std::string, std::map<std::string, PDBelementInformation> > PDBelementMap;
 } // End namespace pdbreader_detail
 
 
+
+/**
+ * @brief      Basic atom containing position and radius
+ */
 struct Atom {
     f3Vector pos;    /**< @brief position */
     double   radius; /**< @brief radius */
 };
 
+/**
+ * @brief      Initialize the element map
+ */
 static void initElementMap()
 {
     // If the element map is empty build it...
@@ -263,6 +277,16 @@ static void initElementMap()
     }
 }
 
+/**
+ * @brief      Read a PDB file
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  inserter  The inserter
+ *
+ * @tparam     Inserter  Inserter
+ *
+ * @return     True if successfully read
+ */
 template <typename Inserter>
 bool readPDB(const std::string &filename, Inserter inserter)
 {
@@ -325,6 +349,16 @@ bool readPDB(const std::string &filename, Inserter inserter)
     }
 }
 
+/**
+ * @brief      Reads a pqr.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  inserter  The inserter
+ *
+ * @tparam     Inserter  { description }
+ *
+ * @return     { description_of_the_return_value }
+ */
 template <typename Inserter>
 bool readPQR(const std::string &filename, Inserter inserter)
 {
@@ -399,6 +433,19 @@ void getMinMax(Iterator begin, Iterator end, f3Vector &min, f3Vector &max, BlurF
     max += f3Vector({maxRad, maxRad, maxRad});
 }
 
+/**
+ * @brief      Apply a gaussian blur to a list of atoms
+ *
+ * @param[in]  begin       The begin
+ * @param[in]  end         The end
+ * @param      dataset     The dataset
+ * @param[in]  min         The minimum
+ * @param[in]  maxMin      The maximum minimum
+ * @param[in]  dim         The dim
+ * @param[in]  blobbyness  The blobbyness
+ *
+ * @tparam     Iterator    Typename of the iterator
+ */
 template <typename Iterator>
 void blurAtoms(Iterator begin, Iterator end,
                float* dataset,

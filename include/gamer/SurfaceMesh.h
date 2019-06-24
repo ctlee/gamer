@@ -629,6 +629,21 @@ void selectFlipEdges(const SurfaceMesh &mesh,
 }
 
 /**
+ * @brief      Select edges which are good candidates for flipping
+ *
+ * @param[in]  mesh            SurfaceMesh to operate on.
+ * @param[in]  preserveRidges  Whether or not to try preserving ridges.
+ * @param[in]  edgeID          The edge id
+ * @param[in]  checkFlip       Functor specifying flip criteria
+ *
+ * @return     True if edge should be flipped
+ */
+bool checkEdgeFlip(const SurfaceMesh &mesh,
+                     bool preserveRidges,
+                     SurfaceMesh::SimplexID<2> edgeID,
+                     std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> &&checkFlip
+                );
+/**
  * @brief      Check if we should flip an edge to improve the angles.
  *
  * @param[in]  mesh    SurfaceMesh to manipulate.

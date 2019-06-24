@@ -63,7 +63,7 @@ struct TMGlobal
 };
 
 /**
- * @brief      { struct_description }
+ * @brief      Properties of a vertex in a tetmesh
  */
 struct TMVertexProperties
 {
@@ -83,7 +83,7 @@ struct TMVertexProperties
 };
 
 /**
- * @brief      { struct_description }
+ * @brief      Vertex data in a tetmesh
  */
 struct TMVertex : Vertex, TMVertexProperties
 {
@@ -128,7 +128,7 @@ struct TMVertex : Vertex, TMVertexProperties
 
 
 /**
- * @brief      { struct_description }
+ * @brief      Edge data in a tetmesh
  */
 struct TMEdge : Vertex
 {
@@ -228,7 +228,7 @@ struct TMFace : TMFaceProperties
 };
 
 /**
- * @brief      { struct_description }
+ * @brief      Cell data properties
  */
 struct TMCellProperties
 {

@@ -514,6 +514,19 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
             //barycenterVertexSmooth(mesh, vertex);
         }
 
+        // IN PLACE EDGE FLIP
+        // auto edgeRange = mesh.get_level_id<2>();
+        // for (auto edgeIT = edgeRange.begin(); edgeIT != edgeRange.end(); ) {
+        //     auto edgeID = *edgeIT;
+        //     ++edgeIT;
+        //     if(surfacemesh_detail::checkEdgeFlip(mesh, preserveRidges, edgeID, surfacemesh_detail::checkFlipAngle)){
+        //         surfacemesh_detail::edgeFlip(mesh, edgeID);
+        //     }
+        // }
+        // init_orientation(mesh);
+        // check_orientation(mesh);
+
+        // ATOMIC EDGE FLIP
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
         // Get set of good, non-interfering edges to flip according to the
         // Angle based criteria.
@@ -724,20 +737,128 @@ std::unique_ptr<SurfaceMesh> sphere(int order)
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
 
     mesh->insert({0}, SMVertex(0, 0, -1));
-    mesh->insert({1}, SMVertex(-1, -1, 0));
-    mesh->insert({2}, SMVertex(-1, 1, 0));
-    mesh->insert({3}, SMVertex(1, 1, 0));
-    mesh->insert({4}, SMVertex(1, -1, 0));
-    mesh->insert({5}, SMVertex(0, 0, 1));
+    mesh->insert({1}, SMVertex(0.723607, -0.525725, -0.44722));
+    mesh->insert({2}, SMVertex(-0.276388, -0.850649, -0.44722));
+    mesh->insert({3}, SMVertex(-0.894426, 0, -0.447216));
+    mesh->insert({4}, SMVertex(-0.276388, 0.850649, -0.44722));
+    mesh->insert({5}, SMVertex(0.723607, 0.525725, -0.44722));
+    mesh->insert({6}, SMVertex(0.276388, -0.850649, 0.44722));
+    mesh->insert({7}, SMVertex(-0.723607, -0.525725, 0.44722));
+    mesh->insert({8}, SMVertex(-0.723607, 0.525725, 0.44722));
+    mesh->insert({9}, SMVertex(0.276388, 0.850649, 0.44722));
+    mesh->insert({10}, SMVertex(0.894426, 0, 0.447216));
+    mesh->insert({11}, SMVertex(0, 0, 1));
+    mesh->insert({12}, SMVertex(-0.162456, -0.499995, -0.850654));
+    mesh->insert({13}, SMVertex(0.425323, -0.309011, -0.850654));
+    mesh->insert({14}, SMVertex(0.262869, -0.809012, -0.525738));
+    mesh->insert({15}, SMVertex(0.850648, 0, -0.525736));
+    mesh->insert({16}, SMVertex(0.425323, 0.309011, -0.850654));
+    mesh->insert({17}, SMVertex(-0.52573, 0, -0.850652));
+    mesh->insert({18}, SMVertex(-0.688189, -0.499997, -0.525736));
+    mesh->insert({19}, SMVertex(-0.162456, 0.499995, -0.850654));
+    mesh->insert({20}, SMVertex(-0.688189, 0.499997, -0.525736));
+    mesh->insert({21}, SMVertex(0.262869, 0.809012, -0.525738));
+    mesh->insert({22}, SMVertex(0.951058, -0.309013, 0));
+    mesh->insert({23}, SMVertex(0.951058, 0.309013, 0));
+    mesh->insert({24}, SMVertex(0, -1, 0));
+    mesh->insert({25}, SMVertex(0.587786, -0.809017, 0));
+    mesh->insert({26}, SMVertex(-0.951058, -0.309013, 0));
+    mesh->insert({27}, SMVertex(-0.587786, -0.809017, 0));
+    mesh->insert({28}, SMVertex(-0.587786, 0.809017, 0));
+    mesh->insert({29}, SMVertex(-0.951058, 0.309013, 0));
+    mesh->insert({30}, SMVertex(0.587786, 0.809017, 0));
+    mesh->insert({31}, SMVertex(0, 1, 0));
+    mesh->insert({32}, SMVertex(0.688189, -0.499997, 0.525736));
+    mesh->insert({33}, SMVertex(-0.262869, -0.809012, 0.525738));
+    mesh->insert({34}, SMVertex(-0.850648, 0, 0.525736));
+    mesh->insert({35}, SMVertex(-0.262869, 0.809012, 0.525738));
+    mesh->insert({36}, SMVertex(0.688189, 0.499997, 0.525736));
+    mesh->insert({37}, SMVertex(0.162456, -0.499995, 0.850654));
+    mesh->insert({38}, SMVertex(0.52573, 0, 0.850652));
+    mesh->insert({39}, SMVertex(-0.425323, -0.309011, 0.850654));
+    mesh->insert({40}, SMVertex(-0.425323, 0.309011, 0.850654));
+    mesh->insert({41}, SMVertex(0.162456, 0.499995, 0.850654));
+    mesh->insert({0,12,13});
+    mesh->insert({1,13,15});
+    mesh->insert({0,12,17});
+    mesh->insert({0,17,19});
+    mesh->insert({0,16,19});
+    mesh->insert({1,15,22});
+    mesh->insert({2,14,24});
+    mesh->insert({3,18,26});
+    mesh->insert({4,20,28});
+    mesh->insert({5,21,30});
+    mesh->insert({1,22,25});
+    mesh->insert({2,24,27});
+    mesh->insert({3,26,29});
+    mesh->insert({4,28,31});
+    mesh->insert({5,23,30});
+    mesh->insert({6,32,37});
+    mesh->insert({7,33,39});
+    mesh->insert({8,34,40});
+    mesh->insert({9,35,41});
+    mesh->insert({10,36,38});
+    mesh->insert({11,38,41});
+    mesh->insert({36,38,41});
+    mesh->insert({9,36,41});
+    mesh->insert({11,40,41});
+    mesh->insert({35,40,41});
+    mesh->insert({8,35,40});
+    mesh->insert({11,39,40});
+    mesh->insert({34,39,40});
+    mesh->insert({7,34,39});
+    mesh->insert({11,37,39});
+    mesh->insert({33,37,39});
+    mesh->insert({6,33,37});
+    mesh->insert({11,37,38});
+    mesh->insert({32,37,38});
+    mesh->insert({10,32,38});
+    mesh->insert({10,23,36});
+    mesh->insert({23,30,36});
+    mesh->insert({9,30,36});
+    mesh->insert({9,31,35});
+    mesh->insert({28,31,35});
+    mesh->insert({8,28,35});
+    mesh->insert({8,29,34});
+    mesh->insert({26,29,34});
+    mesh->insert({7,26,34});
+    mesh->insert({7,27,33});
+    mesh->insert({24,27,33});
+    mesh->insert({6,24,33});
+    mesh->insert({6,25,32});
+    mesh->insert({22,25,32});
+    mesh->insert({10,22,32});
+    mesh->insert({9,30,31});
+    mesh->insert({21,30,31});
+    mesh->insert({4,21,31});
+    mesh->insert({8,28,29});
+    mesh->insert({20,28,29});
+    mesh->insert({3,20,29});
+    mesh->insert({7,26,27});
+    mesh->insert({18,26,27});
+    mesh->insert({2,18,27});
+    mesh->insert({6,24,25});
+    mesh->insert({14,24,25});
+    mesh->insert({1,14,25});
+    mesh->insert({10,22,23});
+    mesh->insert({15,22,23});
+    mesh->insert({5,15,23});
+    mesh->insert({5,16,21});
+    mesh->insert({16,19,21});
+    mesh->insert({4,19,21});
+    mesh->insert({4,19,20});
+    mesh->insert({17,19,20});
+    mesh->insert({3,17,20});
+    mesh->insert({3,17,18});
+    mesh->insert({12,17,18});
+    mesh->insert({2,12,18});
+    mesh->insert({5,15,16});
+    mesh->insert({13,15,16});
+    mesh->insert({0,13,16});
+    mesh->insert({2,12,14});
+    mesh->insert({12,13,14});
+    mesh->insert({1,13,14});
 
-    mesh->insert({0, 1, 2});
-    mesh->insert({0, 2, 3});
-    mesh->insert({0, 3, 4});
-    mesh->insert({0, 1, 4});
-    mesh->insert({5, 1, 2});
-    mesh->insert({5, 2, 3});
-    mesh->insert({5, 3, 4});
-    mesh->insert({5, 1, 4});
     for (int i = 1; i < order; ++i)
     {
         mesh = refineMesh(*mesh);

@@ -118,7 +118,9 @@ PYBIND11_MODULE(pygamer, pygamer) {
     );
 
     pygamer.def("readPDB_gauss", &readPDB_gauss,
-        py::arg("filename"), py::arg("blobbyness"), py::arg("isovalue"),
+        py::arg("filename"),
+        py::arg("blobbyness") = -0.2,
+        py::arg("isovalue") = 2.5,
         R"delim(
             Read a pdb file into a mesh.
 

@@ -191,24 +191,21 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string &filename,
     blurAtoms(atoms.cbegin(), atoms.cend(), dataset, min, maxMin, dim, blobbyness);
     std::cout << "Done blurring coords" << std::endl;
 
-    // float minval;
-    float maxval;
-    // minval = std::numeric_limits<float>::infinity();
-    maxval = -std::numeric_limits<float>::infinity();
+    float minval = std::numeric_limits<float>::infinity();
+    float maxval = -std::numeric_limits<float>::infinity();
 
     for (int i = 0; i < dim[2] * dim[1] * dim[0]; ++i)
     {
         float cval = dataset[i];
-        // if (cval < minval){
-        //     minval = cval;
-        // }
+        if (cval < minval){
+            minval = cval;
+        }
         if (cval > maxval)
         {
             maxval = cval;
         }
     }
-    // std::cout << "Min Density: " << minval << ", Max Density: " << maxval <<
-    // std::endl;
+    // std::cout << "Min Density: " << minval << ", Max Density: " << maxval << std::endl;
     float data_isoval = 0.44 * maxval; // Override the user's isovalue... is
                                        // this a good idea?
     if (data_isoval < isovalue)

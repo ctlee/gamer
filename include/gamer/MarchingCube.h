@@ -40,7 +40,7 @@
 namespace gamer
 {
 
-/// Marching cubes tables
+/// Marching cubes edge table
 static const int edgeTable[256] = {
     0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
     0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -75,6 +75,7 @@ static const int edgeTable[256] = {
     0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
     0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0   };
 
+/// Marching cubes triangle table
 static const int triTable[256][16] =
 {{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -334,6 +335,22 @@ static const int triTable[256][16] =
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
 
+/**
+ * @brief      Marching cubes algorithm
+ *
+ * @param      dataset    Voxel array to mesh
+ * @param[in]  maxval     Maximum value in the dataset
+ * @param[in]  dim        Dimension of the dataset
+ * @param[in]  span       Real space size of a voxel
+ * @param[in]  isovalue   Isovalue to contour at
+ * @param[in]  holelist   Inserter to append holes
+ *
+ * @tparam     NumType    Numerical typename
+ * @tparam     <unnamed>  Check to ensure NumType is numerical
+ * @tparam     Inserter   Typename of the inserter
+ *
+ * @return     Surface mesh
+ */
 template <typename NumType, typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
           class Inserter>
 std::unique_ptr<SurfaceMesh> marchingCubes(
@@ -347,10 +364,13 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
 {
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
     bool* mask = new bool[dim[0]*dim[1]*dim[2]];
+    for (int i = 0; i < dim[0]*dim[1]*dim[2]; ++i){
+        mask[i] = false;
+    }
 
     std::cout << "Isolating isosurface" << std::endl;
 
-    // TODO: (4) is it necessary to go through this three setp masking process?
+    // TODO: (4) is it necessary to go through this three step masking process?
 
     // Mask all of the vertices connected to {0,0,0} outside of isosurface
     std::deque<i3Vector> visit = {i3Vector({0, 0, 0})};
@@ -434,7 +454,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
                                            static_cast<double>(m),
                                            static_cast<double>(n)}).ElementwiseProduct(span);
                         *holelist++ = v;
-                        std::cout << v << std::endl;
+                        std::cout << "Hole real size: " << v << std::endl;
                     }
                 }
             }
@@ -449,7 +469,6 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     Vector            * vertices = new Vector[dim[0]*dim[1]*dim[2]];
 
     // This section in particular is weird...
-
     for (int k = 0; k < dim[2]-1; k++)
     {
         for (int j = 0; j < dim[1]-1; j++)

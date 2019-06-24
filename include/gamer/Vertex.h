@@ -392,9 +392,9 @@ inline REAL length(const Vector &A)
 }
 
 /**
- * @brief      { function_description }
+ * @brief      Normalize a vector
  *
- * @param      A     { parameter_description }
+ * @param      A     Vector of interest
  */
 inline void normalize(Vector &A)
 {
