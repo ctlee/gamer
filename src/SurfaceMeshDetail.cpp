@@ -582,8 +582,8 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
     auto getMinAngle = [](const Vertex &a, const Vertex &b, const Vertex &c){
             double              minAngle = 999; // dummy for now
             double              tmp;
-            std::array<Vertex, 3> triangle = {a, b, c};
-            std::array<std::size_t, 3> sigma({0,1,2});
+            std::array<const Vertex, 3> triangle = {a, b, c};
+            std::array<std::size_t, 3> sigma = {0,1,2};
             for(int i = 0; i < 3; ++i){
                 try
                 {

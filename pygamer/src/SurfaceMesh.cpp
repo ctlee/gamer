@@ -517,7 +517,10 @@ void init_SurfaceMesh(py::module& mod){
         py::call_guard<py::scoped_ostream_redirect,
                 py::scoped_estream_redirect>(),
         R"delim(
-            Split surfaces...
+            Split disconnected surfaces into separate meshes.
+
+            Returns:
+                list: List of :py:class:`surfacemesh.SurfaceMesh` with each surface.
         )delim"
     );
 

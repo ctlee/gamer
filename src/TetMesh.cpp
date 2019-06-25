@@ -313,7 +313,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio)
         {
             auto &vdata = *vertex;
             // std::cout <<
-            // casc::to_string(std::array<double,3>({ptr[0],ptr[1],ptr[2]})) <<
+            // casc::to_string(std::array<double,3>{ptr[0],ptr[1],ptr[2]}) <<
             // std::endl;
             vdata = TMVertex(ptr[0], ptr[1], ptr[2], tetio.pointmarkerlist[i], false);
         }

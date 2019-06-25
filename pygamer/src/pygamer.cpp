@@ -88,8 +88,8 @@ PYBIND11_MODULE(pygamer, pygamer) {
     init_TMEdge(TetMeshMod);       // Edge class
     init_TMFace(TetMeshMod);       // Face class
     init_TMCell(TetMeshMod);       // Cell class
-    init_TMSimplexID(TetMeshMod);
-    init_TetMesh(TetMeshMod);
+    init_TMSimplexID(TetMeshMod);  // TetMesh::SimplexID class
+    init_TetMesh(TetMeshMod);      // TetMesh class
 
     /************************************
      *  PYGAMER FUNC/OBJECT DEFS
