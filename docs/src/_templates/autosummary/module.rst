@@ -2,8 +2,6 @@
 
 .. rubric:: Description
 
-.. automodule:: {{ fullname }}
-
 .. currentmodule:: {{ fullname }}
 
 {% if classes %}

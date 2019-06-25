@@ -1,0 +1,20 @@
+# Required for building
+cmake >= 3.11
+scikit-build >= 0.10.0
+setuptools
+wheel
+
+# Recommended
+ninja
+pytest
+
+# For building documentation
+sphinx>=2.0
+breathe>=4.13.0
+exhale
+pandoc
+sphinx-issues
+nbsphinx
+jupyter_sphinx
+sphinx-rtd-theme
+threevis

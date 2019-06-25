@@ -36,6 +36,11 @@
 #include <memory>
 #include <cmath>
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
+
 #define IndexVect1(i, j, k) ((k) * xdim1 * ydim1 + (j) * xdim1 + (i))
 #define MaxVal            999999
 #define MaxAtom           10
@@ -140,15 +145,15 @@ float GetAngle(int a,
 
 #define MaxDist    29999
 
-int xdim1, ydim1, zdim1;
-MinHeapS *min_heap;
-SEEDS    *AllSeeds;
-int  *heap_pointer;
-ATOM *atom_list;
-float threshold;
+int            xdim1, ydim1, zdim1;
+MinHeapS      *min_heap;
+SEEDS         *AllSeeds;
+int           *heap_pointer;
+ATOM          *atom_list;
+float          threshold;
 unsigned short min_x, min_y, min_z;
-int   min_seed;
-float min_dist;
+int            min_seed;
+float          min_dist;
 
 
 void GetMinimum(void);
@@ -170,25 +175,25 @@ FLTVECT FindSeed(float,
 void ExtractSES(MinHeapS *mheap, SEEDS *all_seeds, int *heappointer, int xd, int yd, int zd,
                 int *atom_index, int atom_num, ATOM *atomlist, float thresh)
 {
-    int i, j, k;
-    int m, n, l, num, c;
-    int index, index1;
+    int     i, j, k;
+    int     m, n, l, num, c;
+    int     index, index1;
     float   dist;
     FLTVECT seed;
     char    visited;
 
 
-    xdim1        = xd;
-    ydim1        = yd;
-    zdim1        = zd;
-    atom_list    = atomlist;
-    min_heap     = mheap;
-    AllSeeds     = all_seeds;
+    xdim1 = xd;
+    ydim1 = yd;
+    zdim1 = zd;
+    atom_list = atomlist;
+    min_heap  = mheap;
+    AllSeeds  = all_seeds;
     heap_pointer = heappointer;
-    threshold    = thresh;
+    threshold = thresh;
 
     /* Initialize */
-    index          = 0;
+    index = 0;
     min_heap->size = 0;
 
     for (k = 0; k < zdim1; k++)
@@ -244,12 +249,12 @@ void ExtractSES(MinHeapS *mheap, SEEDS *all_seeds, int *heappointer, int xd, int
                         }
                     }
 
-                    seed                  = FindSeed(i, j, k, index);
+                    seed = FindSeed(i, j, k, index);
                     AllSeeds[index].seedx = seed.x;
                     AllSeeds[index].seedy = seed.y;
                     AllSeeds[index].seedz = seed.z;
-                    dist                  = (seed.x - i) * (seed.x - i) + (seed.y - j) * (seed.y - j) + (seed.z - k) * (seed.z - k);
-                    min_seed              = index;
+                    dist = (seed.x - i) * (seed.x - i) + (seed.y - j) * (seed.y - j) + (seed.z - k) * (seed.z - k);
+                    min_seed = index;
                     InsertHeap(i, j, k, dist);
 
                     index++;
@@ -286,9 +291,9 @@ void GetMinimum(void)
     int   pointer, left, right;
     float dist;
 
-    min_x    = min_heap->x[0];
-    min_y    = min_heap->y[0];
-    min_z    = min_heap->z[0];
+    min_x = min_heap->x[0];
+    min_y = min_heap->y[0];
+    min_z = min_heap->z[0];
     min_seed = min_heap->seed[0];
     min_dist = min_heap->dist[0];
 
@@ -312,23 +317,23 @@ void GetMinimum(void)
 
         if ((min_heap->dist[left - 1] <= min_heap->dist[right - 1]) && (min_heap->dist[left - 1] < dist))
         {
-            min_heap->x[pointer - 1]                                                                               = min_heap->x[left - 1];
-            min_heap->y[pointer - 1]                                                                               = min_heap->y[left - 1];
-            min_heap->z[pointer - 1]                                                                               = min_heap->z[left - 1];
-            min_heap->seed[pointer - 1]                                                                            = min_heap->seed[left - 1];
-            min_heap->dist[pointer - 1]                                                                            = min_heap->dist[left - 1];
+            min_heap->x[pointer - 1] = min_heap->x[left - 1];
+            min_heap->y[pointer - 1] = min_heap->y[left - 1];
+            min_heap->z[pointer - 1] = min_heap->z[left - 1];
+            min_heap->seed[pointer - 1] = min_heap->seed[left - 1];
+            min_heap->dist[pointer - 1] = min_heap->dist[left - 1];
             heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-            pointer                                                                                                = left;
+            pointer = left;
         }
         else if ((min_heap->dist[left - 1] > min_heap->dist[right - 1]) && (min_heap->dist[right - 1] < dist))
         {
-            min_heap->x[pointer - 1]                                                                               = min_heap->x[right - 1];
-            min_heap->y[pointer - 1]                                                                               = min_heap->y[right - 1];
-            min_heap->z[pointer - 1]                                                                               = min_heap->z[right - 1];
-            min_heap->seed[pointer - 1]                                                                            = min_heap->seed[right - 1];
-            min_heap->dist[pointer - 1]                                                                            = min_heap->dist[right - 1];
+            min_heap->x[pointer - 1] = min_heap->x[right - 1];
+            min_heap->y[pointer - 1] = min_heap->y[right - 1];
+            min_heap->z[pointer - 1] = min_heap->z[right - 1];
+            min_heap->seed[pointer - 1] = min_heap->seed[right - 1];
+            min_heap->dist[pointer - 1] = min_heap->dist[right - 1];
             heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-            pointer                                                                                                = right;
+            pointer = right;
         }
         else
         {
@@ -336,11 +341,11 @@ void GetMinimum(void)
         }
     }
 
-    min_heap->x[pointer - 1]                                                                                        = min_heap->x[min_heap->size];
-    min_heap->y[pointer - 1]                                                                                        = min_heap->y[min_heap->size];
-    min_heap->z[pointer - 1]                                                                                        = min_heap->z[min_heap->size];
-    min_heap->seed[pointer - 1]                                                                                     = min_heap->seed[min_heap->size];
-    min_heap->dist[pointer - 1]                                                                                     = dist;
+    min_heap->x[pointer - 1] = min_heap->x[min_heap->size];
+    min_heap->y[pointer - 1] = min_heap->y[min_heap->size];
+    min_heap->z[pointer - 1] = min_heap->z[min_heap->size];
+    min_heap->seed[pointer - 1] = min_heap->seed[min_heap->size];
+    min_heap->dist[pointer - 1] = dist;
     heap_pointer[IndexVect1(min_heap->x[min_heap->size], min_heap->y[min_heap->size], min_heap->z[min_heap->size])] = pointer - 1;
 }
 
@@ -365,25 +370,25 @@ void InsertHeap(int x, int y, int z, float dist)
 
         if (dist < min_heap->dist[parent - 1])
         {
-            min_heap->x[pointer - 1]    = min_heap->x[parent - 1];
-            min_heap->y[pointer - 1]    = min_heap->y[parent - 1];
-            min_heap->z[pointer - 1]    = min_heap->z[parent - 1];
+            min_heap->x[pointer - 1] = min_heap->x[parent - 1];
+            min_heap->y[pointer - 1] = min_heap->y[parent - 1];
+            min_heap->z[pointer - 1] = min_heap->z[parent - 1];
             min_heap->seed[pointer - 1] = min_heap->seed[parent - 1];
             min_heap->dist[pointer - 1] = min_heap->dist[parent - 1];
 
             int index = IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1]);
             heap_pointer[index] = pointer - 1;
 
-            pointer             = parent;
+            pointer = parent;
         }
         else
         {
             break;
         }
     }
-    min_heap->x[pointer - 1]    = x;
-    min_heap->y[pointer - 1]    = y;
-    min_heap->z[pointer - 1]    = z;
+    min_heap->x[pointer - 1] = x;
+    min_heap->y[pointer - 1] = y;
+    min_heap->z[pointer - 1] = z;
     min_heap->seed[pointer - 1] = min_seed;
     min_heap->dist[pointer - 1] = dist;
 
@@ -413,16 +418,16 @@ void UpdateHeap(int x, int y, int z, float dist)
 
         if (dist < min_heap->dist[parent - 1])
         {
-            min_heap->x[pointer - 1]    = min_heap->x[parent - 1];
-            min_heap->y[pointer - 1]    = min_heap->y[parent - 1];
-            min_heap->z[pointer - 1]    = min_heap->z[parent - 1];
+            min_heap->x[pointer - 1] = min_heap->x[parent - 1];
+            min_heap->y[pointer - 1] = min_heap->y[parent - 1];
+            min_heap->z[pointer - 1] = min_heap->z[parent - 1];
             min_heap->seed[pointer - 1] = min_heap->seed[parent - 1];
             min_heap->dist[pointer - 1] = min_heap->dist[parent - 1];
 
             int index = IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1]);
             heap_pointer[index] = pointer - 1;
 
-            pointer             = parent;
+            pointer = parent;
         }
         else
         {
@@ -440,23 +445,23 @@ void UpdateHeap(int x, int y, int z, float dist)
 
             if ((min_heap->dist[left - 1] <= min_heap->dist[right - 1]) && (min_heap->dist[left - 1] < dist))
             {
-                min_heap->x[pointer - 1]                                                                               = min_heap->x[left - 1];
-                min_heap->y[pointer - 1]                                                                               = min_heap->y[left - 1];
-                min_heap->z[pointer - 1]                                                                               = min_heap->z[left - 1];
-                min_heap->seed[pointer - 1]                                                                            = min_heap->seed[left - 1];
-                min_heap->dist[pointer - 1]                                                                            = min_heap->dist[left - 1];
+                min_heap->x[pointer - 1] = min_heap->x[left - 1];
+                min_heap->y[pointer - 1] = min_heap->y[left - 1];
+                min_heap->z[pointer - 1] = min_heap->z[left - 1];
+                min_heap->seed[pointer - 1] = min_heap->seed[left - 1];
+                min_heap->dist[pointer - 1] = min_heap->dist[left - 1];
                 heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-                pointer                                                                                                = left;
+                pointer = left;
             }
             else if ((min_heap->dist[left - 1] > min_heap->dist[right - 1]) && (min_heap->dist[right - 1] < dist))
             {
-                min_heap->x[pointer - 1]                                                                               = min_heap->x[right - 1];
-                min_heap->y[pointer - 1]                                                                               = min_heap->y[right - 1];
-                min_heap->z[pointer - 1]                                                                               = min_heap->z[right - 1];
-                min_heap->seed[pointer - 1]                                                                            = min_heap->seed[right - 1];
-                min_heap->dist[pointer - 1]                                                                            = min_heap->dist[right - 1];
+                min_heap->x[pointer - 1] = min_heap->x[right - 1];
+                min_heap->y[pointer - 1] = min_heap->y[right - 1];
+                min_heap->z[pointer - 1] = min_heap->z[right - 1];
+                min_heap->seed[pointer - 1] = min_heap->seed[right - 1];
+                min_heap->dist[pointer - 1] = min_heap->dist[right - 1];
                 heap_pointer[IndexVect1(min_heap->x[pointer - 1], min_heap->y[pointer - 1], min_heap->z[pointer - 1])] = pointer - 1;
-                pointer                                                                                                = right;
+                pointer = right;
             }
             else
             {
@@ -466,9 +471,9 @@ void UpdateHeap(int x, int y, int z, float dist)
     }
 
 
-    min_heap->x[pointer - 1]    = x;
-    min_heap->y[pointer - 1]    = y;
-    min_heap->z[pointer - 1]    = z;
+    min_heap->x[pointer - 1] = x;
+    min_heap->y[pointer - 1] = y;
+    min_heap->z[pointer - 1] = z;
     min_heap->seed[pointer - 1] = min_seed;
     min_heap->dist[pointer - 1] = dist;
 
@@ -513,12 +518,12 @@ void Marching(void)
     else if (heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)] > -1)
     {
         neighbor = heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)];
-        dt       = min_heap->dist[neighbor];
+        dt = min_heap->dist[neighbor];
 
         if (dt < MaxDist)
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
 
             if (dist < dt)
             {
@@ -528,7 +533,7 @@ void Marching(void)
         else
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
             seed  = min_heap->seed[neighbor];
             seedx = AllSeeds[seed].seedx;
             seedy = AllSeeds[seed].seedy;
@@ -565,12 +570,12 @@ void Marching(void)
     else if (heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)] > -1)
     {
         neighbor = heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)];
-        dt       = min_heap->dist[neighbor];
+        dt = min_heap->dist[neighbor];
 
         if (dt < MaxDist)
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
 
             if (dist < dt)
             {
@@ -580,7 +585,7 @@ void Marching(void)
         else
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
             seed  = min_heap->seed[neighbor];
             seedx = AllSeeds[seed].seedx;
             seedy = AllSeeds[seed].seedy;
@@ -615,12 +620,12 @@ void Marching(void)
     else if (heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)] > -1)
     {
         neighbor = heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)];
-        dt       = min_heap->dist[neighbor];
+        dt = min_heap->dist[neighbor];
 
         if (dt < MaxDist)
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
 
             if (dist < dt)
             {
@@ -630,7 +635,7 @@ void Marching(void)
         else
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
             seed  = min_heap->seed[neighbor];
             seedx = AllSeeds[seed].seedx;
             seedy = AllSeeds[seed].seedy;
@@ -665,12 +670,12 @@ void Marching(void)
     else if (heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)] > -1)
     {
         neighbor = heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)];
-        dt       = min_heap->dist[neighbor];
+        dt = min_heap->dist[neighbor];
 
         if (dt < MaxDist)
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
 
             if (dist < dt)
             {
@@ -680,7 +685,7 @@ void Marching(void)
         else
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
             seed  = min_heap->seed[neighbor];
             seedx = AllSeeds[seed].seedx;
             seedy = AllSeeds[seed].seedy;
@@ -715,12 +720,12 @@ void Marching(void)
     else if (heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)] > -1)
     {
         neighbor = heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)];
-        dt       = min_heap->dist[neighbor];
+        dt = min_heap->dist[neighbor];
 
         if (dt < MaxDist)
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
 
             if (dist < dt)
             {
@@ -730,7 +735,7 @@ void Marching(void)
         else
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
             seed  = min_heap->seed[neighbor];
             seedx = AllSeeds[seed].seedx;
             seedy = AllSeeds[seed].seedy;
@@ -765,12 +770,12 @@ void Marching(void)
     else if (heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)] > -1)
     {
         neighbor = heap_pointer[IndexVect1(tempt_x, tempt_y, tempt_z)];
-        dt       = min_heap->dist[neighbor];
+        dt = min_heap->dist[neighbor];
 
         if (dt < MaxDist)
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
 
             if (dist < dt)
             {
@@ -780,7 +785,7 @@ void Marching(void)
         else
         {
             dist = (tempt_x - min_seedx) * (tempt_x - min_seedx) + (tempt_y - min_seedy) * (tempt_y - min_seedy) + (tempt_z - min_seedz) *
-                   (tempt_z - min_seedz);
+                (tempt_z - min_seedz);
             seed  = min_heap->seed[neighbor];
             seedx = AllSeeds[seed].seedx;
             seedy = AllSeeds[seed].seedy;
@@ -825,13 +830,13 @@ FLTVECT FindSeed(float x, float y, float z, int index)
     if (atom2 < 0)
     {
         radius1 = atom_list[atom1].radius;
-        cx1     = atom_list[atom1].x;
-        cy1     = atom_list[atom1].y;
-        cz1     = atom_list[atom1].z;
-        dx      = x - cx1;
-        dy      = y - cy1;
-        dz      = z - cz1;
-        dist    = sqrt(dx * dx + dy * dy + dz * dz);
+        cx1  = atom_list[atom1].x;
+        cy1  = atom_list[atom1].y;
+        cz1  = atom_list[atom1].z;
+        dx   = x - cx1;
+        dy   = y - cy1;
+        dz   = z - cz1;
+        dist = sqrt(dx * dx + dy * dy + dz * dz);
 
         tmp.x = cx1 + radius1 * dx / dist;
         tmp.y = cy1 + radius1 * dy / dist;
@@ -841,15 +846,15 @@ FLTVECT FindSeed(float x, float y, float z, int index)
     // contain only two atoms
     else if (atom3 < 0)
     {
-        radius1   = atom_list[atom1].radius;
-        cx1       = atom_list[atom1].x;
-        cy1       = atom_list[atom1].y;
-        cz1       = atom_list[atom1].z;
-        radius2   = atom_list[atom2].radius;
-        cx2       = atom_list[atom2].x;
-        cy2       = atom_list[atom2].y;
-        cz2       = atom_list[atom2].z;
-        dist      = sqrt((cx2 - cx1) * (cx2 - cx1) + (cy2 - cy1) * (cy2 - cy1) + (cz2 - cz1) * (cz2 - cz1));
+        radius1 = atom_list[atom1].radius;
+        cx1 = atom_list[atom1].x;
+        cy1 = atom_list[atom1].y;
+        cz1 = atom_list[atom1].z;
+        radius2 = atom_list[atom2].radius;
+        cx2  = atom_list[atom2].x;
+        cy2  = atom_list[atom2].y;
+        cz2  = atom_list[atom2].z;
+        dist = sqrt((cx2 - cx1) * (cx2 - cx1) + (cy2 - cy1) * (cy2 - cy1) + (cz2 - cz1) * (cz2 - cz1));
         cos_alpha = (radius1 * radius1 + dist * dist - radius2 * radius2) / (2.0 * radius1 * dist);
 
         ax   = (cx2 - cx1) / dist;
@@ -879,9 +884,9 @@ FLTVECT FindSeed(float x, float y, float z, int index)
     // contain three or more atoms
     else
     {
-        hx    = 0;
-        hy    = 0;
-        hz    = 0;
+        hx = 0;
+        hy = 0;
+        hz = 0;
         total = 0;
         num   = 2;
 
@@ -896,17 +901,17 @@ FLTVECT FindSeed(float x, float y, float z, int index)
             atom3 = AllSeeds[index].atom[num];
 
             radius1 = atom_list[atom1].radius;
-            cx1     = atom_list[atom1].x;
-            cy1     = atom_list[atom1].y;
-            cz1     = atom_list[atom1].z;
+            cx1 = atom_list[atom1].x;
+            cy1 = atom_list[atom1].y;
+            cz1 = atom_list[atom1].z;
             radius2 = atom_list[atom2].radius;
-            cx2     = atom_list[atom2].x;
-            cy2     = atom_list[atom2].y;
-            cz2     = atom_list[atom2].z;
+            cx2 = atom_list[atom2].x;
+            cy2 = atom_list[atom2].y;
+            cz2 = atom_list[atom2].z;
             radius3 = atom_list[atom3].radius;
-            cx3     = atom_list[atom3].x;
-            cy3     = atom_list[atom3].y;
-            cz3     = atom_list[atom3].z;
+            cx3 = atom_list[atom3].x;
+            cy3 = atom_list[atom3].y;
+            cz3 = atom_list[atom3].z;
 
             ax = x;
             ay = y;
@@ -984,8 +989,8 @@ FLTVECT FindSeed(float x, float y, float z, int index)
 template <typename Iterator>
 void getMinMax(Iterator begin,
                Iterator end,
-               float min[3],
-               float max[3])
+               float    min[3],
+               float    max[3])
 {
     float maxRad = 0.0;
     float tempRad;
@@ -1010,7 +1015,7 @@ void getMinMax(Iterator begin,
         max[2] = std::max(max[2], z);
 
         // Definition of surface boundary
-        tempRad = curr->radius * sqrt(1.0 + log(detail::EPSILON) / BLOBBYNESS);
+        tempRad = curr->radius * sqrt(1.0 + log(pdbreader_detail::EPSILON) / BLOBBYNESS);
 
         maxRad = std::max(maxRad, tempRad);
     }
@@ -1022,27 +1027,28 @@ void getMinMax(Iterator begin,
     }
 }
 
-std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
+std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string &input_name)
 {
-    int       i, j, k;
-    int       a, b, c, d;
-    float     orig[3], span[3];
-    int       dim[3];
-    int       m, n, l, num;
-    double    threshold;
-    double    nx, ny, nz;
-    int       xydim, xyzdim;
-    clock_t   begin, finish;
+    int               i, j, k;
+    int               a, b, c, d;
+    float             orig[3], span[3];
+    int               dim[3];
+    int               m, n, l, num;
+    double            threshold;
+    double            nx, ny, nz;
+    int               xydim, xyzdim;
+    clock_t           begin, finish;
     std::vector<Atom> atoms;
     std::vector<ATOM> atom_list;
-    float min[3], max[3];
-    SEEDS    *AllSeeds; // Border variable
-    MinHeapS *min_heap;
+    float             min[3], max[3];
+    SEEDS            *AllSeeds; // Border variable
+    MinHeapS         *min_heap;
 
     // Read in the PDB file
     readPDB(input_name, std::back_inserter(atoms));
 
-    for(auto atom : atoms){
+    for (auto atom : atoms)
+    {
 
         ATOM new_atom;
         new_atom.x = atom.pos[0];
@@ -1055,15 +1061,15 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
 
     getMinMax(atom_list.begin(), atom_list.end(), min, max);
 
-    GLOBAL_xdim   = (int)(((max[0] - min[0]) + 1) * DIM_SCALE);
-    GLOBAL_ydim   = (int)(((max[1] - min[1]) + 1) * DIM_SCALE);
-    GLOBAL_zdim   = (int)(((max[2] - min[2]) + 1) * DIM_SCALE);
+    GLOBAL_xdim = (int)(((max[0] - min[0]) + 1) * DIM_SCALE);
+    GLOBAL_ydim = (int)(((max[1] - min[1]) + 1) * DIM_SCALE);
+    GLOBAL_zdim = (int)(((max[2] - min[2]) + 1) * DIM_SCALE);
     xydim  = GLOBAL_xdim * GLOBAL_ydim;
     xyzdim = xydim * GLOBAL_zdim;
 
     // printf("dimension: %d X %d X %d\n",xdim,ydim,zdim);
 
-    GLOBAL_atom_index    = (int *)malloc(sizeof(int) * xyzdim);
+    GLOBAL_atom_index = (int *)malloc(sizeof(int) * xyzdim);
     GLOBAL_segment_index = (int *)malloc(sizeof(int) * xyzdim);
 
     for (k = 0; k < xyzdim; k++)
@@ -1083,9 +1089,9 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
 
     for (m = 0; m < atom_list.size(); m++)
     {
-        atom_list[m].x      = (atom_list[m].x - orig[0]) / span[0];
-        atom_list[m].y      = (atom_list[m].y - orig[1]) / span[1];
-        atom_list[m].z      = (atom_list[m].z - orig[2]) / span[2];
+        atom_list[m].x = (atom_list[m].x - orig[0]) / span[0];
+        atom_list[m].y = (atom_list[m].y - orig[1]) / span[1];
+        atom_list[m].z = (atom_list[m].z - orig[2]) / span[2];
         atom_list[m].radius = (atom_list[m].radius + 1.5) / ((span[0] + span[1] + span[2]) / 3.0);
     }
 
@@ -1096,24 +1102,26 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
     // for(int q=0; q < GLOBAL_xdim; ++q){
     //     for(int r=0; r < GLOBAL_ydim; ++r){
     //         for(int s=0; s < GLOBAL_zdim; ++s){
-    //             std::cout << GLOBAL_atom_index[IndexVect(q,r,s)] << std::endl;
+    //             std::cout << GLOBAL_atom_index[IndexVect(q,r,s)] <<
+    // std::endl;
     //         }
     //     }
     // }
 
-    // printf("   Extract SAS voxels: CPU Time = %f seconds \n",(double)(finish-begin)/CLOCKS_PER_SEC);
+    // printf("   Extract SAS voxels: CPU Time = %f seconds
+    // \n",(double)(finish-begin)/CLOCKS_PER_SEC);
     // printf("   Number of boundary voxels: %d\n\n",num);
 
 
-    begin          = clock();
-    threshold      = 1.5 / ((span[0] + span[1] + span[2]) / 3.0);
-    min_heap       = (MinHeapS *)malloc(sizeof(MinHeapS));
-    min_heap->x    = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
-    min_heap->y    = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
-    min_heap->z    = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
+    begin = clock();
+    threshold   = 1.5 / ((span[0] + span[1] + span[2]) / 3.0);
+    min_heap    = (MinHeapS *)malloc(sizeof(MinHeapS));
+    min_heap->x = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
+    min_heap->y = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
+    min_heap->z = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
     min_heap->seed = (int *)malloc(sizeof(int) * num * 3);
     min_heap->dist = (float *)malloc(sizeof(float) * num * 3);
-    AllSeeds       = (SEEDS *)malloc(sizeof(SEEDS) * num);
+    AllSeeds = (SEEDS *)malloc(sizeof(SEEDS) * num);
     ExtractSES(min_heap,
                AllSeeds,
                GLOBAL_segment_index,
@@ -1126,7 +1134,8 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
                threshold * threshold);
     finish = clock();
 
-    // printf("   Extract SES voxels: CPU Time = %f seconds \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
+    // printf("   Extract SES voxels: CPU Time = %f seconds
+    // \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
 
 
     // detect and fix non-manifolds !
@@ -1147,9 +1156,9 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
                         if (!CheckManifold(i, j, k)) // non-manifold occurs
                         {
                             GLOBAL_segment_index[index] = 0;
-                            min_heap->x[min_heap->size]       = i;
-                            min_heap->y[min_heap->size]       = j;
-                            min_heap->z[min_heap->size]       = k;
+                            min_heap->x[min_heap->size] = i;
+                            min_heap->y[min_heap->size] = j;
+                            min_heap->z[min_heap->size] = k;
                             min_heap->size++;
                             b++;
                         }
@@ -1179,7 +1188,7 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
     {
         GLOBAL_atom_index[k] = -1;
     }
-    begin    = clock();
+    begin = clock();
     GLOBAL_vert_num = 0;
     GLOBAL_quad_num = 0;
 
@@ -1192,13 +1201,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         // back face
         if (GLOBAL_segment_index[IndexVect(i - 1, j, k)] == MaxVal)
         {
-            a                  = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
+            a = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
             GLOBAL_vertex[a].neigh |= 40; // +y and +z
-            b                  = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
+            b = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
             GLOBAL_vertex[b].neigh |= 24; // +y and -z
-            c                  = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
             GLOBAL_vertex[c].neigh |= 20; // -y and -z
-            d                  = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
+            d = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
             GLOBAL_vertex[d].neigh |= 36; // -y and +z
 
             GLOBAL_quads[GLOBAL_quad_num].a = a;
@@ -1211,13 +1220,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         // front face
         if (GLOBAL_segment_index[IndexVect(i + 1, j, k)] == MaxVal)
         {
-            a                  = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
             GLOBAL_vertex[a].neigh |= 40; // +y and +z
-            b                  = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
+            b = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
             GLOBAL_vertex[b].neigh |= 36; // -y and +z
-            c                  = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
+            c = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
             GLOBAL_vertex[c].neigh |= 20; // -y and -z
-            d                  = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
+            d = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
             GLOBAL_vertex[d].neigh |= 24; // +y and -z
 
             GLOBAL_quads[GLOBAL_quad_num].a = a;
@@ -1230,13 +1239,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         // left face
         if (GLOBAL_segment_index[IndexVect(i, j - 1, k)] == MaxVal)
         {
-            a                  = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
             GLOBAL_vertex[a].neigh |= 33; // -x and +z
-            b                  = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
+            b = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
             GLOBAL_vertex[b].neigh |= 17; // -x and -z
-            c                  = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
+            c = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
             GLOBAL_vertex[c].neigh |= 18; // +x and -z
-            d                  = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
+            d = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
             GLOBAL_vertex[d].neigh |= 34; // +x and +z
 
             GLOBAL_quads[GLOBAL_quad_num].a = a;
@@ -1249,13 +1258,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         // right face
         if (GLOBAL_segment_index[IndexVect(i, j + 1, k)] == MaxVal)
         {
-            a                  = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
+            a = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
             GLOBAL_vertex[a].neigh |= 33; // -x and +z
-            b                  = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
+            b = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
             GLOBAL_vertex[b].neigh |= 34; // +x and +z
-            c                  = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
             GLOBAL_vertex[c].neigh |= 18; // +x and -z
-            d                  = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
+            d = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
             GLOBAL_vertex[d].neigh |= 17; // -x and -z
 
             GLOBAL_quads[GLOBAL_quad_num].a = a;
@@ -1268,13 +1277,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         // bottom face
         if (GLOBAL_segment_index[IndexVect(i, j, k - 1)] == MaxVal)
         {
-            a                  = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
             GLOBAL_vertex[a].neigh |= 9;  // -x and +y
-            b                  = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
+            b = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
             GLOBAL_vertex[b].neigh |= 10; // +x and +y
-            c                  = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
             GLOBAL_vertex[c].neigh |= 6;  // +x and -y
-            d                  = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
+            d = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
             GLOBAL_vertex[d].neigh |= 5;  // -x and -y
 
             GLOBAL_quads[GLOBAL_quad_num].a = a;
@@ -1287,13 +1296,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         // top face
         if (GLOBAL_segment_index[IndexVect(i, j, k + 1)] == MaxVal)
         {
-            a                  = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
             GLOBAL_vertex[a].neigh |= 9;  // -x and +y
-            b                  = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
+            b = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
             GLOBAL_vertex[b].neigh |= 5;  // -x and -y
-            c                  = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
             GLOBAL_vertex[c].neigh |= 6;  // +x and -y
-            d                  = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
+            d = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
             GLOBAL_vertex[d].neigh |= 10; // +x and +y
 
             GLOBAL_quads[GLOBAL_quad_num].a = a;
@@ -1305,7 +1314,8 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
     }
     finish = clock();
 
-    // printf("   Generate quad meshes: CPU Time = %f seconds \n",(double)(finish-begin)/CLOCKS_PER_SEC);
+    // printf("   Generate quad meshes: CPU Time = %f seconds
+    // \n",(double)(finish-begin)/CLOCKS_PER_SEC);
     // printf("   vert-num : %d -- quad-num: %d \n\n",vert_num,GLOBAL_quad_num);
 
 
@@ -1317,10 +1327,10 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
     {
         for (n = 0; n < GLOBAL_vert_num; n++)
         {
-            nx       = 0;
-            ny       = 0;
-            nz       = 0;
-            m        = 0;
+            nx = 0;
+            ny = 0;
+            nz = 0;
+            m  = 0;
             neighbor = GLOBAL_vertex[n].neigh;
 
             i = GLOBAL_vertex[n].px;
@@ -1389,7 +1399,8 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
     }
     finish = clock();
 
-    // printf("   Smooth the quad meshes: CPU Time = %f seconds \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
+    // printf("   Smooth the quad meshes: CPU Time = %f seconds
+    // \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
 
     // Allocate memory
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
@@ -1401,7 +1412,7 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
         float y = GLOBAL_vertex[i].y * span[1] + orig[1];
         float z = GLOBAL_vertex[i].z * span[2] + orig[2];
 
-        mesh->insert<1>({i}, Vertex({x,y,z}));
+        mesh->insert<1>({i}, SMVertex({x, y, z}));
     }
 
     // write triangles
@@ -1468,13 +1479,13 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
 
         if (angle1 <= angle2)
         {
-            mesh->insert<3>({a,b,c});
-            mesh->insert<3>({a,c,d});
+            mesh->insert<3>({a, b, c});
+            mesh->insert<3>({a, c, d});
         }
         else
         {
-            mesh->insert<3>({a,b,d});
-            mesh->insert<3>({b,c,d});
+            mesh->insert<3>({a, b, d});
+            mesh->insert<3>({b, c, d});
         }
     }
 
@@ -1486,12 +1497,15 @@ std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string& input_name)
        };
 
        fprintf(fout, "OFF\n");
-       fprintf(fout, "%d %d %d\n",GLOBAL_vert_num,quad_num*2,GLOBAL_vert_num+quad_num*2-2);
+       fprintf(fout, "%d %d
+          %d\n",GLOBAL_vert_num,quad_num*2,GLOBAL_vert_num+quad_num*2-2);
        for (i = 0; i < GLOBAL_vert_num; i++)
-       fprintf(fout, "%f %f %f \n",surfmesh->vertex[i].x,surfmesh->vertex[i].y,surfmesh->vertex[i].z);
+       fprintf(fout, "%f %f %f
+          \n",surfmesh->vertex[i].x,surfmesh->vertex[i].y,surfmesh->vertex[i].z);
 
        for (i = 0; i < quad_num*2; i++) {
-       fprintf(fout, "3 %d %d %d\n",surfmesh->face[i].a,surfmesh->face[i].b,surfmesh->face[i].c);
+       fprintf(fout, "3 %d %d
+          %d\n",surfmesh->face[i].a,surfmesh->face[i].b,surfmesh->face[i].c);
        }
        fclose(fout);
      */
@@ -1617,14 +1631,14 @@ int CheckFaceCorner(float x, float y, float z)
 
     if (GLOBAL_atom_index[IndexVect(m, n, l)] < 0)
     {
-        GLOBAL_vertex[GLOBAL_vert_num].x             = x;
-        GLOBAL_vertex[GLOBAL_vert_num].y             = y;
-        GLOBAL_vertex[GLOBAL_vert_num].z             = z;
-        GLOBAL_vertex[GLOBAL_vert_num].px            = m;
-        GLOBAL_vertex[GLOBAL_vert_num].py            = n;
-        GLOBAL_vertex[GLOBAL_vert_num].pz            = l;
-        GLOBAL_atom_index[IndexVect(m, n, l)]        = GLOBAL_vert_num;
-        a                                            = GLOBAL_vert_num;
+        GLOBAL_vertex[GLOBAL_vert_num].x  = x;
+        GLOBAL_vertex[GLOBAL_vert_num].y  = y;
+        GLOBAL_vertex[GLOBAL_vert_num].z  = z;
+        GLOBAL_vertex[GLOBAL_vert_num].px = m;
+        GLOBAL_vertex[GLOBAL_vert_num].py = n;
+        GLOBAL_vertex[GLOBAL_vert_num].pz = l;
+        GLOBAL_atom_index[IndexVect(m, n, l)] = GLOBAL_vert_num;
+        a = GLOBAL_vert_num;
         GLOBAL_vert_num++;
     }
     else
@@ -1638,14 +1652,14 @@ int CheckFaceCorner(float x, float y, float z)
 FLT2VECT FindIntersection(int n, int m, int j, int k, ATOM *atom_list)
 {
     FLT2VECT intersect;
-    int    i;
-    char   reorder;
-    double cx1, cy1, cz1;
-    double cx2, cy2, cz2;
-    double dist, radius1, radius2;
-    double cos_alpha;
-    double ax, ay, az;
-    double cx, cy, cz;
+    int      i;
+    char     reorder;
+    double   cx1, cy1, cz1;
+    double   cx2, cy2, cz2;
+    double   dist, radius1, radius2;
+    double   cos_alpha;
+    double   ax, ay, az;
+    double   cx, cy, cz;
 
 
     n--;
@@ -1656,20 +1670,20 @@ FLT2VECT FindIntersection(int n, int m, int j, int k, ATOM *atom_list)
     // and the second on the right
     if (atom_list[n].x > atom_list[m].x)
     {
-        i       = n;
-        n       = m;
-        m       = i;
+        i = n;
+        n = m;
+        m = i;
         reorder = 1;
     }
 
     radius1 = atom_list[n].radius;
-    cx1     = atom_list[n].x;
-    cy1     = atom_list[n].y;
-    cz1     = atom_list[n].z;
+    cx1 = atom_list[n].x;
+    cy1 = atom_list[n].y;
+    cz1 = atom_list[n].z;
     radius2 = atom_list[m].radius;
-    cx2     = atom_list[m].x;
-    cy2     = atom_list[m].y;
-    cz2     = atom_list[m].z;
+    cx2 = atom_list[m].x;
+    cy2 = atom_list[m].y;
+    cz2 = atom_list[m].z;
 
     if (cx1 == cx2)
     {
@@ -1687,16 +1701,16 @@ FLT2VECT FindIntersection(int n, int m, int j, int k, ATOM *atom_list)
     }
     else
     {
-        dist      = sqrt((cx2 - cx1) * (cx2 - cx1) + (cy2 - cy1) * (cy2 - cy1) + (cz2 - cz1) * (cz2 - cz1));
+        dist = sqrt((cx2 - cx1) * (cx2 - cx1) + (cy2 - cy1) * (cy2 - cy1) + (cz2 - cz1) * (cz2 - cz1));
         cos_alpha = (radius1 * radius1 + dist * dist - radius2 * radius2) / (2.0 * radius1 * dist);
-        ax        = (cx2 - cx1) / dist;
-        ay        = (cy2 - cy1) / dist;
-        az        = (cz2 - cz1) / dist;
-        dist      = radius1 * cos_alpha;
-        cx        = dist * ax + cx1;
-        cy        = dist * ay + cy1;
-        cz        = dist * az + cz1;
-        dist      = cx * ax + (cy - j) * ay + (cz - k) * az;
+        ax   = (cx2 - cx1) / dist;
+        ay   = (cy2 - cy1) / dist;
+        az   = (cz2 - cz1) / dist;
+        dist = radius1 * cos_alpha;
+        cx   = dist * ax + cx1;
+        cy   = dist * ay + cy1;
+        cz   = dist * az + cz1;
+        dist = cx * ax + (cy - j) * ay + (cz - k) * az;
 
         if (reorder == 0)
         {
@@ -1714,12 +1728,12 @@ FLT2VECT FindIntersection(int n, int m, int j, int k, ATOM *atom_list)
 
 int ExtractSAS(int atom_num, ATOM *atom_list)
 {
-    int   i, j, k;
-    int   m, n, l;
-    int   dim[3], c[3];
-    int   amax[3], amin[3];
-    float radius;
-    float x, y, z;
+    int      i, j, k;
+    int      m, n, l;
+    int      dim[3], c[3];
+    int      amax[3], amin[3];
+    float    radius;
+    float    x, y, z;
     FLT2VECT intersect;
 
 
@@ -1741,11 +1755,11 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
         for (j = 0; j < 3; j++)
         {
             int tmp;
-            tmp     = (int)(c[j] - radius - 1);
-            tmp     = (tmp < 0) ? 0 : tmp;
+            tmp = (int)(c[j] - radius - 1);
+            tmp = (tmp < 0) ? 0 : tmp;
             amin[j] = tmp;
-            tmp     = (int)(c[j] + radius + 1);
-            tmp     = (tmp > (dim[j] - 1)) ? (dim[j] - 1) : tmp;
+            tmp = (int)(c[j] + radius + 1);
+            tmp = (tmp > (dim[j] - 1)) ? (dim[j] - 1) : tmp;
             amax[j] = tmp;
         }
 
@@ -1828,3 +1842,5 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
 
     return total;
 }
+
+} // end namespace gamer

@@ -22,9 +22,20 @@
  * ***************************************************************************
  */
 
+/**
+ * @file  version.h
+ * @brief Definitions of library version
+ */
+
 #pragma once
 
 #include <string>
 
+/// Namespace for all things gamer
+namespace gamer
+{
+/// Version of the library
 extern const std::string gVERSION;
+/// Short version string
 extern const std::string gVERSION_SHORT;
+} // end namespace gamer

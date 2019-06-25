@@ -27,21 +27,26 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
-using Cell = tetmesh::Cell;
 
 void init_TMCell(py::module& mod){
-    py::class_<Cell> cell(mod, "Cell",
+    py::class_<TMCell> cell(mod, "Cell",
         R"delim(
-            Wrapper around a :cpp:class:`Cell`.
+            Wrapper around a :cpp:class:`TMCell`.
         )delim"
     );
     cell.def(py::init<>(), "Default constructor");
     cell.def(py::init<int, bool>(), "Construct with marker and selection");
     cell.def(py::init<int, int, bool>(), "Construct with orientation, marker, and selection");
-    cell.def_readwrite("orientation", &Cell::orientation, "The orientation of the cell");
-    cell.def_readwrite("marker", &Cell::marker, "Boundary marker value");
-    cell.def_readwrite("selected", &Cell::selected, "Selection status of cell");
-    cell.def("__repr__", &Cell::to_string, "Pretty print");
+    cell.def_readwrite("orientation", &TMCell::orientation, "The orientation of the cell");
+    cell.def_readwrite("marker", &TMCell::marker, "Boundary marker value");
+    cell.def_readwrite("selected", &TMCell::selected, "Selection status of cell");
+    cell.def("__repr__", &TMCell::to_string, "Pretty print");
 }
+
+} // end namespace gamer

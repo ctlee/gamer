@@ -58,8 +58,9 @@ if(MATCH_RESULT)
         ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
 else()
     message(STATUS "No GIT VCS found pulling version from file")
-    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/VERSION VERSION NEWLINE_CONSUME)
-    string(REGEX MATCH "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)-*(alpha|beta|dev|)$" MATCH_RESULT "${VERSION}")
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/VERSION VERSION)
+    string(STRIP "${VERSION}" VERSION)
+    string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)-*(alpha|beta|dev|)$" MATCH_RESULT "${VERSION}")
     if(MATCH_RESULT)
         set(VERSION_MAJOR ${CMAKE_MATCH_1})
         set(VERSION_MINOR ${CMAKE_MATCH_2})
@@ -95,7 +96,7 @@ list(APPEND GAMER_SOURCES "${version_file}")
 option(SINGLE "Use single precision floating point numbers?" OFF)
 
 option(BUILD_PYGAMER "Build GAMer python extension?" OFF)
-option(BUILD_BLENDER "Build the GAMer addon for Blender?" OFF)
+option(BUILD_BLENDGAMER "Build the GAMer addon for Blender?" OFF)
 option(BLENDER_PLUGIN_INSTALL "Have CMake install the Blender plugin?" OFF)
 option(BLENDER_VERSION_STRICT "Have CMake verify compatibility of plugin with Blender?" OFF)
 
@@ -132,7 +133,7 @@ if(MSVC)
 endif()
 
 # Blender Addon requires Python extension
-if(BUILD_BLENDER)
+if(BUILD_BLENDGAMER)
     set(BUILD_PYGAMER ON)
 endif()
 
@@ -209,7 +210,7 @@ if(BUILD_PYGAMER)
     add_subdirectory(pygamer)
 endif()
 
-if(BUILD_BLENDER)
+if(BUILD_BLENDGAMER)
     add_subdirectory(tools)
 endif()
 

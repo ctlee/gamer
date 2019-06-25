@@ -31,6 +31,10 @@
 #include "gamer/PDBReader.h"
 #include "gamer/version.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 // Forward function declarations
@@ -84,8 +88,8 @@ PYBIND11_MODULE(pygamer, pygamer) {
     init_TMEdge(TetMeshMod);       // Edge class
     init_TMFace(TetMeshMod);       // Face class
     init_TMCell(TetMeshMod);       // Cell class
-    init_TMSimplexID(TetMeshMod);
-    init_TetMesh(TetMeshMod);
+    init_TMSimplexID(TetMeshMod);  // TetMesh::SimplexID class
+    init_TetMesh(TetMeshMod);      // TetMesh class
 
     /************************************
      *  PYGAMER FUNC/OBJECT DEFS
@@ -114,7 +118,9 @@ PYBIND11_MODULE(pygamer, pygamer) {
     );
 
     pygamer.def("readPDB_gauss", &readPDB_gauss,
-        py::arg("filename"), py::arg("blobbyness"), py::arg("isovalue"),
+        py::arg("filename"),
+        py::arg("blobbyness") = -0.2,
+        py::arg("isovalue") = 2.5,
         R"delim(
             Read a pdb file into a mesh.
 
@@ -250,3 +256,5 @@ PYBIND11_MODULE(pygamer, pygamer) {
         }
     );
 }
+
+} // end namespace gamer

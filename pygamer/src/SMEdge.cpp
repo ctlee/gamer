@@ -27,17 +27,23 @@
 
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_SMEdge(py::module& mod){
-    py::class_<Edge> edge(mod, "Edge",
+    py::class_<SMEdge> edge(mod, "Edge",
         R"delim(
-            Wrapper around a :cpp:class:`Edge`.
+            Wrapper around a :cpp:class:`SMEdge`.
         )delim"
     );
     edge.def(py::init<>(), "Default constructor.");
     edge.def(py::init<bool>(),
-        py::arg("selected"),
+        py::arg("selected") = false,
         "Constructor defining selection.");
-    edge.def_readwrite("selected", &Edge::selected, "Selection status of edge.");
+    edge.def_readwrite("selected", &SMEdge::selected, "Selection status of edge.");
 }
+
+} // end namespace gamer

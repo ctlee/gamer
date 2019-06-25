@@ -28,7 +28,10 @@
 #include <pybind11/iostream.h>
 
 #include "gamer/SurfaceMesh.h"
-#include "gamer/Vertex.h"
+
+/// Namespace for all things gamer
+namespace gamer
+{
 
 namespace py = pybind11;
 
@@ -46,7 +49,7 @@ void init_SurfaceMesh(py::module& mod){
      *  INSERT/REMOVE
      ************************************/
     SurfMeshCls.def("addVertex",
-        py::overload_cast<const Vertex&>(&SurfaceMesh::add_vertex),
+        py::overload_cast<const SMVertex&>(&SurfaceMesh::add_vertex),
         py::arg("data"),
         R"delim(
             Add a vertex to the mesh without specifying the key.
@@ -56,9 +59,13 @@ void init_SurfaceMesh(py::module& mod){
 
     SurfMeshCls.def("addVertex",
         [](SurfaceMesh& mesh, double x, double y, double z, int marker, bool sel){
-            mesh.add_vertex(Vertex(x,y,z,marker,sel));
+            mesh.add_vertex(SMVertex(x,y,z,marker,sel));
         },
-        py::arg("x"), py::arg("y"), py::arg("z"), py::arg("marker"), py::arg("selected"),
+        py::arg("x") = 0,
+        py::arg("y") = 0,
+        py::arg("z") = 0,
+        py::arg("marker") = -1,
+        py::arg("selected") = false,
         R"delim(
             Add a vertex to the mesh without specifying the key.
         )delim"
@@ -66,8 +73,8 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("insertVertex",
-        py::overload_cast<const std::array<int, 1>&, const Vertex&>(&SurfaceMesh::insert<1>),
-        py::arg("key"), py::arg("data") = Vertex(0,0,0,0,false),
+        py::overload_cast<const std::array<int, 1>&, const SMVertex&>(&SurfaceMesh::insert<1>),
+        py::arg("key"), py::arg("data") = SMVertex(0,0,0,-1,false),
         R"delim(
             Inserts a vertex and data based on key.
 
@@ -79,27 +86,27 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("insertEdge",
-        py::overload_cast<const std::array<int, 2>&, const Edge&>(&SurfaceMesh::insert<2>),
-        py::arg("key"), py::arg("data") = Edge(false),
+        py::overload_cast<const std::array<int, 2>&, const SMEdge&>(&SurfaceMesh::insert<2>),
+        py::arg("key"), py::arg("data") = SMEdge(false),
         R"delim(
             Insert an edge into the mesh.
 
             Args:
                 key (list): Array [2] of edge key.
-                data (Edge): Edge data.
+                data (surfacemesh.Edge): Edge data.
         )delim"
     );
 
 
     SurfMeshCls.def("insertFace",
-        py::overload_cast<const std::array<int, 3>&, const Face&>(&SurfaceMesh::insert<3>),
-        py::arg("key"), py::arg("data") = Face(0,0,false),
+        py::overload_cast<const std::array<int, 3>&, const SMFace&>(&SurfaceMesh::insert<3>),
+        py::arg("key"), py::arg("data") = SMFace(0,0,false),
         R"delim(
             Insert a face into the mesh.
 
             Args:
                 key (list): Array [3] of edge key.
-                data (Face): Face data.
+                data (surfacemesh.Face): Face data.
         )delim"
     );
 
@@ -240,7 +247,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("getRoot",
-        [](SurfaceMesh &mesh) -> Global&{
+        [](SurfaceMesh &mesh) -> SMGlobal&{
             return mesh.get_simplex_up().data();
         },
         py::return_value_policy::reference_internal,
@@ -510,7 +517,10 @@ void init_SurfaceMesh(py::module& mod){
         py::call_guard<py::scoped_ostream_redirect,
                 py::scoped_estream_redirect>(),
         R"delim(
-            Split surfaces...
+            Split disconnected surfaces into separate meshes.
+
+            Returns:
+                list: List of :py:class:`surfacemesh.SurfaceMesh` with each surface.
         )delim"
     );
 
@@ -901,3 +911,5 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 }
+
+} // end namespace gamer

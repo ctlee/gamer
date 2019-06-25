@@ -22,34 +22,76 @@
  * ***************************************************************************
  */
 
+
+/**
+ * @file gamer.h
+ * @brief Contains various global definitions and type definitions used in
+ *        the overall project.
+ */
+
 #pragma once
 
 #include "gamer/tensor.h"
 
-// The number of rings to use to compute local structure tensor
+/// Namespace for all things gamer
+namespace gamer
+{
+/// The number of rings to use to compute local structure tensor
 #define RINGS 1
 
-/** @brief Blurring blobyness used in conversion from PDB/PQR to 3D volumes */
+/// Blurring blobbyness to use in conversion from PDB/PQR to 3D volumes
 #define BLOBBYNESS        -0.2f
 
-/** @brief Discretization rate of 3D volumes */
+/// Discretization rate of 3D volumes
 #define DIM_SCALE         1.99
 
-/** @brief The minimal volumes (in voxels) of islands to be removed */
+/// The minimal volume (in voxels) of islands to be automatically removed
 #define MIN_VOLUME        333333
 
 #ifdef SINGLE
-#define REAL float
+/// Defines REAL to be float
+  #define REAL float
 #else
-#define REAL double
+/// Defines REAL to be double
+  #define REAL double
 #endif
 
-using Vector = tensor<REAL,3,1>;
-using d3Vector = tensor<double,3,1>;
-using f3Vector = tensor<float,3,1>;
-using i3Vector = tensor<int,3,1>;
+/// Floating point vector with precision defined by user at compile time
+using Vector = tensor<REAL, 3, 1>;
+/// 3 Vector of doubles
+using d3Vector = tensor<double, 3, 1>;
+/// 3 Vector of floats
+using f3Vector = tensor<float, 3, 1>;
+/// 3 Vector of integers
+using i3Vector = tensor<int, 3, 1>;
+/// 3 Vector of std::size_t
+using szt3Vector = tensor<std::size_t, 3, 1>;
 
-template <class T>
-std::size_t Vect2Index(const T i, const T j, const T k, const i3Vector& dim){
+/**
+ * @brief      Convert 3D array indices to the index of a flat
+ *             array.
+ *
+ * As a convention use the following loop structure to optimize
+ * cache efficiency:
+ * ~~~~~~~~~~~~~~~{.cpp}
+ *  for (int k;...; k++){
+ *    for (int j;...; j++){
+ *      for (int i;...; i++){
+ *  }}}
+ * ~~~~~~~~~~~~~~~
+ * In short, index i should occupy the inner most scope followed
+ * by j then k.
+ *
+ * @param[in]  i     Value of the first index
+ * @param[in]  j     Value of the second index
+ * @param[in]  k     Value of the third index
+ * @param[in]  dim   Dimensions of the 3D array
+ *
+ * @return     Index of flat array corresponding to indices in
+ *             3D array.
+ */
+inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const szt3Vector &dim)
+{
     return k*dim[0]*dim[1] + j*dim[0] + i;
 }
+} // end namespace gamer

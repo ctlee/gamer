@@ -10,45 +10,41 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <array>
+#include <memory>
 
 #include "gamer/gamer"
 
-#include <casc/casc>
+// #include <casc/casc>
+
 
 int  main(int argc, char *argv[])
 {
-    auto mesh = readPDB_molsurf("2jho.pdb");
-    compute_orientation(*mesh);
-    smoothMesh(*mesh, 10, true, false);
+    auto mesh = gamer::readPDB_gauss("2jho.pdb", -0.2, 3);
 
-    auto vol = getVolume(*mesh);
-    if (vol < 0){
-        flipNormals(*mesh);
-    }
+    gamer::writeOFF("2jho.off", *mesh);
 
-    auto lid = mesh->get_level_id<1>();
-    for(auto vid = lid.begin(); vid != lid.end();){
-        std::cout << *vid << std::endl;
-        if((*(*vid))[1] > 1){
-            auto value = *vid;
-            ++vid;
-            mesh->remove(value);
-            continue;
-        }
-        ++vid;
-    }
+    // auto mesh = gamer::readOFF("icosa.off");
 
-    // double max = 0;
-    // for (auto s : mesh->get_level_id<1>()){
-    //     auto curve = getGaussianCurvature(*mesh, s);
-    //     std::cout << s << ": curvature = " << curve << std::endl;
-    //     if (curve > max)
-    //         max = curve;
+    // int i = 0;
+    // for(auto v : mesh->get_level_id<1>()){
+    //     auto data = *v;
+    //     std::cout << "mesh->insert({" << i++
+    //         << "}, SMVertex("
+    //         << data[0] << ", "
+    //         << data[1] << ", "
+    //         << data[2] << "));" << std::endl;
     // }
-    // std::cout << "Max: " << max << std::endl;
-    //
-    // auto mesh = readDolfin(argv[1]);
 
-    // writeDolfin("test.xml", *mesh);
+    // for(auto f : mesh->get_level_id<3>()){
+    //     auto name = f.indices();
+    //     std::cout << "mesh->insert({"
+    //         << name[0] << ","
+    //         << name[1] << ","
+    //         << name[2]
+    //     << "});" << std::endl;
+    // }
+
+
     std::cout << "EOF" << std::endl;
 }

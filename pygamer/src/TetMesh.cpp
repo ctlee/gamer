@@ -28,6 +28,10 @@
 #include "gamer/TetMesh.h"
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_TetMesh(py::module& mod){
@@ -43,7 +47,7 @@ void init_TetMesh(py::module& mod){
      *  INSERT/REMOVE
      ************************************/
     TetMeshCls.def("addVertex",
-        py::overload_cast<const tetmesh::TetVertex&>(&TetMesh::add_vertex),
+        py::overload_cast<const TMVertex&>(&TetMesh::add_vertex),
         py::arg("data"),
         R"delim(
             Add a vertex to the mesh without specifying the key.
@@ -52,47 +56,47 @@ void init_TetMesh(py::module& mod){
 
 
     TetMeshCls.def("insertVertex",
-        py::overload_cast<const std::array<int, 1>&, const tetmesh::TetVertex&>(&TetMesh::insert<1>),
-        py::arg("key"), py::arg("data") = tetmesh::TetVertex(),
+        py::overload_cast<const std::array<int, 1>&, const TMVertex&>(&TetMesh::insert<1>),
+        py::arg("key"), py::arg("data") = TMVertex(),
         R"delim(
             Inserts a vertex and data based on key.
 
             Args:
                 key (list): Array [1] of vertex key.
-                data (:py:class:`Vertex`, optional): Vertex data.
+                data (tetmesh.Vertex): Vertex data.
         )delim"
     );
 
 
     TetMeshCls.def("insertEdge",
-        py::overload_cast<const std::array<int, 2>&, const tetmesh::Edge&>(&TetMesh::insert<2>),
-        py::arg("key"), py::arg("data") = tetmesh::Edge(),
+        py::overload_cast<const std::array<int, 2>&, const TMEdge&>(&TetMesh::insert<2>),
+        py::arg("key"), py::arg("data") = TMEdge(),
         R"delim(
             Insert an edge into the mesh.
 
             Args:
                 key (list): Array [2] of edge key.
-                data (Edge): Edge data.
+                data (tetmesh.Edge): Edge data.
         )delim"
     );
 
 
     TetMeshCls.def("insertFace",
-        py::overload_cast<const std::array<int, 3>&, const tetmesh::Face&>(&TetMesh::insert<3>),
-        py::arg("key"), py::arg("data") = tetmesh::Face(),
+        py::overload_cast<const std::array<int, 3>&, const TMFace&>(&TetMesh::insert<3>),
+        py::arg("key"), py::arg("data") = TMFace(),
         R"delim(
             Insert a face into the mesh.
 
             Args:
                 key (list): Array [3] of face key.
-                data (Face): Face data.
+                data (tetmesh.Face): Face data.
         )delim"
     );
 
 
     TetMeshCls.def("insertCell",
-        py::overload_cast<const std::array<int, 4>&, const tetmesh::Cell&>(&TetMesh::insert<4>),
-        py::arg("key"), py::arg("data") = tetmesh::Cell(),
+        py::overload_cast<const std::array<int, 4>&, const TMCell&>(&TetMesh::insert<4>),
+        py::arg("key"), py::arg("data") = TMCell(),
         R"delim(
             Insert a face into the mesh.
 
@@ -283,7 +287,7 @@ void init_TetMesh(py::module& mod){
 
 
     TetMeshCls.def("getRoot",
-        [](TetMesh &mesh) -> tetmesh::Global&{
+        [](TetMesh &mesh) -> TMGlobal&{
             return mesh.get_simplex_up().data();
         },
         py::return_value_policy::reference_internal,
@@ -618,3 +622,5 @@ void init_TetMesh(py::module& mod){
         )delim"
     );
 }
+
+} // end namespace gamer

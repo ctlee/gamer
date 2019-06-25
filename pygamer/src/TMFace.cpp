@@ -27,19 +27,24 @@
 
 #include "gamer/TetMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
-using TetFace = tetmesh::Face;
 
 
 void init_TMFace(py::module& mod){
-    py::class_<TetFace> face(mod, "Face",
+    py::class_<TMFace> face(mod, "Face",
         R"delim(
             Wrapper around a :cpp:class:`Face`.
         )delim"
     );
     face.def(py::init<>(), "Default constructor");
     face.def(py::init<int, bool>(), "Construct with marker and selection");
-    face.def_readwrite("marker", &TetFace::marker, "Boundary marker value");
-    face.def_readwrite("selected", &TetFace::selected, "Selection status of face");
-    face.def("__repr__", &TetFace::to_string, "Pretty print");
+    face.def_readwrite("marker", &TMFace::marker, "Boundary marker value");
+    face.def_readwrite("selected", &TMFace::selected, "Selection status of face");
+    face.def("__repr__", &TMFace::to_string, "Pretty print");
 }
+
+} // end namespace gamer

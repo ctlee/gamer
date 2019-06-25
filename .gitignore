@@ -4,10 +4,10 @@
 *.swp
 .~
 
-# Ignore the build directory
-build/
-release/
-debug/
+# Ignore some build directory patterns
+build*/
+release*/
+debug*/
 
 # C++ gitignore
 # Prerequisites
@@ -52,11 +52,21 @@ debug/
 # Mac Files
 *.DS_Store
 
-# Files from setuptools
+# Files from setuptools and python
 .eggs/
 gamer.egg-info/
 dist/
 _skbuild/
+*/__pycache__/
+MANIFEST
+pygamer/__init__.py
 
 *.whl
 *.egg-info
+
+# Dont save generated/linked documentation files
+docs/src/_doxyoutput/
+docs/src/_cppapi/
+docs/src/_pythonapi/
+docs/src/tutorials/
+docs/src/conf.py

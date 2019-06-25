@@ -127,7 +127,7 @@ before_install:
 
 install:
 - mkdir build; cd build;
-- cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYGAMER=on -GNinja ..
+- cmake -DGETEIGEN=on -DGAMER_TESTS=on -DBUILD_PYGAMER=on -GNinja ..
 - cmake --build . --config Release
 
 script:

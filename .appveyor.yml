@@ -3,18 +3,26 @@ notifications:
   on_build_status_changed: true
   incoming_webhook:
     secure: bmfSFbqVVCm0/XYaDqAVMGeBP6RNW1f/yzolevVJ1GXCZZHejnpU1aPG8LIYDskbaudyf1Obaf5ua5WTKRqQJm79EGCYiH6NGPq6qhTyMV0=
+
 version: 2.0.2.{build}
+
 branches:
   only:
   - master
   - development
+
 image:
 - Visual Studio 2017
 platform:
 - x64
+
 environment:
   matrix:
-  - PYTHON: "C:\\Python36-x64"
+  - PYTHON: "C:\\Python37-x64"
+
+matrix:
+  fast_finish: true
+
 install:
 - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
 - python --version
@@ -23,7 +31,9 @@ install:
 - mkdir build_64
 - cd build_64
 - cmake -DGETEIGEN=on -DGAMER_TEST=on -DBUILD_PYGAMER=on -A x64 ..
+
 build_script:
 - cmake --build . --config Release
+
 test_script:
 - ctest -C Release -V

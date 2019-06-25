@@ -107,8 +107,11 @@ else()
 endif()
 string(CONCAT _ZIPNAME ${_ZIPNAME} ".zip")
 
+# Configure the Blender addon metadata
 configure_file(${CMAKE_SOURCE_DIR}/tools/blender_addon/__init__.in
             ${CMAKE_BINARY_DIR}/plugin/blendgamer/__init__.py @ONLY)
+
+# Target to zip up the plugin
 add_custom_target(zip_plugin
     ALL
     COMMAND ${CMAKE_COMMAND} -E tar "cfv"

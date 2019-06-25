@@ -27,6 +27,10 @@
 
 #include "gamer/SurfaceMesh.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 using SMVertexID = SurfaceMesh::SimplexID<1>;
@@ -45,15 +49,6 @@ void init_SMSimplexID(py::module& mod){
     );
     vid.def(py::init<>());
 
-    vid.def_property_readonly("dataro",
-        py::overload_cast<>(&SMVertexID::data),
-        R"delim(
-                Access the data stored on the 1-simplex.
-
-                Returns:
-                    :py:class:`Vertex`: Vertex data
-        )delim"
-    );
 
     vid.def("data",
             py::overload_cast<>(&SMVertexID::data),
@@ -62,18 +57,25 @@ void init_SMSimplexID(py::module& mod){
                 Access the data stored on the 1-simplex.
 
                 Returns:
-                    :py:class:`Vertex`: Vertex data
+                    :py:class:`surfacemesh.Vertex`: Vertex data
             )delim"
         );
+
+
     vid.def("isValid",
         [](const SMVertexID& lhs) {return lhs != nullptr;},
         R"delim(
             Checks if VertexID refers to a valid simplex.
 
+            This is useful for validating if :py:func:`get_simplex_up` has
+            returned a valid SimplexID.
+
             Returns:
                 bool: True if valid.
         )delim"
     );
+
+
     vid.def("indices",
         &SMVertexID::indices,
         R"delim(
@@ -83,6 +85,8 @@ void init_SMSimplexID(py::module& mod){
                 list: Indices
         )delim"
     );
+
+
     vid.def("cover",
         &SMVertexID::cover,
         R"delim(
@@ -218,3 +222,5 @@ void init_SMSimplexID(py::module& mod){
         }
     );
 }
+
+} // end namespace gamer

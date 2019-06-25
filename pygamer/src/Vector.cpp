@@ -5,6 +5,10 @@
 
 #include "gamer/gamer.h"
 
+/// Namespace for all things gamer
+namespace gamer
+{
+
 namespace py = pybind11;
 
 void init_Vector(py::module& mod){
@@ -66,3 +70,5 @@ void init_Vector(py::module& mod){
         }
     );
 }
+
+} // end namespace gamer

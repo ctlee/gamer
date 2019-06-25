@@ -22,6 +22,10 @@
  * ***************************************************************************
  */
 
+/**
+ * @file  Vertex.h
+ * @brief Vertex class definitions
+ */
 
 #pragma once
 
@@ -32,32 +36,34 @@
 #include "gamer/gamer.h"
 #include "gamer/tensor.h"
 
-
+/// Namespace for all things gamer
+namespace gamer
+{
 /**
- * @brief      Vertex class
+ * @brief      Vertex struct represents a general vertex
  */
 struct Vertex
 {
-    Vector position;    /**< @brief a 3 tensor for x, y, z */
-    int marker = 0;                 /**< @brief Boundary marking ID */
-    bool selected = false;          /**< @brief Selection flag */
+    Vector position;            /**< @brief a 3 tensor for x, y, z */
+    int    marker   = 0;        /**< @brief Boundary marking ID */
+    bool   selected = false;    /**< @brief Selection flag */
 
     /**
      * @brief      Default constructor with x,y,z = 0
      */
-    Vertex(): Vertex(0,0,0) {}
+    Vertex() : Vertex(0, 0, 0) {}
 
     /**
-     * @brief      Constructor
+     * @brief      Constructor with initialized position
      *
      * @param[in]  x     x-position of the vertex
      * @param[in]  y     y-position of the vertex
      * @param[in]  z     z-position of the vertex
      */
-    Vertex(double x, double y, double z): Vertex(x,y,z, -1, false){}
+    Vertex(REAL x, REAL y, REAL z) : Vertex(x, y, z, -1, false){}
 
     /**
-     * @brief      Constructor
+     * @brief      Constructor with initialized position, marker, and selection
      *
      * @param[in]  x     x-position of the vertex
      * @param[in]  y     y-position of the vertex
@@ -65,53 +71,66 @@ struct Vertex
      * @param[in]  m     marker ID
      * @param[in]  sel   selection flag
      */
-    Vertex(double x, double y, double z, int m, bool sel){
+    Vertex(REAL x, REAL y, REAL z, int m, bool sel)
+    {
         position[0] = x;
         position[1] = y;
         position[2] = z;
-        marker = m;
+        marker   = m;
         selected = sel;
     }
 
-    Vertex(Vector v){
-        position = v;
-        marker = -1;
-        selected = false;
-    }
+    /**
+     * @brief      Constructor seeded from a Vector
+     *
+     * @param[in]  v     Vector position
+     */
+    Vertex(Vector &v) : position(v), marker(-1), selected(false){}
+
+    /**
+     * @brief      Move construct a vertex from vector
+     *
+     * @param      v     Vector position
+     */
+    Vertex(Vector &&v) : position(std::move(v)), marker(-1), selected(false) {}
 
     /**
      * @brief      Copy Constructor
      *
      * @param[in]  x     Vertex to copy
      */
-    Vertex(const Vertex& x) : position(x.position), marker(x.marker), selected(x.selected){}
+    Vertex(const Vertex &x) : position(x.position), marker(x.marker), selected(x.selected){}
 
     /**
      * @brief      Move Constructor
      *
      * @param[in]  x     Vertex to move
      */
-    Vertex(const Vertex&& x) : position(std::move(x.position)), marker(std::move(x.marker)), selected(std::move(x.selected)) {}
+    Vertex(const Vertex &&x) : position(std::move(x.position)), marker(std::move(x.marker)), selected(std::move(x.selected)) {}
 
+    /**
+     * @brief      Implicit cast of Vertex to Vector type
+     */
     operator Vector() const {
         return position;
     }
 
     /**
-     * @brief      Operator<< overload
+     * @brief      Print operator overload
      *
      * @param      output  stream to print to
      * @param[in]  v       Vertex to print
      *
      * @return     the stream
      */
-    friend std::ostream& operator<<(std::ostream& output, const Vertex& v){
-        output  << "Vertex(x:" << v[0]
-                << ",y:" << v[1]
-                << ",z:" << v[2]
-                << ";m:" << v.marker
-                << ";sel:" << v.selected
-                << ")";
+    friend std::ostream &operator<<(std::ostream &output, const Vertex &v)
+    {
+        output << "Vertex(x:" << v[0]
+               << ",y:" << v[1]
+               << ",z:" << v[2]
+               << ";m:" << v.marker
+               << ";sel:" << v.selected
+               << ")";
         return output;
     }
 
@@ -120,14 +139,10 @@ struct Vertex
      *
      * @return     String representation of the object.
      */
-    std::string to_string() const{
+    std::string to_string() const
+    {
         std::ostringstream output;
-        output  << "Vertex(x:" << position[0]
-                << ",y:" << position[1]
-                << ",z:" << position[2]
-                << ";m:" << marker
-                << ";sel:" << selected
-                << ")";
+        output << *this;
         return output.str();
     }
 
@@ -137,20 +152,23 @@ struct Vertex
      *
      * @param[in]  index  Index to access
      *
-     * @return     return the value of the tensor at index
+     * @return     Reference to the value at the index
      */
-    const double& operator[](std::size_t index) const{
+    const REAL &operator[](std::size_t index) const
+    {
         return position[index];
     }
 
     /**
-     * @brief      Operator[] overload allows easy access to x, y, z using intuitive syntax
+     * @brief      Operator[] overload allows easy access to x, y, z using
+     *intuitive syntax
      *
      * @param[in]  index  Index to access
      *
-     * @return     the value of the tensor at index
+     * @return     Reference to the value at the index
      */
-    double& operator[](std::size_t index){
+    REAL &operator[](std::size_t index)
+    {
         return position[index];
     }
 
@@ -159,9 +177,10 @@ struct Vertex
      *
      * @param[in]  v     vertex to assign
      */
-    void operator=(const Vertex& v){
+    void operator=(const Vertex &v)
+    {
         position = v.position;
-        marker = v.marker;
+        marker   = v.marker;
         selected = v.selected;
     }
 
@@ -172,11 +191,12 @@ struct Vertex
      *
      * @return     True if all values are equal
      */
-    bool operator==(const Vertex& rhs) const{
+    bool operator==(const Vertex &rhs) const
+    {
         Vertex temp(rhs);
-        if(position != temp.position) return false;
-        if(marker != temp.marker) return false;
-        if(selected != temp.selected) return false;
+        if (position != temp.position) return false;
+        if (marker != temp.marker) return false;
+        if (selected != temp.selected) return false;
         return true;
     }
 
@@ -187,7 +207,8 @@ struct Vertex
      *
      * @return     True if not equal
      */
-    bool operator!=(const Vertex& rhs) const{
+    bool operator!=(const Vertex &rhs) const
+    {
         return !(*this == rhs);
     }
 
@@ -198,7 +219,8 @@ struct Vertex
      *
      * @return     Vertex with sum of positions
      */
-    Vertex& operator+=(const Vector& rhs){
+    Vertex &operator+=(const Vector &rhs)
+    {
         // retains the marker of the lhs
         position += rhs;
         return *this;
@@ -211,7 +233,8 @@ struct Vertex
      *
      * @return     Vertex with difference of positions
      */
-    Vertex& operator-=(const Vector& rhs){
+    Vertex &operator-=(const Vector &rhs)
+    {
         // retains the marker of the lhs
         position -= rhs;
         return *this;
@@ -224,7 +247,8 @@ struct Vertex
      *
      * @return     Post multiplied vertex
      */
-    Vertex& operator*=(double x){
+    Vertex &operator*=(const REAL x)
+    {
         position *= x;
         return *this;
     }
@@ -236,32 +260,148 @@ struct Vertex
      *
      * @return     Post divided vertex
      */
-    Vertex& operator/=(double x){
-        position /=x;
+    Vertex &operator/=(const REAL x)
+    {
+        position /= x;
         return *this;
     }
 };
 
-Vertex operator+(const Vertex& A, const Vector& B);
-Vector operator+(const Vertex& A, const Vertex& B);
-Vertex operator-(const Vertex& A, const Vector& B);
-Vector operator-(const Vertex& A, const Vertex& B);
-Vertex operator*(double x, const Vertex& A);
-Vertex operator/(const Vertex& A, double x);
-double distance(const Vertex& A, const Vertex& B);
-double angle(const Vertex& A, const Vertex& B, const Vertex& C);
-double angle(const Vector& AB, const Vector& CB);
-double angleRad(const Vertex& A, const Vertex& B, const Vertex& C);
-double angleRad(const Vector& AB, const Vector& CB);
+/**
+ * @brief      Translate a Vertex by vector
+ *
+ * @param[in]  A     Vertex base
+ * @param[in]  B     Vector translation
+ *
+ * @return     Resulting Vertex with new position
+ */
+Vertex operator+(const Vertex &A, const Vector &B);
 
-inline double magnitude(const Vector& A){
-    return  std::sqrt(A|A);
+/**
+ * @brief      Translate a Vertex by difference
+ *
+ * @param[in]  A     Vertex base
+ * @param[in]  B     Vector translation
+ *
+ * @return     Resulting Vertex with new position
+ */
+Vertex operator-(const Vertex &A, const Vector &B);
+
+/**
+ * @brief      Compute vector between two Vertices
+ *
+ * @param[in]  A     First Vertex
+ * @param[in]  B     Second Vertex
+ *
+ * @return     Vector from Vertex A to Vertex B
+ */
+Vector operator-(const Vertex &A, const Vertex &B);
+
+/**
+ * @brief      Scale Vertex position
+ *
+ * @param[in]  x     Scalar multiplicand
+ * @param[in]  A     Vertex to scale
+ *
+ * @return     Vertex with scaled position
+ */
+Vertex operator*(REAL x, const Vertex &A);
+
+/**
+ * @brief      Scale Vertex position
+ *
+ * @param[in]  A     Vertex to scale
+ * @param[in]  x     Scalar multiplicand
+ *
+ * @return     Vertex with scaled position
+ */
+Vertex operator*(const Vertex &A, REAL x);
+
+/**
+ * @brief      Scale Vertex position by scalar division
+ *
+ * @param[in]  A     Vertex to scale
+ * @param[in]  x     Scalar denominator
+ *
+ * @return     Vertex with scaled position
+ */
+Vertex operator/(const Vertex &A, REAL x);
+
+/**
+ * @brief      Get the distance between two Vertices
+ *
+ * @param[in]  A     The first Vertex
+ * @param[in]  B     The other Vertex
+ *
+ * @return     Scalar distance between vertices
+ */
+REAL distance(const Vertex &A, const Vertex &B);
+
+/**
+ * @brief     Compute the angle between three vertices.
+ *
+ * @param[in]  A     Vertex A
+ * @param[in]  B     Vertex B is in the middle
+ * @param[in]  C     Vertex C
+ *
+ * @return     The angle in degrees
+ */
+REAL angle(const Vertex &A, const Vertex &B, const Vertex &C);
+
+/**
+ * @brief      Compute angle between two vectors
+ *
+ * @param[in]  AB    First Vector
+ * @param[in]  CB    Second Vector
+ *
+ * @return     The angle in degrees
+ */
+REAL angle(const Vector &AB, const Vector &CB);
+
+/**
+ * @brief     Compute the angle between three vertices.
+ *
+ * @param[in]  A     Vertex A
+ * @param[in]  B     Vertex B is in the middle
+ * @param[in]  C     Vertex C
+ *
+ * @return     The angle in radians
+ */
+REAL angleRad(const Vertex &A, const Vertex &B, const Vertex &C);
+
+/**
+ * @brief      Compute angle between two vectors
+ *
+ * @param[in]  AB    First Vector
+ * @param[in]  CB    Second Vector
+ *
+ * @return     The angle in radians
+ */
+REAL angleRad(const Vector &AB, const Vector &CB);
+
+/**
+ * @brief      Get the length of a vector
+ *
+ * @param[in]  A     Vector of interest
+ *
+ * @return     length of the vector
+ */
+inline REAL length(const Vector &A)
+{
+    return std::sqrt(A|A);
 }
 
-inline void normalize(Vector& A){
-    double mag = magnitude(A);
+/**
+ * @brief      Normalize a vector
+ *
+ * @param      A     Vector of interest
+ */
+inline void normalize(Vector &A)
+{
+    REAL mag = length(A);
     if (mag == 0)
         throw std::runtime_error("Cannot normalize a vector with length of 0.");
     A /= mag;
 }
 
+} //end namespace gamer

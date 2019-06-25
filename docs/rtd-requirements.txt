@@ -2,10 +2,12 @@ scikit-build >= 0.10.0
 setuptools
 wheel
 cmake >= 3.11
-breathe
+sphinx>=2.0
+breathe>=4.13.0
 exhale
 sphinx-issues
 nbsphinx
 jupyter_sphinx
 threevis
 pytest
+pandoc

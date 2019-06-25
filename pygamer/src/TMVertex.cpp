@@ -26,14 +26,17 @@
 #include <pybind11/stl.h>
 
 #include "gamer/TetMesh.h"
-#include "gamer/Vertex.h"
+
+/// Namespace for all things gamer
+namespace gamer
+{
 
 namespace py = pybind11;
 
 void init_TMVertex(py::module& mod){
-    py::class_<tetmesh::TetVertex> vertex(mod, "Vertex",
+    py::class_<TMVertex> vertex(mod, "Vertex",
         R"delim(
-            Wrapper around a :cpp:class:`TetVertex`.
+            Wrapper around a :cpp:class:`TMVertex`.
         )delim"
     );
 
@@ -43,28 +46,30 @@ void init_TMVertex(py::module& mod){
         py::arg("z") = 0,
         py::arg("marker") = -1,
         py::arg("selected") = false,
-        "Constructor defining doordinates, marker, and selection status."
+        "Constructor defining coordinates, marker, and selection status."
     );
 
 
     vertex.def("__getitem__",
-        [](const tetmesh::TetVertex &v, std::size_t i) -> const double& {
+        [](const TMVertex &v, std::size_t i) -> const double& {
             if (i >= 3) throw py::index_error("Vector only contains three coordinates");
             return v[i];
         },
-        "Get coordinate of position"
+        "Get value of coordinate position"
     );
     vertex.def("__setitem__",
-        [](tetmesh::TetVertex &v, size_t i, double val) {
+        [](TMVertex &v, size_t i, double val) {
             if (i >= 3) throw py::index_error("Vector only contains three coordinates");
             v[i] = val;
         },
-        "Set coordinate..."
+        "Set coordinate value"
     );
 
-    vertex.def_readwrite("position", &tetmesh::TetVertex::position, "Position of the vertex.");
-    vertex.def_readwrite("marker", &tetmesh::TetVertex::marker, "Boundary marker value");
-    vertex.def_readwrite("selected", &tetmesh::TetVertex::selected, "Selection status of vertex");
-    vertex.def_readwrite("error", &tetmesh::TetVertex::error, "Error value");
-    vertex.def("__repr__", &tetmesh::TetVertex::to_string);
+    vertex.def_readwrite("position", &TMVertex::position, "Position of the vertex");
+    vertex.def_readwrite("marker", &TMVertex::marker, "Boundary marker value");
+    vertex.def_readwrite("selected", &TMVertex::selected, "Selection status of vertex");
+    vertex.def_readwrite("error", &TMVertex::error, "Error value");
+    vertex.def("__repr__", &TMVertex::to_string);
 }
+
+} // end namespace gamer
