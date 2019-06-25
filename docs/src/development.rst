@@ -63,9 +63,10 @@ The documentation can be found in ``{builddir}/docs/html/``.
 This functionality is enabled by the sphinx-issue sphinx extension.
 
 Embedding Widgets in Jupyter-Notebooks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
-A notebook file may be saved with the current widget state as metadata. This allows the notebook file to be rendered with rendered widgets. To save a notebook with the current widget state, use the `Save Notebook Widget State` menu item.
+A notebook file may be saved with the current widget state as metadata. This allows the notebook file to be rendered with rendered widgets.
+To save a notebook with the current widget state, use the `Save Notebook Widget State` menu item.
 
 In order to delete old saved state and save new state to the notebook, do the following in order:
 
@@ -73,9 +74,24 @@ In order to delete old saved state and save new state to the notebook, do the fo
 #. Restart the kernel and refresh the page. This clears the old widget state from the widget manager on the page.
 #. Create whatever widgets you'd like, and use `Save Notebook Widget State` and save the notebook. This saves the new widget state to the notebook file.
 
+Inline Code Comments
+--------------------
+
+You are also encouraged to use traditional comments inline with the code to explain complex steps.
+We also encourage the use of ``TODO`` style comments in the source.
+These tags can be parsed by tools such as the `TodoReview <https://packagecontrol.io/packages/TodoReview>`__ plugin for Sublime Text to generate useful roadmaps.
+Comment tags should follow this style:
+
+.. code-block:: cpp
+
+   // TODO: (#priority) {Text comments}
+   // TODO: (100) Example todo note
+
+Where ``#priority`` is a numerical priority ranging from 0 to 100 for sorting importance with 0 being the most important.
+
 
 Publishing a new official release
----------------------------------
+=================================
 
 #.  merge the `development` branch into `master`.
 

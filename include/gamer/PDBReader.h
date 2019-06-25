@@ -44,15 +44,14 @@
 namespace gamer
 {
 
+/// @cond detail
 namespace pdbreader_detail
 {
 const double            EPSILON = 1e-3;
-/// @cond detail
 static const std::regex PDB(".*.pdb", std::regex::icase | std::regex::optimize);
 static const std::regex PQR(".*.pqr", std::regex::icase | std::regex::optimize);
 static const std::regex XYZR(".*.xyzr", std::regex::icase | std::regex::optimize);
 static const std::regex atom("ATOM.*\n*", std::regex::optimize);
-/// @endcond
 
 /**
  * @brief      PDB element information
@@ -249,7 +248,7 @@ static PDBelementInformation PDBelementTable[MAX_BIOCHEM_ELEMENTS] =
 /// Map of residueName, atomName to PDBelementInformation
 static std::map<std::string, std::map<std::string, PDBelementInformation> > PDBelementMap;
 } // End namespace pdbreader_detail
-
+/// @endcond
 
 
 /**

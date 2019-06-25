@@ -275,7 +275,6 @@ void writeOFF(const std::string &filename, const SurfaceMesh &mesh)
 
     fout.precision(10);
     // Get the vertex data directly
-    // TODO: (3) Will this always print in order?
     for (const auto vertexID : mesh.get_level_id<1>())
     {
         sigma[mesh.get_name(vertexID)[0]] = cnt++;

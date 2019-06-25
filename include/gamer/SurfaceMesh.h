@@ -604,11 +604,9 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                 auto   area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
                 auto   areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
                 double edgeFlipCriterion = 1.001;
+                // If area changes by a lot continue
                 if (areaFlip/area > edgeFlipCriterion)
-                    continue;                                    // If area
-                                                                 // changes by a
-                                                                 // lot then
-                                                                 // continue
+                    continue;
 
                 // Check the flip using user function
                 if (checkFlip(mesh, edgeID))
@@ -620,6 +618,9 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                     std::set<SurfaceMesh::SimplexID<2> > tmpIgnored;
                     kneighbors(mesh, edgeID, 3, tmpIgnored);
                     ignoredEdges.insert(tmpIgnored.begin(), tmpIgnored.end());
+
+                    // Local neighborhood append. Larger neighborhood selected
+                    // above appears to work better...
                     // neighbors(mesh, edgeID, std::inserter(ignoredEdges,
                     // ignoredEdges.end()));
                 }
@@ -629,7 +630,7 @@ void selectFlipEdges(const SurfaceMesh &mesh,
 }
 
 /**
- * @brief      Select edges which are good candidates for flipping
+ * @brief      Check if an edge should be flipped
  *
  * @param[in]  mesh            SurfaceMesh to operate on.
  * @param[in]  preserveRidges  Whether or not to try preserving ridges.
@@ -877,7 +878,9 @@ bool hasHole(const SurfaceMesh &mesh);
  *
  * @return     The valence.
  */
-std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+inline std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+    return mesh.get_cover(vertexID).size();
+}
 
 /**
  * @brief      Gets the mean curvature.

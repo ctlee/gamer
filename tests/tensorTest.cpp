@@ -27,6 +27,10 @@ TEST(TensorTest, MathOperations){
     auto v10 = v1 ^ v0;
     EXPECT_EQ(v01, -v10);
 
+    tensor<double,3,2> v3({1,2,3,4,5,6,7,8,9});
+    tensor<double,3,2> v4({1,3,5,3,5,7,5,7,9});
+    EXPECT_EQ(Sym(v3), v4);
+
     // TODO: (0) add test for elementwise division etc...
 }
 

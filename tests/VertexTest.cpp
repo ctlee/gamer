@@ -45,7 +45,7 @@ TEST(VertexTest,TestConstructor)
 TEST(VertexTest, MathOperations)
 {
     Vertex v0 = Vertex(1.0,1.0,1.0);
-    Vector vec = (Vector) Vertex(2.1,3.2,4.3); // TODO: change this so the cast isn't weird
+    Vector vec = Vertex(2.1,3.2,4.3);
 
     EXPECT_EQ(Vertex(3.1,4.2,5.3), v0+vec); // check addition
 
@@ -53,15 +53,6 @@ TEST(VertexTest, MathOperations)
     EXPECT_EQ(Vertex(1,1,1), 1*v0);
     EXPECT_EQ(Vertex(3.4,3.4,3.4), 3.4*v0);
     EXPECT_EQ(Vertex(1.0,1.0,1.0), v0/1.0);
-}
-
-TEST(VertexTest, TypeCastOperations)
-{
-    // TODO: implement some tests to ensure that return types are correct after each operation
-}
-
-TEST(VertexTest, FunctionOperations){
-    // TODO: check the accuracy of different functions
 }
 
 #if GTEST_HAS_PARAM_TEST
@@ -104,7 +95,7 @@ TEST_P(VertexTest,RandomDoubleAddition)
 // Run the randomdoubles 100 times
 INSTANTIATE_TEST_CASE_P(RandomDoubles,
                         VertexTest,
-                        Range(1,10));
+                        Range(1,5));
 
 #else
 TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}

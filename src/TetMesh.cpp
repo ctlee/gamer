@@ -294,10 +294,6 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio)
         int *ptr = &tetio.tetrahedronlist[i*tetio.numberofcorners];
 
         vertices.insert({ptr[0], ptr[1], ptr[2], ptr[3]});
-
-        // TODO: (0) Do we need to set the orientation?
-        // std::cout << casc::to_string(std::array<int,4>({ptr[0], ptr[1],
-        // ptr[2], ptr[3]})) << std::endl;
         mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]},
                         TMCell(0, marker));
     }
@@ -361,6 +357,25 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio)
         }
     }
     casc::compute_orientation(*mesh);
+
+    auto cellID = *(mesh->get_level_id<4>().begin());
+    auto indices = cellID.indices();
+    auto p0 = (*mesh->get_simplex_down(cellID, {indices[1],indices[2],indices[3]})).position;
+    auto p1 = (*mesh->get_simplex_down(cellID, {indices[0],indices[2],indices[3]})).position;
+    auto p2 = (*mesh->get_simplex_down(cellID, {indices[0],indices[1],indices[3]})).position;
+    auto p3 = (*mesh->get_simplex_down(cellID, {indices[0],indices[1],indices[2]})).position;
+    p1 = p1-p0;
+    p2 = p2-p0;
+    p3 = p3-p0;
+    auto norm12 = cross(p1,p2);
+    auto det = dot(norm12, p3);
+
+    if (det*(*cellID).orientation < 0) {
+        for (auto& cell : mesh->get_level<4>()){
+            cell.orientation *= -1;
+        }
+    }
+
     return mesh;
 }
 
@@ -430,17 +445,17 @@ void writeVTK(const std::string &filename, const TetMesh &mesh)
 
         if (orientation == 1)
         {
-            fout << "4 " << std::setw(4) << sigma[w[3]] << " "
-                 << std::setw(4) << sigma[w[1]] << " "
-                 << std::setw(4) << sigma[w[2]] << " "
-                 << std::setw(4) << sigma[w[0]] << "\n";
-        }
-        else if (orientation == -1)
-        {
             fout << "4 " << std::setw(4) << sigma[w[0]] << " "
                  << std::setw(4) << sigma[w[1]] << " "
                  << std::setw(4) << sigma[w[2]] << " "
                  << std::setw(4) << sigma[w[3]] << "\n";
+        }
+        else if (orientation == -1)
+        {
+            fout << "4 " << std::setw(4) << sigma[w[3]] << " "
+                 << std::setw(4) << sigma[w[1]] << " "
+                 << std::setw(4) << sigma[w[2]] << " "
+                 << std::setw(4) << sigma[w[0]] << "\n";
         }
         else
         {
@@ -518,17 +533,17 @@ void writeOFF(const std::string &filename, const TetMesh &mesh)
 
         if (orientation == 1)
         {
-            fout << "4 " << std::setw(4) << sigma[w[3]] << " "
-                 << std::setw(4) << sigma[w[1]] << " "
-                 << std::setw(4) << sigma[w[2]] << " "
-                 << std::setw(4) << sigma[w[0]] << "\n";
-        }
-        else if (orientation == -1)
-        {
             fout << "4 " << std::setw(4) << sigma[w[0]] << " "
                  << std::setw(4) << sigma[w[1]] << " "
                  << std::setw(4) << sigma[w[2]] << " "
                  << std::setw(4) << sigma[w[3]] << "\n";
+        }
+        else if (orientation == -1)
+        {
+            fout << "4 " << std::setw(4) << sigma[w[3]] << " "
+                 << std::setw(4) << sigma[w[1]] << " "
+                 << std::setw(4) << sigma[w[2]] << " "
+                 << std::setw(4) << sigma[w[0]] << "\n";
         }
         else
         {
@@ -596,17 +611,39 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
     cnt = 0;
     std::vector<std::array<std::size_t, 3> > faceMarkerList;
     std::vector<std::array<std::size_t, 2> > cellMarkerList;
+    bool orientationError = false;
 
     fout << "    <cells size=\"" << mesh.size<4>() << "\">\n";
     for (const auto tetID :  mesh.get_level_id<4>())
     {
         std::size_t idx = cnt++;
         auto        tetName = mesh.get_name(tetID);
-        fout << "      <tetrahedron index=\"" << idx << "\" "
-             << "v0=\"" << sigma[tetName[0]] << "\" "
-             << "v1=\"" << sigma[tetName[1]] << "\" "
-             << "v2=\"" << sigma[tetName[2]] << "\" "
-             << "v3=\"" << sigma[tetName[3]] << "\" />\n";
+        auto orientation = (*tetID).orientation;
+        if (orientation == 1)
+        {
+            fout << "      <tetrahedron index=\"" << idx << "\" "
+                 << "v0=\"" << sigma[tetName[0]] << "\" "
+                 << "v1=\"" << sigma[tetName[1]] << "\" "
+                 << "v2=\"" << sigma[tetName[2]] << "\" "
+                 << "v3=\"" << sigma[tetName[3]] << "\" />\n";
+        }
+        else if (orientation == -1)
+        {
+            fout << "      <tetrahedron index=\"" << idx << "\" "
+                 << "v0=\"" << sigma[tetName[3]] << "\" "
+                 << "v1=\"" << sigma[tetName[1]] << "\" "
+                 << "v2=\"" << sigma[tetName[2]] << "\" "
+                 << "v3=\"" << sigma[tetName[0]] << "\" />\n";
+        }
+        else
+        {
+            orientationError = true;
+            fout << "      <tetrahedron index=\"" << idx << "\" "
+                 << "v0=\"" << sigma[tetName[0]] << "\" "
+                 << "v1=\"" << sigma[tetName[1]] << "\" "
+                 << "v2=\"" << sigma[tetName[2]] << "\" "
+                 << "v3=\"" << sigma[tetName[3]] << "\" />\n";
+        }
         // std::cout << casc::to_string(tetName) << std::endl;
 
         // First face = vertices 2,3,4
@@ -621,6 +658,12 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
                 faceMarkerList.push_back({idx, i, mark});
         }
         cellMarkerList.push_back({idx, static_cast<std::size_t>((*tetID).marker)});
+    }
+    if (orientationError)
+    {
+        std::cerr << "WARNING(writeDolfin): The orientation of one or more cells "
+                  << "is not defined. Did you run compute_orientation()?"
+                  << std::endl;
     }
     fout << "    </cells>\n";
     fout << "    <domains>\n";

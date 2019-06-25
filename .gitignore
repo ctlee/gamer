@@ -5,9 +5,9 @@
 .~
 
 # Ignore some build directory patterns
-build/
-release/
-debug/
+build*/
+release*/
+debug*/
 
 # C++ gitignore
 # Prerequisites

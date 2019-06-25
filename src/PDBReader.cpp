@@ -223,7 +223,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string &filename,
     {
         v += min;
     }
-    // TODO: (0) What to do with holelist...
+    // TODO: (50) What to do with holelist...
     return mesh;
 }
 
@@ -312,7 +312,7 @@ std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string &filename,
     {
         v += min;
     }
-    // TODO: (0) What to do with holelist...
+    // TODO: (50) What to do with holelist...
     return mesh;
 }
 

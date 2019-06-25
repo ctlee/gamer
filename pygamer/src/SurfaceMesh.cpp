@@ -61,7 +61,11 @@ void init_SurfaceMesh(py::module& mod){
         [](SurfaceMesh& mesh, double x, double y, double z, int marker, bool sel){
             mesh.add_vertex(SMVertex(x,y,z,marker,sel));
         },
-        py::arg("x") = 0, py::arg("y") = 0, py::arg("z") = 0, py::arg("marker") = -1, py::arg("selected") = false,
+        py::arg("x") = 0,
+        py::arg("y") = 0,
+        py::arg("z") = 0,
+        py::arg("marker") = -1,
+        py::arg("selected") = false,
         R"delim(
             Add a vertex to the mesh without specifying the key.
         )delim"

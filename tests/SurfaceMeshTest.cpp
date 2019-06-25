@@ -57,7 +57,7 @@ TEST_F(SurfaceMeshTest, Smooth){
     int vbefore = mesh->size<1>();
     int ebefore = mesh->size<2>();
     int fbefore = mesh->size<3>();
-    smoothMesh(*mesh, 1, true, false);
+    smoothMesh(*mesh, 3, true, false);
 
     EXPECT_EQ(vbefore, 42);
     EXPECT_EQ(ebefore, 120);

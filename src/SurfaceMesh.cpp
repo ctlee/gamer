@@ -413,11 +413,6 @@ void normalSmooth(SurfaceMesh &mesh)
               << ", # Large Angles: " << nLarge << std::endl;
 }
 
-std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
-{
-    return mesh.get_cover(vertexID).size();
-}
-
 tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
 {
     return surfacemesh_detail::getTangentH(mesh, (*vertexID).position, vertexID);
@@ -523,21 +518,19 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
         //         surfacemesh_detail::edgeFlip(mesh, edgeID);
         //     }
         // }
-        // init_orientation(mesh);
-        // check_orientation(mesh);
 
         // ATOMIC EDGE FLIP
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
         // Get set of good, non-interfering edges to flip according to the
         // Angle based criteria.
-        surfacemesh_detail::selectFlipEdges(mesh, preserveRidges, surfacemesh_detail::checkFlipAngle,
+        surfacemesh_detail::selectFlipEdges(mesh,
+                                            preserveRidges,
+                                            surfacemesh_detail::checkFlipAngle,
                                             std::back_inserter(edgesToFlip));
         for (auto edgeID : edgesToFlip)
         {
             surfacemesh_detail::edgeFlip(mesh, edgeID);
         }
-        init_orientation(mesh);
-        check_orientation(mesh);
 
         // Mark for flipping by edge valence.
         // edgesToFlip.clear();
@@ -546,8 +539,6 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
         // for(auto edgeID : edgesToFlip){
         //     edgeFlip(mesh, edgeID);
         // }
-        // init_orientation(mesh);
-        // check_orientation(mesh);
 
         if (verbose)
         {

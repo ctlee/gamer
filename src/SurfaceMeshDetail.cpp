@@ -338,11 +338,13 @@ Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 
     // TODO: (99) How much optimization can we get from having a persistent
     // eigensolver?
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(emat);
-    if (eigensolver.info() != Eigen::Success)
-        abort(); // TODO: (0) Replace this with a throw
+    if (eigensolver.info() != Eigen::Success){
+        std::stringstream ss;
+        ss << "getEigenvalues has encountered Eigen error " << eigensolver.info();
+        throw std::runtime_error(ss.str());
+    }
     return eigensolver;
 }
-
 
 void weightedVertexSmooth(SurfaceMesh              &mesh,
                           SurfaceMesh::SimplexID<1> vertexID,
@@ -408,21 +410,13 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
         }
         else
         {
-            try
-            {
-                normalize(bisector);
-                // Normal of tangent plane
-                Vector tanNorm = cross(pS, nS);
-                // Get the perpendicular plane made up of plane normal of
-                // bisector
-                perpNorm = cross(tanNorm, bisector);
-                normalize(perpNorm);
-            }
-            catch (std::exception &e)
-            {
-                // TODO: (0) rewrite this robustly to remove try catch blocks
-                throw std::runtime_error("ERROR: cannot normalize zero length vector");
-            }
+            normalize(bisector);
+            // Normal of tangent plane
+            Vector tanNorm = cross(pS, nS);
+            // Get the perpendicular plane made up of plane normal of
+            // bisector
+            perpNorm = cross(tanNorm, bisector);
+            normalize(perpNorm);
         }
 
         // Get a reference vector to shared which lies on the plane of interest.
@@ -572,16 +566,15 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     edgeID = mesh.get_simplex_up({up[0], up[1]});
     (*edgeID).selected = true;
 
-    init_orientation(mesh);
-    check_orientation(mesh);
-    // std::vector<SurfaceMesh::SimplexID<1>> verts;
-    // mesh.down(edgeID, std::back_inserter(verts));
-    // initLocalOrientation<std::integral_constant<size_t, 1> >::apply(mesh, std::set<int>({up[0], up[1]}), verts.begin(), verts.end());
 
-    // std::vector<SurfaceMesh::SimplexID<2>> nbors;
-    // casc::neighbors(mesh, edgeID, std::back_inserter(nbors));
-    // nbors.push_back(edgeID);
-    // computeLocalOrientation(mesh, nbors);
+    std::vector<SurfaceMesh::SimplexID<1>> verts;
+    mesh.down(edgeID, std::back_inserter(verts));
+    initLocalOrientation<std::integral_constant<size_t, 1> >::apply(mesh, std::set<int>({up[0], up[1], name[0], name[1]}), verts.begin(), verts.end());
+
+    std::vector<SurfaceMesh::SimplexID<2>> nbors;
+    casc::neighbors(mesh, edgeID, std::back_inserter(nbors));
+    nbors.push_back(edgeID);
+    computeLocalOrientation(mesh, nbors);
 }
 
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
@@ -589,29 +582,31 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
     auto getMinAngle = [](const Vertex &a, const Vertex &b, const Vertex &c){
             double              minAngle = 999; // dummy for now
             double              tmp;
-            std::vector<Vertex> triangle = {a, b, c};
-            for (int i = 0; i < 3; i++)
-            {
-                std::rotate(triangle.begin(), triangle.begin()+i, triangle.end());
-                auto it = triangle.begin();
+            std::array<Vertex, 3> triangle = {a, b, c};
+            std::array<std::size_t, 3> sigma({0,1,2});
+            for(int i = 0; i < 3; ++i){
                 try
                 {
-                    tmp = angle(*it, *(it+1), *(it+2));
+                    tmp = angle(triangle[sigma[0]], triangle[sigma[1]], triangle[sigma[2]]);
                 }
                 catch (std::runtime_error &e)
                 {
                     throw std::runtime_error("Angle is undefined for face with zero area. Try running degenerate dissolve in Blender and ensure manifoldness.");
                 }
                 if (tmp < minAngle)
-                    minAngle = tmp;
+                minAngle = tmp;
+
+                std::rotate(sigma.begin(), sigma.begin() + 1, sigma.end());
             }
             return minAngle;
         };
 
     auto name = mesh.get_name(edgeID);
     std::pair<Vertex, Vertex> shared;
-    shared.first  = *mesh.get_simplex_up({name[0]});
-    shared.second = *mesh.get_simplex_up({name[1]});
+    shared.first  = *mesh.get_simplex_down(edgeID, name[0]);
+    shared.second = *mesh.get_simplex_down(edgeID, name[1]);
+
+    // TODO: (50) Benchmark for performance increase from going up to face then back down...
     std::pair<Vertex, Vertex> notShared;
     auto up   = mesh.get_cover(edgeID);
     notShared.first  = *mesh.get_simplex_up({up[0]});
@@ -645,8 +640,8 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
     notShared.first  = mesh.get_simplex_up({up[0]});
     notShared.second = mesh.get_simplex_up({up[1]});
     std::array<double, 20> valence;
+
     // assuming there are no boundaries
-    // TODO: (5) check if it's a boundary...
     valence[0] = getValence(mesh, shared.first)-6;
     valence[1] = getValence(mesh, shared.second)-6;
     valence[2] = getValence(mesh, notShared.first)-6;
@@ -936,7 +931,7 @@ bool checkEdgeFlip(const SurfaceMesh &mesh,
         }
     }
 
-    // TODO: (5) Change to check link condition
+    // TODO: (5) Implement a better algorithm to prevent folding
     // Check if the triangles make a wedge shape. Flipping this can
     // cause knife faces.
     auto   f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
