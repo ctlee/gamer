@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/_skbuild/macosx-10.14-x86_64-3.7/cmake-build/lib/'))
 
 import os
 import pygamer
@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.2'
-release = 'v2.0.2-dev-15-gc883dac.dirty'
+release = 'v2.0.2-dev-16-g721d135.dirty'
 
 # -- General configuration ---------------------------------------------------
 

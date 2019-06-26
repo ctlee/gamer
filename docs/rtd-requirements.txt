@@ -1,13 +1,21 @@
+# Required for building
+cmake >= 3.11
 scikit-build >= 0.10.0
 setuptools
 wheel
-cmake >= 3.11
+numpy
+
+# Recommended
+pytest
+
+# For building documentation
 sphinx>=2.0
 breathe>=4.13.0
 exhale
+pandoc
 sphinx-issues
 nbsphinx
 jupyter_sphinx
+
+# Visualization in docs
 threevis
-pytest
-pandoc
