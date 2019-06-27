@@ -3,6 +3,7 @@ cmake >= 3.11
 scikit-build >= 0.10.0
 setuptools
 wheel
+numpy
 
 # Recommended
 ninja
