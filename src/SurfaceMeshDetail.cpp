@@ -603,6 +603,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
 
     auto name = mesh.get_name(edgeID);
     std::pair<Vertex, Vertex> shared;
+
     shared.first  = *mesh.get_simplex_down(edgeID, name[0]);
     shared.second = *mesh.get_simplex_down(edgeID, name[1]);
 
@@ -611,6 +612,30 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
     auto up   = mesh.get_cover(edgeID);
     notShared.first  = *mesh.get_simplex_up({up[0]});
     notShared.second = *mesh.get_simplex_up({up[1]});
+
+    // TODO: (5) Change to check link condition
+    // Check if the triangles make a wedge shape. Flipping this can
+    // cause knife faces.
+    auto   f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
+    auto   f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
+    auto   f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
+    auto   f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
+    auto   area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
+    auto   areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
+    double edgeFlipCriterion = 1.001;
+    // If area changes by a lot continue
+    if (areaFlip/area > edgeFlipCriterion)
+        return false;
+
+    int excess = checkFlipValenceExcess(mesh, edgeID);
+    if (excess < -3){
+        // Force flip since it improves valence by a lot
+        return true;
+    }
+    else if (excess > 3){
+        // Flipping is too bad...
+        return false;
+    }
 
     // Go through all angle combinations
     double tmp;
@@ -624,22 +649,23 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
     if (tmp < minAngleFlip)
         minAngleFlip = tmp;
 
-    if (minAngleFlip > minAngle)
+    if (minAngleFlip > minAngle){
         return true;
+    }
     return false;
 }
 
-bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
+int checkFlipValenceExcess(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
 {
     auto name = mesh.get_name(edgeID);
     std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1> > shared;
-    shared.first  = mesh.get_simplex_up({name[0]});
-    shared.second = mesh.get_simplex_up({name[1]});
+    shared.first  = mesh.get_simplex_down(edgeID, name[0]);
+    shared.second = mesh.get_simplex_down(edgeID, name[1]);
     std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1> > notShared;
     auto up = mesh.get_cover(edgeID);
     notShared.first  = mesh.get_simplex_up({up[0]});
     notShared.second = mesh.get_simplex_up({up[1]});
-    std::array<double, 20> valence;
+    std::array<int, 4> valence;
 
     // assuming there are no boundaries
     valence[0] = getValence(mesh, shared.first)-6;
@@ -647,6 +673,7 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
     valence[2] = getValence(mesh, notShared.first)-6;
     valence[3] = getValence(mesh, notShared.second)-6;
 
+    // std::cout << "Before: " << casc::to_string(valence) << std::endl;
     int excess = 0;
     for (int i = 0; i < 4; i++)
     {
@@ -657,15 +684,14 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
     valence[1] -= 1;
     valence[2] += 1;
     valence[3] += 1;
-    int flipExcess = 0;
 
+    // std::cout << "After: " << casc::to_string(valence) << std::endl;
+    int flipExcess = 0;
     for (int i = 0; i < 4; i++)
     {
         flipExcess += std::pow(valence[i], 2);
     }
-    if (flipExcess < excess)
-        return true;
-    return false;
+    return flipExcess - excess;
 }
 
 // Angle Mesh improvement by projecting barycenter on tangent plane...

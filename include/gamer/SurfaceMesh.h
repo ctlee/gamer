@@ -564,15 +564,6 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                     //           << "Returning..." << std::endl;
                     continue;
                 }
-                auto name = mesh.get_name(edgeID);
-                std::pair<Vertex, Vertex> shared;
-                shared.first  = *mesh.get_simplex_up({name[0]});
-                shared.second = *mesh.get_simplex_up({name[1]});
-
-
-                std::pair<Vertex, Vertex> notShared;
-                notShared.first  = *mesh.get_simplex_up({up[0]});
-                notShared.second = *mesh.get_simplex_up({up[1]});
 
                 // Check if the edge is a part of a tetrahedron.
                 if (mesh.exists<2>({up[0], up[1]}))
@@ -593,20 +584,6 @@ void selectFlipEdges(const SurfaceMesh &mesh,
                         continue;
                     }
                 }
-
-                // TODO: (5) Change to check link condition
-                // Check if the triangles make a wedge shape. Flipping this can
-                // cause knife faces.
-                auto   f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
-                auto   f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
-                auto   f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
-                auto   f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
-                auto   area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
-                auto   areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
-                double edgeFlipCriterion = 1.001;
-                // If area changes by a lot continue
-                if (areaFlip/area > edgeFlipCriterion)
-                    continue;
 
                 // Check the flip using user function
                 if (checkFlip(mesh, edgeID))
@@ -664,7 +641,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  * @return     Returns true if flipping the edge will improve the valence, false
  *             otherwise.
  */
-bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
+int checkFlipValenceExcess(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
 
 /**
  * @brief      Apply normal smoothing to a region around a vertex

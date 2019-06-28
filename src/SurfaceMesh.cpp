@@ -532,14 +532,6 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
             surfacemesh_detail::edgeFlip(mesh, edgeID);
         }
 
-        // Mark for flipping by edge valence.
-        // edgesToFlip.clear();
-        // selectFlipEdges(mesh, preserveRidges, checkFlipValence,
-        //                    std::back_inserter(edgesToFlip));
-        // for(auto edgeID : edgesToFlip){
-        //     edgeFlip(mesh, edgeID);
-        // }
-
         if (verbose)
         {
             std::tie(minAngle, maxAngle, nSmall, nLarge) = getMinMaxAngles(mesh, maxMinAngle, minMaxAngle);
