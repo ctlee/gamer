@@ -90,6 +90,12 @@ add_dependencies(stage_files pygamer)
 
 # Generate the name of the build
 set(_ZIPNAME "blendgamer-${VERSION_SHORT}-")
+if(VERSION_INFO)
+    string(CONCAT _ZIPNAME ${_ZIPNAME} "${VERSION_INFO}-${VERSION_SHA1}-")
+    if(VERSION_DIRTY)
+        string(CONCAT _ZIPNAME ${_ZIPNAME} "${VERSION_DIRTY}-")
+    endif()
+endif()
 string(CONCAT _ZIPNAME ${_ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
