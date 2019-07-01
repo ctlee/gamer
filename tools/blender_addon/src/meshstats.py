@@ -390,7 +390,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
 
     maxCurve = FloatProperty(
         name="Maximum curvature", default=1000,
-        description="Upper bound percnetile truncation"
+        description="Upper bound percentile truncation"
         )
 
     minEnergy = FloatProperty(
@@ -404,7 +404,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         )
 
     niter = IntProperty(
-        name="Smooth Curvature Iterations", default = 5,
+        name="Smooth Curvature Iterations", min=0, default = 5,
         description="How many iterations of curvature smoothing?"
         )
 
@@ -412,9 +412,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report)
         if gmesh:
             curvatures = gmesh.meanCurvature(True, self.niter)
-            # curvatures = np.zeros(gmesh.nVertices)
-            # for i, vID in enumerate(gmesh.vertexIDs):
-            #     curvatures[i] = gmesh.getMeanCurvature(vID)
+
+            np.save('%s_%s_%d_MeanCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.niter), curvatures)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)
@@ -437,6 +436,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report)
         if gmesh:
             curvatures = gmesh.gaussianCurvature(True, self.niter)
+
+            np.save('%s_%s_%d_GaussCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.niter), curvatures)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
                 maxV=self.maxCurve, percentTruncate=True)

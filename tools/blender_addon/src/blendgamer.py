@@ -35,6 +35,7 @@ from blendgamer.tetrahedralization import GAMerTetrahedralizationPropertyGroup
 
 from blendgamer.util import UNSETID
 
+import blendgamer.pygamer as pygamer
 
 # python imports
 import sys
@@ -51,6 +52,7 @@ def gamer_load_post(dummy):
     """
     Initialize GAMer addon...
     """
+    print('Loading BlendGAMer v%s with PyGAMer %s'%(getGamerVersion(), pygamer.__version__()))
     scene = bpy.context.scene
     if not scene.gamer.initialized:
         # print('Initializing GAMer Properties')
