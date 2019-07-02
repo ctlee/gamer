@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.3'
-release = 'v2.0.3-dev-2-gdd28c33'
+release = 'v2.0.3-dev-3-ged9cdf8.dirty'
 
 # -- General configuration ---------------------------------------------------
 

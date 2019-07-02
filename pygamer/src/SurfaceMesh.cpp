@@ -636,6 +636,35 @@ void init_SurfaceMesh(py::module& mod){
     );
 
 
+    SurfMeshCls.def("getNormal",
+        py::overload_cast<const SurfaceMesh&, SurfaceMesh::SimplexID<3>>(&getNormal),
+        R"delim(
+            Return the normal of the face.
+
+            Args:
+                mesh  (:py:class`pygamer.surfacemesh.SurfaceMesh`): Mesh of interest
+                FaceID (:py:class`pygamer.surfacemesh.FaceID`): FaceID of interest
+
+            Returns:
+                Vector: Vector normal
+        )delim"
+    );
+
+
+    SurfMeshCls.def("getNormal",
+        py::overload_cast<const SurfaceMesh&, SurfaceMesh::SimplexID<1>>(&getNormal),
+        R"delim(
+            Return the normal of the face.
+
+            Args:
+                mesh  (:py:class`pygamer.surfacemesh.SurfaceMesh`): Mesh of interest
+                FaceID (:py:class`pygamer.surfacemesh.VertexID`): VertexID of interest
+
+            Returns:
+                Vector: Vector normal
+        )delim"
+    );
+
     /************************************
      *  ITERATORS
      ************************************/

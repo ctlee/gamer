@@ -912,9 +912,25 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
     std::vector<int> cover = mesh.get_cover(vertexID);
     std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
 
-    auto eID = mesh.get_simplex_up(vertexID, cover.back());
-    cover.pop_back();
-    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    SurfaceMesh::SimplexID<2> eID;
+
+    if (mesh.onBoundary(vertexID)){
+        auto it = cover.begin();
+        for(; it != cover.end(); ++it){
+            auto v = mesh.get_simplex_up({*it});
+            if(mesh.onBoundary(v)){
+                break;
+            }
+        }
+        eID = mesh.get_simplex_up(vertexID, *it);
+        cover.erase(it);
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
+    else{
+        eID = mesh.get_simplex_up(vertexID, cover.back());
+        cover.pop_back();
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
 
     while (!cover.empty())
     {
