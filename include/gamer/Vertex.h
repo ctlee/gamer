@@ -379,6 +379,10 @@ REAL angleRad(const Vertex &A, const Vertex &B, const Vertex &C);
  */
 REAL angleRad(const Vector &AB, const Vector &CB);
 
+REAL angleRadTan(const Vertex &A, const Vertex &B, const Vertex &C);
+REAL angleRadTan(const Vector &v1, const Vector &v2);
+REAL signed_angle(const Vector &v1, const Vector &v2, const Vector &reference);
+
 /**
  * @brief      Get the length of a vector
  *

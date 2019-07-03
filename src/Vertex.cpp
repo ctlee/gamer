@@ -110,4 +110,20 @@ REAL angleRad(const Vector &AB, const Vector &CB)
     cb /= lenCB;
     return std::acos(ab|cb);
 }
+
+REAL angleRadTan(const Vertex &A, const Vertex &B, const Vertex &C){
+    Vector AB(A-B);
+    Vector CB(C-B);
+    return angleRadTan(AB, CB);
+}
+
+REAL angleRadTan(const Vector &v1, const Vector &v2){
+    return std::atan2(length(cross(v1,v2)), dot(v1,v2));
+}
+
+REAL signed_angle(const Vector& v1, const Vector& v2, const Vector& reference)
+{
+    return std::atan2(length(dot(cross(v1, v2), reference)), dot(v1, v2));
+}
+
 } // end namespace gamer

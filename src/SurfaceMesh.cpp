@@ -914,11 +914,10 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
 
     SurfaceMesh::SimplexID<2> eID;
 
-    if (mesh.onBoundary(vertexID)){
+    if(mesh.onBoundary(vertexID)){
         auto it = cover.begin();
         for(; it != cover.end(); ++it){
-            auto v = mesh.get_simplex_up({*it});
-            if(mesh.onBoundary(v)){
+            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
                 break;
             }
         }
@@ -996,10 +995,10 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         else
         {
             // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angleRad(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angleRad(center, curr, next)))/8;
+            Amix += (pow(distance(center, curr), 2)/tan(angleRadTan(center, next, curr))
+                     + pow(distance(center, next), 2)/tan(angleRadTan(center, curr, next)))/8;
         }
-        curvature += (1/tan(angleRad(center, prev, curr)) + 1/tan(angleRad(center, next, curr)))*(center - curr);
+        curvature += (1/tan(angleRadTan(center, prev, curr)) + 1/tan(angleRadTan(center, next, curr)))*(center - curr);
     }
     curvature /= (2*Amix);
     return std::sqrt(curvature|curvature)/2;
@@ -1015,9 +1014,24 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     std::vector<int> cover = mesh.get_cover(vertexID);
     std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
 
-    auto eID = mesh.get_simplex_up(vertexID, cover.back());
-    cover.pop_back();
-    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    SurfaceMesh::SimplexID<2> eID;
+
+    if(mesh.onBoundary(vertexID)){
+        auto it = cover.begin();
+        for(; it != cover.end(); ++it){
+            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
+                break;
+            }
+        }
+        eID = mesh.get_simplex_up(vertexID, *it);
+        cover.erase(it);
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
+    else{
+        eID = mesh.get_simplex_up(vertexID, cover.back());
+        cover.pop_back();
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
 
     while (!cover.empty())
     {
@@ -1083,10 +1097,10 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
         else
         {
             // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angleRad(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angleRad(center, curr, next)))/8;
+            Amix += (pow(distance(center, curr), 2)/tan(angleRadTan(center, next, curr))
+                     + pow(distance(center, next), 2)/tan(angleRadTan(center, curr, next)))/8;
         }
-        angleSum += angleRad(curr, center, next);
+        angleSum += angleRadTan(curr, center, next);
     }
     return (2*M_PI-angleSum)/Amix;
 }

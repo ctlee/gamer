@@ -537,7 +537,6 @@ void init_SurfaceMesh(py::module& mod){
                 curvature[i] = getMeanCurvature(mesh, vertexID);
             }
 
-
             if(smooth){
                 double* smoothed = new double[mesh.size<1>()];
                 for(int round = 0; round < nIter; ++round){
@@ -553,7 +552,6 @@ void init_SurfaceMesh(py::module& mod){
                         }
                         // smoothed[i] = value;
                         smoothed[i] = value/static_cast<double>(neighbors.size()+1);
-
                     }
                     for(std::size_t i = 0; i < mesh.size<1>(); ++i){
                         curvature[i] = smoothed[i];
