@@ -81,9 +81,9 @@ void generateHistogram(const SurfaceMesh &mesh)
         auto   binAngle = [&](double angle) -> std::size_t {
                 return static_cast<std::size_t>(std::floor(angle/10));
             };
-        histogram[binAngle(angle(a, b, c))]++;
-        histogram[binAngle(angle(b, a, c))]++;
-        histogram[binAngle(angle(c, a, b))]++;
+        histogram[binAngle(angleDeg(a, b, c))]++;
+        histogram[binAngle(angleDeg(b, a, c))]++;
+        histogram[binAngle(angleDeg(c, a, b))]++;
     }
 
     std::size_t factor = mesh.size<3>()*3;
@@ -192,9 +192,9 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
 
         areaOut << getArea(a, b, c) << "\n";
         // Print angles in degrees
-        angleOut << angle(a, b, c) << "\n"
-                 << angle(b, a, c) << "\n"
-                 << angle(a, c, b) << "\n";
+        angleOut << angleDeg(a, b, c) << "\n"
+                 << angleDeg(b, a, c) << "\n"
+                 << angleDeg(a, c, b) << "\n";
     }
     areaOut.close();
     angleOut.close();
@@ -982,7 +982,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angle(curr, center, next) > 90)
+            if (angleDeg(curr, center, next) > 90)
             {
                 // The angle of T at center is obtuse
                 Amix += getArea(center, curr, next)/2;
@@ -995,10 +995,10 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         else
         {
             // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angleRadTan(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angleRadTan(center, curr, next)))/8;
+            Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
+                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8;
         }
-        curvature += (1/tan(angleRadTan(center, prev, curr)) + 1/tan(angleRadTan(center, next, curr)))*(center - curr);
+        curvature += (1/tan(angle(center, prev, curr)) + 1/tan(angle(center, next, curr)))*(center - curr);
     }
     curvature /= (2*Amix);
     return std::sqrt(curvature|curvature)/2;
@@ -1097,10 +1097,10 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
         else
         {
             // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angleRadTan(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angleRadTan(center, curr, next)))/8;
+            Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
+                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8;
         }
-        angleSum += angleRadTan(curr, center, next);
+        angleSum += angle(curr, center, next);
     }
     return (2*M_PI-angleSum)/Amix;
 }

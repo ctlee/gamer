@@ -587,7 +587,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
             for(int i = 0; i < 3; ++i){
                 try
                 {
-                    tmp = angle(triangle[sigma[0]], triangle[sigma[1]], triangle[sigma[2]]);
+                    tmp = angleDeg(triangle[sigma[0]], triangle[sigma[1]], triangle[sigma[2]]);
                 }
                 catch (std::runtime_error &e)
                 {
@@ -950,7 +950,7 @@ bool checkEdgeFlip(const SurfaceMesh &mesh,
     {
         auto a   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[0]));
         auto b   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[1]));
-        auto val = angle(a, b);
+        auto val = angleDeg(a, b);
         if (val > 60)
         {
             return false;

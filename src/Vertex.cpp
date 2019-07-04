@@ -76,54 +76,32 @@ REAL distance(const Vertex &A, const Vertex &B)
     return length(A - B);
 }
 
-REAL angle(const Vertex &A, const Vertex &B, const Vertex &C)
+REAL angleDeg(const Vertex &A, const Vertex &B, const Vertex &C)
 {
+    Vector AB(A-B);
+    Vector CB(C-B);
+    return angleDeg(AB, CB);
+}
+
+REAL angleDeg(const Vector &AB, const Vector &CB)
+{
+
+    return angle(AB, CB)*180/M_PI;
+}
+
+REAL angle(const Vertex &A, const Vertex &B, const Vertex &C){
     Vector AB(A-B);
     Vector CB(C-B);
     return angle(AB, CB);
 }
 
-REAL angle(const Vector &AB, const Vector &CB)
-{
-
-    return angleRad(AB, CB)*180/M_PI;
-}
-
-REAL angleRad(const Vertex &A, const Vertex &B, const Vertex &C)
-{
-    Vector AB(A-B);
-    Vector CB(C-B);
-    return angleRad(AB, CB);
-}
-
-REAL angleRad(const Vector &AB, const Vector &CB)
-{
-    Vector ab(AB);
-    Vector cb(CB);
-    REAL   lenAB = length(ab);
-    REAL   lenCB = length(cb);
-    if (lenAB == 0 || lenCB == 0)
-    {
-        throw std::runtime_error("Some length == 0, cannot compute angle.");
-    }
-    ab /= lenAB;
-    cb /= lenCB;
-    return std::acos(ab|cb);
-}
-
-REAL angleRadTan(const Vertex &A, const Vertex &B, const Vertex &C){
-    Vector AB(A-B);
-    Vector CB(C-B);
-    return angleRadTan(AB, CB);
-}
-
-REAL angleRadTan(const Vector &v1, const Vector &v2){
+REAL angle(const Vector &v1, const Vector &v2){
     return std::atan2(length(cross(v1,v2)), dot(v1,v2));
 }
 
 REAL signed_angle(const Vector& v1, const Vector& v2, const Vector& reference)
 {
-    return std::atan2(length(dot(cross(v1, v2), reference)), dot(v1, v2));
+    return std::atan2(dot(cross(v1, v2), reference), dot(v1, v2));
 }
 
 } // end namespace gamer
