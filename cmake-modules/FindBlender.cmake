@@ -35,7 +35,7 @@ find_program(BLENDER_EXECUTABLE blender)
 
 if(BLENDER_EXECUTABLE)
     # Get the python path and version from blender
-    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b --factory-startup --python-expr
+    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b -noaudio --factory-startup --python-expr
         "import sys;import struct;import bpy;
 print(str(bpy.app.version[0]) + '.' + str(bpy.app.version[1]) + '.' + str(bpy.app.version[2]))
 print(bpy.utils.script_path_user())
