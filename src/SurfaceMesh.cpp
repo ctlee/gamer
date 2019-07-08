@@ -220,9 +220,9 @@ std::tuple<double, double, int, int> getMinMaxAngles(
         std::array<double, 3> angles;
         try
         {
-            angles[0] = angle(a, b, c);
-            angles[1] = angle(b, a, c);
-            angles[2] = angle(a, c, b);
+            angles[0] = angleDeg(a, b, c);
+            angles[1] = angleDeg(b, a, c);
+            angles[2] = angleDeg(a, c, b);
         }
         catch (std::runtime_error &e)
         {
@@ -481,7 +481,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 }
 
 
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose)
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings)
 {
     double maxMinAngle = 15;
     double minMaxAngle = 165;
@@ -504,7 +504,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
         {
             if ((*vertex).selected == true)
             {
-                surfacemesh_detail::weightedVertexSmooth(mesh, vertex, RINGS);
+                surfacemesh_detail::weightedVertexSmooth(mesh, vertex, rings);
             }
             //barycenterVertexSmooth(mesh, vertex);
         }
@@ -610,7 +610,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
 }
 
 
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight)
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings)
 {
     // TODO: Check if all polygons are closed (0)
 
@@ -666,7 +666,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         // Curvature as coarsening criteria
         if (flatRate > 0)
         {
-            auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, RINGS);
+            auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
             auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
             // The closer this ratio is to 0 the flatter the local region.
             flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
@@ -679,6 +679,87 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         }
     }
 }
+
+void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings)
+{
+    // Compute the average edge length
+    REAL avgLen = 0;
+    for (auto edgeID : mesh.get_level_id<2>())
+    {
+        auto name =  mesh.get_name(edgeID);
+        auto v = *mesh.get_simplex_down(edgeID, name[0])
+                 - *mesh.get_simplex_down(edgeID, name[1]);
+        avgLen += length(v);
+    }
+    avgLen /= static_cast<REAL>(mesh.size<2>());
+
+    REAL sparsenessRatio = 1;
+
+    auto range = mesh.get_level_id<1>();
+    for (auto vertexIDIT = range.begin(); vertexIDIT != range.end();)
+    {
+        // Immediately cache vertexID and increment IT so destruction of
+        // vertexID won't invalidate the iterator.
+        auto vertexID = *vertexIDIT;
+        ++vertexIDIT;
+
+        if ((*vertexID).selected == false)
+        {
+            continue;
+        }
+
+        // Get max length of edges.
+        auto edges  = mesh.up(vertexID);
+        REAL maxLen = 0;
+        for (auto edgeID : edges)
+        {
+            auto name =  mesh.get_name(edgeID);
+            auto v = *mesh.get_simplex_down(edgeID, name[0])
+                     - *mesh.get_simplex_down(edgeID, name[1]);
+            REAL tmpLen = std::sqrt(v|v);
+            if (tmpLen > maxLen)
+                maxLen = tmpLen;
+        }
+        sparsenessRatio = std::pow(maxLen/avgLen, weight);
+
+        // Decimate if under the threshold
+        if (sparsenessRatio < threshold)
+        {
+            surfacemesh_detail::decimateVertex(mesh, vertexID, rings);
+        }
+    }
+}
+
+void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings){
+    REAL flatnessRatio = 1;
+
+    auto range = mesh.get_level_id<1>();
+    for (auto vertexIDIT = range.begin(); vertexIDIT != range.end();)
+    {
+        // Immediately cache vertexID and increment IT so destruction of
+        // vertexID won't invalidate the iterator.
+        auto vertexID = *vertexIDIT;
+        ++vertexIDIT;
+
+        if ((*vertexID).selected == false)
+        {
+            continue;
+        }
+
+        // Curvature as coarsening criteria
+        auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
+        auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
+        // The closer this ratio is to 0 the flatter the local region.
+        flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], weight);
+
+        // Add vertex to delete list
+        if (flatnessRatio < threshold)
+        {
+            surfacemesh_detail::decimateVertex(mesh, vertexID);
+        }
+    }
+}
+
 
 void fillHoles(SurfaceMesh &mesh)
 {

@@ -280,7 +280,7 @@ namespace surfacemesh_detail
  * @param      mesh      The mesh
  * @param[in]  vertexID  The vertex id
  */
-void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings = 2);
 
 /**
  * @brief      Computes the local structure tensor
@@ -941,17 +941,37 @@ void centeralize(SurfaceMesh &mesh);
  * @param[in]  preserveRidges  The preserve ridges
  * @param[in]  verbose         The verbose
  */
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose);
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings = 2);
 
 /**
- * @brief      Coarsens the mesh by selecting vertices first.
+ * @brief      Coarsens the mesh
  *
  * @param      mesh         The mesh
  * @param[in]  coarseRate   The coarse rate
  * @param[in]  flatRate     The flat rate
  * @param[in]  denseWeight  The dense weight
  */
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight);
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2);
+
+/**
+ * @brief      Coarsens the mesh by selecting vertices first.
+ *
+ * @param      mesh       The mesh
+ * @param[in]  threshold  The threshold
+ * @param[in]  weight     The weight
+ * @param[in]  rings      The rings
+ */
+void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2);
+
+/**
+ * @brief      Coarsens flat regions by LST analysis
+ *
+ * @param      mesh       The mesh
+ * @param[in]  threshold  The threshold
+ * @param[in]  weight     The weight
+ * @param[in]  rings      The rings
+ */
+void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2);
 
 /**
  * @brief      Perform smoothing of the mesh normals

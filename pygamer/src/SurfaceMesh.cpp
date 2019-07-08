@@ -770,7 +770,7 @@ void init_SurfaceMesh(py::module& mod){
 
 
     SurfMeshCls.def("smooth", &smoothMesh,
-        py::arg("max_iter")=6, py::arg("preserve_ridges")=false, py::arg("verbose")=true,
+        py::arg("max_iter")=6, py::arg("preserve_ridges")=false, py::arg("verbose")=true, py::arg("rings")=2,
         py::call_guard<py::scoped_ostream_redirect,
                 py::scoped_estream_redirect>(),
         R"delim(
@@ -783,12 +783,13 @@ void init_SurfaceMesh(py::module& mod){
                 maxIter (int): Maximum number of smoothing iterations
                 preserveRidges (bool):  Prevent flipping of edges along ridges.
                 verbose (bool): Print details to std::out
+                rings (int): Number of LST rings to consider
         )delim"
     );
 
 
     SurfMeshCls.def("coarse", &coarse,
-        py::arg("rate"), py::arg("flatRate"), py::arg("denseWeight"),
+        py::arg("rate"), py::arg("flatRate"), py::arg("denseWeight"), py::arg("rings")=2,
         R"delim(
             Coarsen a surface mesh.
 
@@ -799,36 +800,39 @@ void init_SurfaceMesh(py::module& mod){
                 rate (float): Threshold value for coarsening
                 flatRate (float): Priority of decimating flat regions
                 denseWeight (float): Priority of decimating dense regions
+                rings (int): Number of LST rings to consider
         )delim"
     );
 
 
     SurfMeshCls.def("coarse_flat",
-        [](SurfaceMesh& mesh, double rate, int niter){
-            for(int i = 0; i < niter; ++i) coarse(mesh, rate, 0.5, 0);
+        [](SurfaceMesh& mesh, double rate, int niter, std::size_t rings){
+            for(int i = 0; i < niter; ++i) coarse_flat(mesh, rate, 0.5, rings);
         },
-        py::arg("rate")=0.016, py::arg("numiter")=1,
+        py::arg("rate")=0.016, py::arg("numiter")=1, py::arg("rings")=2,
         R"delim(
             Coarsen flat regions of a surface mesh.
 
             Args:
                 rate (float): Threshold value
                 numiter (int): Number of iterations to run
+                rings (int): Number of LST rings to consider
         )delim"
     );
 
 
     SurfMeshCls.def("coarse_dense",
-        [](SurfaceMesh& mesh, double rate, int niter){
-            for(int i = 0; i < niter; ++i) coarse(mesh, rate, 0, 10);
+        [](SurfaceMesh& mesh, double rate, int niter, std::size_t rings){
+            for(int i = 0; i < niter; ++i) coarse_dense(mesh, rate, 10, rings);
         },
-        py::arg("rate")=1.6, py::arg("numiter")=1,
+        py::arg("rate")=1.6, py::arg("numiter")=1, py::arg("rings")=2,
         R"delim(
             Coarsen dense regions of a surface mesh.
 
             Args:
                 rate (float): Threshold value
                 numiter (int): Number of iterations to run
+                rings (int): Number of LST rings to consider
         )delim"
     );
 

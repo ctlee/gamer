@@ -403,20 +403,35 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Maximum bound for plotting/thresholding energy"
         )
 
-    niter = IntProperty(
+    curveIter = IntProperty(
         name="Smooth Curvature Iterations", min=0, default = 5,
         description="How many iterations of curvature smoothing?"
+        )
+
+    curvePercentile = BoolProperty(
+        name="Use Percentiles", default = True,
+        description="Treat min and max as percentiles?"
+        )
+
+    logCurvature = BoolProperty(
+        name="Use Log scale", default = False,
+        description="Plot the curvatures in log scale"
+        )
+
+    plotColorbar = BoolProperty(
+        name="Show plot", default=False,
+        description="Plot colorbar"
         )
 
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = gmesh.meanCurvature(True, self.niter)
+            curvatures = gmesh.meanCurvature(True, self.curveIter)
 
-            np.save('%s_%s_%d_MeanCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.niter), curvatures)
+            np.save('%s_%s_%d_MeanCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter), curvatures)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
-                maxV=self.maxCurve, percentTruncate=True)
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -435,12 +450,12 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def gaussian_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = gmesh.gaussianCurvature(True, self.niter)
+            curvatures = gmesh.gaussianCurvature(True, self.curveIter)
 
-            np.save('%s_%s_%d_GaussCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.niter), curvatures)
+            np.save('%s_%s_%d_GaussCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter), curvatures)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
-                maxV=self.maxCurve, percentTruncate=True)
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data

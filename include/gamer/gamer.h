@@ -36,9 +36,6 @@
 /// Namespace for all things gamer
 namespace gamer
 {
-/// The number of rings to use to compute local structure tensor
-#define RINGS 1
-
 /// Blurring blobbyness to use in conversion from PDB/PQR to 3D volumes
 #define BLOBBYNESS        -0.2f
 

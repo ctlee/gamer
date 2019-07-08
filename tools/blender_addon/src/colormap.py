@@ -22,16 +22,22 @@
 
 import numpy as np
 
-def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, saveData=True):
+def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, logscale=False, showplot=False):
     colorStyle = colormapDict[colormapKey]
 
-    if saveData:
-        np.savetxt('data.npy', data)
+    tmpMin = np.amin(data)
+    tmpMax = np.amax(data)
+    tmpMean = np.mean(data)
+    tmpMedian = np.median(data)
+    print("*** Pre Truncation ****")
+    print("Minimum value: %s; Maximum value: %s"%(tmpMin, tmpMax))
+    print("Mean value: %s; Median value: %s"%(tmpMean, tmpMedian))
+    print("***********************\n")
+    if logscale:
+        data = np.log10(data)
+        print("Plotting log scale")
 
-    print("*** Pre Truncation ***")
-    print("Minimum value: %s; Maximum value: %s"%(np.amin(data),np.amax(data)))
-    print("Mean value: %s; Median value: %s"%(np.mean(data),np.median(data)))
-
+    extend = 'neither'
     # the minV/maxV values are percentiles instead
     if percentTruncate:
         print("Using min/max values as percentiles!")
@@ -48,20 +54,44 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, sa
 
         minV = np.percentile(data,lowerPercentile)
         maxV = np.percentile(data,upperPercentile)
-        print("Data truncated at %f and %f percentiles"%(lowerPercentile,upperPercentile) )
+        print("Data truncated at %f and %f percentiles\n"%(lowerPercentile,upperPercentile) )
+
+        if lowerPercentile > 0 and upperPercentile < 100:
+            extend = 'both'
+        elif lowerPercentile > 0:
+            extend = 'min'
+        elif upperPercentile < 100:
+            extend = 'max'
         # if colormapKey == 'gauss':
         #     absV = np.max((np.abs(minV),np.abs(maxV)))
         #     minV, maxV = (-absV, absV)
         #     print("Data symmetrized around 0")
+    else:
+        if minV < tmpMin and maxV > tmpMax:
+            extend = 'both'
+        elif minV < tmpMin:
+            extend = 'min'
+        elif maxV > tmpMax:
+            extend = 'max'
 
     # Truncate at min and max
     data[data < minV] = minV
     data[data > maxV] = maxV
-    #amin = np.amin(data)
 
-    print("*** Post Truncation***")
-    print("Minimum value: %s; Maximum value: %s"%(np.amin(data),np.amax(data)))
-    print("Mean value: %s; Median value: %s"%(np.mean(data),np.median(data)))
+    tmpMin = np.amin(data)
+    tmpMax = np.amax(data)
+    tmpMean = np.mean(data)
+    tmpMedian = np.median(data)
+    if logscale:
+        tmpMin = 10**np.amin(data)
+        tmpMax = 10**np.amax(data)
+        tmpMean = 10**np.mean(data)
+        tmpMedian = 10**np.median(data)
+
+    print("*** Post Truncation ***")
+    print("Minimum value: %s; Maximum value: %s"%(tmpMin, tmpMax))
+    print("Mean value: %s; Median value: %s"%(tmpMean, tmpMedian))
+    print("***********************\n")
 
     # Normalize based on minV and maxV so colorbar is scaled accordingly
     data = data - minV # set values at minV to 0
@@ -77,11 +107,15 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, sa
 
     # this depends on matplotlib
     #if plotColorBar:
-    #    genColorBar(colorStyle,minV,maxV)
+    if showplot:
+        if logscale:
+            genColorBar(colorStyle, 10**minV, 10**maxV, logscale=True, extend=extend)
+        else:
+            genColorBar(colorStyle, minV, maxV, extend=extend)
 
     return colors
 
-def genColorBar(colorStyle,minV,maxV,fontsize,orientation='vertical'):
+def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscale=False, extend='neither'):
     """
     Generates a figure of a colormap
     colorStyle: either numpy array or palettable colormap
@@ -102,11 +136,34 @@ def genColorBar(colorStyle,minV,maxV,fontsize,orientation='vertical'):
     else:
         cmap = colorStyle.mpl_colormap
 
-    cnorm = mpl.colors.Normalize(vmin=minV,vmax=maxV)
-    cb = mpl.colorbar.ColorbarBase(ax,cmap=cmap,norm=cnorm,orientation=orientation,format=ticker.FuncFormatter(eng_notation))
+    cnorm = mpl.colors.Normalize(vmin=minV, vmax=maxV)
+    if logscale:
+        cnorm = mpl.colors.LogNorm(vmin=minV, vmax=maxV)
+
+    cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=cnorm, orientation=orientation, extend=extend) #,format=ticker.FuncFormatter(eng_notation))
+
+    ticks = cb.get_ticks()
+    ticks = np.insert(ticks, 0, minV)
+    ticks = np.append(ticks, maxV)
+    cb.set_ticks(ticks)
+
+    ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
+
+    if extend == 'neither':
+        pass
+    elif extend == 'both':
+        ticklabels[0] = "< " + ticklabels[0]
+        ticklabels[-1] = "> " + ticklabels[-1]
+    elif extend == 'max':
+        ticklabels[-1] = "> " + ticklabels[-1]
+    elif extend == 'min':
+        ticklabels[0] = "< " + ticklabels[0]
+
+    cb.set_ticklabels(ticklabels)
+
     cb.ax.tick_params(labelsize=fontsize)
     #ax.ticklabel_format(axis='both',style='sci')
-    fig.show()
+    plt.show()
 
 def eng_notation(x,pos):
     num, power = '{:.1e}'.format(x).split('e')

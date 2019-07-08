@@ -75,7 +75,7 @@ tensor<double, 3, 2> computeLocalStructureTensor(const SurfaceMesh              
     return lst;
 }
 
-void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings)
 {
     // TODO: (10) Come up with a better scheme
     // Pick an arbitrary face's data
@@ -154,7 +154,7 @@ void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
     // Smooth vertices around the filled hole
     for (auto v : backupBoundary)
     {
-        weightedVertexSmooth(mesh, v, RINGS);
+        weightedVertexSmooth(mesh, v, rings);
     }
 }
 
