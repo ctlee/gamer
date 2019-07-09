@@ -193,6 +193,7 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         row.prop(qProps, "logCurvature")
         row.prop(qProps, "curvePercentile")
         row.prop(qProps, "plotColorbar")
+        row.prop(qProps, "savePlots")
         row = col.row(align=True)
         row.prop(qProps, "curveIter")
         row = col.row(align=True)
