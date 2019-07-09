@@ -24,6 +24,8 @@ import numpy as np
 
 def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, logscale=False, showplot=False, label='', fname='plot.eps', saveplot=False):
     colorStyle = colormapDict[colormapKey]
+    truncMin = minV
+    truncMax = maxV
     tmpMin = np.amin(data)
     tmpMax = np.amax(data)
     tmpMean = np.mean(data)
