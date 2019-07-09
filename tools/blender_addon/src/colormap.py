@@ -22,7 +22,7 @@
 
 import numpy as np
 
-def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, logscale=False, showplot=False):
+def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, logscale=False, showplot=False, label='', fname='plot.eps'):
     colorStyle = colormapDict[colormapKey]
 
     tmpMin = np.amin(data)
@@ -109,13 +109,13 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
     #if plotColorBar:
     if showplot:
         if logscale:
-            genColorBar(colorStyle, 10**minV, 10**maxV, logscale=True, extend=extend)
+            genColorBar(colorStyle, 10**minV, 10**maxV, logscale=True, extend=extend, label=label, fname=fname)
         else:
-            genColorBar(colorStyle, minV, maxV, extend=extend)
+            genColorBar(colorStyle, minV, maxV, extend=extend, label=label, fname=fname)
 
     return colors
 
-def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscale=False, extend='neither'):
+def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscale=False, extend='neither', label='', fname='meancurvature.eps'):
     """
     Generates a figure of a colormap
     colorStyle: either numpy array or palettable colormap
@@ -160,10 +160,12 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
         ticklabels[0] = "< " + ticklabels[0]
 
     cb.set_ticklabels(ticklabels)
-
     cb.ax.tick_params(labelsize=fontsize)
     #ax.ticklabel_format(axis='both',style='sci')
+    cb.set_label(label, size=fontsize+2)
+    plt.savefig(fname+'.eps', format='eps')
     plt.show()
+    # plt.savefig(fname+'.png', format='png')
 
 def eng_notation(x,pos):
     num, power = '{:.1e}'.format(x).split('e')

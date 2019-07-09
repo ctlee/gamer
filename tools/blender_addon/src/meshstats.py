@@ -427,11 +427,12 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report)
         if gmesh:
             curvatures = gmesh.meanCurvature(True, self.curveIter)
+            fname = "%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter)
 
-            np.save('%s_%s_%d_MeanCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter), curvatures)
+            np.save("%s.npy"%(fname), curvatures)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
-                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature)
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="Mean Curvature [$\mu m^{-1}$]", fname=fname)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
@@ -452,10 +453,11 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         if gmesh:
             curvatures = gmesh.gaussianCurvature(True, self.curveIter)
 
-            np.save('%s_%s_%d_GaussCurvature.npy'%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter), curvatures)
+            fname = "%s_%s_%d_GaussCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
+            np.save("%s.npy"%(fname), curvatures)
 
             colors = getColor(curvatures, 'viridis', minV=self.minCurve,
-                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature)
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="Gaussian Curvature [$\mu m^{-2}$]", fname=fname)
 
             # Use 'curvature' vertex color entry for results
             mesh = bpy.context.object.data
