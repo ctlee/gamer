@@ -24,7 +24,6 @@ import numpy as np
 
 def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, logscale=False, showplot=False, label='', fname='plot.eps'):
     colorStyle = colormapDict[colormapKey]
-
     tmpMin = np.amin(data)
     tmpMax = np.amax(data)
     tmpMean = np.mean(data)
@@ -36,6 +35,15 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
     if logscale:
         data = np.log10(data)
         print("Plotting log scale")
+
+    if showplot:
+        import matplotlib as mpl
+        import matplotlib.pyplot as plt
+
+        plt.hist(data, bins='auto')
+        plt.title("%s Distribution"%(fname))
+        plt.axvline(tmpMin, color='r', linestyle='dashed', linewidth=1)
+        plt.axvline(tmpMax, color='r', linestyle='dashed', linewidth=1)
 
     extend = 'neither'
     # the minV/maxV values are percentiles instead
@@ -56,6 +64,10 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
         maxV = np.percentile(data,upperPercentile)
         print("Data truncated at %f and %f percentiles\n"%(lowerPercentile,upperPercentile) )
 
+        if showplot:
+            plt.axvline(minV, color='g', linestyle='dashed', linewidth=2)
+            plt.axvline(maxV, color='g', linestyle='dashed', linewidth=2)
+
         if lowerPercentile > 0 and upperPercentile < 100:
             extend = 'both'
         elif lowerPercentile > 0:
@@ -67,12 +79,19 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
         #     minV, maxV = (-absV, absV)
         #     print("Data symmetrized around 0")
     else:
-        if minV < tmpMin and maxV > tmpMax:
+        if showplot:
+            plt.axvline(minV, color='g', linestyle='dashed', linewidth=2)
+            plt.axvline(maxV, color='g', linestyle='dashed', linewidth=2)
+
+        if minV > tmpMin and maxV < tmpMax:
             extend = 'both'
-        elif minV < tmpMin:
+        elif minV > tmpMin:
             extend = 'min'
-        elif maxV > tmpMax:
+        elif maxV < tmpMax:
             extend = 'max'
+
+    if showplot:
+        plt.show()
 
     # Truncate at min and max
     data[data < minV] = minV
@@ -143,8 +162,10 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
     cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=cnorm, orientation=orientation, extend=extend) #,format=ticker.FuncFormatter(eng_notation))
 
     ticks = cb.get_ticks()
-    ticks = np.insert(ticks, 0, minV)
-    ticks = np.append(ticks, maxV)
+    if ticks[0] != minV:
+        ticks = np.insert(ticks, 0, minV)
+    if ticks[-1] != maxV:
+        ticks = np.append(ticks, maxV)
     cb.set_ticks(ticks)
 
     ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
