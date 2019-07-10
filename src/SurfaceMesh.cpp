@@ -1186,6 +1186,95 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     return (2*M_PI-angleSum)/Amix;
 }
 
+void computeCurvatures(const SurfaceMesh & mesh){
+    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+    REAL *area = new REAL[mesh.size<1>()];
+    REAL *kg = new REAL[mesh.size<3>()];
+    Vector *kh = new Vector[mesh.size<1>()];
+
+    // Map VertexIDs to indices
+    std::size_t i = 0;
+    for(const auto vertexID : mesh.get_level_id<1>()){
+        sigma[vertexID.indices()[0]] = i++;
+    }
+
+    for(const auto faceID : mesh.get_level_id<3>()){
+        auto indices = faceID.indices();
+        std::array<typename SurfaceMesh::KeyType, 2> others;
+        std::array<Vertex, 3> vertices;
+
+        for(std::size_t skip = 0; skip < 3; ++skip){
+            std::size_t j = 0;
+            std::size_t k = 0;
+            while (k < 2){
+                if (j == skip) ++j;
+                else{
+                    others[k++] = indices[j++];
+                }
+            }
+            vertices[skip] = *mesh.get_simplex_down(faceID, others);
+        }
+
+        // TODO: (15) This section computes the same distances a bunch of time
+        std::array<REAL, 3> dist;
+        dist[0] = distance(vertices[0], vertices[1]);
+        dist[1] = distance(vertices[1], vertices[2]);
+        dist[3] = distance(vertices[0], vertices[2]);
+        std::sort(dist.begin(), dist.end());
+
+        bool obtuse = dist[0]*dist[0] + dist[1]*dist[1] < dist[2]*dist[2];
+
+        // Compute area
+        REAL tArea = getArea(vertices[0], vertices[1], vertices[2]);
+
+        std::size_t obtuse_idx = 0;
+        // List of indices to rotate
+        std::array<std::size_t, 3> idxmap = {0,1,2};
+        for(std::size_t i = 0; i < 3; ++i){
+            // idxmap[0] is the current vertex
+            REAL ang = angle(vertices[idxmap[2]],vertices[idxmap[0]],vertices[idxmap[1]]);
+
+            // Add angle to Gaussian Curvature
+            kg[sigma[indices[i]]] += ang;
+
+            // Vectors of other edges
+            Vector v1 = vertices[idxmap[1]] - vertices[idxmap[2]];
+            Vector v2 = -v1;
+
+            REAL cot = 1.0/tan(ang);
+
+            if(obtuse){
+                if (ang > M_PI/2.0){
+                    area[sigma[idxmap[0]]] += tArea/4;
+                }
+                else{
+                    area[sigma[idxmap[0]]] += tArea/2;
+                }
+            }
+            else{
+                area[sigma[idxmap[1]]] += cot*std::pow(length(v1),2)/8.0;
+                area[sigma[idxmap[2]]] += cot*std::pow(length(v2),2/8.0);
+            }
+
+            // Add value to Mean Curvature
+            kh[sigma[indices[1]]] += cot*v1;
+            kh[sigma[indices[2]]] += cot*v2;
+
+            std::rotate(idxmap.begin(), idxmap.begin() + 1, idxmap.end());
+        }
+    }
+
+    for (std::size_t i = 0; i < mesh.size<1>(); ++i){
+        kh[i] = kh[i]/(2*area[i]);
+        kg[i] = (2*M_PI - kg[i])/area[i];
+    }
+
+    delete[] area;
+    delete[] kg;
+    delete[] kh;
+}
+
 std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
 {
     // Queue to store the next edges to visit

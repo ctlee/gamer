@@ -105,7 +105,6 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
     if showplot:
         plt.show()
 
-
     # Truncate at min and max
     data[data < truncMin] = truncMin
     data[data > truncMax] = truncMax
@@ -209,7 +208,7 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
 
     if saveplot:
         plt.savefig(fname+'.eps', format='eps')
-        # plt.savefig(fname+'.png', format='png')
+        plt.savefig(fname+'.png', format='png')
 
 def eng_notation(x,pos):
     num, power = '{:.1e}'.format(x).split('e')

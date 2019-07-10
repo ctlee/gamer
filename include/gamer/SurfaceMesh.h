@@ -829,6 +829,8 @@ double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
  */
 double getArea(Vertex a, Vertex b, Vertex c);
 
+REAL getArea(std::array<Vertex, 3> t);
+
 /**
  * @brief      Gets the volume.
  *
@@ -878,6 +880,8 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
  */
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
+
+void computeCurvatures(const SurfaceMesh &mesh);
 
 //
 // @param      mesh  The mesh
