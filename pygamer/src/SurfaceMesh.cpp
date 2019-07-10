@@ -525,6 +525,53 @@ void init_SurfaceMesh(py::module& mod){
     );
 
 
+    SurfMeshCls.def("computeCurvatures",
+        [](const SurfaceMesh& mesh, bool smooth, std::size_t nIter){
+            double* kh;
+            double* kg;
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+            std::tie(kh,kg,sigma) = computeCurvatures(mesh);
+            delete[] kg;
+
+            if(smooth){
+                double* smoothed = new double[mesh.size<1>()];
+                for(int round = 0; round < nIter; ++round){
+                    std::cout << "Smoothing round: " << round << std::endl;
+                    // Smoothing
+                    for(const auto vertexID : mesh.get_level_id<1>()) {
+                        std::size_t i = sigma[vertexID.indices()[0]];
+                        // double value = scale*kh[i];
+                        double value = kh[i];
+                        auto neighbors = vertexID.cover();
+                        for(std::size_t nbor : neighbors) {
+                            value += kh[sigma[nbor]];
+                            // value += (1-scale)/static_cast<double>(neighbors.size())*kh[sigma[nbor]];
+                        }
+                        // smoothed[i] = value;
+                        smoothed[i] = value/static_cast<double>(neighbors.size()+1);
+                    }
+                    for(std::size_t i = 0; i < mesh.size<1>(); ++i){
+                        kh[i] = smoothed[i];
+                    }
+                }
+                delete[] smoothed;
+            }
+
+            auto free_kh  = py::capsule(
+                                kh,
+                                [](void *kh) {
+                                    delete[] reinterpret_cast<double*>(kh);
+                             });
+            return  py::array_t<double>(
+                        std::array<std::size_t, 1>({mesh.size<1>()}),
+                        {sizeof(double)},
+                        kh,
+                        free_kh);
+        }
+    );
+
+
     SurfMeshCls.def("meanCurvature",
         [](const SurfaceMesh& mesh, bool smooth, std::size_t nIter){
             std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;

@@ -159,6 +159,9 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
 
+    mpl.rcParams['pdf.fonttype'] = 42
+    mpl.rcParams['ps.fonttype'] = 42
+
     fig = plt.figure(figsize=(3,8))
 
     if orientation=='horizontal':
@@ -178,7 +181,8 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
         cnorm = mpl.colors.SymLogNorm(1, vmin=minV, vmax=maxV)
 
 
-    cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=cnorm, orientation=orientation, extend=extend) #,format=ticker.FuncFormatter(eng_notation))
+    cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=cnorm,
+            orientation=orientation, extend=extend) #,format=ticker.FuncFormatter(eng_notation))
 
     ticks = cb.get_ticks()
     ticks.sort()
@@ -204,11 +208,9 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
     cb.ax.tick_params(labelsize=fontsize)
     #ax.ticklabel_format(axis='both',style='sci')
     cb.set_label(label, size=fontsize+2)
-    plt.show()
-
     if saveplot:
-        plt.savefig(fname+'.eps', format='eps')
-        plt.savefig(fname+'.png', format='png')
+        plt.savefig(fname+'.pdf', format='pdf')
+    plt.show()
 
 def eng_notation(x,pos):
     num, power = '{:.1e}'.format(x).split('e')

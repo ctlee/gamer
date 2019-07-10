@@ -430,7 +430,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            curvatures = gmesh.meanCurvature(True, self.curveIter)
+            # curvatures = gmesh.meanCurvature(True, self.curveIter)
+            curvatures = gmesh.computeCurvatures(True, self.curveIter)
             fname = "%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter)
 
             # np.save("%s.npy"%(fname), curvatures)

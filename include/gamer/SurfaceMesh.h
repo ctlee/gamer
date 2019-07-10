@@ -881,7 +881,8 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 
-void computeCurvatures(const SurfaceMesh &mesh);
+std::tuple<REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType>>
+computeCurvatures(const SurfaceMesh &mesh);
 
 //
 // @param      mesh  The mesh
