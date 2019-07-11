@@ -200,9 +200,11 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         row.prop(qProps, "minCurve")
         row.prop(qProps, "maxCurve")
 
+        col.operator("gamer.compute_curvatures")
         col.operator("gamer.mean_curvature")
         col.operator("gamer.gaussian_curvature")
-
+        col.operator("gamer.k1_curvature")
+        col.operator("gamer.k2_curvature")
 
         col=layout.column()
         col.label(text="Curvature Calculations:")

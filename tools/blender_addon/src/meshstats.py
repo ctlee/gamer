@@ -322,6 +322,20 @@ class GAMER_OT_write_quality_info(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class GAMER_OT_compute_curvatures(bpy.types.Operator):
+    bl_idname = "gamer.compute_curvatures"
+    bl_label = "Compute Curvatures"
+    bl_description = "Compute curvatures to vertex colors"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        mqp = bpy.context.scene.gamer.mesh_quality_properties
+        if mqp.compute_curvatures(context, self.report):
+            self.report({'INFO'}, "GAMer: Compute Curvatures complete")
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
 class GAMER_OT_mean_curvature(bpy.types.Operator):
     bl_idname = "gamer.mean_curvature"
     bl_label = "Mean Curvature"
@@ -347,6 +361,36 @@ class GAMER_OT_gaussian_curvature(bpy.types.Operator):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
         if mqp.gaussian_curvature(context, self.report):
             self.report({'INFO'}, "GAMer: Gaussian Curvature complete")
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
+
+class GAMER_OT_k1_curvature(bpy.types.Operator):
+    bl_idname = "gamer.k1_curvature"
+    bl_label = "k1 Curvature"
+    bl_description = "Compute k1 curvature to vertex colors"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        mqp = bpy.context.scene.gamer.mesh_quality_properties
+        if mqp.k1_curvature(context, self.report):
+            self.report({'INFO'}, "GAMer: k1 Curvature complete")
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
+
+
+class GAMER_OT_k2_curvature(bpy.types.Operator):
+    bl_idname = "gamer.k2_curvature"
+    bl_label = "k2 Curvature"
+    bl_description = "Compute k2 curvature to vertex colors"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        mqp = bpy.context.scene.gamer.mesh_quality_properties
+        if mqp.k2_curvature(context, self.report):
+            self.report({'INFO'}, "GAMer: k2 Curvature complete")
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
@@ -427,11 +471,93 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Save the generated plots"
         )
 
+
+    def compute_curvatures(self, context, report):
+        gmesh = blenderToGamer(report)
+        if gmesh:
+            kh, kg, k1, k2 = gmesh.computeCurvatures(True, self.curveIter)
+
+            fname = "%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter)
+
+            colors = getColor(kh, 'viridis', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="Mean Curvature [$\mu m^{-1}$]", fname=fname, saveplot=self.savePlots)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "MeanCurvature" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="MeanCurvature")
+
+            color_layer = mesh.vertex_colors['MeanCurvature']
+            mesh.vertex_colors["MeanCurvature"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+            fname = "%s_%s_%d_GaussCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
+            colors = getColor(kg, 'PRGn', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="Gaussian Curvature [$\mu m^{-2}$]", fname=fname, saveplot=self.savePlots)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "GaussianCurvature" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="GaussianCurvature")
+
+            color_layer = mesh.vertex_colors['GaussianCurvature']
+            mesh.vertex_colors["GaussianCurvature"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+
+            fname = "%s_%s_%d_k1Curvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
+            colors = getColor(k1, 'viridis', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="k1 Curvature [$\mu m^{-1}$]", fname=fname, saveplot=self.savePlots)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "k1" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="k1")
+
+            color_layer = mesh.vertex_colors['k1']
+            mesh.vertex_colors["k1"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+
+            fname = "%s_%s_%d_k2Curvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
+            colors = getColor(k2, 'viridis', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="k2 Curvature [$\mu m^{-1}$]", fname=fname, saveplot=self.savePlots)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "k2" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="k2")
+
+            color_layer = mesh.vertex_colors['k2']
+            mesh.vertex_colors["k2"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+
+            return True
+        return False
+
     def mean_curvature(self, context, report):
         gmesh = blenderToGamer(report)
         if gmesh:
-            # curvatures = gmesh.meanCurvature(True, self.curveIter)
-            curvatures = gmesh.computeCurvatures(True, self.curveIter)
+            curvatures = gmesh.meanCurvature(True, self.curveIter)
+            kh, _, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+
+            import matplotlib.pyplot as plt
+            plt.plot(np.arange(0, gmesh.nVertices), curvatures-kh)
+            plt.show()
+
             fname = "%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter)
 
             # np.save("%s.npy"%(fname), curvatures)
@@ -457,6 +583,12 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report)
         if gmesh:
             curvatures = gmesh.gaussianCurvature(True, self.curveIter)
+            _, kg, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+
+            import matplotlib.pyplot as plt
+            plt.plot(np.arange(0, gmesh.nVertices), curvatures-kg)
+            plt.show()
+
 
             fname = "%s_%s_%d_GaussCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
             # np.save("%s.npy"%(fname), curvatures)
@@ -471,6 +603,56 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
 
             color_layer = mesh.vertex_colors['GaussianCurvature']
             mesh.vertex_colors["GaussianCurvature"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+            return True
+        return False
+
+
+    def k1_curvature(self, context, report):
+        gmesh = blenderToGamer(report)
+        if gmesh:
+            _, _, k1, _ = gmesh.computeCurvatures(True, self.curveIter)
+
+            fname = "%s_%s_%d_k1Curvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
+
+            colors = getColor(k1, 'viridis', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="k1 Curvature [$\mu m^{-1}$]", fname=fname, saveplot=self.savePlots)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "k1" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="k1")
+
+            color_layer = mesh.vertex_colors['k1']
+            mesh.vertex_colors["k1"].active = True
+
+            mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+            mesh.loops.foreach_get("vertex_index", mloops)
+            color_layer.data.foreach_set("color", colors[mloops].flatten())
+            return True
+        return False
+
+
+    def k2_curvature(self, context, report):
+        gmesh = blenderToGamer(report)
+        if gmesh:
+            _, _, _, k2 = gmesh.computeCurvatures(True, self.curveIter)
+
+            fname = "%s_%s_%d_k2Curvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.curveIter)
+
+            colors = getColor(k2, 'PRGn', minV=self.minCurve,
+                maxV=self.maxCurve, percentTruncate=self.curvePercentile, logscale=self.logCurvature, showplot=self.plotColorbar, label="k2 Curvature [$\mu m^{-1}$]", fname=fname, saveplot=self.savePlots)
+
+            # Use 'curvature' vertex color entry for results
+            mesh = bpy.context.object.data
+            if "k2" not in mesh.vertex_colors:
+                mesh.vertex_colors.new(name="k2")
+
+            color_layer = mesh.vertex_colors['k2']
+            mesh.vertex_colors["k2"].active = True
 
             mloops = np.zeros((len(mesh.loops)), dtype=np.int)
             mesh.loops.foreach_get("vertex_index", mloops)

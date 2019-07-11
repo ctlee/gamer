@@ -359,7 +359,6 @@ REAL angle(const Vertex &A, const Vertex &B, const Vertex &C);
 REAL angle(const Vector &AB, const Vector &CB);
 
 // REAL signed_angle(const Vertex &A, const Vertex &B, const Vertex &C);
-
 REAL signed_angle(const Vector &v1, const Vector &v2, const Vector &reference);
 
 /**

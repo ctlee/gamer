@@ -36,7 +36,7 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
     print("Mean value: %s; Median value: %s"%(tmpMean, tmpMedian))
     print("***********************\n")
     if logscale:
-        sign =- np.sign(data)
+        sign = np.sign(data)
         data = np.log10(np.abs(data))
         data = sign*data
         print("Plotting log scale")
@@ -45,6 +45,7 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
         import matplotlib as mpl
         import matplotlib.pyplot as plt
 
+        fig1 = plt.figure(num=1)
         plt.hist(data, bins='auto')
         plt.title("%s Distribution"%(fname))
         plt.axvline(tmpMin, color='r', linestyle='dashed', linewidth=1)
@@ -62,7 +63,7 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
         else:
             lowerPercentile = int(minV)
         if maxV <= 0 or maxV > 100:
-            print("Maximum percentile must be 0<x<=1. Setting to 100")
+            print("Maximum percentile must be 0<x<=100. Setting to 100")
             upperPercentile = 100
         else:
             upperPercentile = int(maxV)
@@ -102,8 +103,8 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
         elif truncMax < tmpMax:
             extend = 'max'
 
-    if showplot:
-        plt.show()
+    # if showplot:
+    #     plt.show()
 
     # Truncate at min and max
     data[data < truncMin] = truncMin

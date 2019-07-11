@@ -1063,26 +1063,26 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angleDeg(curr, center, next) > 90)
+            if (angle(curr, center, next) > M_PI/2)
             {
                 // The angle of T at center is obtuse
-                Amix += getArea(center, curr, next)/2;
+                Amix += getArea(center, curr, next)/2.0;
             }
             else
             {
-                Amix += getArea(center, curr, next)/4;
+                Amix += getArea(center, curr, next)/4.0;
             }
         }
         else
         {
             // Compute using voronoi formula
             Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8;
+                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8.0;
         }
-        curvature += (1/tan(angle(center, prev, curr)) + 1/tan(angle(center, next, curr)))*(center - curr);
+        curvature += (1.0/tan(angle(center, prev, curr)) + 1.0/tan(angle(center, next, curr)))*(center - curr);
     }
-    curvature /= (2*Amix);
-    return std::sqrt(curvature|curvature)/2;
+    curvature /= (2.0*Amix);
+    return std::sqrt(curvature|curvature)/2.0;
 }
 
 
@@ -1186,55 +1186,67 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     return (2*M_PI-angleSum)/Amix;
 }
 
-std::tuple<REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType>>
+
+/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
 computeCurvatures(const SurfaceMesh & mesh){
     std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
 
-    REAL *area = new REAL[mesh.size<1>()];
-    REAL *kg = new REAL[mesh.size<3>()];
-    REAL *kh = new REAL[mesh.size<3>()];
+    REAL *Amix = new REAL[mesh.size<1>()];
+    REAL *kg = new REAL[mesh.size<1>()];
+    REAL *kh = new REAL[mesh.size<1>()];
+    REAL *k1 = new REAL[mesh.size<1>()];
+    REAL *k2 = new REAL[mesh.size<1>()];
     Vector *Kh = new Vector[mesh.size<1>()];
+    Vector *normals = new Vector[mesh.size<1>()];
 
     // Map VertexIDs to indices
     std::size_t i = 0;
-    for(const auto vertexID : mesh.get_level_id<1>()){
+    for(const auto vertexID : mesh.get_level_id<1>()) {
+        Amix[i] = 0;
+        kg[i] = 0;
+        kh[i] = 0;
+        k1[i] = 0;
+        k2[i] = 0;
+        normals[i] = getNormal(mesh, vertexID);
         sigma[vertexID.indices()[0]] = i++;
-        area[i] = kg[i] = kh[i] = 0;
     }
 
-    for(const auto faceID : mesh.get_level_id<3>()){
-        auto indices = faceID.indices();
-        std::array<typename SurfaceMesh::KeyType, 2> others;
-        std::array<Vertex, 3> vertices;
+    for(const auto faceID : mesh.get_level_id<3>()) {
+        auto indices = faceID.indices(); // Face vertex indices
+        std::array<Vertex, 3> vertices;  // Vertex data for indices
+        std::array<typename SurfaceMesh::KeyType, 2> keysDown; // Tmp to store keys
 
-        for(std::size_t skip = 0; skip < 3; ++skip){
+        // Fill vertices in order corresponding to indices
+        for(std::size_t skip = 0; skip < 3; ++skip) {
             std::size_t j = 0;
             std::size_t k = 0;
-            while (k < 2){
+            while (k < 2) {
                 if (j == skip) ++j;
                 else{
-                    others[k++] = indices[j++];
+                    keysDown[k++] = indices[j++];
                 }
             }
-            vertices[skip] = *mesh.get_simplex_down(faceID, others);
+            vertices[skip] = *mesh.get_simplex_down(faceID, keysDown);
         }
 
         // TODO: (15) This section computes the same distances a bunch of time
         std::array<REAL, 3> dist;
         dist[0] = distance(vertices[0], vertices[1]);
         dist[1] = distance(vertices[1], vertices[2]);
-        dist[3] = distance(vertices[0], vertices[2]);
+        dist[2] = distance(vertices[0], vertices[2]);
         std::sort(dist.begin(), dist.end());
 
+        // Check if the triangle is obtuse...
         bool obtuse = dist[0]*dist[0] + dist[1]*dist[1] < dist[2]*dist[2];
 
-        // Compute area
-        REAL tArea = getArea(vertices[0], vertices[1], vertices[2]);
+        REAL t_area = 0; // Area of the face
+        // Populate t_area if obtuse
+        if (obtuse) t_area = getArea(vertices[0], vertices[1], vertices[2]);
 
-        std::size_t obtuse_idx = 0;
         // List of indices to rotate
         std::array<std::size_t, 3> idxmap = {0,1,2};
-        for(std::size_t i = 0; i < 3; ++i){
+        for(std::size_t i = 0; i < 3; ++i) {
             // idxmap[0] is the current vertex
             REAL ang = angle(vertices[idxmap[2]],vertices[idxmap[0]],vertices[idxmap[1]]);
 
@@ -1247,21 +1259,24 @@ computeCurvatures(const SurfaceMesh & mesh){
 
             // Vectors of other edges
             Vector v1 = vertices[idxmap[1]] - vertices[idxmap[2]];
-            Vector v2 = -v1;
+            Vector v2 = vertices[idxmap[2]] - vertices[idxmap[1]];
 
             REAL cot = 1.0/tan(ang);
 
-            if(obtuse){
-                if (ang > M_PI/2.0){
-                    area[i0] += tArea/4;
+            if(obtuse) {
+                if (ang > M_PI/2.0) {
+                    Amix[i0] += t_area/2.0;
                 }
                 else{
-                    area[i0] += tArea/2;
+                    Amix[i0] += t_area/4.0;
                 }
             }
             else{
-                area[i1] += cot*std::pow(length(v1),2)/8.0;
-                area[i2] += cot*std::pow(length(v2),2)/8.0;
+                REAL tmp = cot/8.0;
+                REAL lenSq = length(v1);
+                lenSq *= lenSq;
+                Amix[i1] += tmp*lenSq;
+                Amix[i2] += tmp*lenSq;
             }
 
             // Add value to Mean Curvature
@@ -1272,17 +1287,25 @@ computeCurvatures(const SurfaceMesh & mesh){
         }
     }
 
-    for (std::size_t i = 0; i < mesh.size<1>(); ++i){
-        Kh[i] = Kh[i]/(2*area[i]);
-        kh[i] = length(Kh[i])/2;
-        kg[i] = (2*M_PI - kg[i])/area[i];
+    for (std::size_t i = 0; i < mesh.size<1>(); ++i) {
+        Kh[i] = Kh[i]/(2.0*Amix[i]);
+        kh[i] = std::copysign(length(Kh[i])/2.0, dot(Kh[i], normals[i]));
+        kg[i] = (2.0*M_PI - kg[i])/Amix[i];
+
+        REAL kh2 = kh[i]*kh[i];
+        REAL tmp = kh2 < kg[i] ? 0 : std::sqrt(kh2-kg[i]);
+
+        k1[i] = kh[i] + tmp;
+        k2[i] = kh[i] - tmp;
     }
 
-    delete[] area;
+    delete[] Amix;
     delete[] Kh;
     // delete[] kg;
     // delete[] kh;
-    return std::make_tuple(kh, kg, sigma);
+    // delete[] k1;
+    // delete[] k2;
+    return std::make_tuple(kh, kg, k1, k2, sigma);
 }
 
 std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
