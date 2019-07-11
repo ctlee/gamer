@@ -1082,7 +1082,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         curvature += (1.0/tan(angle(center, prev, curr)) + 1.0/tan(angle(center, next, curr)))*(center - curr);
     }
     curvature /= (2.0*Amix);
-    return std::sqrt(curvature|curvature)/2.0;
+    return std::copysign(std::sqrt(curvature|curvature)/2.0, dot(curvature, getNormal(mesh, vertexID)));
 }
 
 
@@ -1165,7 +1165,7 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angle(curr, center, next) > 90)
+            if (angle(curr, center, next) > M_PI/2)
             {
                 // The angle of T at center is obtuse
                 Amix += getArea(center, curr, next)/2;
@@ -1301,6 +1301,7 @@ computeCurvatures(const SurfaceMesh & mesh){
 
     delete[] Amix;
     delete[] Kh;
+    delete[] normals;
     // delete[] kg;
     // delete[] kh;
     // delete[] k1;
