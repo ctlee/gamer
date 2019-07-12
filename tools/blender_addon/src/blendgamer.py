@@ -108,6 +108,6 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
     Initialize if matplotlib is available
     """
     def check_for_matplotlib(self):
-        import importlib
+        import importlib.util
         mpl_spec = importlib.util.find_spec("matplotlib")
         self.matplotlib_found = mpl_spec is not None

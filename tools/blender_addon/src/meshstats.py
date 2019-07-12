@@ -26,7 +26,7 @@ import bmesh
 
 import blendgamer.pygamer as g
 
-import importlib
+import importlib.util
 mpl_spec = importlib.util.find_spec("matplotlib")
 mpl_found = mpl_spec is not None
 

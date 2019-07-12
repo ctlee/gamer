@@ -187,9 +187,10 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 
         GAMER_PT_mesh_quality.draw_report(layout, context)
 
+
+        col=layout.column()
+        col.label(text="Curvature Calculations:")
         if context.scene.gamer.matplotlib_found:
-            col=layout.column()
-            col.label(text="Curvature Calculations:")
             row = col.row(align=True)
             row.prop(qProps, "curvePercentile")
             row.prop(qProps, "showplots")
@@ -213,8 +214,7 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
             # row.prop(qProps, "maxEnergy")
             # col.operator("gamer.helfrich_energy")
         else:
-            col=layout.column()
-            col.label(text="Curvature Calculations require matplotlib.")
+            col.label(text="Curvature Calculations require matplotlib.", icon='LAMP')
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):
