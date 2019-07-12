@@ -1,4 +1,4 @@
-# ***************************************************************************
+#****************************************************************************
 # This file is part of the GAMer software.
 # Copyright (C) 2016-2018
 # by Christopher Lee, Tom Bartol, John Moody, Rommie Amaro, J. Andrew McCammon,
@@ -190,10 +190,9 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col=layout.column()
         col.label(text="Curvature Calculations:")
         row = col.row(align=True)
-        row.prop(qProps, "logCurvature")
         row.prop(qProps, "curvePercentile")
-        row.prop(qProps, "plotColorbar")
-        row.prop(qProps, "savePlots")
+        row.prop(qProps, "showplots")
+        row.prop(qProps, "saveplots")
         row = col.row(align=True)
         row.prop(qProps, "curveIter")
         row = col.row(align=True)
@@ -206,12 +205,12 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col.operator("gamer.k1_curvature")
         col.operator("gamer.k2_curvature")
 
-        col=layout.column()
-        col.label(text="Curvature Calculations:")
-        row = col.row(align=True)
-        row.prop(qProps, "minEnergy")
-        row.prop(qProps, "maxEnergy")
-        col.operator("gamer.helfrich_energy")
+        # col=layout.column()
+        # col.label(text="Curvature Calculations:")
+        # row = col.row(align=True)
+        # row.prop(qProps, "minEnergy")
+        # row.prop(qProps, "maxEnergy")
+        # col.operator("gamer.helfrich_energy")
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):

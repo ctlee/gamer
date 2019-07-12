@@ -19,49 +19,112 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-
+import bpy
 import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
-def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, logscale=False, showplot=False, label='', fname='plot.eps', saveplot=False):
-    colorStyle = colormapDict[colormapKey]
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['ps.fonttype'] = 42
+
+class DivergingNorm(mpl.colors.Normalize):
+    def __init__(self, vcenter, vmin=None, vmax=None):
+        """
+        Normalize data with a set center.
+
+        Useful when mapping data with an unequal rates of change around a
+        conceptual center, e.g., data that range from -2 to 4, with 0 as
+        the midpoint.
+
+        Parameters
+        ----------
+        vcenter : float
+            The data value that defines ``0.5`` in the normalization.
+        vmin : float, optional
+            The data value that defines ``0.0`` in the normalization.
+            Defaults to the min value of the dataset.
+        vmax : float, optional
+            The data value that defines ``1.0`` in the normalization.
+            Defaults to the the max value of the dataset.
+
+        Examples
+        --------
+        This maps data value -4000 to 0., 0 to 0.5, and +10000 to 1.0; data
+        between is linearly interpolated::
+
+            >>> import matplotlib.colors as mcolors
+            >>> offset = mcolors.DivergingNorm(vmin=-4000.,
+                                               vcenter=0., vmax=10000)
+            >>> data = [-4000., -2000., 0., 2500., 5000., 7500., 10000.]
+            >>> offset(data)
+            array([0., 0.25, 0.5, 0.625, 0.75, 0.875, 1.0])
+        """
+
+        self.vcenter = vcenter
+        self.vmin = vmin
+        self.vmax = vmax
+        if vcenter is not None and vmax is not None and vcenter >= vmax:
+            raise ValueError('vmin, vcenter, and vmax must be in '
+                             'ascending order')
+        if vcenter is not None and vmin is not None and vcenter <= vmin:
+            raise ValueError('vmin, vcenter, and vmax must be in '
+                             'ascending order')
+
+    def autoscale_None(self, A):
+        """
+        Get vmin and vmax, and then clip at vcenter
+        """
+        super().autoscale_None(A)
+        if self.vmin > self.vcenter:
+            self.vmin = self.vcenter
+        if self.vmax < self.vcenter:
+            self.vmax = self.vcenter
+
+
+    def __call__(self, value, clip=False):
+        """
+        Map value to the interval [0, 1].
+        """
+        result, is_scalar = self.process_value(value)
+        self.autoscale_None(result)  # sets self.vmin, self.vmax if None
+
+        if not self.vmin <= self.vcenter <= self.vmax:
+            raise ValueError("vmin, vcenter, vmax must increase monotonically")
+        result = np.ma.masked_array(
+            np.interp(result, [self.vmin, self.vcenter, self.vmax],
+                      [0, 0.5, 1.]), mask=np.ma.getmask(result))
+        if is_scalar:
+            result = np.atleast_1d(result)[0]
+        return result
+
+
+def dataToVertexColor(data, minV=-1000, maxV=1000, percentTruncate=False, vlayer='curvature', axislabel='', file_prefix='plot', showplot=False,saveplot=False):
+    fig = plt.figure(figsize=(8,5))
+    ax = fig.add_axes([0.1,0.05,0.6,0.9])
+
     truncMin = minV
     truncMax = maxV
-    tmpMin = np.amin(data)
-    tmpMax = np.amax(data)
-    tmpMean = np.mean(data)
-    tmpMedian = np.median(data)
-
-    print("*** Pre Truncation ****")
-    print("Minimum value: %s; Maximum value: %s"%(tmpMin, tmpMax))
-    print("Mean value: %s; Median value: %s"%(tmpMean, tmpMedian))
-    print("***********************\n")
-    if logscale:
-        sign = np.sign(data)
-        data = np.log10(np.abs(data))
-        data = sign*data
-        print("Plotting log scale")
+    amin = np.amin(data)
+    amax = np.amax(data)
+    amean = np.mean(data)
+    amedian = np.median(data)
 
     if showplot:
-        import matplotlib as mpl
-        import matplotlib.pyplot as plt
-
-        fig1 = plt.figure(num=1)
         plt.hist(data, bins='auto')
-        plt.title("%s Distribution"%(fname))
-        plt.axvline(tmpMin, color='r', linestyle='dashed', linewidth=1)
-        plt.axvline(tmpMax, color='r', linestyle='dashed', linewidth=1)
+        plt.title("%s Distribution"%(file_prefix))
+        plt.axvline(amin, color='r', linestyle='dashed', linewidth=1)
+        plt.axvline(amax, color='r', linestyle='dashed', linewidth=1)
 
     extend = 'neither'
     # the minV/maxV values are percentiles instead
     if percentTruncate:
-        if logscale:
-            raise RuntimeError("Cannot use log scale with percent truncation.")
         print("Using min/max values as percentiles!")
         if minV < 0 or minV >= 100:
             print("Minimum percentile must be 0<=x<100. Setting to 0")
             lowerPercentile = 0
         else:
             lowerPercentile = int(minV)
+
         if maxV <= 0 or maxV > 100:
             print("Maximum percentile must be 0<x<=100. Setting to 100")
             upperPercentile = 100
@@ -72,131 +135,66 @@ def getColor(data, colormapKey, minV=-1000, maxV=1000, percentTruncate=False, lo
         truncMax = np.percentile(data,upperPercentile)
         print("Data truncated at %f and %f percentiles\n"%(lowerPercentile,upperPercentile) )
 
-        if showplot:
-            plt.axvline(truncMin, color='g', linestyle='dashed', linewidth=2)
-            plt.axvline(truncMax, color='g', linestyle='dashed', linewidth=2)
+    if showplot:
+        plt.axvline(truncMin, color='g', linestyle='dashed', linewidth=2)
+        plt.axvline(truncMax, color='g', linestyle='dashed', linewidth=2)
 
-        if lowerPercentile > 0 and upperPercentile < 100:
+        if truncMin > amin and truncMax < amax:
             extend = 'both'
-        elif lowerPercentile > 0:
+        elif truncMin > amin:
             extend = 'min'
-        elif upperPercentile < 100:
-            extend = 'max'
-        # if colormapKey == 'gauss':
-        #     absV = np.max((np.abs(minV),np.abs(maxV)))
-        #     minV, maxV = (-absV, absV)
-        #     print("Data symmetrized around 0")
-    else:
-        if logscale:
-            truncMin = np.sign(minV)*np.log10(np.abs(minV))
-            truncMax = np.sign(maxV)*np.log10(np.abs(maxV))
-            plt.xscale('symlog')
-
-        if showplot:
-            plt.axvline(truncMin, color='g', linestyle='dashed', linewidth=2)
-            plt.axvline(truncMax, color='g', linestyle='dashed', linewidth=2)
-
-        if truncMin > tmpMin and truncMax < tmpMax:
-            extend = 'both'
-        elif truncMin > tmpMin:
-            extend = 'min'
-        elif truncMax < tmpMax:
+        elif truncMax < amax:
             extend = 'max'
 
-    # if showplot:
-    #     plt.show()
-
-    # Truncate at min and max
     data[data < truncMin] = truncMin
     data[data > truncMax] = truncMax
 
-    tmpMin = np.amin(data)
-    tmpMax = np.amax(data)
-    tmpMean = np.mean(data)
-    tmpMedian = np.median(data)
+    amin = np.amin(data)
+    amax = np.amax(data)
 
-    if logscale:
-        tmpMin = np.sign(tmpMin)*10**np.abs(tmpMin)
-        tmpMax = np.sign(tmpMax)*10**np.abs(tmpMax)
-        tmpMean = np.sign(tmpMean)*10**np.abs(tmpMean)
-        tmpMedian = np.sign(tmpMedian)*10**np.abs(tmpMedian)
+    # Construct the norm and colorbar
+    if amin < 0:
+        norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
+        colors_neg = plt.cm.viridis(np.linspace(0, 0.2, 256))
+        colors_pos = plt.cm.viridis(np.linspace(0.2, 1, 256))
 
-    print("*** Post Truncation ***")
-    print("Minimum value: %s; Maximum value: %s"%(tmpMin, tmpMax))
-    print("Mean value: %s; Median value: %s"%(tmpMean, tmpMedian))
-    print("***********************\n")
-
-    # Normalize based on minV and maxV so colorbar is scaled accordingly
-    data = data - truncMin # set values at minV to 0
-    data = data/(truncMax-truncMin) # set values which were at maxV to 1
-
-    # print('normalized data min/max: %f' % np.amin(data))
-    # print('normalized data max: %f' % np.amax(data))
-    chunk = 1/(len(colorStyle)-2)
-    remainder = np.mod(data, chunk)
-    idx = np.floor_divide(data, chunk).astype(int)
-    colors = colorStyle[idx]*(1-remainder)[:,None] + colorStyle[idx+1]*(remainder)[:,None]
-    #print('min/max color index: %d, %d' % (np.amin(idx), np.amax(idx)))
-
-    # this depends on matplotlib
-    #if plotColorBar:
-    if showplot:
-        if percentTruncate:
-            genColorBar(colorStyle, tmpMin, tmpMax, extend=extend, label=label, fname=fname, saveplot=saveplot)
-        else:
-            if logscale:
-                genColorBar(colorStyle, tmpMin, tmpMax, logscale=logscale, extend=extend, label=label, fname=fname, saveplot=saveplot)
-            else:
-                genColorBar(colorStyle, tmpMin, tmpMax, extend=extend, label=label, fname=fname, saveplot=saveplot)
-
-    return colors
-
-def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscale=False, extend='neither', label='', fname='meancurvature.eps', saveplot=False):
-    """
-    Generates a figure of a colormap
-    colorStyle: either numpy array or palettable colormap
-    """
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-    import matplotlib.ticker as ticker
-
-    mpl.rcParams['pdf.fonttype'] = 42
-    mpl.rcParams['ps.fonttype'] = 42
-
-    fig = plt.figure(figsize=(3,8))
-
-    if orientation=='horizontal':
-        ax = fig.add_axes([0.05,0.80,0.9,0.15])
-    elif orientation=='vertical':
-        ax = fig.add_axes([0.05,0.05,0.15,0.9])
-
-    if type(colorStyle) == np.ndarray:
-        cmap = mpl.colors.LinearSegmentedColormap.from_list('name',colorStyle)
+        all_colors = np.vstack((colors_neg, colors_pos))
+        curvature_map = mpl.colors.LinearSegmentedColormap.from_list('curvature_map', all_colors)
     else:
-        cmap = colorStyle.mpl_colormap
+        norm = mpl.colors.Normalize(vmin=amin, vmax=amax)
+        curvature_map = viridis.mpl_colormap
 
-    cnorm = mpl.colors.Normalize(vmin=minV, vmax=maxV)
-    if logscale and minV >= 0:
-        cnorm = mpl.colors.LogNorm(vmin=minV, vmax=maxV)
-    elif logscale and minV < 0:
-        cnorm = mpl.colors.SymLogNorm(1, vmin=minV, vmax=maxV)
+    # Map values to colors and add vertex color layer
+    colors = curvature_map(norm(data))[:,:3] # Skip alpha channel
+    mesh = bpy.context.object.data
+    if vlayer not in mesh.vertex_colors:
+        mesh.vertex_colors.new(name=vlayer)
 
+    color_layer = mesh.vertex_colors[vlayer]
+    mesh.vertex_colors[vlayer].active = True
 
-    cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=cnorm,
-            orientation=orientation, extend=extend) #,format=ticker.FuncFormatter(eng_notation))
+    mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+    mesh.loops.foreach_get("vertex_index", mloops)
+    color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+    # Add axis for colorbar and plot it
+    ax = fig.add_axes([0.75,0.05,0.05,0.9])
+    cb = mpl.colorbar.ColorbarBase(ax, cmap=curvature_map, norm=norm,
+                orientation='vertical')
 
     ticks = cb.get_ticks()
     ticks.sort()
-    if minV != ticks[0]:
-        ticks = np.insert(ticks, 0, minV)
-    if maxV != ticks[-1]:
-        ticks = np.append(ticks, maxV)
+
+    if amin != ticks[0]:
+        ticks = np.insert(ticks, 0, amin)
+    if amax != ticks[-1]:
+        ticks = np.append(ticks, amax)
     cb.set_ticks(ticks)
 
     ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
 
     if extend == 'neither':
-        pass
+       pass
     elif extend == 'both':
         ticklabels[0] = "< " + ticklabels[0]
         ticklabels[-1] = "> " + ticklabels[-1]
@@ -204,14 +202,15 @@ def genColorBar(colorStyle,minV,maxV,fontsize=14,orientation='vertical', logscal
         ticklabels[-1] = "> " + ticklabels[-1]
     elif extend == 'min':
         ticklabels[0] = "< " + ticklabels[0]
-
     cb.set_ticklabels(ticklabels)
-    cb.ax.tick_params(labelsize=fontsize)
-    #ax.ticklabel_format(axis='both',style='sci')
-    cb.set_label(label, size=fontsize+2)
+    cb.ax.tick_params(labelsize=14)
+    cb.set_label(axislabel, size=16)
+
     if saveplot:
-        plt.savefig(fname+'.pdf', format='pdf')
-    plt.show()
+        plt.savefig(file_prefix+'.pdf', format='pdf')
+    if showplot:
+        plt.show()
+
 
 def eng_notation(x,pos):
     num, power = '{:.1e}'.format(x).split('e')
