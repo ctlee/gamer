@@ -25,7 +25,13 @@ from bpy.props import (
 import bmesh
 
 import blendgamer.pygamer as g
-from blendgamer.colormap import dataToVertexColor
+
+import importlib
+mpl_spec = importlib.util.find_spec("matplotlib")
+mpl_found = mpl_spec is not None
+
+if mpl_found:
+    from blendgamer.colormap import dataToVertexColor
 
 import blendgamer.report as report
 from blendgamer.util import *
@@ -467,101 +473,101 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Save the generated plots"
         )
 
+    if mpl_found:
+        def compute_curvatures(self, context, report):
+            gmesh = blenderToGamer(report)
+            if gmesh:
+                kh, kg, k1, k2 = gmesh.computeCurvatures(True, self.curveIter)
 
-    def compute_curvatures(self, context, report):
-        gmesh = blenderToGamer(report)
-        if gmesh:
-            kh, kg, k1, k2 = gmesh.computeCurvatures(True, self.curveIter)
+                dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="MeanCurvature",
+                    axislabel="Mean Curvature [$\mu m^{-1}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
 
-            dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="MeanCurvature",
-                axislabel="Mean Curvature [$\mu m^{-1}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
+                dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="GaussianCurvature",
+                    axislabel="Gaussian Curvature [$\mu m^{-2}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
 
-            dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="GaussianCurvature",
-                axislabel="Gaussian Curvature [$\mu m^{-2}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
+                dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="k1Curvature",
+                    axislabel="k1 Curvature [$\mu m^{-1}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
 
-            dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="k1Curvature",
-                axislabel="k1 Curvature [$\mu m^{-1}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
+                dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="k2Curvature",
+                    axislabel="k2 Curvature [$\mu m^{-1}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
 
-            dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="k2Curvature",
-                axislabel="k2 Curvature [$\mu m^{-1}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
+                return True
+            return False
 
-            return True
-        return False
+        def mean_curvature(self, context, report):
+            gmesh = blenderToGamer(report)
+            if gmesh:
+                curvatures = gmesh.meanCurvature(True, self.curveIter)
+                kh, _, _, _ = gmesh.computeCurvatures(True, self.curveIter)
 
-    def mean_curvature(self, context, report):
-        gmesh = blenderToGamer(report)
-        if gmesh:
-            curvatures = gmesh.meanCurvature(True, self.curveIter)
-            kh, _, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+                dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="MeanCurvature",
+                    axislabel="Mean Curvature [$\mu m^{-1}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
+                return True
+            return False
 
-            dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="MeanCurvature",
-                axislabel="Mean Curvature [$\mu m^{-1}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
-            return True
-        return False
+        def gaussian_curvature(self, context, report):
+            gmesh = blenderToGamer(report)
+            if gmesh:
+                _, kg, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+                dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="GaussianCurvature",
+                    axislabel="Gaussian Curvature [$\mu m^{-2}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
 
-    def gaussian_curvature(self, context, report):
-        gmesh = blenderToGamer(report)
-        if gmesh:
-            _, kg, _, _ = gmesh.computeCurvatures(True, self.curveIter)
-            dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="GaussianCurvature",
-                axislabel="Gaussian Curvature [$\mu m^{-2}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
-
-            return True
-        return False
-
-
-    def k1_curvature(self, context, report):
-        gmesh = blenderToGamer(report)
-        if gmesh:
-            _, _, k1, _ = gmesh.computeCurvatures(True, self.curveIter)
-
-            dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="k1Curvature",
-                axislabel="k1 Curvature [$\mu m^{-1}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
-
-            return True
-        return False
+                return True
+            return False
 
 
-    def k2_curvature(self, context, report):
-        gmesh = blenderToGamer(report)
-        if gmesh:
-            _, _, _, k2 = gmesh.computeCurvatures(True, self.curveIter)
+        def k1_curvature(self, context, report):
+            gmesh = blenderToGamer(report)
+            if gmesh:
+                _, _, k1, _ = gmesh.computeCurvatures(True, self.curveIter)
 
-            dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
-                percentTruncate=self.curvePercentile,
-                vlayer="k2Curvature",
-                axislabel="k2 Curvature [$\mu m^{-1}$]",
-                file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                showplot=self.showplots,saveplot=self.saveplots)
-        return False
+                dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="k1Curvature",
+                    axislabel="k1 Curvature [$\mu m^{-1}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
+
+                return True
+            return False
+
+
+        def k2_curvature(self, context, report):
+            gmesh = blenderToGamer(report)
+            if gmesh:
+                _, _, _, k2 = gmesh.computeCurvatures(True, self.curveIter)
+
+                dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
+                    percentTruncate=self.curvePercentile,
+                    vlayer="k2Curvature",
+                    axislabel="k2 Curvature [$\mu m^{-1}$]",
+                    file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+                    showplot=self.showplots,saveplot=self.saveplots)
+            return False
 
     # def helfrich_energy(self, context, report):
     #     gmesh = blenderToGamer(report)

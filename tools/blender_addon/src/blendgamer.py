@@ -54,6 +54,7 @@ def gamer_load_post(dummy):
     """
     print('Loading BlendGAMer v%s with PyGAMer %s'%(getGamerVersion(), pygamer.__version__()))
     scene = bpy.context.scene
+    scene.gamer.check_for_matplotlib()
     if not scene.gamer.initialized:
         # print('Initializing GAMer Properties')
         scene.gamer.init_properties()
@@ -72,6 +73,7 @@ def gamer_load_post(dummy):
 
 class GAMerAddonProperties(bpy.types.PropertyGroup):
     initialized = BoolProperty(name="GAMer Initialized", default=False)
+    matplotlib_found = BoolProperty(name="Is matplotlib available", default=False)
     gamer_version = StringProperty(name="GAMer Version", default="0")
     boundary_id_counter = IntProperty(name="GAMer Boundary id Counter")
     versionerror = IntProperty(name="Version mismatch", default=0)
@@ -101,3 +103,11 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
             bnd_unset_mat.use_fake_user = True
             bnd_unset_mat.gamer.boundary_id = UNSETID
             self.initialized = True
+
+    """"
+    Initialize if matplotlib is available
+    """
+    def check_for_matplotlib(self):
+        import importlib
+        mpl_spec = importlib.util.find_spec("matplotlib")
+        self.matplotlib_found = mpl_spec is not None
