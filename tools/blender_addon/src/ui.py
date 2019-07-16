@@ -196,10 +196,12 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
             row.prop(qProps, "showplots")
             row.prop(qProps, "saveplots")
             row = col.row(align=True)
+            row.prop(qProps, "mixpoint")
             row.prop(qProps, "curveIter")
             row = col.row(align=True)
             row.prop(qProps, "minCurve")
             row.prop(qProps, "maxCurve")
+
 
             col.operator("gamer.compute_curvatures")
             col.operator("gamer.mean_curvature")

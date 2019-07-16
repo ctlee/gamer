@@ -22,6 +22,7 @@
 import bpy
 import numpy as np
 import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 mpl.rcParams['pdf.fonttype'] = 42
@@ -98,7 +99,7 @@ class DivergingNorm(mpl.colors.Normalize):
         return result
 
 
-def dataToVertexColor(data, minV=-1000, maxV=1000, percentTruncate=False, vlayer='curvature', axislabel='', file_prefix='plot', showplot=False,saveplot=False):
+def dataToVertexColor(data, minV=-1000, maxV=1000, percentTruncate=False, vlayer='curvature', axislabel='', file_prefix='plot', showplot=False,saveplot=False, mixpoint=0.5):
     fig = plt.figure(figsize=(8,5))
     ax = fig.add_axes([0.1,0.05,0.6,0.9])
 
@@ -155,14 +156,14 @@ def dataToVertexColor(data, minV=-1000, maxV=1000, percentTruncate=False, vlayer
     # Construct the norm and colorbar
     if amin < 0:
         norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
-        colors_neg = plt.cm.viridis(np.linspace(0, 0.2, 256))
-        colors_pos = plt.cm.viridis(np.linspace(0.2, 1, 256))
+        colors_neg = plt.cm.viridis(np.linspace(0, mixpoint, 256))
+        colors_pos = plt.cm.viridis(np.linspace(mixpoint, 1, 256))
 
         all_colors = np.vstack((colors_neg, colors_pos))
         curvature_map = mpl.colors.LinearSegmentedColormap.from_list('curvature_map', all_colors)
     else:
         norm = mpl.colors.Normalize(vmin=amin, vmax=amax)
-        curvature_map = viridis.mpl_colormap
+        curvature_map = plt.cm.viridis
 
     # Map values to colors and add vertex color layer
     colors = curvature_map(norm(data))[:,:3] # Skip alpha channel

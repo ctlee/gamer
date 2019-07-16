@@ -473,6 +473,11 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Save the generated plots"
         )
 
+    mixpoint =FloatProperty(
+        name = "Color mixing point", default = 0.5, min=0, max=1,
+        description="Value for color mixing"
+        )
+
     if mpl_found:
         def compute_curvatures(self, context, report):
             gmesh = blenderToGamer(report)
@@ -484,29 +489,32 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                     vlayer="MeanCurvature",
                     axislabel="Mean Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
 
                 dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="GaussianCurvature",
                     axislabel="Gaussian Curvature [$\mu m^{-2}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
 
                 dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="k1Curvature",
                     axislabel="k1 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
 
                 dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="k2Curvature",
                     axislabel="k2 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
-
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                del kh
+                del kg
+                del k1
+                del k2
                 return True
             return False
 
@@ -521,7 +529,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                     vlayer="MeanCurvature",
                     axislabel="Mean Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                del kh
                 return True
             return False
 
@@ -534,8 +543,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                     vlayer="GaussianCurvature",
                     axislabel="Gaussian Curvature [$\mu m^{-2}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
-
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                del kg
                 return True
             return False
 
@@ -550,8 +559,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                     vlayer="k1Curvature",
                     axislabel="k1 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
-
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                del k1
                 return True
             return False
 
@@ -566,7 +575,9 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                     vlayer="k2Curvature",
                     axislabel="k2 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                del k2
+                return True
             return False
 
     # def helfrich_energy(self, context, report):
