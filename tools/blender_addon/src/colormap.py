@@ -22,7 +22,6 @@
 import bpy
 import numpy as np
 import matplotlib as mpl
-mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 mpl.rcParams['pdf.fonttype'] = 42
