@@ -104,6 +104,8 @@ option(GAMER_TESTS "Build the GAMer tests?" OFF)
 option(GETEIGEN "Download Eigen?" ON)
 option(GETPYBIND11 "Download pybind11?" ON)
 
+option(WITH_OPENMP "Compile with OpenMP support?" OFF)
+
 option(GAMER_DOCS "Download and configure documentation?" OFF)
 
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
@@ -165,6 +167,19 @@ endif(GAMER_CMAKE_VERBOSE)
 # Add and configure library dependencies
 add_subdirectory(libraries EXCLUDE_FROM_ALL)
 
+if(WITH_OPENMP)
+    set(OpenMP_LIBRARIES "/opt/local/lib/libomp")
+    set(OpenMP_INCLUDES "/opt/local/include/libomp")
+    set(OpenMP_C_FLAGS -Xpreprocessor -fopenmp -I/opt/local/include/libomp)
+    set(OpenMP_C_LIB_NAMES "omp")
+    set(OpenMP_CXX_FLAGS -Xpreprocessor -fopenmp -I/opt/local/include/libomp)
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY "/opt/local/lib/libomp/libomp.dylib")
+
+    find_package(OpenMP REQUIRED)
+endif(WITH_OPENMP)
+
+
 list(APPEND GAMER_SOURCES
     "src/OFF_SurfaceMesh.cpp"
     "src/OBJ_SurfaceMesh.cpp"
@@ -186,6 +201,11 @@ target_include_directories(gamer_objlib PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
+if(WITH_OPENMP)
+    target_link_libraries(gamer_objlib PRIVATE ${OpenMP_CXX_LIBRARIES})
+    target_compile_options(gamer_objlib PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
+
 # target_compile_options(gamer_objlib PRIVATE -Werror -Wall -Weverything -Wextra -pedantic-errors -Wconversion -Wsign-conversion -ferror-limit=3 -Wno-c++17-extensions)
 # -ferror-limit=3 -Wno-unused-variable -Wno-unused-parameter)
 

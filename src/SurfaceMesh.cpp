@@ -35,6 +35,10 @@
 #include <vector>
 #include <casc/casc>
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
@@ -527,10 +531,21 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                                             preserveRidges,
                                             surfacemesh_detail::checkFlipAngle,
                                             std::back_inserter(edgesToFlip));
-        for (auto edgeID : edgesToFlip)
+        std::cout << "Entering the hypothetical parallel section..." << std::endl;
+
+        #pragma omp parallel
         {
-            surfacemesh_detail::edgeFlip(mesh, edgeID);
+            std::cout << "NumThreads: " << omp_get_num_threads() << std::endl;
+            #pragma omp for
+            for(auto edgeIDIT = edgesToFlip.begin() ; edgeIDIT < edgesToFlip.end(); ++edgeIDIT)
+            // for (auto edgeID : edgesToFlip)
+            {
+                std::cout << "Other things" << std::endl;
+                surfacemesh_detail::edgeFlip(mesh, *edgeIDIT);
+            }
         }
+
+        std::cout << "Exiting parallel part..." << std::endl;
 
         if (verbose)
         {

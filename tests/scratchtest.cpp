@@ -22,7 +22,13 @@ int  main(int argc, char *argv[])
 {
     auto mesh = gamer::readPDB_gauss("2jho.pdb", -0.2, 3);
 
-    gamer::writeOFF("2jho.off", *mesh);
+    for(auto v : mesh->get_level_id<1>()){
+        (*v).selected = true;
+    }
+
+    gamer::smoothMesh(*mesh, 50, true, true, 2);
+
+    // gamer::writeOFF("2jho.off", *mesh);
 
     // auto mesh = gamer::readOFF("icosa.off");
 
