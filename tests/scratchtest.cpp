@@ -20,7 +20,8 @@
 
 int  main(int argc, char *argv[])
 {
-    auto mesh = gamer::readPDB_gauss("2jho.pdb", -0.2, 3);
+    // auto mesh = gamer::readPDB_gauss("2jho.pdb", -0.2, 3);
+    auto mesh = gamer::readOFF("1spine_init.off");
 
     for(auto v : mesh->get_level_id<1>()){
         (*v).selected = true;

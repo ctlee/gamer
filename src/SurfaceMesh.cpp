@@ -34,6 +34,7 @@
 #include <strstream>
 #include <vector>
 #include <casc/casc>
+#include <chrono>
 
 #if defined(_OPENMP)
 #include <omp.h>
@@ -487,6 +488,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 
 void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings)
 {
+    using Clock = std::chrono::high_resolution_clock;
     double maxMinAngle = 15;
     double minMaxAngle = 165;
     double minAngle, maxAngle;
@@ -504,6 +506,8 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
 
     for (int nIter = 1; nIter <= maxIter; ++nIter)
     {
+        auto t1 = Clock::now();
+        surfacemesh_detail::cacheNormals(mesh);
         for (auto vertex : mesh.get_level_id<1>())
         {
             if ((*vertex).selected == true)
@@ -522,6 +526,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
         //         surfacemesh_detail::edgeFlip(mesh, edgeID);
         //     }
         // }
+        surfacemesh_detail::cacheNormals(mesh);
 
         // ATOMIC EDGE FLIP
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
@@ -531,21 +536,16 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                                             preserveRidges,
                                             surfacemesh_detail::checkFlipAngle,
                                             std::back_inserter(edgesToFlip));
-        std::cout << "Entering the hypothetical parallel section..." << std::endl;
 
-        #pragma omp parallel
+        #pragma omp parallel shared(edgesToFlip)
         {
-            std::cout << "NumThreads: " << omp_get_num_threads() << std::endl;
             #pragma omp for
             for(auto edgeIDIT = edgesToFlip.begin() ; edgeIDIT < edgesToFlip.end(); ++edgeIDIT)
             // for (auto edgeID : edgesToFlip)
             {
-                std::cout << "Other things" << std::endl;
                 surfacemesh_detail::edgeFlip(mesh, *edgeIDIT);
             }
         }
-
-        std::cout << "Exiting parallel part..." << std::endl;
 
         if (verbose)
         {
@@ -555,6 +555,10 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                       << "Max Angle = " << maxAngle << ", "
                       << "# smaller-than-" << maxMinAngle << " = " << nSmall << ", "
                       << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
+            auto t2 = Clock::now();
+            std::cout << "Iteration took: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+              << " milliseconds" << std::endl;
         }
     }
 }

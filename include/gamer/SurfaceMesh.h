@@ -74,7 +74,10 @@ struct SMGlobal
         marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
 };
 
-struct SMVertex : Vertex { using Vertex::Vertex; };
+struct SMVertex : Vertex {
+    Vector normal;
+    using Vertex::Vertex;
+};
 
 /**
  * @brief      Edge data
@@ -88,7 +91,7 @@ struct SMEdge{
 
     /**
      * @brief      Overload constructor constructs edge with
-     *
+
      * @param[in]  select  Selection status
      */
     SMEdge(bool select) : selected(select) {}
@@ -101,6 +104,7 @@ struct SMFaceProperties
 {
     int  marker;   /**< @brief Marker */
     bool selected; /**< @brief Selection flag */
+    Vector normal;
 
     /**
      * @brief      Face properties constructor
@@ -726,6 +730,8 @@ struct CopyHelper
         }
     }
 };
+
+void cacheNormals(SurfaceMesh & mesh);
 } // end namespace surfacemesh_detail
 /// @endcond
 

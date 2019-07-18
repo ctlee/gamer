@@ -35,6 +35,10 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
@@ -53,9 +57,11 @@ tensor<double, 3, 2> computeLocalStructureTensor(const SurfaceMesh              
     casc::kneighbors_up(mesh, vertexID, rings, nbors);
     // local structure tensor
     tensor<double, 3, 2> lst = tensor<double, 3, 2>();
-    for (SurfaceMesh::SimplexID<1> nid : nbors)
+    for (SurfaceMesh::SimplexID<1> vID : nbors)
     {
-        auto norm = getNormal(mesh, nid);           // Get Vector normal
+        // auto norm = getNormal(mesh, vID);
+        // Get cached Vector normal
+        auto norm = (*vID).normal;
         auto mag  = std::sqrt(norm|norm);
         if (mag <= 0)
         {
@@ -973,6 +979,36 @@ bool checkEdgeFlip(const SurfaceMesh &mesh,
 
     // Check the flip using user function
     return checkFlip(mesh, edgeID);
+}
+
+
+
+void cacheNormals(SurfaceMesh &mesh){
+    #pragma omp parallel
+    {
+    #pragma omp single
+    {
+    for(auto fID : mesh.get_level_id<3>()){
+        #pragma omp task
+        {
+        (*fID).normal = getNormal(mesh, fID);
+        } // end task
+    }
+
+    for(auto vID: mesh.get_level_id<1>()){
+        #pragma omp task
+        {
+        Vector norm;
+        auto   faces = mesh.up(mesh.up(vID));
+        for (auto faceID : faces)
+        {
+            norm += (*faceID).normal;
+        }
+        // norm /= faces.size();
+        (*vID).normal = norm;
+        } // end task
+    }
+    }} // end single, parallel
 }
 
 } // end namespace surfacemesh_detail
