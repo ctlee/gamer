@@ -12,7 +12,11 @@
 
 # Add the local lib to path if desired
 # import sys
+<<<<<<< HEAD
 # sys.path.insert(0, os.path.abspath('/home/ctlee/gamer/gamer/buildpy37/lib/'))
+=======
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/build/lib/'))
+>>>>>>> decimation
 
 import os
 import pygamer

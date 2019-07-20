@@ -54,6 +54,12 @@ class tetgenio;
 /// Namespace for all things gamer
 namespace gamer
 {
+
+struct ErrorProperties
+{
+    double error;
+};
+
 /**
  * @brief      Type for containing root metadata
  */
@@ -124,6 +130,16 @@ struct TMVertex : Vertex, TMVertexProperties
         output << *this;
         return output.str();
     }
+
+    bool operator< (const TetVertex& rhs) const
+    {
+        return  error < rhs.error;
+    };
+
+    bool operator> (const TetVertex& rhs) const
+    {
+        return  error > rhs.error;
+    };
 };
 
 
@@ -164,6 +180,17 @@ struct TMEdge : Vertex
         output << *this;
         return output.str();
     }
+
+
+    bool operator< (const Edge& rhs) const
+    {
+        return  error < rhs.error;
+    };
+
+    bool operator> (const Edge& rhs) const
+    {
+        return  error > rhs.error;
+    };
 };
 
 /**
@@ -399,12 +426,191 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh);
 //void writeDiffPack
 //void writeCARP
 
-/**
- * @brief      Reads in a mesh in dolfin XML format
- *
- * @param[in]  filename  The filename
- *
- * @return     Tetrahedral mesh
+std::unique_ptr<TetMesh> readDolfin(const std::string&filename);
+
+typedef double (*PenaltyFunction)(TetMesh::SimplexID<2>, TetMesh&);
+
+template <typename Complex, template <typename> class Callback>
+void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, Callback<Complex> &&clbk)
+{
+    auto name = mesh.get_name(edge);
+    auto v = *mesh.get_simplex_down(edge, name[0])
+             - *mesh.get_simplex_down(edge, name[1]);
+    Vector pos = mesh.get_simplex_down(edge, name[0]).data().position - v*vertexLoc;
+
+    using SimplexMap = typename casc::SimplexMap<Complex>;
+
+    casc::SimplexMap<Complex> simplexMap;
+    int np = casc::decimateFirstHalf(mesh, edge, simplexMap);
+    typename casc::decimation_detail::SimplexDataSet<Complex>::type rv;
+
+    run_user_callback(mesh, simplexMap,  std::forward<Callback<Complex>>(clbk), rv);
+    tetmesh::TetVertex vert;
+    for (auto vpair : std::get<1>(rv)) {
+        auto vnames = vpair.first;
+        for (auto name : vnames) {
+            if (np == name) {
+                vert = vpair.second;
+                goto endloop;
+            }
+
+        }
+    }
+    endloop:
+    vert.position = pos;
+    casc::decimateBackHalf(mesh, simplexMap, rv);
+}
+
+
+// Misc Error computation and propagation functions
+template <std::size_t level>
+void propagateHelper(TetMesh & mesh){
+    if (level <= 1) return;
+
+    for (auto node : mesh.get_level_id<level>()){
+        auto parents = mesh.up(node);
+        double tmperror;
+        for (auto parent : parents){
+            tmperror += parent->error;
+        }
+        double error = tmperror / parents.size();
+        node->error = error;
+    }
+    propagateHelper<level-1>(mesh);
+}
+
+
+
+
+
+/*
+ * Compute errors of each vertex/edge based on inputted functions
+ * vertex Loc is location of new vertex relative to edge endpoints
  */
-std::unique_ptr<TetMesh> readDolfin(const std::string &filename);
-} // end namespace gamer
+double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
+                      std::vector<PenaltyFunction> penaltyList);
+
+void propagateError(TetMesh & mesh, std::vector<PenaltyFunction> penalty);
+
+// Specific decimation operations
+template <typename Complex, template <typename> class Callback>
+int halfEdgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> e, std::vector<PenaltyFunction> penaltyList,
+        Callback<Complex> &&clbk) {
+    double penaltyA = computePenalty(e, mesh, 0, penaltyList);
+    double penaltyB = computePenalty(e, mesh, 1, penaltyList);
+    if (penaltyA < penaltyB) {
+        edgeCollapse(mesh, e, 0, Callback<TetMesh>());
+        return 0;
+    } else {
+        edgeCollapse(mesh, e, 1, Callback<TetMesh>());
+        return 1;
+    }
+}
+
+// Penalty/Constraint functions
+double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh);
+
+bool isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh);
+
+double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh);
+
+// double scalarInfoValue(tetmesh::TetEdge e) {}
+
+// double volumePreservation(TetMesh::SimplexID<2> edge, TetMesh & mesh) {}
+
+double inwardCollapse(TetMesh::SimplexID<2> edge, TetMesh & mesh);
+
+// // Test if a potential edge collapse preserves substructes
+// double substructurePreservation(TetMesh::SimplexID<2> edge, TetMesh & mesh);
+
+// // Test if a potential edge collapse results in inverted tetrahedra
+// double simplexInversionCheck(TetMesh::SimplexID<2> edge, TetMesh & mesh);
+
+// // Error from error quadrics as described in garland paper
+// double quadricError(TetMesh::SimplexID<2> edge, TetMesh & mesh);
+
+void markDecimatedEdge(TetMesh & mesh, std::vector<std::pair<std::pair<int,int>, double>>& list, TetMesh::SimplexID<2> edge,
+                       double loc);
+
+// Restriction matrix with convention as in http://www.cs.huji.ac.il/~csip/CSIP2007-MG.pdf
+void writeRestrictionMatrix(const std::string &filename, int origSize,
+        std::vector<std::pair<std::pair<int,int>, double>> list, std::vector<bool> encountered);
+
+template <typename Complex, template <typename> class Callback>
+void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
+    std::vector<PenaltyFunction> samplePenaltyFunction = {isBoundaryEdge, inwardCollapse};
+
+    int origVertexNum = mesh.size<1>();
+    int numToRemove = origVertexNum - origVertexNum*threshold;
+
+    if (numToRemove < 1) {
+        throw std::invalid_argument("Number of vertices to remove to must be at least 1");
+    }
+
+    // Exit, mesh already sufficiently decimated
+    if (threshold*origVertexNum > mesh.size<2>()) {
+        std::cout << "Decimation finished to requested threshold: " << threshold <<"; final mesh size: "
+        << mesh.size<2>() << std::endl;
+        return;
+    }
+
+    propagateError(mesh, samplePenaltyFunction);
+
+    std::vector<TetMesh::SimplexID<2>> sortedEdges;
+    // initialize vector of edges
+    for (TetMesh::SimplexID<2> e : mesh.get_level_id<2>()) {
+        sortedEdges.push_back(e);
+    }
+
+    auto edgeErrorCmp = [](const TetMesh::SimplexID<2> e1, const TetMesh::SimplexID<2> e2) -> bool{
+        return *e1 < *e2;
+    };
+
+    // sort edges in order of error
+    std::sort_heap(sortedEdges.begin(), sortedEdges.end(), edgeErrorCmp);
+    // remove invalid edges (if edge with both vertices decimated already decimated, will cause segfault)
+    std::vector<bool> encountered(mesh.size<1>(), false);
+    int numValidEdges = 0;
+    for (auto it = sortedEdges.begin(); it != sortedEdges.end();) {
+        if (numValidEdges > numToRemove) {
+            sortedEdges.erase(it, sortedEdges.end());
+            break;
+        }
+
+        auto edge = *it;
+
+        /*
+        if ((*edge).error == INFINITY) {
+            sortedEdges.erase(it, sortedEdges.end());
+            std::cout << "No more valid edges for decimation, all remaining edges are protected by constraints." << std::endl;
+            break;
+        }
+        */
+        auto name =  mesh.get_name(edge);
+
+        if (encountered[name[0]] || encountered[name[1]]) {
+            it = sortedEdges.erase(it);
+        } else {
+            ++it;
+            numValidEdges++;
+        }
+        encountered[name[0]] = true;
+        encountered[name[1]] = true;
+    }
+
+    std::vector<std::pair<std::pair<int,int>, double>> decimatedList;
+
+    for(auto it = sortedEdges.begin(); it != sortedEdges.end(); it++){
+        auto edge = *it;
+        std::cout << "collapsing edge: " << *it << std::endl;
+        //markDecimatedEdge(mesh, decimatedList, edge, .5);
+        if (isBoundaryEdge(*it, mesh)) {
+            std::cout << "Warning: boundary edges being collapsed, raise threshold" << std::endl;
+            break;
+        }
+        edgeCollapse(mesh, *it, .5, Callback<TetMesh>());
+        //int pos = halfEdgeCollapse(mesh, *it, samplePenaltyFunction, Callback<TetMesh>());
+    }
+    std::cout << "Decimation finished, final size: " << mesh.size<1>() << " vertices." << std::endl;
+    //writeRestrictionMatrix("restrictionM.csv", origVertexNum, decimatedList, encountered);
+}
