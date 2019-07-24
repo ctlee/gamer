@@ -54,9 +54,9 @@ endif()
 
 add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp)
 target_link_libraries(objecttests gamerstatic gtest_main)
-target_compile_options(objecttests PRIVATE -Werror -Wall -Weverything
-          -Wextra -pedantic-errors -Wconversion -Wsign-conversion
-          -ferror-limit=3 -Wno-c++17-extensions)
+# target_compile_options(objecttests PRIVATE -Werror -Wall -Weverything
+#           -Wextra -pedantic-errors -Wconversion -Wsign-conversion
+#           -ferror-limit=3 -Wno-c++17-extensions)
 # -ferror-limit=3 -Wno-unused-variable -Wno-unused-parameter)
 
 
