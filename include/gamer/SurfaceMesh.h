@@ -74,7 +74,11 @@ struct SMGlobal
         marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
 };
 
-struct SMVertex : Vertex { using Vertex::Vertex; };
+struct SMVertex : Vertex {
+    /// Cached normal vector
+    Vector normal;
+    using Vertex::Vertex;
+};
 
 /**
  * @brief      Edge data
@@ -101,6 +105,7 @@ struct SMFaceProperties
 {
     int  marker;   /**< @brief Marker */
     bool selected; /**< @brief Selection flag */
+    Vector normal; /**< @brief cached normal of face */
 
     /**
      * @brief      Face properties constructor
@@ -295,6 +300,22 @@ tensor<double, 3, 2> computeLocalStructureTensor(
     const SurfaceMesh              &mesh,
     const SurfaceMesh::SimplexID<1> vertexID,
     const int                       rings);
+
+
+/**
+ * @brief      Computes the local structure tensor from cached normals
+ *
+ * @param[in]  mesh      Surface mesh of interest
+ * @param[in]  vertexID  Vertex of interest
+ * @param[in]  rings     Number of neighborhood rings to consider
+ *
+ * @return     The local structure tensor.
+ */
+tensor<double, 3, 2> computeLSTFromCache(
+    const SurfaceMesh              &mesh,
+    const SurfaceMesh::SimplexID<1> vertexID,
+    const int                       rings);
+
 
 /**
  * @brief      Terminal case
@@ -508,6 +529,10 @@ Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 
  */
 void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
 
+Vector weightedVertexSmoothCache(SurfaceMesh &mesh,
+                               SurfaceMesh::SimplexID<1> vertexID,
+                               std::size_t rings);
+
 /**
  * @brief      Traditional barycenter smooth.
  *
@@ -523,6 +548,8 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
  * @param[in]  edgeID  SimplexID of the edge to flip.
  */
 void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
+
+void edgeFlipCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
 
 /**
  * @brief      Select edges which are good candidates for flipping
@@ -1034,4 +1061,6 @@ std::unique_ptr<SurfaceMesh> cube(int order);
  * @return     Vector of surface meshes
  */
 std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh);
+
+void cacheNormals(SurfaceMesh &mesh);
 } // end namespace gamer

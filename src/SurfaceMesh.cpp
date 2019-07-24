@@ -498,26 +498,27 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                   << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
     }
 
+    std::vector<std::pair<SurfaceMesh::SimplexID<1>, Vector>> delta;
+
+    // Cache normals before entering loop
+    cacheNormals(mesh);
     for (int nIter = 1; nIter <= maxIter; ++nIter)
     {
         for (auto vertex : mesh.get_level_id<1>())
         {
             if ((*vertex).selected == true)
             {
-                surfacemesh_detail::weightedVertexSmooth(mesh, vertex, rings);
+                // surfacemesh_detail::weightedVertexSmooth(mesh, vertex, rings);
+                delta.push_back(std::make_pair(vertex, surfacemesh_detail::weightedVertexSmoothCache(mesh, vertex, rings)));
             }
             //barycenterVertexSmooth(mesh, vertex);
         }
 
-        // IN PLACE EDGE FLIP
-        // auto edgeRange = mesh.get_level_id<2>();
-        // for (auto edgeIT = edgeRange.begin(); edgeIT != edgeRange.end(); ) {
-        //     auto edgeID = *edgeIT;
-        //     ++edgeIT;
-        //     if(surfacemesh_detail::checkEdgeFlip(mesh, preserveRidges, edgeID, surfacemesh_detail::checkFlipAngle)){
-        //         surfacemesh_detail::edgeFlip(mesh, edgeID);
-        //     }
-        // }
+        for (auto pair : delta){
+            *pair.first += pair.second;
+        }
+        delta.clear();
+        cacheNormals(mesh);
 
         // ATOMIC EDGE FLIP
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
@@ -529,7 +530,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                                             std::back_inserter(edgesToFlip));
         for (auto edgeID : edgesToFlip)
         {
-            surfacemesh_detail::edgeFlip(mesh, edgeID);
+            surfacemesh_detail::edgeFlipCache(mesh, edgeID);
         }
 
         if (verbose)
@@ -1063,7 +1064,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angle(curr, center, next) > M_PI/2)
+            if (angle(curr, center, next) > M_PI_2)
             {
                 // The angle of T at center is obtuse
                 Amix += getArea(center, curr, next)/2.0;
@@ -1165,7 +1166,7 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angle(curr, center, next) > M_PI/2)
+            if (angle(curr, center, next) > M_PI_2)
             {
                 // The angle of T at center is obtuse
                 Amix += getArea(center, curr, next)/2;
@@ -1367,5 +1368,24 @@ std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
     }
 
     return meshes;
+}
+
+void cacheNormals(SurfaceMesh &mesh){
+    for(auto fID : mesh.get_level_id<3>()){
+        auto norm = getNormal(mesh, fID);
+        normalize(norm);
+        (*fID).normal = norm;
+    }
+
+    for(auto vID: mesh.get_level_id<1>()){
+        Vector norm;
+        auto   faces = mesh.up(mesh.up(vID));
+        for (auto faceID : faces)
+        {
+            norm += (*faceID).normal;
+        }
+        normalize(norm);
+        (*vID).normal = norm;
+    }
 }
 } // end namespace gamer
