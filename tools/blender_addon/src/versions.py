@@ -137,9 +137,9 @@ def checkVersion():
                             if 'boundaries' in obj.keys():
                                 del obj['boundaries']
                 scene.gamer.gamer_version = str(newver)
-            if compare_version(fileVer, (2,0,1)) == 0:
-                newver = (2,0,2)
-                print("Migrating from v(2,0,1) to v%s"%(str(newver)))
+            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,3)) < 0 :
+                newver = (2,0,3)
+                print("Migrating from v%s to v%s"%(str(fileVer), str(newver)))
                 scene.gamer.gamer_version = str(newver)
             else:
                 bpy.ops.gamer.prompt_old_version()

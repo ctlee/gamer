@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <map>
 #include <cmath>
@@ -53,6 +54,20 @@ TEST(VertexTest, MathOperations)
     EXPECT_EQ(Vertex(1,1,1), 1*v0);
     EXPECT_EQ(Vertex(3.4,3.4,3.4), 3.4*v0);
     EXPECT_EQ(Vertex(1.0,1.0,1.0), v0/1.0);
+
+    Vector v1 = Vector({0.0, 0.0, 1.0});
+    Vector v2 = Vector({0.0, 1.0, 0.0});
+    EXPECT_EQ(angle(v1,v2), M_PI_2);
+    EXPECT_EQ(angle(v1,v1), 0.0);
+
+    Vector v3 = Vector({0.0, 1.0, 1.0});
+    EXPECT_EQ(angle(v1,v3), M_PI_4);
+
+    Vector n = cross(v1,v3);
+    n /= std::sqrt(n|n);
+
+    EXPECT_EQ(signed_angle(v1,v3,n), M_PI_4);
+    EXPECT_EQ(signed_angle(v3,v1,n), -M_PI_4);
 }
 
 #if GTEST_HAS_PARAM_TEST

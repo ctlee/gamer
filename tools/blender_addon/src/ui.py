@@ -1,4 +1,4 @@
-# ***************************************************************************
+#****************************************************************************
 # This file is part of the GAMer software.
 # Copyright (C) 2016-2018
 # by Christopher Lee, Tom Bartol, John Moody, Rommie Amaro, J. Andrew McCammon,
@@ -88,6 +88,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
                 col.prop(smprops, "advanced_options", icon='TRIA_DOWN', emboss=False)
                 col.prop(smprops, "autocorrect_normals")
                 col.prop(smprops, "verbose")
+                col.prop(smprops, "rings")
 
             col = layout.column()
             col.label(text="Global mesh operations:")
@@ -186,24 +187,36 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 
         GAMER_PT_mesh_quality.draw_report(layout, context)
 
-        col=layout.column()
-        col.label(text="Curvature Calculations:")
-        row = col.row(align=True)
-        row.prop(qProps, "niter")
-        row = col.row(align=True)
-        row.prop(qProps, "minCurve")
-        row.prop(qProps, "maxCurve")
-
-        col.operator("gamer.mean_curvature")
-        col.operator("gamer.gaussian_curvature")
-
 
         col=layout.column()
         col.label(text="Curvature Calculations:")
-        row = col.row(align=True)
-        row.prop(qProps, "minEnergy")
-        row.prop(qProps, "maxEnergy")
-        col.operator("gamer.helfrich_energy")
+        if context.scene.gamer.matplotlib_found:
+            row = col.row(align=True)
+            row.prop(qProps, "curvePercentile")
+            row.prop(qProps, "showplots")
+            row.prop(qProps, "saveplots")
+            row = col.row(align=True)
+            row.prop(qProps, "mixpoint")
+            row.prop(qProps, "curveIter")
+            row = col.row(align=True)
+            row.prop(qProps, "minCurve")
+            row.prop(qProps, "maxCurve")
+
+
+            col.operator("gamer.compute_curvatures")
+            col.operator("gamer.mean_curvature")
+            col.operator("gamer.gaussian_curvature")
+            col.operator("gamer.k1_curvature")
+            col.operator("gamer.k2_curvature")
+
+            # col=layout.column()
+            # col.label(text="Curvature Calculations:")
+            # row = col.row(align=True)
+            # row.prop(qProps, "minEnergy")
+            # row.prop(qProps, "maxEnergy")
+            # col.operator("gamer.helfrich_energy")
+        else:
+            col.label(text="Curvature Calculations require matplotlib.", icon='LAMP')
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):

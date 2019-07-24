@@ -81,9 +81,9 @@ void generateHistogram(const SurfaceMesh &mesh)
         auto   binAngle = [&](double angle) -> std::size_t {
                 return static_cast<std::size_t>(std::floor(angle/10));
             };
-        histogram[binAngle(angle(a, b, c))]++;
-        histogram[binAngle(angle(b, a, c))]++;
-        histogram[binAngle(angle(c, a, b))]++;
+        histogram[binAngle(angleDeg(a, b, c))]++;
+        histogram[binAngle(angleDeg(b, a, c))]++;
+        histogram[binAngle(angleDeg(c, a, b))]++;
     }
 
     std::size_t factor = mesh.size<3>()*3;
@@ -192,9 +192,9 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
 
         areaOut << getArea(a, b, c) << "\n";
         // Print angles in degrees
-        angleOut << angle(a, b, c) << "\n"
-                 << angle(b, a, c) << "\n"
-                 << angle(a, c, b) << "\n";
+        angleOut << angleDeg(a, b, c) << "\n"
+                 << angleDeg(b, a, c) << "\n"
+                 << angleDeg(a, c, b) << "\n";
     }
     areaOut.close();
     angleOut.close();
@@ -220,9 +220,9 @@ std::tuple<double, double, int, int> getMinMaxAngles(
         std::array<double, 3> angles;
         try
         {
-            angles[0] = angle(a, b, c);
-            angles[1] = angle(b, a, c);
-            angles[2] = angle(a, c, b);
+            angles[0] = angleDeg(a, b, c);
+            angles[1] = angleDeg(b, a, c);
+            angles[2] = angleDeg(a, c, b);
         }
         catch (std::runtime_error &e)
         {
@@ -481,7 +481,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 }
 
 
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose)
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings)
 {
     double maxMinAngle = 15;
     double minMaxAngle = 165;
@@ -498,26 +498,27 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                   << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
     }
 
+    std::vector<std::pair<SurfaceMesh::SimplexID<1>, Vector>> delta;
+
+    // Cache normals before entering loop
+    cacheNormals(mesh);
     for (int nIter = 1; nIter <= maxIter; ++nIter)
     {
         for (auto vertex : mesh.get_level_id<1>())
         {
             if ((*vertex).selected == true)
             {
-                surfacemesh_detail::weightedVertexSmooth(mesh, vertex, RINGS);
+                // surfacemesh_detail::weightedVertexSmooth(mesh, vertex, rings);
+                delta.push_back(std::make_pair(vertex, surfacemesh_detail::weightedVertexSmoothCache(mesh, vertex, rings)));
             }
             //barycenterVertexSmooth(mesh, vertex);
         }
 
-        // IN PLACE EDGE FLIP
-        // auto edgeRange = mesh.get_level_id<2>();
-        // for (auto edgeIT = edgeRange.begin(); edgeIT != edgeRange.end(); ) {
-        //     auto edgeID = *edgeIT;
-        //     ++edgeIT;
-        //     if(surfacemesh_detail::checkEdgeFlip(mesh, preserveRidges, edgeID, surfacemesh_detail::checkFlipAngle)){
-        //         surfacemesh_detail::edgeFlip(mesh, edgeID);
-        //     }
-        // }
+        for (auto pair : delta){
+            *pair.first += pair.second;
+        }
+        delta.clear();
+        cacheNormals(mesh);
 
         // ATOMIC EDGE FLIP
         std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
@@ -529,16 +530,8 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
                                             std::back_inserter(edgesToFlip));
         for (auto edgeID : edgesToFlip)
         {
-            surfacemesh_detail::edgeFlip(mesh, edgeID);
+            surfacemesh_detail::edgeFlipCache(mesh, edgeID);
         }
-
-        // Mark for flipping by edge valence.
-        // edgesToFlip.clear();
-        // selectFlipEdges(mesh, preserveRidges, checkFlipValence,
-        //                    std::back_inserter(edgesToFlip));
-        // for(auto edgeID : edgesToFlip){
-        //     edgeFlip(mesh, edgeID);
-        // }
 
         if (verbose)
         {
@@ -618,7 +611,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
 }
 
 
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight)
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings)
 {
     // TODO: Check if all polygons are closed (0)
 
@@ -674,7 +667,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         // Curvature as coarsening criteria
         if (flatRate > 0)
         {
-            auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, RINGS);
+            auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
             auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
             // The closer this ratio is to 0 the flatter the local region.
             flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
@@ -687,6 +680,87 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         }
     }
 }
+
+void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings)
+{
+    // Compute the average edge length
+    REAL avgLen = 0;
+    for (auto edgeID : mesh.get_level_id<2>())
+    {
+        auto name =  mesh.get_name(edgeID);
+        auto v = *mesh.get_simplex_down(edgeID, name[0])
+                 - *mesh.get_simplex_down(edgeID, name[1]);
+        avgLen += length(v);
+    }
+    avgLen /= static_cast<REAL>(mesh.size<2>());
+
+    REAL sparsenessRatio = 1;
+
+    auto range = mesh.get_level_id<1>();
+    for (auto vertexIDIT = range.begin(); vertexIDIT != range.end();)
+    {
+        // Immediately cache vertexID and increment IT so destruction of
+        // vertexID won't invalidate the iterator.
+        auto vertexID = *vertexIDIT;
+        ++vertexIDIT;
+
+        if ((*vertexID).selected == false)
+        {
+            continue;
+        }
+
+        // Get max length of edges.
+        auto edges  = mesh.up(vertexID);
+        REAL maxLen = 0;
+        for (auto edgeID : edges)
+        {
+            auto name =  mesh.get_name(edgeID);
+            auto v = *mesh.get_simplex_down(edgeID, name[0])
+                     - *mesh.get_simplex_down(edgeID, name[1]);
+            REAL tmpLen = std::sqrt(v|v);
+            if (tmpLen > maxLen)
+                maxLen = tmpLen;
+        }
+        sparsenessRatio = std::pow(maxLen/avgLen, weight);
+
+        // Decimate if under the threshold
+        if (sparsenessRatio < threshold)
+        {
+            surfacemesh_detail::decimateVertex(mesh, vertexID, rings);
+        }
+    }
+}
+
+void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings){
+    REAL flatnessRatio = 1;
+
+    auto range = mesh.get_level_id<1>();
+    for (auto vertexIDIT = range.begin(); vertexIDIT != range.end();)
+    {
+        // Immediately cache vertexID and increment IT so destruction of
+        // vertexID won't invalidate the iterator.
+        auto vertexID = *vertexIDIT;
+        ++vertexIDIT;
+
+        if ((*vertexID).selected == false)
+        {
+            continue;
+        }
+
+        // Curvature as coarsening criteria
+        auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
+        auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
+        // The closer this ratio is to 0 the flatter the local region.
+        flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], weight);
+
+        // Add vertex to delete list
+        if (flatnessRatio < threshold)
+        {
+            surfacemesh_detail::decimateVertex(mesh, vertexID);
+        }
+    }
+}
+
 
 void fillHoles(SurfaceMesh &mesh)
 {
@@ -920,9 +994,24 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
     std::vector<int> cover = mesh.get_cover(vertexID);
     std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
 
-    auto eID = mesh.get_simplex_up(vertexID, cover.back());
-    cover.pop_back();
-    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    SurfaceMesh::SimplexID<2> eID;
+
+    if(mesh.onBoundary(vertexID)){
+        auto it = cover.begin();
+        for(; it != cover.end(); ++it){
+            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
+                break;
+            }
+        }
+        eID = mesh.get_simplex_up(vertexID, *it);
+        cover.erase(it);
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
+    else{
+        eID = mesh.get_simplex_up(vertexID, cover.back());
+        cover.pop_back();
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
 
     while (!cover.empty())
     {
@@ -975,26 +1064,26 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angle(curr, center, next) > 90)
+            if (angle(curr, center, next) > M_PI_2)
             {
                 // The angle of T at center is obtuse
-                Amix += getArea(center, curr, next)/2;
+                Amix += getArea(center, curr, next)/2.0;
             }
             else
             {
-                Amix += getArea(center, curr, next)/4;
+                Amix += getArea(center, curr, next)/4.0;
             }
         }
         else
         {
             // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angleRad(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angleRad(center, curr, next)))/8;
+            Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
+                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8.0;
         }
-        curvature += (1/tan(angleRad(center, prev, curr)) + 1/tan(angleRad(center, next, curr)))*(center - curr);
+        curvature += (1.0/tan(angle(center, prev, curr)) + 1.0/tan(angle(center, next, curr)))*(center - curr);
     }
-    curvature /= (2*Amix);
-    return std::sqrt(curvature|curvature)/2;
+    curvature /= (2.0*Amix);
+    return std::copysign(std::sqrt(curvature|curvature)/2.0, dot(curvature, getNormal(mesh, vertexID)));
 }
 
 
@@ -1007,9 +1096,24 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
     std::vector<int> cover = mesh.get_cover(vertexID);
     std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
 
-    auto eID = mesh.get_simplex_up(vertexID, cover.back());
-    cover.pop_back();
-    orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    SurfaceMesh::SimplexID<2> eID;
+
+    if(mesh.onBoundary(vertexID)){
+        auto it = cover.begin();
+        for(; it != cover.end(); ++it){
+            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
+                break;
+            }
+        }
+        eID = mesh.get_simplex_up(vertexID, *it);
+        cover.erase(it);
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
+    else{
+        eID = mesh.get_simplex_up(vertexID, cover.back());
+        cover.pop_back();
+        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
+    }
 
     while (!cover.empty())
     {
@@ -1062,7 +1166,7 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
         if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
         {
             // Triangle is obtuse!
-            if (angle(curr, center, next) > 90)
+            if (angle(curr, center, next) > M_PI_2)
             {
                 // The angle of T at center is obtuse
                 Amix += getArea(center, curr, next)/2;
@@ -1075,12 +1179,135 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
         else
         {
             // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angleRad(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angleRad(center, curr, next)))/8;
+            Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
+                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8;
         }
-        angleSum += angleRad(curr, center, next);
+        angleSum += angle(curr, center, next);
     }
     return (2*M_PI-angleSum)/Amix;
+}
+
+
+/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
+computeCurvatures(const SurfaceMesh & mesh){
+    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+
+    REAL *Amix = new REAL[mesh.size<1>()];
+    REAL *kg = new REAL[mesh.size<1>()];
+    REAL *kh = new REAL[mesh.size<1>()];
+    REAL *k1 = new REAL[mesh.size<1>()];
+    REAL *k2 = new REAL[mesh.size<1>()];
+    Vector *Kh = new Vector[mesh.size<1>()];
+    Vector *normals = new Vector[mesh.size<1>()];
+
+    // Map VertexIDs to indices
+    std::size_t i = 0;
+    for(const auto vertexID : mesh.get_level_id<1>()) {
+        Amix[i] = 0;
+        kg[i] = 0;
+        kh[i] = 0;
+        k1[i] = 0;
+        k2[i] = 0;
+        normals[i] = getNormal(mesh, vertexID);
+        sigma[vertexID.indices()[0]] = i++;
+    }
+
+    for(const auto faceID : mesh.get_level_id<3>()) {
+        auto indices = faceID.indices(); // Face vertex indices
+        std::array<Vertex, 3> vertices;  // Vertex data for indices
+        std::array<typename SurfaceMesh::KeyType, 2> keysDown; // Tmp to store keys
+
+        // Fill vertices in order corresponding to indices
+        for(std::size_t skip = 0; skip < 3; ++skip) {
+            std::size_t j = 0;
+            std::size_t k = 0;
+            while (k < 2) {
+                if (j == skip) ++j;
+                else{
+                    keysDown[k++] = indices[j++];
+                }
+            }
+            vertices[skip] = *mesh.get_simplex_down(faceID, keysDown);
+        }
+
+        // TODO: (15) This section computes the same distances a bunch of time
+        std::array<REAL, 3> dist;
+        dist[0] = distance(vertices[0], vertices[1]);
+        dist[1] = distance(vertices[1], vertices[2]);
+        dist[2] = distance(vertices[0], vertices[2]);
+        std::sort(dist.begin(), dist.end());
+
+        // Check if the triangle is obtuse...
+        bool obtuse = dist[0]*dist[0] + dist[1]*dist[1] < dist[2]*dist[2];
+
+        REAL t_area = 0; // Area of the face
+        // Populate t_area if obtuse
+        if (obtuse) t_area = getArea(vertices[0], vertices[1], vertices[2]);
+
+        // List of indices to rotate
+        std::array<std::size_t, 3> idxmap = {0,1,2};
+        for(std::size_t i = 0; i < 3; ++i) {
+            // idxmap[0] is the current vertex
+            REAL ang = angle(vertices[idxmap[2]],vertices[idxmap[0]],vertices[idxmap[1]]);
+
+            std::size_t i0 = sigma[indices[idxmap[0]]];
+            std::size_t i1 = sigma[indices[idxmap[1]]];
+            std::size_t i2 = sigma[indices[idxmap[2]]];
+
+            // Add angle to Gaussian Curvature
+            kg[i0] += ang;
+
+            // Vectors of other edges
+            Vector v1 = vertices[idxmap[1]] - vertices[idxmap[2]];
+            Vector v2 = vertices[idxmap[2]] - vertices[idxmap[1]];
+
+            REAL cot = 1.0/tan(ang);
+
+            if(obtuse) {
+                if (ang > M_PI/2.0) {
+                    Amix[i0] += t_area/2.0;
+                }
+                else{
+                    Amix[i0] += t_area/4.0;
+                }
+            }
+            else{
+                REAL tmp = cot/8.0;
+                REAL lenSq = length(v1);
+                lenSq *= lenSq;
+                Amix[i1] += tmp*lenSq;
+                Amix[i2] += tmp*lenSq;
+            }
+
+            // Add value to Mean Curvature
+            Kh[i1] += cot*v1;
+            Kh[i2] += cot*v2;
+
+            std::rotate(idxmap.begin(), idxmap.begin() + 1, idxmap.end());
+        }
+    }
+
+    for (std::size_t i = 0; i < mesh.size<1>(); ++i) {
+        Kh[i] = Kh[i]/(2.0*Amix[i]);
+        kh[i] = std::copysign(length(Kh[i])/2.0, dot(Kh[i], normals[i]));
+        kg[i] = (2.0*M_PI - kg[i])/Amix[i];
+
+        REAL kh2 = kh[i]*kh[i];
+        REAL tmp = kh2 < kg[i] ? 0 : std::sqrt(kh2-kg[i]);
+
+        k1[i] = kh[i] + tmp;
+        k2[i] = kh[i] - tmp;
+    }
+
+    delete[] Amix;
+    delete[] Kh;
+    delete[] normals;
+    // delete[] kg;
+    // delete[] kh;
+    // delete[] k1;
+    // delete[] k2;
+    return std::make_tuple(kh, kg, k1, k2, sigma);
 }
 
 std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
@@ -1141,5 +1368,24 @@ std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
     }
 
     return meshes;
+}
+
+void cacheNormals(SurfaceMesh &mesh){
+    for(auto fID : mesh.get_level_id<3>()){
+        auto norm = getNormal(mesh, fID);
+        normalize(norm);
+        (*fID).normal = norm;
+    }
+
+    for(auto vID: mesh.get_level_id<1>()){
+        Vector norm;
+        auto   faces = mesh.up(mesh.up(vID));
+        for (auto faceID : faces)
+        {
+            norm += (*faceID).normal;
+        }
+        normalize(norm);
+        (*vID).normal = norm;
+    }
 }
 } // end namespace gamer

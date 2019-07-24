@@ -215,6 +215,17 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+    pygamer.def("printQualityInfo", &printQualityInfo,
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Print mesh quality info to file
+
+            Args:
+                filename (str): Filename to write to
+                mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
+        )delim"
+    );
+
 
     pygamer.def("readDolfin", &readDolfin,
         py::arg("filename"),
