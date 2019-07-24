@@ -2,26 +2,28 @@
 
 .. rubric:: Description
 
-.. currentmodule:: {{ fullname }}
+.. automodule:: {{ fullname }}
 
+{% block classes %}
 {% if classes %}
-.. rubric:: Classes
+   .. rubric:: Classes
 
-.. autosummary::
-    :toctree: .
-    {% for class in classes %}
-    {{ class }}
-    {% endfor %}
-
+   .. autosummary::
+      :toctree: .
+      {% for class in classes %}
+      {{ class }}
+      {% endfor %}
 {% endif %}
+{% endblock %}
 
+{% block functions %}
 {% if functions %}
-.. rubric:: Functions
+   .. rubric:: Functions
 
-.. autosummary::
-    :toctree: .
-    {% for function in functions %}
-    {{ function }}
-    {% endfor %}
-
+   .. autosummary::
+      :toctree: .
+      {% for function in functions %}
+      {{ function }}
+      {% endfor %}
 {% endif %}
+{% endblock %}

@@ -72,7 +72,10 @@ if(SKBUILD)
     install(TARGETS pygamer LIBRARY DESTINATION pygamer)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py DESTINATION pygamer)
 else()
+    message(STATUS "CMake install no longer installs PyGAMer to your Python site-packages. "
+        "Please configure and install using 'python setup.py install' instead."
+    )
     # Otherwise put in PREFIX/lib if conventionally installed
-    install(TARGETS pygamer LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pygamer")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py DESTINATION "${PYTHON_SITE_PACKAGES}/pygamer")
+    # install(TARGETS pygamer LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pygamer")
+    # install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py DESTINATION "${PYTHON_SITE_PACKAGES}/pygamer")
 endif()

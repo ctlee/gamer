@@ -344,7 +344,7 @@ REAL distance(const Vertex &A, const Vertex &B);
  * @param[in]  B     Vertex B is in the middle
  * @param[in]  C     Vertex C
  *
- * @return     The angle in degrees
+ * @return     The angle in radians
  */
 REAL angle(const Vertex &A, const Vertex &B, const Vertex &C);
 
@@ -354,9 +354,12 @@ REAL angle(const Vertex &A, const Vertex &B, const Vertex &C);
  * @param[in]  AB    First Vector
  * @param[in]  CB    Second Vector
  *
- * @return     The angle in degrees
+ * @return     The angle in radians
  */
 REAL angle(const Vector &AB, const Vector &CB);
+
+// REAL signed_angle(const Vertex &A, const Vertex &B, const Vertex &C);
+REAL signed_angle(const Vector &v1, const Vector &v2, const Vector &reference);
 
 /**
  * @brief     Compute the angle between three vertices.
@@ -365,9 +368,9 @@ REAL angle(const Vector &AB, const Vector &CB);
  * @param[in]  B     Vertex B is in the middle
  * @param[in]  C     Vertex C
  *
- * @return     The angle in radians
+ * @return     The angle in degrees
  */
-REAL angleRad(const Vertex &A, const Vertex &B, const Vertex &C);
+REAL angleDeg(const Vertex &A, const Vertex &B, const Vertex &C);
 
 /**
  * @brief      Compute angle between two vectors
@@ -375,9 +378,10 @@ REAL angleRad(const Vertex &A, const Vertex &B, const Vertex &C);
  * @param[in]  AB    First Vector
  * @param[in]  CB    Second Vector
  *
- * @return     The angle in radians
+ * @return     The angle in degrees
  */
-REAL angleRad(const Vector &AB, const Vector &CB);
+REAL angleDeg(const Vector &AB, const Vector &CB);
+
 
 /**
  * @brief      Get the length of a vector

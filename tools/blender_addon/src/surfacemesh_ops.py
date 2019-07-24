@@ -150,12 +150,16 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         description="Auto fix inconsistent normals")
     verbose = BoolProperty(name="Verbose", default=False,
         description="Print information to console")
+    rings = IntProperty(
+        name="LST rings", default=2, min=1, max=5,
+        description="The number of neighborhood rings to consider for LST calculation"
+        )
 
     def coarse_dense(self, context, report):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                gmesh.coarse_dense(rate=self.dense_rate, numiter=self.dense_iter)
+                gmesh.coarse_dense(rate=self.dense_rate, numiter=self.dense_iter, rings=self.rings)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
@@ -167,7 +171,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                gmesh.coarse_flat(rate=self.flat_rate)
+                gmesh.coarse_flat(rate=self.flat_rate, numiter=self.flat_iter, rings=self.rings)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
@@ -179,7 +183,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                gmesh.smooth(max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges)
+                gmesh.smooth(max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges, rings=self.rings)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False

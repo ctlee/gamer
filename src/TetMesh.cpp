@@ -598,7 +598,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
         sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto   vertex = *vertexID;
 
-        fout << "      <vertex index=\"" << idx << "\" "
+        fout << "      <vertex index=\"" << vertexID.indices()[0] << "\" "
              << "x=\"" << vertex[0] << "\" "
              << "y=\"" << vertex[1] << "\" "
              << "z=\"" << vertex[2] << "\" />\n";
@@ -619,32 +619,33 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
         std::size_t idx = cnt++;
         auto        tetName = mesh.get_name(tetID);
         auto orientation = (*tetID).orientation;
+
+
         if (orientation == 1)
         {
             fout << "      <tetrahedron index=\"" << idx << "\" "
-                 << "v0=\"" << sigma[tetName[0]] << "\" "
-                 << "v1=\"" << sigma[tetName[1]] << "\" "
-                 << "v2=\"" << sigma[tetName[2]] << "\" "
-                 << "v3=\"" << sigma[tetName[3]] << "\" />\n";
+                 << "v0=\"" << tetName[0] << "\" "
+                 << "v1=\"" << tetName[1] << "\" "
+                 << "v2=\"" << tetName[2] << "\" "
+                 << "v3=\"" << tetName[3] << "\" />\n";
         }
         else if (orientation == -1)
         {
-            fout << "      <tetrahedron index=\"" << idx << "\" "
-                 << "v0=\"" << sigma[tetName[3]] << "\" "
-                 << "v1=\"" << sigma[tetName[1]] << "\" "
-                 << "v2=\"" << sigma[tetName[2]] << "\" "
-                 << "v3=\"" << sigma[tetName[0]] << "\" />\n";
+           fout << "      <tetrahedron index=\"" << idx << "\" "
+                << "v0=\"" << tetName[3] << "\" "
+                << "v1=\"" << tetName[1] << "\" "
+                << "v2=\"" << tetName[2] << "\" "
+                << "v3=\"" << tetName[0] << "\" />\n";
         }
         else
         {
-            orientationError = true;
-            fout << "      <tetrahedron index=\"" << idx << "\" "
-                 << "v0=\"" << sigma[tetName[0]] << "\" "
-                 << "v1=\"" << sigma[tetName[1]] << "\" "
-                 << "v2=\"" << sigma[tetName[2]] << "\" "
-                 << "v3=\"" << sigma[tetName[3]] << "\" />\n";
+           orientationError = true;
+           fout << "      <tetrahedron index=\"" << idx << "\" "
+                << "v0=\"" << tetName[0] << "\" "
+                << "v1=\"" << tetName[1] << "\" "
+                << "v2=\"" << tetName[2] << "\" "
+                << "v3=\"" << tetName[3] << "\" />\n";
         }
-        // std::cout << casc::to_string(tetName) << std::endl;
 
         // First face = vertices 2,3,4
         // Second face = vertices 1,3,4 etc...
@@ -652,8 +653,8 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
         {
             auto        faceID = mesh.get_simplex_down(tetID, tetName[i]);
             std::size_t mark   = (*faceID).marker;
-            // std::cout << casc::to_string(mesh.get_name(faceID)) << " " << i
-            // << std::endl;
+            // std::cout << casc::to_string(mesh.get_name(faceID)) << " " << i << std::endl;
+    
             if (mark != 0)
                 faceMarkerList.push_back({idx, i, mark});
         }

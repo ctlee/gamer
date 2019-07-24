@@ -75,7 +75,25 @@ tensor<double, 3, 2> computeLocalStructureTensor(const SurfaceMesh              
     return lst;
 }
 
-void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+tensor<double, 3, 2> computeLSTFromCache(const SurfaceMesh              &mesh,
+                                                 const SurfaceMesh::SimplexID<1> vertexID,
+                                                 const int                       rings)
+{
+    // Set of neighbors
+    std::set<SurfaceMesh::SimplexID<1> > nbors;
+    // Get list of neighbors
+    casc::kneighbors_up(mesh, vertexID, rings, nbors);
+    // local structure tensor
+    tensor<double, 3, 2> lst = tensor<double, 3, 2>();
+    for (SurfaceMesh::SimplexID<1> vID : nbors)
+    {
+        auto norm = (*vID).normal;           // Get Vector normal
+        lst  += norm*norm;         // tensor product
+    }
+    return lst;
+}
+
+void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings)
 {
     // TODO: (10) Come up with a better scheme
     // Pick an arbitrary face's data
@@ -154,7 +172,7 @@ void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
     // Smooth vertices around the filled hole
     for (auto v : backupBoundary)
     {
-        weightedVertexSmooth(mesh, v, RINGS);
+        weightedVertexSmooth(mesh, v, rings);
     }
 }
 
@@ -463,6 +481,122 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
     center.position += newPos;
 }
 
+Vector weightedVertexSmoothCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings){
+    auto   centerName = mesh.get_name(vertexID)[0];
+    auto  &center = *vertexID; // get the vertex data
+
+    double sumWeights = 0;
+    Vector newPos;
+
+    // Compute the following sum to get the new position
+    // \bar{x} = \frac{1}{\sum_{i=1}^{N_2}(\alpha_i+1)}\sum_{i=1}^{N_2}(\alpha_i
+    // + 1) x_i
+    for (auto edge : mesh.up(vertexID))
+    {
+        // Get the vertex connected by edge
+        auto   edgeName = mesh.get_name(edge);
+        Vertex shared   = *mesh.get_simplex_up({(edgeName[0] == centerName) ? edgeName[1] : edgeName[0]});
+
+        // Get the vertices connected to adjacent edge by face
+        auto cover = mesh.get_cover(edge);
+        if (cover.size() != 2)
+        {
+            // Vertex is on a boundary... Don't move it
+            return Vector({0,0,0});
+        }
+        std::vector<SurfaceMesh::SimplexID<3>> faces;
+        mesh.up(edge, std::back_inserter(faces));
+
+        Vertex prev = *mesh.get_simplex_down(faces[0], edgeName);
+        Vertex next = *mesh.get_simplex_down(faces[1], edgeName);
+
+        // std::cout << mesh.get_simplex_up({up[0]}) << " "
+        //             << mesh.get_simplex_up({up[1]}) << " "
+        //             << mesh.get_simplex_up({(edgeName[0] == centerName) ?
+        // edgeName[1] : edgeName[0]}) << std::endl;
+
+        // std::cout << prev << " " << next << " " << shared << std::endl;
+        Vector pS, nS;
+        try
+        {
+            pS = prev - shared;
+            normalize(pS);
+            nS = next - shared;
+            normalize(nS);
+        }
+        catch (std::exception &e)
+        {
+            throw std::runtime_error("ERROR: Zero length edge found. "
+                                     "weightedVertexSmooth expects no zero length edges.");
+        }
+
+        // Bisector of the 'rhombus'
+        Vector bisector = pS + nS;
+        Vector perpNorm;
+        double alpha = (pS|nS) + 1;
+
+        // Check if vertices are colinear
+        if (length(bisector) == 0 || alpha < 1e-6 || fabs(alpha-2) < 1e-6)
+        {
+            perpNorm = pS;
+            normalize(perpNorm);
+        }
+        else
+        {
+            normalize(bisector);
+            // Normal of tangent plane
+            Vector tanNorm = cross(pS, nS);
+            // Get the perpendicular plane made up of plane normal of
+            // bisector
+            perpNorm = cross(tanNorm, bisector);
+            normalize(perpNorm);
+        }
+
+        // Get a reference vector to shared which lies on the plane of interest.
+        Vector disp = center - shared;
+        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+
+        // Perpendicular projector
+        auto   perpProj = perpNorm*perpNorm; // tensor product
+        // Compute perpendicular component
+        Vector perp;
+        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
+        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+        perp_e = perpProj_e*disp_e; // matrix (3x3) * vector = vector
+
+        sumWeights += alpha;
+
+        newPos += alpha*(center.position - perp);
+    }
+    newPos /= sumWeights;
+    /**
+     * Project to move onto LST eigenvector space and scale by eigenvalues.
+     *
+     * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
+     * \vec{e_k})\vec{e_k}
+     */
+    auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
+
+    auto eigen_result = getEigenvalues(lst);
+    // std::cout << "Eigenvalues(LST): "
+    //      << eigen_result.eigenvalues().transpose() << std::endl;
+    // std::cout << "Here's a matrix whose columns are eigenvectors of LST \n"
+    //      << "corresponding to these eigenvalues:\n"
+    //      << eigen_result.eigenvectors() << std::endl;
+
+    newPos -= center.position;  // Vector of old position to new position
+    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+
+    // dot product followed by elementwise-division EQN 4. w is a scale factor.
+    auto w = (
+        (eigen_result.eigenvectors().transpose()*newPos_e).array()
+        / (eigen_result.eigenvalues().array()+1)
+        ).matrix();                           // vector 3x1
+    newPos_e = eigen_result.eigenvectors()*w; // matrix 3x3 * vector = vector
+    // center.position += newPos;
+    return newPos;
+}
+
 
 /**
  * @brief      Perona-Malik normal based smoothing algorithm
@@ -577,6 +711,57 @@ void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
     computeLocalOrientation(mesh, nbors);
 }
 
+void edgeFlipCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID)
+{
+    // Assuming that the mesh is manifold and edge has been vetted for flipping
+    auto name = mesh.get_name(edgeID);
+    auto up   = mesh.get_cover(edgeID);
+
+    std::array<SurfaceMesh::SimplexID<3>, 2> faces;
+    mesh.up(edgeID, faces.begin());
+
+    // Assume flipped edges are always selected
+    auto fdata = SMFace(0, true);
+    if ((*faces[0]).marker == (*faces[1]).marker)
+    {
+        fdata.marker = (*faces[0]).marker;
+    }
+
+    std::array<SurfaceMesh::SimplexID<3>, 2> newFaces;
+    mesh.remove<2>({name[0], name[1]});
+    newFaces[0] = mesh.insert<3>({name[0], up[0], up[1]}, fdata);
+    newFaces[1] = mesh.insert<3>({name[1], up[0], up[1]}, fdata);
+
+    edgeID = mesh.get_simplex_up({up[0], up[1]});
+    (*edgeID).selected = true;
+
+    std::vector<SurfaceMesh::SimplexID<1>> verts;
+    mesh.down(edgeID, std::back_inserter(verts));
+    initLocalOrientation<std::integral_constant<size_t, 1> >::apply(mesh, std::set<int>({up[0], up[1], name[0], name[1]}), verts.begin(), verts.end());
+
+    std::vector<SurfaceMesh::SimplexID<2>> nbors;
+    casc::neighbors(mesh, edgeID, std::back_inserter(nbors));
+    nbors.push_back(edgeID);
+    computeLocalOrientation(mesh, nbors);
+
+    for(auto fID : newFaces){
+        auto norm = getNormal(mesh, fID);
+        normalize(norm);
+        (*fID).normal = norm;
+    }
+
+    for(auto vID : verts){
+        Vector norm;
+        auto   faces = mesh.up(mesh.up(vID));
+        for (auto faceID : faces)
+        {
+            norm += (*faceID).normal;
+        }
+        normalize(norm);
+        (*vID).normal = norm;
+    }
+}
+
 bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
 {
     auto getMinAngle = [](const Vertex &a, const Vertex &b, const Vertex &c){
@@ -587,7 +772,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
             for(int i = 0; i < 3; ++i){
                 try
                 {
-                    tmp = angle(triangle[sigma[0]], triangle[sigma[1]], triangle[sigma[2]]);
+                    tmp = angleDeg(triangle[sigma[0]], triangle[sigma[1]], triangle[sigma[2]]);
                 }
                 catch (std::runtime_error &e)
                 {
@@ -603,6 +788,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
 
     auto name = mesh.get_name(edgeID);
     std::pair<Vertex, Vertex> shared;
+
     shared.first  = *mesh.get_simplex_down(edgeID, name[0]);
     shared.second = *mesh.get_simplex_down(edgeID, name[1]);
 
@@ -611,6 +797,30 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
     auto up   = mesh.get_cover(edgeID);
     notShared.first  = *mesh.get_simplex_up({up[0]});
     notShared.second = *mesh.get_simplex_up({up[1]});
+
+    // TODO: (5) Change to check link condition
+    // Check if the triangles make a wedge shape. Flipping this can
+    // cause knife faces.
+    auto   f1   = (shared.first - notShared.first)^(shared.second - notShared.first);
+    auto   f2   = (shared.first - notShared.second)^(shared.second - notShared.second);
+    auto   f3   = (notShared.first - shared.first)^(notShared.second - shared.first);
+    auto   f4   = (notShared.first - shared.second)^(notShared.second - shared.second);
+    auto   area = std::pow(std::sqrt(f1|f1) + std::sqrt(f2|f2), 2);
+    auto   areaFlip = std::pow(std::sqrt(f3|f3) + std::sqrt(f4|f4), 2);
+    double edgeFlipCriterion = 1.001;
+    // If area changes by a lot continue
+    if (areaFlip/area > edgeFlipCriterion)
+        return false;
+
+    int excess = checkFlipValenceExcess(mesh, edgeID);
+    if (excess < -3){
+        // Force flip since it improves valence by a lot
+        return true;
+    }
+    else if (excess > 3){
+        // Flipping is too bad...
+        return false;
+    }
 
     // Go through all angle combinations
     double tmp;
@@ -624,22 +834,23 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
     if (tmp < minAngleFlip)
         minAngleFlip = tmp;
 
-    if (minAngleFlip > minAngle)
+    if (minAngleFlip > minAngle){
         return true;
+    }
     return false;
 }
 
-bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
+int checkFlipValenceExcess(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID)
 {
     auto name = mesh.get_name(edgeID);
     std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1> > shared;
-    shared.first  = mesh.get_simplex_up({name[0]});
-    shared.second = mesh.get_simplex_up({name[1]});
+    shared.first  = mesh.get_simplex_down(edgeID, name[0]);
+    shared.second = mesh.get_simplex_down(edgeID, name[1]);
     std::pair<SurfaceMesh::SimplexID<1>, SurfaceMesh::SimplexID<1> > notShared;
     auto up = mesh.get_cover(edgeID);
     notShared.first  = mesh.get_simplex_up({up[0]});
     notShared.second = mesh.get_simplex_up({up[1]});
-    std::array<double, 20> valence;
+    std::array<int, 4> valence;
 
     // assuming there are no boundaries
     valence[0] = getValence(mesh, shared.first)-6;
@@ -647,6 +858,7 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
     valence[2] = getValence(mesh, notShared.first)-6;
     valence[3] = getValence(mesh, notShared.second)-6;
 
+    // std::cout << "Before: " << casc::to_string(valence) << std::endl;
     int excess = 0;
     for (int i = 0; i < 4; i++)
     {
@@ -657,15 +869,14 @@ bool checkFlipValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &
     valence[1] -= 1;
     valence[2] += 1;
     valence[3] += 1;
-    int flipExcess = 0;
 
+    // std::cout << "After: " << casc::to_string(valence) << std::endl;
+    int flipExcess = 0;
     for (int i = 0; i < 4; i++)
     {
         flipExcess += std::pow(valence[i], 2);
     }
-    if (flipExcess < excess)
-        return true;
-    return false;
+    return flipExcess - excess;
 }
 
 // Angle Mesh improvement by projecting barycenter on tangent plane...
@@ -924,7 +1135,7 @@ bool checkEdgeFlip(const SurfaceMesh &mesh,
     {
         auto a   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[0]));
         auto b   = getNormal(mesh, mesh.get_simplex_up(edgeID, up[1]));
-        auto val = angle(a, b);
+        auto val = angleDeg(a, b);
         if (val > 60)
         {
             return false;
@@ -948,6 +1159,5 @@ bool checkEdgeFlip(const SurfaceMesh &mesh,
     // Check the flip using user function
     return checkFlip(mesh, edgeID);
 }
-
 } // end namespace surfacemesh_detail
 } // end namespace gamer

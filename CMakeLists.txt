@@ -108,6 +108,15 @@ option(GAMER_DOCS "Download and configure documentation?" OFF)
 
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 
+option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." OFF)
+if (FORCE_COLORED_OUTPUT)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+       add_compile_options (-fdiagnostics-color=always)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+       add_compile_options (-fcolor-diagnostics)
+    endif ()
+endif ()
+
 #####################################################################
 # Configuration
 #####################################################################
@@ -177,8 +186,6 @@ target_include_directories(gamer_objlib PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
-# target_compile_options(gamer_objlib PRIVATE -Werror -Wall -Weverything -Wextra -pedantic-errors -Wconversion -Wsign-conversion -ferror-limit=3 -Wno-c++17-extensions)
-# -ferror-limit=3 -Wno-unused-variable -Wno-unused-parameter)
 
 # SHARED LIBRARY
 add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
