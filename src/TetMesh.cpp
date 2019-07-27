@@ -36,7 +36,6 @@
 #include <strstream>
 #include <string>
 #include <vector>
-
 #include <casc/casc>
 
 #include "gamer/TetMesh.h"
@@ -586,7 +585,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
          << "  <mesh celltype=\"tetrahedron\" dim=\"3\">\n"
          << "    <vertices size=\"" << mesh.size<1>() <<  "\">\n";
 
-    std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
+    //std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
     size_t cnt = 0;
 
     // Print out Vertices
@@ -595,7 +594,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
     for (const auto vertexID : mesh.get_level_id<1>())
     {
         size_t idx = cnt;
-        sigma[mesh.get_name(vertexID)[0]] = cnt++;
+        //sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto   vertex = *vertexID;
 
         fout << "      <vertex index=\"" << vertexID.indices()[0] << "\" "
@@ -943,4 +942,138 @@ std::unique_ptr<TetMesh> readDolfin(const std::string &filename)
     return mesh;
 }
 
-} // end namespace gamer
+
+void markDecimatedEdge(TetMesh & mesh, std::vector<std::pair<std::pair<int,int>, double>>& list, TetMesh::SimplexID<2> edge,
+                       double loc) {
+    auto name =  mesh.get_name(edge);
+    list.push_back(std::pair<std::pair<int,int>,double>(std::pair<int,int>(name[0], name[1]), loc));
+}
+
+
+// Restriction matrix with convention as in http://www.cs.huji.ac.il/~csip/CSIP2007-MG.pdf
+void writeRestrictionMatrix(const std::string &filename, int origSize,
+        std::vector<std::pair<std::pair<int,int>, double>> list, std::vector<bool> encountered) {
+
+    std::ofstream fout(filename);
+    if(!fout.is_open())
+    {
+        std::cerr   << "File '" << filename
+                    << "' could not be writen to." << std::endl;
+        exit(1);
+    }
+
+    std::vector<std::vector<double>> matrix(origSize, std::vector<double> (origSize, 0));
+    auto iter = list.begin();
+
+    for (int i = 0; i < (origSize-list.size()); i++) {
+        if (!encountered[i]) {
+            matrix[i][i] = 1;
+        }
+    }
+
+    for (int i = (origSize-list.size()); i < matrix.size(); i++) {
+        int a = std::get<0>(std::get<0>(*iter));
+        int b = std::get<1>(std::get<0>(*iter));
+        double pos = std::get<1>(*iter);
+        matrix[i][a] = pos;
+        matrix[i][b] = 1 - pos;
+        iter++;
+    }
+
+    // Delete rows that are all 0
+    for (auto itr = matrix.begin(); itr != matrix.end();) {
+        bool allzeros = true;
+        for (auto col : *itr) {
+            if (col != 0) {
+                allzeros = false;
+                break;
+            }
+        }
+        if (allzeros) {
+            itr = matrix.erase(itr);
+        } else {
+            ++itr;
+        }
+
+    }
+
+    // Print to file as csv
+    for (auto row : matrix) {
+        for (auto element : row) {
+            fout << element << ",";
+        }
+        fout << std::endl;
+    }
+}
+
+double inwardCollapse(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    auto name =  mesh.get_name(edge);
+    auto v1 = mesh.get_simplex_down(edge, name[0]);
+    auto v2 = mesh.get_simplex_down(edge, name[1]);
+    auto b1 = isBoundaryVertex(v1, mesh);
+    auto b2 = isBoundaryVertex(v2, mesh);
+    if (b1 && b2) {
+        return INFINITY;
+    } else if (!b1 && !b2) {
+        return INFINITY;
+    } else {
+        return 0;
+    }
+}
+
+
+// Penalty/Constraint functions
+double isBoundaryEdge(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    std::set<TetMesh::SimplexID<3>> faces= mesh.up(edge);
+    for (auto face : faces) {
+        std::set<TetMesh::SimplexID<4>> parentTets = mesh.up(face);
+        if (parentTets.size() == 1) {
+            return INFINITY;
+        }
+    }
+    return 0;
+}
+
+bool isBoundaryVertex(TetMesh::SimplexID<1> v, TetMesh & mesh) {
+    std::set<TetMesh::SimplexID<2>> edges = mesh.up(v);
+    for (auto edge : edges) {
+        if (isBoundaryEdge(edge, mesh)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
+    auto name =  mesh.get_name(edge);
+    auto v = *mesh.get_simplex_down(edge, name[0])
+             - *mesh.get_simplex_down(edge, name[1]);
+    return std::sqrt(v|v);
+}
+
+double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
+                      std::vector<PenaltyFunction> penaltyList){
+    // Scalarization of penalty function; using weighted sum method with 1/n as
+    // coefficient for each individual function
+    if (penaltyList.size() == 0) {
+        return 0;
+    }
+    double weight = (1/penaltyList.size());
+
+    double penalty = 0;
+    for (auto f : penaltyList) {
+        penalty += weight * f(e, mesh);
+        if (std::isnan(penalty)) {
+            return INFINITY;
+        }
+    }
+    return penalty;
+}
+
+void propagateError(TetMesh & mesh, std::vector<PenaltyFunction> penalty){
+    for (auto edge : mesh.get_level_id<2>()) {
+        (*edge).error = computePenalty(edge, mesh, 0, penalty);
+    }
+    //propagateHelper<2>(mesh);
+}
+}

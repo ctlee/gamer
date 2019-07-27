@@ -22,7 +22,6 @@
  * ***************************************************************************
  */
 
-
 #include "gamer/gamer.h"
 #include "gamer/tensor.h"
 #include "gamer/MarchingCube.h"
