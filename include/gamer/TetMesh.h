@@ -131,12 +131,12 @@ struct TMVertex : Vertex, TMVertexProperties
         return output.str();
     }
 
-    bool operator< (const TetVertex& rhs) const
+    bool operator< (const TMVertex& rhs) const
     {
         return  error < rhs.error;
     };
 
-    bool operator> (const TetVertex& rhs) const
+    bool operator> (const TMVertex& rhs) const
     {
         return  error > rhs.error;
     };
@@ -146,7 +146,7 @@ struct TMVertex : Vertex, TMVertexProperties
 /**
  * @brief      Edge data in a tetmesh
  */
-struct TMEdge : Vertex
+struct TMEdge : Vertex, ErrorProperties
 {
     using Vertex::Vertex;
 
@@ -182,12 +182,12 @@ struct TMEdge : Vertex
     }
 
 
-    bool operator< (const Edge& rhs) const
+    bool operator< (const TMEdge& rhs) const
     {
         return  error < rhs.error;
     };
 
-    bool operator> (const Edge& rhs) const
+    bool operator> (const TMEdge& rhs) const
     {
         return  error > rhs.error;
     };
@@ -445,7 +445,8 @@ void edgeCollapse(TetMesh & mesh, TetMesh::SimplexID<2> edge, double vertexLoc, 
     typename casc::decimation_detail::SimplexDataSet<Complex>::type rv;
 
     run_user_callback(mesh, simplexMap,  std::forward<Callback<Complex>>(clbk), rv);
-    tetmesh::TetVertex vert;
+    //TetMesh::TMVertex vert;
+    TMVertex vert;
     for (auto vpair : std::get<1>(rv)) {
         auto vnames = vpair.first;
         for (auto name : vnames) {
@@ -489,8 +490,32 @@ void propagateHelper(TetMesh & mesh){
  */
 double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
                       std::vector<PenaltyFunction> penaltyList);
+// double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
+//                       std::vector<PenaltyFunction> penaltyList){
+//     // Scalarization of penalty function; using weighted sum method with 1/n as
+//     // coefficient for each individual function
+//     if (penaltyList.size() == 0) {
+//         return 0;
+//     }
+//     double weight = (1/penaltyList.size());
+
+//     double penalty = 0;
+//     for (auto f : penaltyList) {
+//         penalty += weight * f(e, mesh);
+//         if (std::isnan(penalty)) {
+//             return INFINITY;
+//         }
+//     }
+//     return penalty;
+// }
 
 void propagateError(TetMesh & mesh, std::vector<PenaltyFunction> penalty);
+// void propagateError(TetMesh & mesh, std::vector<PenaltyFunction> penalty){
+//     for (auto edge : mesh.get_level_id<2>()) {
+//         (*edge).error = computePenalty(edge, mesh, 0, penalty);
+//     }
+//     //propagateHelper<2>(mesh);
+// }
 
 // Specific decimation operations
 template <typename Complex, template <typename> class Callback>
@@ -613,4 +638,5 @@ void decimation(TetMesh & mesh, double threshold, Callback<Complex> &&cbk){
     }
     std::cout << "Decimation finished, final size: " << mesh.size<1>() << " vertices." << std::endl;
     //writeRestrictionMatrix("restrictionM.csv", origVertexNum, decimatedList, encountered);
+}
 }

@@ -585,7 +585,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
          << "  <mesh celltype=\"tetrahedron\" dim=\"3\">\n"
          << "    <vertices size=\"" << mesh.size<1>() <<  "\">\n";
 
-    std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
+    //std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
     size_t cnt = 0;
 
     // Print out Vertices
@@ -594,7 +594,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
     for (const auto vertexID : mesh.get_level_id<1>())
     {
         size_t idx = cnt;
-        sigma[mesh.get_name(vertexID)[0]] = cnt++;
+        //sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto   vertex = *vertexID;
 
         fout << "      <vertex index=\"" << vertexID.indices()[0] << "\" "
@@ -1051,3 +1051,29 @@ double edgeLength(TetMesh::SimplexID<2> edge, TetMesh & mesh) {
     return std::sqrt(v|v);
 }
 
+double computePenalty(TetMesh::SimplexID<2> & e, TetMesh& mesh, double vertexLoc,
+                      std::vector<PenaltyFunction> penaltyList){
+    // Scalarization of penalty function; using weighted sum method with 1/n as
+    // coefficient for each individual function
+    if (penaltyList.size() == 0) {
+        return 0;
+    }
+    double weight = (1/penaltyList.size());
+
+    double penalty = 0;
+    for (auto f : penaltyList) {
+        penalty += weight * f(e, mesh);
+        if (std::isnan(penalty)) {
+            return INFINITY;
+        }
+    }
+    return penalty;
+}
+
+void propagateError(TetMesh & mesh, std::vector<PenaltyFunction> penalty){
+    for (auto edge : mesh.get_level_id<2>()) {
+        (*edge).error = computePenalty(edge, mesh, 0, penalty);
+    }
+    //propagateHelper<2>(mesh);
+}
+}

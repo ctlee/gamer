@@ -20,19 +20,19 @@ protected:
 	virtual void SetUp() {
 		mesh = std::make_unique<SurfaceMesh>();
 		// Idealized icosahedron!
-		std::vector<Vertex> vectors;
-		vectors.push_back(Vertex(0.0, 0.0, 2.0));
-		vectors.push_back(Vertex(1.788854, 0.000000, 0.894427));
-  		vectors.push_back(Vertex(1.552786, 1.701302, 0.894427));
- 		vectors.push_back(Vertex(-1.447214, 1.051462, 0.894427));
- 		vectors.push_back(Vertex(-1.447214, -1.051462, 0.894427));
-  		vectors.push_back(Vertex(0.552786, -1.701302, 0.894427));
-  		vectors.push_back(Vertex(1.447214, 1.051462, -0.894427));
- 		vectors.push_back(Vertex(-0.552786, 1.701302, -0.894427));
- 		vectors.push_back(Vertex(-1.788855, 0.000000, -0.894427));
- 		vectors.push_back(Vertex(-0.552786, -1.701302, -0.894427));
-  		vectors.push_back(Vertex(1.447214, -1.051462, -0.894427));
-  		vectors.push_back(Vertex(0.0, 0.0, -2.0));
+		std::vector<SMVertex> vectors;
+		vectors.push_back(SMVertex(0.0, 0.0, 2.0));
+		vectors.push_back(SMVertex(1.788854, 0.000000, 0.894427));
+  		vectors.push_back(SMVertex(1.552786, 1.701302, 0.894427));
+ 		vectors.push_back(SMVertex(-1.447214, 1.051462, 0.894427));
+ 		vectors.push_back(SMVertex(-1.447214, -1.051462, 0.894427));
+  		vectors.push_back(SMVertex(0.552786, -1.701302, 0.894427));
+  		vectors.push_back(SMVertex(1.447214, 1.051462, -0.894427));
+ 		vectors.push_back(SMVertex(-0.552786, 1.701302, -0.894427));
+ 		vectors.push_back(SMVertex(-1.788855, 0.000000, -0.894427));
+ 		vectors.push_back(SMVertex(-0.552786, -1.701302, -0.894427));
+  		vectors.push_back(SMVertex(1.447214, -1.051462, -0.894427));
+  		vectors.push_back(SMVertex(0.0, 0.0, -2.0));
 
   		int i = 0;
   		for(auto vector : vectors){

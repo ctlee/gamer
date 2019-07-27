@@ -17,6 +17,7 @@
 
 // #include <casc/casc>
 
+namespace gamer {
 
 template <typename Complex>
 struct Callback
@@ -24,20 +25,20 @@ struct Callback
     using SimplexSet = typename casc::SimplexSet<Complex>;
     using KeyType = typename Complex::KeyType;
 
-    tetmesh::Cell operator()(Complex& F,
+    TMCell operator()(Complex& F,
                              const std::array<KeyType, 4>& new_name,
                              const SimplexSet& merged){
         //std::cout << merged << " -> " << casc::to_string(new_name) << std::endl;
         return **merged.template cbegin<4>();
     }
 
-    tetmesh::Face operator()(Complex& F,
+    TMFace operator()(Complex& F,
                     const std::array<KeyType, 3>& new_name,
                     const SimplexSet& merged){
         return **merged.template cbegin<3>();
     }
 
-    tetmesh::Edge operator()(Complex& F,
+    TMEdge operator()(Complex& F,
                     const std::array<KeyType, 2>& new_name,
                     const SimplexSet& merged){
 
@@ -58,7 +59,7 @@ struct Callback
         return **merged.template cbegin<2>();
     }
 
-    tetmesh::TetVertex operator()(Complex& F,
+    TMVertex operator()(Complex& F,
                       const std::array<KeyType, 1>& new_name,
                       const SimplexSet& merged){
 
@@ -94,10 +95,12 @@ struct Callback
     }
     */
 };
+}
 
-int  main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-    auto tetmesh = readDolfin(argv[1]);
+    //auto tetmesh = readDolfin(argv[1]);
+    auto tetmesh = gamer::readDolfin(argv[1]);
     /*auto mesh = readOFF(argv[1]);
     // auto mesh = readPQR_gauss(argv[1],-0.2, 2.5);
     // writeOFF("test.off", *mesh);
@@ -119,12 +122,14 @@ int  main(int argc, char *argv[])
 
     //edgeCollapse(*tetmesh, edge, 0.5, Callback<TetMesh>());
     */
-    decimation(*tetmesh, .5, Callback<TetMesh>());
+    //decimation(*tetmesh, .5, Callback<TetMesh>());
+    gamer::decimation(*tetmesh, .5, gamer::Callback<gamer::TetMesh>());
 
     std::cout << "EOF" << std::endl;
 
 
-    SurfaceMesh surfaceMesh;
+    //SurfaceMesh surfaceMesh;
+    gamer::SurfaceMesh surfaceMesh;
 
     std::set<int> vertices;
     // Create surface mesh from tetrahedral mesh
@@ -145,12 +150,18 @@ int  main(int argc, char *argv[])
     }
     for (auto vertexKey : vertices){
         auto& data = *surfaceMesh.get_simplex_up({vertexKey});
-        data = Vertex((*tetmesh->get_simplex_up({vertexKey})).position);
+        //data = SMVertex((*tetmesh->get_simplex_up({vertexKey})).position);
+        data = gamer::SMVertex((*tetmesh->get_simplex_up({vertexKey})).position);
     }
+
 
     compute_orientation(surfaceMesh);
 
-    writeOFF("meshOut.off", surfaceMesh);
-    //writeDolfin("meshOut.xml", *tetmesh);
-
+    //writeOFF("meshOut.off", surfaceMesh);
+    gamer::writeOFF("meshOut.off", surfaceMesh);
+    auto &metadata = *tetmesh->get_simplex_up();
+    metadata.higher_order = false;
+    compute_orientation(*tetmesh);
+    gamer::writeDolfin("meshOut.xml", *tetmesh);
 }
+//}
