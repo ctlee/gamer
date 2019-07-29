@@ -192,6 +192,8 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col.label(text="Curvature Calculations:")
         if context.scene.gamer.matplotlib_found:
             row = col.row(align=True)
+            row.prop(qProps, "colormap")
+            row = col.row(align=True)
             row.prop(qProps, "curvePercentile")
             row.prop(qProps, "showplots")
             row.prop(qProps, "saveplots")
