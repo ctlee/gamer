@@ -230,6 +230,10 @@ Getting BlendGAMer
 
 .. _BlendGAMer the Easy Way:
 
+.. warning::
+   Currently ``BlendGAMer`` only supports ``Blender`` v2.79b.
+   If you have another version of ``Blender``, please install `Blender v2.79b <https://download.blender.org/release/Blender2.79/>`__ before proceeding.
+
 The Easy Way
 ============
 
@@ -254,7 +258,7 @@ The zip file can be installed by following the traditional `Blender addon instal
 The Harder Way
 ==============
 
-You can build ``BlendGAMer`` yourself using CMake.
+You can build ``BlendGAMer`` yourself using ``CMake``.
 Owing to the complexities of building Python extension modules, it is preferable to have a working installation of Blender on your system.
 While this is not strictly necessary, it enables CMake to verify that the Python versions will be compatible.
 Note that the prebuilt Blender binaries from the Blender Foundation do not contain Python header files and are therefore unsuitable for compilation.

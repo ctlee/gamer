@@ -22,9 +22,9 @@ GAMer has the following main features:
 * Code is hosted at `GitHub <http://github.com/ctlee/gamer/>`_ under the Lesser GNU public license (LGPLv2). Please post issues or reports there.
 
 
-******************************************
-Acknowleding the Use of GAMer in Your Work
-******************************************
+*******************************************
+Acknowledging the Use of GAMer in Your Work
+*******************************************
 
 The `contributors <https://github.com/ctlee/gamer/contributors>`__ to this project are grateful for your use of this software.
 To acknowledge our contributions please cite the following:
