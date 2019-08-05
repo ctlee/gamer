@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.4'
-release = 'v2.0.4-dev-1-gb325324.dirty'
+release = 'v2.0.4-dev-2-g6e9583e.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -78,6 +78,12 @@ exhale_args = {
     "exhaleDoxygenStdin":    doxystdin,
 }
 
+##############################
+# Number figures
+##############################
+
+numfig = True
+numfig_secnum_depth = (2)
 
 ##############################
 # Autosummary Settings
