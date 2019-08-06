@@ -86,6 +86,7 @@ Legacy Contributions
    :caption: Getting Started:
 
    install
+   algorithms
    changelog
 
 .. toctree::
