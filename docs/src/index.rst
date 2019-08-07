@@ -87,6 +87,7 @@ Legacy Contributions
 
    install
    algorithms
+   blendgamer
    changelog
 
 .. toctree::

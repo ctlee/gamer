@@ -341,6 +341,40 @@ Note that the prebuilt Blender binaries from the Blender Foundation do not conta
 
 #.  Load up Blender and verify that ``BlendGAMer`` is working maybe by following one of our illustrative :ref:`BlendGAMer Tutorials`.
 
+.. _Getting matplotlib in Blender:
+
+Installing Matplotlib in Blender
+================================
+
+For advanced users only, if you wish to run curvature calculations in ``BlendGAMer`` there is a ``matplotlib`` dependency which is not satisfied by default ``Blender``.
+For ``Blender`` versions using the bundled system ``Python``, you may only need to install the relevant ``python3-matplotlib`` or related package for your system.
+
+Otherwise, if you are using a prepackaged version of ``Blender``, the currently recommended method to get ``matplotlib`` is through ``pip``.
+Fist download the ``get-pip.py`` file from the `pip documentation <https://pip.pypa.io/en/stable/installing/>`__.
+Execute this script using the bundled ``Python`` from ``Blender.
+
+.. code-block:: sh
+   python get-pip.py
+
+The bundled ``Python`` can be found at
+
+.. code-block:: sh
+   {path to blender}/2.xx/python/bin/python
+
+for Linux and Windows and at
+
+.. code-block:: sh
+   /blender.app/Contents/Resources/2.79/python/bin
+
+for Mac platforms.
+Now that ``pip`` is installed you can use it to install ``matplotlib``:
+
+.. code-block:: sh
+   /path/to/blenderspython/pip install matplotlib
+
+``matplotlib`` should now be installed.
+
+
 .. _Building the Documentation:
 
 **************************

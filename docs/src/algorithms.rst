@@ -5,7 +5,7 @@ Overview of GAMer Algorithms
 .. contents::
    :local:
 
-.. _LocalStructureTensor:
+.. _Local Structure Tensor:
 
 ****************************
 Local Structure Tensor (LST)
@@ -15,12 +15,12 @@ To represent information about the local geometry, mesh processing operations in
 The LST is defined as follows,
 
 .. math::
-    T(\mathbf{v}) = \sum_{i=1}^{N_r} \mathbf{n_i}\otimes\mathbf{n_i}= \sum_{i=1}^{N_r}
-    \begin{pmatrix}
-        n_i^xn_i^x & n_i^xn_i^y & n_i^xn_i^z\\
-        n_i^yn_i^x & n_i^yn_i^y & n_i^yn_i^z\\
-        n_i^zn_i^x & n_i^zn_i^y & n_i^zn_i^z
-    \end{pmatrix},
+  T(\mathbf{v}) = \sum_{i=1}^{N_r} \mathbf{n_i}\otimes\mathbf{n_i}= \sum_{i=1}^{N_r}
+  \begin{pmatrix}
+    n_i^xn_i^x & n_i^xn_i^y & n_i^xn_i^z\\
+    n_i^yn_i^x & n_i^yn_i^y & n_i^yn_i^z\\
+    n_i^zn_i^x & n_i^zn_i^y & n_i^zn_i^z
+  \end{pmatrix},
 
 where :math:`\mathbf{v}` is the vertex of interest, :math:`N_r` is the number of neighbors in the :math:`r`-ring neighborhood, and :math:`n_{i}^{x,y,z}` form the normal of the :math:`i`-th neighbor vertex.
 Vertex normals are defined as the weighted average of incident face normals.
@@ -33,7 +33,7 @@ Inspecting the magnitude of the eigenvalues gives several geometric cases:
 - Spheres and saddles: :math:`\lambda_1 \approx \lambda_2 \approx \lambda_3 > 0`
 
 
-.. _WeightedVertexSmooth:
+.. _Weighted Vertex Smooth:
 
 **********************
 Weighted Vertex Smooth
@@ -61,7 +61,7 @@ We define a weighting factor, :math:`\alpha_i = \frac{\mathbf{e}_{i-1}\cdot\math
 The average of the projections weighted by :math:`\alpha_i` gives a new position of :math:`\mathbf{x}` as follows,
 
 .. math::
-  \bar{\mathbf{x}} = \frac{1}{\sum_{i=1}^{N}(\alpha_i + 1)}\sum_{i=1}^{N}(\alpha_i + 1)\mathbf{x}_i.
+   \bar{\mathbf{x}} = \frac{1}{\sum_{i=1}^{N}(\alpha_i + 1)}\sum_{i=1}^{N}(\alpha_i + 1)\mathbf{x}_i.
 
 To maintain the fidelity of the local geometry we restrict vertex movement along directions of low curvature.
 This constraint is achieved by anisotropically dampening vertex diffusion using information contained in the LST.
@@ -69,10 +69,12 @@ Computing the eigendecomposition of the LST, we obtain eigenvalues :math:`\lambd
 We project :math:`\bar{\mathbf{x}}-\mathbf{x}` onto the eigenvector basis and scale each component by the inverse of the corresponding eigenvalue,
 
 .. math::
-  \hat{\mathbf{x}} = \mathbf{x} + \sum_{k=1}^{3}\frac{1}{1+\lambda_k}[(\bar{\mathbf{x}}-\mathbf{x})\cdot \mathbf{E}_k]\mathbf{E}_k.
+   \hat{\mathbf{x}} = \mathbf{x} + \sum_{k=1}^{3}\frac{1}{1+\lambda_k}[(\bar{\mathbf{x}}-\mathbf{x})\cdot \mathbf{E}_k]\mathbf{E}_k.
 
 This has the effect of dampening movement along directions of high curvature i.e., where :math:`\lambda` is large.
 
+
+.. _Mesh Decimation:
 
 ***************
 Mesh Decimation
@@ -94,7 +96,7 @@ By comparing the magnitudes of the eigenvalues of the LST we can select for regi
 For example, to decimate vertices in flat regions of the mesh, given eigenvalues :math:`\lambda_1 \geq \lambda_2 \geq \lambda_3`, vertices can be selected by checking if the local region satisfies,
 
 .. math::
-  \frac{\lambda_2}{\lambda_1} < R_1,
+   \frac{\lambda_2}{\lambda_1} < R_1,
 
 where :math:`R_1` is a user specified flatness threshold (smaller is flatter).
 In a similar fashion, vertices in curved regions can also be selected.
@@ -103,11 +105,13 @@ However, decimation of curved regions is typically avoided due to the potential 
 Instead, to simplify dense areas of the mesh, we employ an edge length based selection criterion,
 
  .. math::
-  \frac{\mathrm{max}_{i=1}^{N_1}d(\mathbf{x}, \mathbf{v}_i)}{\overline{D}} < R_2,
+    \frac{\mathrm{max}_{i=1}^{N_1}d(\mathbf{x}, \mathbf{v}_i)}{\overline{D}} < R_2,
 
 where :math:`N_1` is the number of vertices in the 1-ring neighborhood of vertex :math:`\mathbf{x}`, :math:`d(\cdot,\cdot)` is the distance between vertices :math:`\mathbf{x}` and :math:`\mathbf{v}_i`, :math:`\overline{D}` is the mean edge length of the mesh, and :math:`R_2` is a user specified threshold.
 This criterion allows us to control the sparseness of the mesh.
 
+
+.. _Anisotropic Normal Smooth:
 
 *************************
 Anisotropic Normal Smooth
@@ -126,7 +130,7 @@ meaning that many iterations of this algorithm may weaken sharp features.
 
 .. _fig_normalsmooth:
 .. figure:: images/normalsmooth.png
-   :width: 200px
+   :width: 300px
    :figclass: align-center
 
    Illustration of the Anisotropic Normal Smooth algorithm.
@@ -135,7 +139,7 @@ meaning that many iterations of this algorithm may weaken sharp features.
 Instead, we use an anisotropic scheme to compute the mean neighbor normals,
 
 .. math::
-  \bar{\mathbf{n}_i} = \frac{1}{\sum_{j=1}^{3} e^{K(\mathbf{n}_i\cdot \mathbf{n}_{ij})}} \sum_{j=1}^{3} e^{K(\mathbf{n}_i\cdot \mathbf{n}_{ij})} \mathbf{n}_{ij},
+   \bar{\mathbf{n}_i} = \frac{1}{\sum_{j=1}^{3} e^{K(\mathbf{n}_i\cdot \mathbf{n}_{ij})}} \sum_{j=1}^{3} e^{K(\mathbf{n}_i\cdot \mathbf{n}_{ij})} \mathbf{n}_{ij},
 
 where :math:`K` is a user defined positive parameter which scales the extent of anisotropy.
 Under this scheme, the weighting function decreases as a function of the angle between :math:`\mathbf{n}_i` and :math:`\mathbf{n}_{ij}` resulting in the preservation of sharp features.

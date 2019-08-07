@@ -282,8 +282,9 @@ namespace surfacemesh_detail
 /**
  * @brief      Remove a vertex from mesh and triangulate the resulting hole.
  *
- * @param      mesh      The mesh
+ * @param      mesh      Surface mesh of interest
  * @param[in]  vertexID  The vertex id
+ * @param[in]  rings     Number of neighborhood rings to consider
  */
 void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings = 2);
 
@@ -846,11 +847,11 @@ double getArea(const SurfaceMesh &mesh);
 double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
 
 /**
- * @brief      Gets the area.
+ * @brief      Gets the area of a triangle defined by three vertices
  *
- * @param[in]  a     { parameter_description }
- * @param[in]  b     { parameter_description }
- * @param[in]  c     { parameter_description }
+ * @param[in]  a     Vertex 1
+ * @param[in]  b     Vertex 2
+ * @param[in]  c     Vertex 3
  *
  * @return     The area.
  */
@@ -972,6 +973,7 @@ void centeralize(SurfaceMesh &mesh);
  * @param[in]  maxIter         The maximum iterator
  * @param[in]  preserveRidges  The preserve ridges
  * @param[in]  verbose         The verbose
+ * @param[in]  rings           Number of neighborhood rings to consider for LST
  */
 void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings = 2);
 
@@ -982,6 +984,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
  * @param[in]  coarseRate   The coarse rate
  * @param[in]  flatRate     The flat rate
  * @param[in]  denseWeight  The dense weight
+ * @param[in]  rings        Number of neighborhood rings to consider for LST
  */
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2);
 
@@ -991,7 +994,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
  * @param      mesh       The mesh
  * @param[in]  threshold  The threshold
  * @param[in]  weight     The weight
- * @param[in]  rings      The rings
+ * @param[in]  rings      Number of neighborhood rings to consider for LST
  */
 void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2);
 
@@ -1001,7 +1004,7 @@ void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t ri
  * @param      mesh       The mesh
  * @param[in]  threshold  The threshold
  * @param[in]  weight     The weight
- * @param[in]  rings      The rings
+ * @param[in]  rings      Number of neighborhood rings to consider for LST
  */
 void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2);
 

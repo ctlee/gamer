@@ -430,7 +430,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             default="meshquality", maxlen=1024, subtype='FILE_NAME'
             )
     min_angle = IntProperty(
-        name="Angle Theshold", default=15, min=0, max=180,
+        name="Angle Threshold", default=15, min=0, max=180,
         description="Select faces with angles less than this criteria")
 
     minCurve = FloatProperty(
