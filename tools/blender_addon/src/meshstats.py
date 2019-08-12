@@ -473,19 +473,21 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Save the generated plots"
         )
 
+
     mixpoint = FloatProperty(
         name = "Color mixing point", default = 0.5, min=0, max=1,
         description="Value for color mixing"
         )
 
-    colormap = EnumProperty(
-        name = "Colormap colors",
-        description="Colormap to use",
-        items = colormapEnums,
-        default = 'VIRIDIS'
-        )
-
     if mpl_found:
+
+        colormap = EnumProperty(
+            name = "Colormap colors",
+            description="Colormap to use",
+            items = colormapEnums,
+            default = 'VIRIDIS'
+            )
+
         def compute_curvatures(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
