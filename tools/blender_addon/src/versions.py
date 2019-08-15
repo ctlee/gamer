@@ -137,8 +137,8 @@ def checkVersion():
                             if 'boundaries' in obj.keys():
                                 del obj['boundaries']
                 scene.gamer.gamer_version = str(newver)
-            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,3)) < 0 :
-                newver = (2,0,3)
+            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,4)) < 0 :
+                newver = (2,0,4)
                 print("Migrating from v%s to v%s"%(str(fileVer), str(newver)))
                 scene.gamer.gamer_version = str(newver)
             else:
