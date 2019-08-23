@@ -89,10 +89,10 @@ def register():
     from bpy.utils import register_class
 
     for cls in classes:
-        print(cls)
+        # print(cls)
         register_class(cls)
 
-    print ("Done registering classes")
+    # print ("Done registering classes")
 
     types = bpy.types
     types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)

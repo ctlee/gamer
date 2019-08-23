@@ -90,7 +90,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
             col = layout.column()
             col.label(text="Global mesh operations:")
             col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
-            col.operator("gamer.fill_holes", icon='BORDER_LASSO')
+            col.operator("gamer.fill_holes", icon='BLANK1')
             # col.operator("gamer.refine_mesh", icon='OUTLINER_OB_LATTICE')
 
             if active_obj.mode == 'EDIT':
@@ -215,7 +215,7 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
             # row.prop(qProps, "maxEnergy")
             # col.operator("gamer.helfrich_energy")
         else:
-            col.label(text="Curvature Calculations require matplotlib.", icon='LAMP')
+            col.label(text="Curvature Calculations require matplotlib.", icon='LIGHT')
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):
@@ -238,12 +238,12 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
             row = layout.row()
-            row.label("Unmarked marker value = %d"%(UNSETMARKER))
+            row.label(text="Unmarked marker value = %d"%(UNSETMARKER))
             row = layout.row()
             row.prop(bpy.data.materials['bnd_unset_mat'], 'diffuse_color', text = "Unmarked boundary color")
 
             row = layout.row()
-            row.label(text="Defined Boundaries:", icon='FACESEL_HLT')
+            row.label(text="Defined Boundaries:", icon='FACESEL')
             row = layout.row()
             col = row.column()
             col.template_list("GAMER_UL_boundary_list",
@@ -254,8 +254,8 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
                     type='DEFAULT'
                 )
             col = row.column(align=True)
-            col.operator("gamer.add_boundary", icon='ZOOMIN', text="")
-            col.operator("gamer.remove_boundary", icon='ZOOMOUT', text="")
+            col.operator("gamer.add_boundary", icon='ADD', text="")
+            col.operator("gamer.remove_boundary", icon='REMOVE', text="")
             col.operator("gamer.remove_all_boundaries", icon='X', text="")
 
             # Could have boundary item draw itself in new row here:
@@ -300,12 +300,12 @@ class GAMER_UL_boundary_list(bpy.types.UIList):
         Draw the UI list for boundary markers
         """
         if item.status:
-            layout.label(item.boundary_name, icon='ERROR')
+            layout.label(text=item.boundary_name, icon='ERROR')
         else:
-            layout.label(item.boundary_name)
+            layout.label(text=item.boundary_name)
 
         # Show the color swatch in last section only
-        split = layout.split(percentage = 0.5)
+        split = layout.split(factor = 0.5, align = True)
         col = split.column()
         col = split.column()
         mats = bpy.data.materials

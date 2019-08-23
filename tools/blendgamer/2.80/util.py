@@ -57,7 +57,7 @@ def getMarkerLayer(obj):
     markerLayer = obj.data.polygon_layers_int.get('marker')
     # If the layer doesn't exist yet, create it!
     if not markerLayer:
-        markerLayer = obj.data.polygon_layers_int.new('marker')
+        markerLayer = obj.data.polygon_layers_int.new(name='marker')
     return markerLayer.data
 
 

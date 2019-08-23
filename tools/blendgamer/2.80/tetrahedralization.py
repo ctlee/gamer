@@ -119,14 +119,14 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
 
     def draw_item_in_row ( self, row ):
         col = row.column()
-        col.label(str(self.object_name))
+        col.label(text=str(self.object_name))
         col = row.column()
-        col.label("Domain ID: " + str(self.domain_id))
+        col.label(text="Domain ID: " + str(self.domain_id))
         col = row.column()
         if self.is_hole:
-            col.label("Hole")
+            col.label(text="Hole")
         else:
-            col.label("Domain Marker: " + str(self.marker))
+            col.label(text="Domain Marker: " + str(self.marker))
 
 
 class GAMER_UL_domain(bpy.types.UIList):
@@ -198,7 +198,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     def draw_layout(self, context, layout):
 
         row = layout.row()
-        row.label("Domains")
+        row.label(text="Domains")
 
         row = layout.row()
         col = row.column()
@@ -209,8 +209,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                           rows=2)
 
         col = row.column(align=True)
-        col.operator("gamer.tet_domain_add", icon='ZOOMIN', text="")
-        col.operator("gamer.tet_domain_remove", icon='ZOOMOUT', text="")
+        col.operator("gamer.tet_domain_add", icon='ADD', text="")
+        col.operator("gamer.tet_domain_remove", icon='REMOVE', text="")
         col.operator("gamer.tet_domain_remove_all", icon='X', text="")
 
         if len(self.domain_list) > 0:
@@ -244,7 +244,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 # row.prop ( self, "ho_mesh" )
 
                 row = box.row()
-                row.label("Output Formats:")
+                row.label(text="Output Formats:")
 
                 row = box.row()
                 sbox = row.box()
@@ -262,7 +262,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             row.operator("gamer.tetrahedralize", text="Tetrahedralize", icon=icon)
             if len(self.status) > 0:
                 row = layout.row()
-                row.label(self.status, icon="ERROR")
+                row.label(text=self.status, icon="ERROR")
 
 
     def add_tet_domain(self, context):
