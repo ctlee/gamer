@@ -25,7 +25,7 @@ bl_info = {
         "description": "Utilities for generating finite elements simulation compatible meshes",
         "author": "Christopher T. Lee, John B. Moody, Zeyun Yu, Tom Bartol, Johan Hake, and Michael Holst",
         "version": (@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@),
-        "blender": (2, 79, 0),
+        "blender": (@BLENDER_VERSION_MAJOR@, @BLENDER_VERSION_MINOR@, 0),
         "location": "3D View > Tool Shelf",
         "wiki_url": "https://github.com/ctlee/gamer",
         "tracker_url": "https://github.com/ctlee/gamer/issues",
@@ -36,28 +36,43 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(blendgamer)
-    importlib.reload(ui)
-    importlib.reload(surfacemesh_ops)
     importlib.reload(markers)
-    importlib.reload(tetrahedralization)
-    importlib.reload(versions)
     importlib.reload(meshstats)
     importlib.reload(report)
+    importlib.reload(surfacemesh_ops)
+    importlib.reload(tetrahedralization)
+    importlib.reload(versions)
+    importlib.reload(ui)
 else:
     from . import (
             blendgamer,
-            ui,
             markers,
-            tetrahedralization,
-            surfacemesh_ops,
-            versions,
             meshstats,
             report,
+            surfacemesh_ops,
+            tetrahedralization,
+            ui,
+            versions,
             )
 
 # General import
 import bpy
 from bpy.props import PointerProperty
+
+
+modules = (markers,
+           meshstats,
+           surfacemesh_ops,
+           tetrahedralization,
+           ui,
+           versions,
+           blendgamer)
+
+classes = []
+for module in modules:
+    classes.extend(module.classes)
+classes = tuple(classes)
+
 
 def add_handler(handler_list, handler_function):
     """ Only add a handler if it's not already in the list """
@@ -71,7 +86,14 @@ def remove_handler(handler_list, handler_function):
         handler_list.remove(handler_function)
 
 def register():
-    bpy.utils.register_module(__name__)
+    from bpy.utils import register_class
+
+    for cls in classes:
+        print(cls)
+        register_class(cls)
+
+    print ("Done registering classes")
+
     types = bpy.types
     types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)
     types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
@@ -81,12 +103,16 @@ def register():
     add_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
 
 def unregister():
+    from bpy.utils import unregister_class
+
     remove_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
     types = bpy.types
     del types.Material.gamer
     del types.Object.gamer
     del types.Scene.gamer
-    bpy.utils.unregister_module(__name__)
+
+    for cls in reversed(classes):
+        unregister_class(cls)
 
 # for testing
 if __name__ == '__main__':

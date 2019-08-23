@@ -7,6 +7,8 @@ If you are an experienced C++ developer and wish to link to ``libGAMer`` start a
 For other users, many of the functions and types provided by GAMer can be accessed through the Python API wrapper (``PyGAMer``) or can be called through an interactive Blender plugin (``BlendGAMer``).
 Check out the :ref:`Getting PyGAMer` and :ref:`Getting BlendGAMer` sections for details on how to install these tools on your system.
 
+.. contents::
+   :local:
 
 .. _Prerequisites:
 
@@ -351,7 +353,7 @@ For ``Blender`` versions using the bundled system ``Python``, you may only need 
 
 Otherwise, if you are using a prepackaged version of ``Blender``, the currently recommended method to get ``matplotlib`` is through ``pip``.
 Fist download the ``get-pip.py`` file from the `pip documentation <https://pip.pypa.io/en/stable/installing/>`__.
-Execute this script using the bundled ``Python`` from ``Blender.
+Execute this script using the bundled ``Python`` from ``Blender``.
 
 .. code-block:: sh
    python get-pip.py

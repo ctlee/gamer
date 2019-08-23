@@ -40,12 +40,6 @@ import blendgamer.pygamer as pygamer
 # python imports
 import sys
 
-# we use per module class registration/unregistration
-def register():
-    bpy.utils.register_module(__name__)
-
-def unregister():
-    bpy.utils.unregister_module(__name__)
 
 @persistent
 def gamer_load_post(dummy):
@@ -72,23 +66,26 @@ def gamer_load_post(dummy):
 
 
 class GAMerAddonProperties(bpy.types.PropertyGroup):
-    initialized = BoolProperty(name="GAMer Initialized", default=False)
-    matplotlib_found = BoolProperty(name="Is matplotlib available", default=False)
-    gamer_version = StringProperty(name="GAMer Version", default="0")
-    boundary_id_counter = IntProperty(name="GAMer Boundary id Counter")
-    versionerror = IntProperty(name="Version mismatch", default=0)
+    initialized         : BoolProperty(name="GAMer Initialized", default=False)
+    matplotlib_found    : BoolProperty(name="Is matplotlib available", default=False)
+    gamer_version       : StringProperty(name="GAMer Version", default="0")
+    boundary_id_counter : IntProperty(name="GAMer Boundary id Counter")
+    versionerror        : IntProperty(name="Version mismatch", default=0)
 
-    surfmesh_procs = PointerProperty(
-            type=SurfaceMeshImprovementProperties,
-            name="GAMer Surface Mesh Improvement")
+    surfmesh_procs      : PointerProperty(
+                            type=SurfaceMeshImprovementProperties,
+                            name="GAMer Surface Mesh Improvement"
+                          )
 
-    mesh_quality_properties = PointerProperty(
-            type=MeshQualityReportProperties,
-            name="GAMer Mesh Quality Reporting"        )
+    mesh_quality_properties : PointerProperty(
+                            type=MeshQualityReportProperties,
+                            name="GAMer Mesh Quality Reporting"
+                          )
 
-    tet_group = PointerProperty(
-            type=GAMerTetrahedralizationPropertyGroup,
-            name="GAMer Tetrahedralization")
+    tet_group           : PointerProperty(
+                            type=GAMerTetrahedralizationPropertyGroup,
+                            name="GAMer Tetrahedralization"
+                          )
 
     def allocate_boundary_id ( self ):
         self.boundary_id_counter += 1
@@ -111,3 +108,6 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
         import importlib.util
         mpl_spec = importlib.util.find_spec("matplotlib")
         self.matplotlib_found = mpl_spec is not None
+
+
+classes = [GAMerAddonProperties]
