@@ -25,7 +25,7 @@ bl_info = {
         "description": "Utilities for generating finite elements simulation compatible meshes",
         "author": "Christopher T. Lee, John B. Moody, Zeyun Yu, Tom Bartol, Johan Hake, and Michael Holst",
         "version": (@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@),
-        "blender": (@BLENDER_VERSION_MAJOR@, @BLENDER_VERSION_MINOR@, 0),
+        "blender": (2, 80, 0),
         "location": "3D View > Tool Shelf",
         "wiki_url": "https://github.com/ctlee/gamer",
         "tracker_url": "https://github.com/ctlee/gamer/issues",
@@ -68,12 +68,6 @@ modules = (markers,
            versions,
            blendgamer)
 
-classes = []
-for module in modules:
-    classes.extend(module.classes)
-classes = tuple(classes)
-
-
 def add_handler(handler_list, handler_function):
     """ Only add a handler if it's not already in the list """
     if not (handler_function in handler_list):
@@ -85,19 +79,24 @@ def remove_handler(handler_list, handler_function):
     if handler_function in handler_list:
         handler_list.remove(handler_function)
 
+
+
+# def menu_func_test(self, context):
+#     layout = self.layout
+#     layout.operator_context = "INVOKE_DEFAULT"
+#     layout.separator()
+#     layout.operator("gamer.smooth", text="FOOTEST")
+
 def register():
-    from bpy.utils import register_class
-
-    for cls in classes:
-        # print(cls)
-        register_class(cls)
-
-    # print ("Done registering classes")
+    for module in modules:
+        module.register()
 
     types = bpy.types
     types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)
     types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
     types.Material.gamer = PointerProperty(type=markers.GAMerBoundaryMaterial)
+
+    # bpy.types.VIEW3D_MT_edit_mesh_vertices.append(menu_func_test)
 
     # Add the load_post handlers
     add_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
@@ -111,8 +110,8 @@ def unregister():
     del types.Object.gamer
     del types.Scene.gamer
 
-    for cls in reversed(classes):
-        unregister_class(cls)
+    for module in reversed(modules):
+        module.unregister()
 
 # for testing
 if __name__ == '__main__':

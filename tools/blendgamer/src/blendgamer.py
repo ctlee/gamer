@@ -33,7 +33,7 @@ from blendgamer.meshstats import MeshQualityReportProperties
 
 from blendgamer.tetrahedralization import GAMerTetrahedralizationPropertyGroup
 
-from blendgamer.util import UNSETID
+from blendgamer.util import UNSETID, make_annotations
 
 import blendgamer.pygamer as pygamer
 
@@ -66,23 +66,23 @@ def gamer_load_post(dummy):
 
 
 class GAMerAddonProperties(bpy.types.PropertyGroup):
-    initialized         : BoolProperty(name="GAMer Initialized", default=False)
-    matplotlib_found    : BoolProperty(name="Is matplotlib available", default=False)
-    gamer_version       : StringProperty(name="GAMer Version", default="0")
-    boundary_id_counter : IntProperty(name="GAMer Boundary id Counter")
-    versionerror        : IntProperty(name="Version mismatch", default=0)
+    initialized         = BoolProperty(name="GAMer Initialized", default=False)
+    matplotlib_found    = BoolProperty(name="Is matplotlib available", default=False)
+    gamer_version       = StringProperty(name="GAMer Version", default="0")
+    boundary_id_counter = IntProperty(name="GAMer Boundary id Counter")
+    versionerror        = IntProperty(name="Version mismatch", default=0)
 
-    surfmesh_procs      : PointerProperty(
+    surfmesh_procs      = PointerProperty(
                             type=SurfaceMeshImprovementProperties,
                             name="GAMer Surface Mesh Improvement"
                           )
 
-    mesh_quality_properties : PointerProperty(
+    mesh_quality_properties = PointerProperty(
                             type=MeshQualityReportProperties,
                             name="GAMer Mesh Quality Reporting"
                           )
 
-    tet_group           : PointerProperty(
+    tet_group           = PointerProperty(
                             type=GAMerTetrahedralizationPropertyGroup,
                             name="GAMer Tetrahedralization"
                           )
@@ -111,3 +111,13 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
 
 
 classes = [GAMerAddonProperties]
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))

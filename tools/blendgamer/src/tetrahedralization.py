@@ -84,22 +84,22 @@ class GAMER_OT_tetrahedralize(bpy.types.Operator):
 
 class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     # name = StringProperty()  # This is a reminder that "name" is already defined for all subclasses of PropertyGroup
-    domain_id : IntProperty(
+    domain_id = IntProperty(
             name="ID", default=-1,
             description="Domain ID")
-    object_name : StringProperty(
+    object_name = StringProperty(
             name="ObjName", default="",
             description="Object Name")
-    marker : IntProperty(
+    marker = IntProperty(
             name="Marker", default=-1,
             description="Domain Marker Integer")
-    is_hole : BoolProperty(
+    is_hole = BoolProperty(
             name="Hole", default=False,
             description="Use this domain as a hole")
-    constrain_vol  : BoolProperty(
+    constrain_vol = BoolProperty(
             name="Constrain Volume", default=False,
             description="Constrain Volume")
-    vol_constraint : FloatProperty(
+    vol_constraint = FloatProperty(
             name="Vol Constraint", default=10.0,
             description="Volume Constraint")
 
@@ -128,145 +128,54 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
         else:
             col.label(text="Domain Marker: " + str(self.marker))
 
-
-class GAMER_UL_domain(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        # The draw_item function is called for each item of the collection that is visible in the list.
-        #   data is the RNA object containing the collection,
-        #   item is the current drawn item of the collection,
-        #   icon is the "computed" icon for the item (as an integer, because some objects like materials or textures
-        #        have custom icons ID, which are not available as enum items).
-        #   active_data is the RNA object containing the active property for the collection (i.e. integer pointing to the
-        #        active item of the collection).
-        #   active_propname is the name of the active property (use 'getattr(active_data, active_propname)').
-        #   index is index of the current item in the collection.
-        #   flt_flag is the result of the filtering process for this item.
-        #   Note: as index and flt_flag are optional arguments, you do not have to use/declare them here if you don't
-        #         need them.
-
-        # The item will be a GAMerTetDomainPropertyGroup
-        # Let it draw itself in a new row:
-
-        item.draw_item_in_row(layout.row())
-
-
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
-    export_path : StringProperty(
+    export_path = StringProperty(
             name="Export Directory",
             description="Path to directory where files will be created",
             default="./", maxlen=1024, subtype='DIR_PATH'
             )
-    export_filebase : StringProperty(
+    export_filebase = StringProperty(
             name="Filename",
             description="Base name of the files to export",
             default="gamertetmesh", maxlen=1024, subtype='FILE_NAME'
             )
-    domain_list : CollectionProperty(
+    domain_list = CollectionProperty(
             type=GAMerTetDomainPropertyGroup, name="Domain List")
-    active_domain_index : IntProperty(
+    active_domain_index = IntProperty(
             name="Active Domain Index", default=0)
-    next_id : IntProperty(
+    next_id = IntProperty(
             name="Counter for Unique Domain IDs", default=1)  # Start ID's at 1 to confirm initialization
 
-    show_settings : BoolProperty(
+    show_settings = BoolProperty(
             name="Tetrahedralization Settings", default=False,
             description="Show more detailed settings")
 
-    min_dihedral : FloatProperty(
+    min_dihedral = FloatProperty(
             name="Min Dihedral", default=10.0,
             description="Minimum Dihedral in Degrees")
-    max_aspect_ratio : FloatProperty(
+    max_aspect_ratio = FloatProperty(
             name="Max Aspect Ratio", default=1.3,
             description="Maximum Aspect Ratio")
 
-    ho_mesh : BoolProperty(
+    ho_mesh = BoolProperty(
             name="Higher order mesh generation", default=False,
             description="Higher order mesh generation")
 
-    dolfin : BoolProperty(
+    dolfin = BoolProperty(
             name="DOLFIN", default=False,
             description="Generate DOLFIN output")
     # diffpack = BoolProperty(
     #         name="Diffpack", default=False,
     #         description="Generate Diffpack output")
-    paraview : BoolProperty(
+    paraview = BoolProperty(
             name="Paraview", default=False,
             description="Generate Paraview output")
 
-    status : StringProperty ( name="status", default="" )
-
-    def draw_layout(self, context, layout):
-
-        row = layout.row()
-        row.label(text="Domains")
-
-        row = layout.row()
-        col = row.column()
-
-        col.template_list("GAMER_UL_domain", "",
-                          self, "domain_list",
-                          self, "active_domain_index",
-                          rows=2)
-
-        col = row.column(align=True)
-        col.operator("gamer.tet_domain_add", icon='ADD', text="")
-        col.operator("gamer.tet_domain_remove", icon='REMOVE', text="")
-        col.operator("gamer.tet_domain_remove_all", icon='X', text="")
-
-        if len(self.domain_list) > 0:
-            domain = self.domain_list[self.active_domain_index]
-
-            # row = layout.row()
-            # row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
-
-            domain.draw_layout ( layout )
-
-            box = layout.box()
-            row = box.row(align=True)
-            row.alignment = 'LEFT'
-            if not self.show_settings:
-                row.prop(self, "show_settings", icon='TRIA_RIGHT', emboss=False)
-            else:
-                row.prop(self, "show_settings", icon='TRIA_DOWN', emboss=False)
-
-                row = box.row()
-                row.prop(self, "export_path")
-                row = box.row()
-                row.prop(self, "export_filebase")
-
-                row = box.row()
-                col = row.column()
-                col.prop(self, "min_dihedral")
-                col = row.column()
-                col.prop(self, "max_aspect_ratio")
-
-                # row = box.row()
-                # row.prop ( self, "ho_mesh" )
-
-                row = box.row()
-                row.label(text="Output Formats:")
-
-                row = box.row()
-                sbox = row.box()
-
-                row = sbox.row()
-                col = row.column()
-                col.prop(self, "dolfin")
-                col = row.column()
-                col.prop(self, "paraview")
-
-            row = layout.row()
-            icon = 'PROP_OFF'
-            if self.dolfin or self.paraview:
-                icon = 'COLOR_RED'
-            row.operator("gamer.tetrahedralize", text="Tetrahedralize", icon=icon)
-            if len(self.status) > 0:
-                row = layout.row()
-                row.label(text=self.status, icon="ERROR")
+    status = StringProperty ( name="status", default="" )
 
 
     def add_tet_domain(self, context):
-        print("Adding a Tet Domain")
+        # print("Adding a Tet Domain")
         """ Add a new tet domain to the list of tet domains for each selected object """
         #mcell = context.scene.mcell
 
@@ -286,7 +195,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     self.active_domain_index = len(self.domain_list) - 1
 
     def remove_active_tet_domain(self, context):
-        print("Removing active Tet Domain")
+        # print("Removing active Tet Domain")
         """ Remove the active tet domain from the list of domains """
         self.domain_list.remove(self.active_domain_index)
         self.active_domain_index -= 1
@@ -294,7 +203,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             self.active_domain_index = 0
 
     def remove_all_tet_domains(self, context):
-        print("Removing All Tet Domains")
+        # print("Removing All Tet Domains")
         """ Remove all tet domains from the list of domains """
         while len(self.domain_list) > 0:
             self.domain_list.remove(0)
@@ -310,9 +219,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         self.next_id += 1
         return(self.next_id - 1)
 
-    def draw_panel(self, context, panel):
-        layout = panel.layout
-        self.draw_layout(context, layout)
+    # def draw_panel(self, context, panel):
+    #     layout = panel.layout
+    #     self.draw_layout(context, layout)
 
     def tetrahedralize(self, report):
         print ("######################## Begin Tetrahedralize ########################")
@@ -410,5 +319,14 @@ classes = [GAMER_OT_tet_domain_add,
            GAMER_OT_tet_domain_remove_all,
            GAMER_OT_tetrahedralize,
            GAMerTetDomainPropertyGroup,
-           GAMER_UL_domain,
            GAMerTetrahedralizationPropertyGroup]
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))

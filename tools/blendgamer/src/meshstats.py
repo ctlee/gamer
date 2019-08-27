@@ -44,7 +44,7 @@ class GAMER_OT_MeshStats_Select_Report(bpy.types.Operator):
     bl_label   = "Select Report"
     bl_options = {'INTERNAL'}
 
-    index : IntProperty()
+    index = IntProperty()
 
     _type_to_mode = {
         bmesh.types.BMVert: 'VERT',
@@ -410,72 +410,72 @@ class GAMER_OT_k2_curvature(bpy.types.Operator):
 #             return {'CANCELLED'}
 
 class MeshQualityReportProperties(bpy.types.PropertyGroup):
-    n_wagon_edges : IntProperty(
+    n_wagon_edges = IntProperty(
         name="N Edges", default=8, min=1,
         description="The number of incident edges to a vertex to be selected")
-    export_path : StringProperty(
+    export_path = StringProperty(
             name="Export Directory",
             description="Path to directory where files will be created",
             default="./", maxlen=1024, subtype='DIR_PATH'
             )
-    export_filebase : StringProperty(
+    export_filebase = StringProperty(
             name="Filename",
             description="Base name of the files to export",
             default="meshquality", maxlen=1024, subtype='FILE_NAME'
             )
-    min_angle : IntProperty(
+    min_angle = IntProperty(
         name="Angle Threshold", default=15, min=0, max=180,
         description="Select faces with angles less than this criteria")
 
-    minCurve : FloatProperty(
+    minCurve = FloatProperty(
         name="Minimum curvature", default=0,
         description="Lower bound percentile truncation"
         )
 
-    maxCurve : FloatProperty(
+    maxCurve = FloatProperty(
         name="Maximum curvature", default=1000,
         description="Upper bound percentile truncation"
         )
 
-    minEnergy : FloatProperty(
+    minEnergy = FloatProperty(
         name="Minimum energy", default = 0,
         description="Lower bound for plotting/thresholding energy"
         )
 
-    maxEnergy : FloatProperty(
+    maxEnergy = FloatProperty(
         name="Maximum energy", default = 100,
         description="Maximum bound for plotting/thresholding energy"
         )
 
-    curveIter : IntProperty(
+    curveIter = IntProperty(
         name="Smooth Curvature Iterations", min=0, default = 5,
         description="How many iterations of curvature smoothing?"
         )
 
-    curvePercentile : BoolProperty(
+    curvePercentile = BoolProperty(
         name="Use Percentiles", default = True,
         description="Treat min and max as percentiles?"
         )
 
-    showplots : BoolProperty(
+    showplots = BoolProperty(
         name="Show plot", default=False,
         description="Display the plots"
         )
 
-    saveplots : BoolProperty(
+    saveplots = BoolProperty(
         name="Save plots", default=False,
         description="Save the generated plots"
         )
 
 
-    mixpoint : FloatProperty(
+    mixpoint = FloatProperty(
         name = "Color mixing point", default = 0.5, min=0, max=1,
         description="Value for color mixing"
         )
 
     if mpl_found:
 
-        colormap : EnumProperty(
+        colormap = EnumProperty(
             name = "Colormap colors",
             description="Colormap to use",
             items = colormapEnums,
@@ -627,3 +627,13 @@ classes = [
     GAMER_OT_k1_curvature,
     GAMER_OT_k2_curvature,
     MeshQualityReportProperties]
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))

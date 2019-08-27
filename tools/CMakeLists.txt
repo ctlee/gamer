@@ -71,7 +71,8 @@ endif()
 #####################################################################
 # Stage files for Blender plugin packaging
 #####################################################################
-set(BLENDGAMER_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}/tools/blendgamer/${BLENDER_VERSION_MAJOR}.${BLENDER_VERSION_MINOR}")
+# set(BLENDGAMER_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}/tools/blendgamer/${BLENDER_VERSION_MAJOR}.${BLENDER_VERSION_MINOR}")
+set(BLENDGAMER_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}/tools/blendgamer/src")
 
 add_custom_target(stage_files
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pygamer> ${CMAKE_BINARY_DIR}/plugin/blendgamer/
@@ -101,6 +102,9 @@ if(VERSION_INFO)
         string(CONCAT _ZIPNAME ${_ZIPNAME} "${VERSION_DIRTY}-")
     endif()
 endif()
+
+string(CONCAT _ZIPNAME ${_ZIPNAME} "b${BLENDER_VERSION_MAJOR}.${BLENDER_VERSION_MINOR}-")
+
 string(CONCAT _ZIPNAME ${_ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -117,7 +121,6 @@ else()
     endif()
 endif()
 
-string(CONCAT _ZIPNAME ${_ZIPNAME} "")
 string(CONCAT _ZIPNAME ${_ZIPNAME} ".zip")
 
 # Configure the Blender addon metadata

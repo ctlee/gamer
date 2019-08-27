@@ -23,17 +23,24 @@ import bpy
 import bmesh
 
 import blendgamer.report as report
-from blendgamer.util import UNSETMARKER
+from blendgamer.util import UNSETMARKER, make_annotations
 
 if bpy.app.version < (2,80,0):
-    Region = "TOOLS"
+    REGION = "TOOLS"
+    BULB_ICON = 'LAMP'
+    ADD_ICON = 'ZOOMIN'
+    REMOVE_ICON = 'ZOOMOUT'
 else:
-    Region = "UI"
+    REGION = "UI"
+    BULB_ICON = 'LIGHT'
+    ADD_ICON = 'ADD'
+    REMOVE_ICON = 'REMOVE'
+
 
 class GAMER_PT_versionerror(bpy.types.Panel):
     bl_label = "GAMer Version Mismatch"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = Region
+    bl_region_type = REGION
     bl_category = "GAMer"
 
     @classmethod
@@ -60,7 +67,7 @@ class GAMER_PT_versionerror(bpy.types.Panel):
 class GAMER_PT_surfacemesh(bpy.types.Panel):
     bl_label = "Surface Mesh Conditioning"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = Region
+    bl_region_type = REGION
     bl_category = "GAMer"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -74,6 +81,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+
         smprops = context.scene.gamer.surfmesh_procs
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
@@ -89,43 +97,70 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
 
             col = layout.column()
             col.label(text="Global mesh operations:")
-            col.operator("gamer.normal_smooth", icon='SMOOTHCURVE')
-            col.operator("gamer.fill_holes", icon='BLANK1')
-            # col.operator("gamer.refine_mesh", icon='OUTLINER_OB_LATTICE')
+            col.operator("gamer.normal_smooth")
+            col.operator("gamer.fill_holes")
 
             if active_obj.mode == 'EDIT':
-                col = layout.column(align=True)
+                col = layout.column()
                 col.label(text="Local operations (applied to selection only): ")
+
+                col = layout.column(align=True)
+                col.operator("gamer.coarse_dense")
                 rowsub = col.row(align=True)
-                rowsub.operator("gamer.coarse_dense",icon='OUTLINER_OB_LATTICE')
                 rowsub.prop(smprops, "dense_rate")
                 rowsub.prop(smprops, "dense_iter")
+
+
+                col = layout.column(align=True)
+                col.operator("gamer.coarse_flat")
                 rowsub = col.row(align=True)
-                rowsub.operator("gamer.coarse_flat",icon='MOD_TRIANGULATE')
                 rowsub.prop(smprops, "flat_rate")
                 rowsub.prop(smprops, "flat_iter")
 
-                row = layout.row(align = True)
-                row.operator("gamer.smooth", icon='OUTLINER_OB_MESH')
-                row.prop(smprops, "smooth_iter")
-                row.prop(smprops, "preserve_ridges", expand=True)
+
+                col = layout.column(align=True)
+                col.operator("gamer.smooth")
+                rowsub = col.row(align = True)
+                rowsub.prop(smprops, "smooth_iter")
+                rowsub.prop(smprops, "preserve_ridges", expand=True)
             else:
                 col = layout.column()
                 col.label(text="Change to Edit Mode to enable local improvement options", icon='INFO')
         else:
             layout.label(text="Select a mesh object to use GAMer mesh processing features", icon='HAND')
 
+# class GAMER_PT_advanced_options(bpy.types.Panel):
+#     bl_label = "Advanced Options"
+#     bl_parent_id = 'GAMER_PT_surfacemesh'
+#     bl_space_type = 'VIEW_3D'
+#     bl_region_type = REGION
+#     bl_category = "GAMer"
+#     bl_options = {'DEFAULT_CLOSED'}
+
+
+#     def draw(self, context):
+#         layout = self.layout
+
+#         smprops = context.scene.gamer.surfmesh_procs
+#         active_obj = context.active_object
+
+#         col = layout.column(align=True)
+#         col.prop(smprops, "autocorrect_normals")
+#         col.prop(smprops, "verbose")
+#         col.prop(smprops, "rings")
+
+
 class GAMER_PT_mesh_quality(bpy.types.Panel):
     bl_label = "Mesh Quality Reporting"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = Region
+    bl_region_type = REGION
     bl_category = "GAMer"
     bl_options = {'DEFAULT_CLOSED'}
 
     _type_to_icon = {
-    bmesh.types.BMVert: 'VERTEXSEL',
-    bmesh.types.BMEdge: 'EDGESEL',
-    bmesh.types.BMFace: 'FACESEL',
+        bmesh.types.BMVert: 'VERTEXSEL',
+        bmesh.types.BMEdge: 'EDGESEL',
+        bmesh.types.BMFace: 'FACESEL',
     }
 
     # Panel will be drawn if this returns True
@@ -221,7 +256,7 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 class GAMER_PT_boundary_marking(bpy.types.Panel):
     bl_label = "Boundary Marking"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = Region
+    bl_region_type = REGION
     bl_category = "GAMer"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -254,8 +289,8 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
                     type='DEFAULT'
                 )
             col = row.column(align=True)
-            col.operator("gamer.add_boundary", icon='ADD', text="")
-            col.operator("gamer.remove_boundary", icon='REMOVE', text="")
+            col.operator("gamer.add_boundary", icon=ADD_ICON, text="")
+            col.operator("gamer.remove_boundary", icon=REMOVE_ICON, text="")
             col.operator("gamer.remove_all_boundaries", icon='X', text="")
 
             # Could have boundary item draw itself in new row here:
@@ -312,10 +347,32 @@ class GAMER_UL_boundary_list(bpy.types.UIList):
         bnd_mat = [ mat for mat in mats if mat.gamer.boundary_id == item.boundary_id ][0]
         col.prop(bnd_mat, 'diffuse_color', text='')
 
+
+class GAMER_UL_domain(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        # The draw_item function is called for each item of the collection that is visible in the list.
+        #   data is the RNA object containing the collection,
+        #   item is the current drawn item of the collection,
+        #   icon is the "computed" icon for the item (as an integer, because some objects like materials or textures
+        #        have custom icons ID, which are not available as enum items).
+        #   active_data is the RNA object containing the active property for the collection (i.e. integer pointing to the
+        #        active item of the collection).
+        #   active_propname is the name of the active property (use 'getattr(active_data, active_propname)').
+        #   index is index of the current item in the collection.
+        #   flt_flag is the result of the filtering process for this item.
+        #   Note: as index and flt_flag are optional arguments, you do not have to use/declare them here if you don't
+        #         need them.
+
+        # The item will be a GAMerTetDomainPropertyGroup
+        # Let it draw itself in a new row:
+
+        item.draw_item_in_row(layout.row())
+
+
 class GAMER_PT_tetrahedralization(bpy.types.Panel):
     bl_label = "Tetrahedralization"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = Region
+    bl_region_type = REGION
     bl_category = "GAMer"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -327,12 +384,95 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
         self.layout.label(text="", icon='MESH_ICOSPHERE')
 
     def draw(self, context):
-        context.scene.gamer.tet_group.draw_layout(context, self.layout)
+        layout = self.layout
+
+        tetprops = context.scene.gamer.tet_group
+
+        row = layout.row()
+        row.label(text="Domains")
+
+        row = layout.row()
+        col = row.column()
+
+        col.template_list("GAMER_UL_domain", "",
+                          tetprops, "domain_list",
+                          tetprops, "active_domain_index",
+                          rows=2)
+
+        col = row.column(align=True)
+        col.operator("gamer.tet_domain_add", icon=ADD_ICON, text="")
+        col.operator("gamer.tet_domain_remove", icon=REMOVE_ICON, text="")
+        col.operator("gamer.tet_domain_remove_all", icon='X', text="")
+
+        if len(tetprops.domain_list) > 0:
+            domain = tetprops.domain_list[tetprops.active_domain_index]
+
+            # row = layout.row()
+            # row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
+
+            domain.draw_layout ( layout )
+
+            box = layout.box()
+            row = box.row(align=True)
+            row.alignment = 'LEFT'
+            if not tetprops.show_settings:
+                row.prop(tetprops, "show_settings", icon='TRIA_RIGHT', emboss=False)
+            else:
+                row.prop(tetprops, "show_settings", icon='TRIA_DOWN', emboss=False)
+
+                row = box.row()
+                row.prop(tetprops, "export_path")
+                row = box.row()
+                row.prop(tetprops, "export_filebase")
+
+                row = box.row()
+                col = row.column()
+                col.prop(tetprops, "min_dihedral")
+                col = row.column()
+                col.prop(tetprops, "max_aspect_ratio")
+
+                # row = box.row()
+                # row.prop ( self, "ho_mesh" )
+
+                row = box.row()
+                row.label(text="Output Formats:")
+
+                row = box.row()
+                sbox = row.box()
+
+                row = sbox.row()
+                col = row.column()
+                col.prop(tetprops, "dolfin")
+                col = row.column()
+                col.prop(tetprops, "paraview")
+
+            row = layout.row()
+            icon = 'PROP_OFF'
+            if tetprops.dolfin or tetprops.paraview:
+                icon = 'PROP_ON'
+            row.operator("gamer.tetrahedralize", text="Tetrahedralize", icon=icon)
+            if len(tetprops.status) > 0:
+                row = layout.row()
+                row.label(text=tetprops.status, icon="ERROR")
 
 
 classes = [GAMER_PT_versionerror,
            GAMER_PT_surfacemesh,
+           # GAMER_PT_advanced_options,
            GAMER_PT_mesh_quality,
            GAMER_PT_boundary_marking,
            GAMER_UL_boundary_list,
+           GAMER_UL_domain,
            GAMER_PT_tetrahedralization]
+
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))
+
