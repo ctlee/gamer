@@ -59,7 +59,7 @@ else:
 import bpy
 from bpy.props import PointerProperty
 
-
+# Tuple of modules to register
 modules = (markers,
            meshstats,
            surfacemesh_ops,
@@ -79,14 +79,6 @@ def remove_handler(handler_list, handler_function):
     if handler_function in handler_list:
         handler_list.remove(handler_function)
 
-
-
-# def menu_func_test(self, context):
-#     layout = self.layout
-#     layout.operator_context = "INVOKE_DEFAULT"
-#     layout.separator()
-#     layout.operator("gamer.smooth", text="FOOTEST")
-
 def register():
     for module in modules:
         module.register()
@@ -95,8 +87,6 @@ def register():
     types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)
     types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
     types.Material.gamer = PointerProperty(type=markers.GAMerBoundaryMaterial)
-
-    # bpy.types.VIEW3D_MT_edit_mesh_vertices.append(menu_func_test)
 
     # Add the load_post handlers
     add_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)

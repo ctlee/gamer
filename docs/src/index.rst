@@ -15,9 +15,9 @@ GAMer has the following main features:
 
 **Technical Features:**
 
-* Code is implemented in C++ and supports Python using a pybind11 wrapper (pygamer).
-* Cross system compilation using CMake and runs on Linux (64 bit), Windows (32 or 64 bit) or MacOS (64 bit).
-* Blender addon which enables easy access to GAMer features using the pygamer API.
+* Code is implemented in C++ and supports Python using a ``pybind11`` wrapper (pygamer).
+* Cross system compilation using ``CMake`` and runs on Linux (64 bit), Windows (32 or 64 bit) or MacOS (64 bit).
+* Blender addon which enables easy access to ``GAMer`` features using the ``PyGAMer`` API.
 * Uses the Colored Abstract Simplicial Complex data (`CASC <http://github.com/ctlee/casc/>`_) structure as the flexible underlying representation of surface and tetrahedral meshes.
 * Code is hosted at `GitHub <http://github.com/ctlee/gamer/>`_ under the Lesser GNU public license (LGPLv2). Please post issues or reports there.
 

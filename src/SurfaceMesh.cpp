@@ -481,7 +481,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 }
 
 
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings)
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t rings, bool verbose)
 {
     double maxMinAngle = 15;
     double minMaxAngle = 165;
@@ -611,7 +611,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
 }
 
 
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings)
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings, bool verbose)
 {
     // TODO: Check if all polygons are closed (0)
 
@@ -681,7 +681,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     }
 }
 
-void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings)
+void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings, bool verbose)
 {
     // Compute the average edge length
     REAL avgLen = 0;
@@ -731,7 +731,7 @@ void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t ri
     }
 }
 
-void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings){
+void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings, bool verbose){
     REAL flatnessRatio = 1;
 
     auto range = mesh.get_level_id<1>();

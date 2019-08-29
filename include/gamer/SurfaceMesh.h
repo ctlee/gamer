@@ -969,13 +969,13 @@ void centeralize(SurfaceMesh &mesh);
 /**
  * @brief      Smooth the surface mesh
  *
- * @param      mesh            The mesh
- * @param[in]  maxIter         The maximum iterator
- * @param[in]  preserveRidges  The preserve ridges
- * @param[in]  verbose         The verbose
+ * @param      mesh            SurfaceMesh of interest
+ * @param[in]  maxIter         Maximum number of iterations to run
+ * @param[in]  preserveRidges  Whether or not to preserve ridges
  * @param[in]  rings           Number of neighborhood rings to consider for LST
+ * @param[in]  verbose         Print additional information
  */
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbose, std::size_t rings = 2);
+void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Coarsens the mesh
@@ -986,7 +986,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, bool verbos
  * @param[in]  denseWeight  The dense weight
  * @param[in]  rings        Number of neighborhood rings to consider for LST
  */
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2);
+void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Coarsens the mesh by selecting vertices first.
@@ -996,7 +996,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
  * @param[in]  weight     The weight
  * @param[in]  rings      Number of neighborhood rings to consider for LST
  */
-void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2);
+void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Coarsens flat regions by LST analysis
@@ -1006,7 +1006,7 @@ void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t ri
  * @param[in]  weight     The weight
  * @param[in]  rings      Number of neighborhood rings to consider for LST
  */
-void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2);
+void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Perform smoothing of the mesh normals

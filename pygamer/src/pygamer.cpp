@@ -110,10 +110,12 @@ PYBIND11_MODULE(pygamer, pygamer) {
     pygamer.def("readPDB_molsurf", &readPDB_molsurf,
         py::arg("filename"),
         R"delim(
-            Read a pdb file into a mesh.
+            Read a PDB file into a mesh
 
             Args:
-                filename (str): PDB file to read.
+                filename (str): PDB file to read
+            Returns:
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
         )delim"
     );
 
@@ -122,14 +124,47 @@ PYBIND11_MODULE(pygamer, pygamer) {
         py::arg("blobbyness") = -0.2,
         py::arg("isovalue") = 2.5,
         R"delim(
-            Read a pdb file into a mesh.
+            Read a PDB file into a mesh
 
             Args:
                 filename (str): PDB file to read.
                 blobbyness (float): Blobbiness of the Gaussian
                 isovalue (float): The isocontour value to mesh
+            Returns:
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
         )delim"
     );
+
+
+    pygamer.def("readPQR_molsurf", &readPQR_molsurf,
+        py::arg("filename"),
+        R"delim(
+            Read a PQR file into a mesh
+
+            Args:
+                filename (str): PQR file to read
+            Returns:
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
+        )delim"
+    );
+
+
+    pygamer.def("readPQR_gauss", &readPQR_gauss,
+        py::arg("filename"),
+        py::arg("blobbyness") = -0.2,
+        py::arg("isovalue") = 2.5,
+        R"delim(
+            Read a PQR file into a mesh
+
+            Args:
+                filename (str): PQR file to read.
+                blobbyness (float): Blobbiness of the Gaussian
+                isovalue (float): The isocontour value to mesh
+            Returns:
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
+        )delim"
+    );
+
 
     pygamer.def("writeOFF", py::overload_cast<const std::string&, const SurfaceMesh&>(&writeOFF),
         py::arg("filename"), py::arg("mesh"),
@@ -163,7 +198,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Args:
                 filename (str): Filename to read from
             Returns:
-                :py:class:`surfacemesh.SurfaceMesh`: Mesh
+                :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest
         )delim"
     );
 
@@ -195,7 +230,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
     pygamer.def("writeDolfin", &writeDolfin,
         py::arg("filename"), py::arg("mesh"),
         R"delim(
-            Write mesh to file in Dolfin format
+            Write mesh to file in Dolfin XML format
 
             Args:
                 filename (str): Filename to write to
@@ -236,7 +271,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
                 filename (str): Filename to write to
 
             Returns:
-                :py:class:`TetMesh`: Tetrahedral mesh
+                :py:class:`tetmesh.TetMesh`: Tetrahedral mesh
         )delim"
     );
 
@@ -244,13 +279,13 @@ PYBIND11_MODULE(pygamer, pygamer) {
         py::call_guard<py::scoped_ostream_redirect,
                 py::scoped_estream_redirect>(),
         R"delim(
-            Call tetgen to make a TetMesh.
+            Call tetgen to make a TetMesh
 
             Args:
                 meshes (list): List of meshes with filled metadata
 
             Returns:
-                :py:class:`TetMesh`: resulting tetrahedral mesh
+                :py:class:`tetmesh.TetMesh`: Resulting tetrahedral mesh
         )delim"
     );
 
@@ -258,13 +293,26 @@ PYBIND11_MODULE(pygamer, pygamer) {
         [](){
             extern const std::string gVERSION;
             return gVERSION;
-        }
+        },
+        R"delim(
+            Get the full version of PyGAMer
+
+            Returns:
+                str: Long version of PyGAMer
+        )delim"
     );
+
     pygamer.def("getVersion",
-         [](){
+        [](){
             extern const std::string gVERSION_SHORT;
             return gVERSION_SHORT;
-        }
+        },
+        R"delim(
+            Get the short version of PyGAMer
+
+            Returns:
+                str: Short version of PyGAMer
+        )delim"
     );
 }
 

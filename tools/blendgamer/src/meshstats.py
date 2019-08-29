@@ -284,21 +284,23 @@ class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
     bl_label  = "MeshStats Check All"
     bl_description = "Check all"
 
-    check_cls = (
-        GAMER_OT_MeshStats_Info_Volume,
-        GAMER_OT_MeshStats_Info_Area,
-        GAMER_OT_MeshStats_Check_Wagonwheels,
-        GAMER_OT_MeshStats_Check_Sharp,
-        GAMER_OT_MeshStats_Check_Solid,
-        GAMER_OT_MeshStats_Check_Intersections,
-        GAMER_OT_MeshStats_Check_Degenerate,
-        )
-
     def execute(self, context):
         obj = context.active_object
         info = []
-        for cls in self.check_cls:
+
+        check_classes = (
+            GAMER_OT_MeshStats_Info_Volume,
+            GAMER_OT_MeshStats_Info_Area,
+            GAMER_OT_MeshStats_Check_Wagonwheels,
+            GAMER_OT_MeshStats_Check_Sharp,
+            GAMER_OT_MeshStats_Check_Solid,
+            GAMER_OT_MeshStats_Check_Intersections,
+            GAMER_OT_MeshStats_Check_Degenerate,
+        )
+
+        for cls in check_classes:
             cls.main_check(obj, info)
+
         report.update(*info)
         multiple_obj_warning(self, context)
         return {'FINISHED'}
@@ -485,7 +487,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def compute_curvatures(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                kh, kg, k1, k2 = gmesh.computeCurvatures(True, self.curveIter)
+                kh, kg, k1, k2 = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
@@ -524,8 +526,8 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def mean_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                curvatures = gmesh.meanCurvature(True, self.curveIter)
-                kh, _, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+                # curvatures = gmesh.meanCurvature(self.curveIter)
+                kh, _, _, _ = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
@@ -540,7 +542,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def gaussian_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                _, kg, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+                _, kg, _, _ = gmesh.computeCurvatures(self.curveIter)
                 dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="GaussianCurvature",
@@ -555,7 +557,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def k1_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                _, _, k1, _ = gmesh.computeCurvatures(True, self.curveIter)
+                _, _, k1, _ = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,

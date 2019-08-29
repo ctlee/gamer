@@ -1843,4 +1843,503 @@ int ExtractSAS(int atom_num, ATOM *atom_list)
     return total;
 }
 
+std::unique_ptr<SurfaceMesh> readPQR_molsurf(const std::string &input_name)
+{
+    int               i, j, k;
+    int               a, b, c, d;
+    float             orig[3], span[3];
+    int               dim[3];
+    int               m, n, l, num;
+    double            threshold;
+    double            nx, ny, nz;
+    int               xydim, xyzdim;
+    clock_t           begin, finish;
+    std::vector<Atom> atoms;
+    std::vector<ATOM> atom_list;
+    float             min[3], max[3];
+    SEEDS            *AllSeeds; // Border variable
+    MinHeapS         *min_heap;
+
+    // Read in the PQR file
+    readPQR(input_name, std::back_inserter(atoms));
+
+    for (auto atom : atoms)
+    {
+
+        ATOM new_atom;
+        new_atom.x = atom.pos[0];
+        new_atom.y = atom.pos[1];
+        new_atom.z = atom.pos[2];
+        new_atom.radius = atom.radius;
+
+        atom_list.push_back(new_atom);
+    }
+
+    getMinMax(atom_list.begin(), atom_list.end(), min, max);
+
+    GLOBAL_xdim = (int)(((max[0] - min[0]) + 1) * DIM_SCALE);
+    GLOBAL_ydim = (int)(((max[1] - min[1]) + 1) * DIM_SCALE);
+    GLOBAL_zdim = (int)(((max[2] - min[2]) + 1) * DIM_SCALE);
+    xydim  = GLOBAL_xdim * GLOBAL_ydim;
+    xyzdim = xydim * GLOBAL_zdim;
+
+    // printf("dimension: %d X %d X %d\n",xdim,ydim,zdim);
+
+    GLOBAL_atom_index = (int *)malloc(sizeof(int) * xyzdim);
+    GLOBAL_segment_index = (int *)malloc(sizeof(int) * xyzdim);
+
+    for (k = 0; k < xyzdim; k++)
+    {
+        GLOBAL_atom_index[k] = 0;
+    }
+
+    orig[0] = min[0];
+    orig[1] = min[1];
+    orig[2] = min[2];
+    span[0] = (max[0] - min[0]) / (double)(GLOBAL_xdim - 1);
+    span[1] = (max[1] - min[1]) / (double)(GLOBAL_ydim - 1);
+    span[2] = (max[2] - min[2]) / (double)(GLOBAL_zdim - 1);
+    dim[0]  = GLOBAL_xdim;
+    dim[1]  = GLOBAL_ydim;
+    dim[2]  = GLOBAL_zdim;
+
+    for (m = 0; m < atom_list.size(); m++)
+    {
+        atom_list[m].x = (atom_list[m].x - orig[0]) / span[0];
+        atom_list[m].y = (atom_list[m].y - orig[1]) / span[1];
+        atom_list[m].z = (atom_list[m].z - orig[2]) / span[2];
+        atom_list[m].radius = (atom_list[m].radius + 1.5) / ((span[0] + span[1] + span[2]) / 3.0);
+    }
+
+    begin  = clock();
+    num    = ExtractSAS(atom_list.size(), atom_list.data());
+    finish = clock();
+
+    // for(int q=0; q < GLOBAL_xdim; ++q){
+    //     for(int r=0; r < GLOBAL_ydim; ++r){
+    //         for(int s=0; s < GLOBAL_zdim; ++s){
+    //             std::cout << GLOBAL_atom_index[IndexVect(q,r,s)] <<
+    // std::endl;
+    //         }
+    //     }
+    // }
+
+    // printf("   Extract SAS voxels: CPU Time = %f seconds
+    // \n",(double)(finish-begin)/CLOCKS_PER_SEC);
+    // printf("   Number of boundary voxels: %d\n\n",num);
+
+
+    begin = clock();
+    threshold   = 1.5 / ((span[0] + span[1] + span[2]) / 3.0);
+    min_heap    = (MinHeapS *)malloc(sizeof(MinHeapS));
+    min_heap->x = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
+    min_heap->y = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
+    min_heap->z = (unsigned short *)malloc(sizeof(unsigned short) * num * 3);
+    min_heap->seed = (int *)malloc(sizeof(int) * num * 3);
+    min_heap->dist = (float *)malloc(sizeof(float) * num * 3);
+    AllSeeds = (SEEDS *)malloc(sizeof(SEEDS) * num);
+    ExtractSES(min_heap,
+               AllSeeds,
+               GLOBAL_segment_index,
+               GLOBAL_xdim,
+               GLOBAL_ydim,
+               GLOBAL_zdim,
+               GLOBAL_atom_index,
+               atom_list.size(),
+               atom_list.data(),
+               threshold * threshold);
+    finish = clock();
+
+    // printf("   Extract SES voxels: CPU Time = %f seconds
+    // \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
+
+
+    // detect and fix non-manifolds !
+    while (1)
+    {
+        b = 0;
+
+        int index = 0;
+
+        for (k = 0; k < GLOBAL_zdim; k++)
+        {
+            for (j = 0; j < GLOBAL_ydim; j++)
+            {
+                for (i = 0; i < GLOBAL_xdim; i++, ++index)
+                {
+                    if (GLOBAL_segment_index[index] == MaxVal)
+                    {
+                        if (!CheckManifold(i, j, k)) // non-manifold occurs
+                        {
+                            GLOBAL_segment_index[index] = 0;
+                            min_heap->x[min_heap->size] = i;
+                            min_heap->y[min_heap->size] = j;
+                            min_heap->z[min_heap->size] = k;
+                            min_heap->size++;
+                            b++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // printf("non-manifold = %d \n",b);
+        if (b == 0)
+        {
+            break;
+        }
+    }
+
+
+    // generate the surface mesh
+    GLOBAL_vertex = (MOL_VERTEX *)malloc(sizeof(MOL_VERTEX) * num * 8);
+    GLOBAL_quads  = (INT4VECT *)malloc(sizeof(INT4VECT) * num * 6);
+
+    for (k = 0; k < num * 8; k++)
+    {
+        GLOBAL_vertex[k].neigh = 0;
+    }
+
+    for (k = 0; k < xyzdim; k++)
+    {
+        GLOBAL_atom_index[k] = -1;
+    }
+    begin = clock();
+    GLOBAL_vert_num = 0;
+    GLOBAL_quad_num = 0;
+
+    for (num = 0; num < min_heap->size; num++)
+    {
+        i = min_heap->x[num];
+        j = min_heap->y[num];
+        k = min_heap->z[num];
+
+        // back face
+        if (GLOBAL_segment_index[IndexVect(i - 1, j, k)] == MaxVal)
+        {
+            a = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
+            GLOBAL_vertex[a].neigh |= 40; // +y and +z
+            b = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
+            GLOBAL_vertex[b].neigh |= 24; // +y and -z
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
+            GLOBAL_vertex[c].neigh |= 20; // -y and -z
+            d = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
+            GLOBAL_vertex[d].neigh |= 36; // -y and +z
+
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
+        }
+
+        // front face
+        if (GLOBAL_segment_index[IndexVect(i + 1, j, k)] == MaxVal)
+        {
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
+            GLOBAL_vertex[a].neigh |= 40; // +y and +z
+            b = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
+            GLOBAL_vertex[b].neigh |= 36; // -y and +z
+            c = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
+            GLOBAL_vertex[c].neigh |= 20; // -y and -z
+            d = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
+            GLOBAL_vertex[d].neigh |= 24; // +y and -z
+
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
+        }
+
+        // left face
+        if (GLOBAL_segment_index[IndexVect(i, j - 1, k)] == MaxVal)
+        {
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
+            GLOBAL_vertex[a].neigh |= 33; // -x and +z
+            b = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
+            GLOBAL_vertex[b].neigh |= 17; // -x and -z
+            c = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
+            GLOBAL_vertex[c].neigh |= 18; // +x and -z
+            d = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
+            GLOBAL_vertex[d].neigh |= 34; // +x and +z
+
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
+        }
+
+        // right face
+        if (GLOBAL_segment_index[IndexVect(i, j + 1, k)] == MaxVal)
+        {
+            a = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
+            GLOBAL_vertex[a].neigh |= 33; // -x and +z
+            b = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
+            GLOBAL_vertex[b].neigh |= 34; // +x and +z
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
+            GLOBAL_vertex[c].neigh |= 18; // +x and -z
+            d = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
+            GLOBAL_vertex[d].neigh |= 17; // -x and -z
+
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
+        }
+
+        // bottom face
+        if (GLOBAL_segment_index[IndexVect(i, j, k - 1)] == MaxVal)
+        {
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k - 0.5);
+            GLOBAL_vertex[a].neigh |= 9;  // -x and +y
+            b = CheckFaceCorner(i - 0.5, j - 0.5, k - 0.5);
+            GLOBAL_vertex[b].neigh |= 10; // +x and +y
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k - 0.5);
+            GLOBAL_vertex[c].neigh |= 6;  // +x and -y
+            d = CheckFaceCorner(i + 0.5, j + 0.5, k - 0.5);
+            GLOBAL_vertex[d].neigh |= 5;  // -x and -y
+
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
+        }
+
+        // top face
+        if (GLOBAL_segment_index[IndexVect(i, j, k + 1)] == MaxVal)
+        {
+            a = CheckFaceCorner(i + 0.5, j - 0.5, k + 0.5);
+            GLOBAL_vertex[a].neigh |= 9;  // -x and +y
+            b = CheckFaceCorner(i + 0.5, j + 0.5, k + 0.5);
+            GLOBAL_vertex[b].neigh |= 5;  // -x and -y
+            c = CheckFaceCorner(i - 0.5, j + 0.5, k + 0.5);
+            GLOBAL_vertex[c].neigh |= 6;  // +x and -y
+            d = CheckFaceCorner(i - 0.5, j - 0.5, k + 0.5);
+            GLOBAL_vertex[d].neigh |= 10; // +x and +y
+
+            GLOBAL_quads[GLOBAL_quad_num].a = a;
+            GLOBAL_quads[GLOBAL_quad_num].b = b;
+            GLOBAL_quads[GLOBAL_quad_num].c = c;
+            GLOBAL_quads[GLOBAL_quad_num].d = d;
+            GLOBAL_quad_num++;
+        }
+    }
+    finish = clock();
+
+    // printf("   Generate quad meshes: CPU Time = %f seconds
+    // \n",(double)(finish-begin)/CLOCKS_PER_SEC);
+    // printf("   vert-num : %d -- quad-num: %d \n\n",vert_num,GLOBAL_quad_num);
+
+
+    // Smooth the mesh
+    begin = clock();
+    unsigned char neighbor;
+
+    for (num = 0; num < 3; num++)
+    {
+        for (n = 0; n < GLOBAL_vert_num; n++)
+        {
+            nx = 0;
+            ny = 0;
+            nz = 0;
+            m  = 0;
+            neighbor = GLOBAL_vertex[n].neigh;
+
+            i = GLOBAL_vertex[n].px;
+            j = GLOBAL_vertex[n].py;
+            k = GLOBAL_vertex[n].pz;
+
+            if (neighbor & 1)
+            {
+                m++;
+                l   = GLOBAL_atom_index[IndexVect(i - 1, j, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
+            }
+
+            if (neighbor & 2)
+            {
+                m++;
+                l   = GLOBAL_atom_index[IndexVect(i + 1, j, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
+            }
+
+            if (neighbor & 4)
+            {
+                m++;
+                l   = GLOBAL_atom_index[IndexVect(i, j - 1, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
+            }
+
+            if (neighbor & 8)
+            {
+                m++;
+                l   = GLOBAL_atom_index[IndexVect(i, j + 1, k)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
+            }
+
+            if (neighbor & 16)
+            {
+                m++;
+                l   = GLOBAL_atom_index[IndexVect(i, j, k - 1)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
+            }
+
+            if (neighbor & 32)
+            {
+                m++;
+                l   = GLOBAL_atom_index[IndexVect(i, j, k + 1)];
+                nx += GLOBAL_vertex[l].x;
+                ny += GLOBAL_vertex[l].y;
+                nz += GLOBAL_vertex[l].z;
+            }
+
+            // update the position
+            GLOBAL_vertex[n].x = nx / (float)m;
+            GLOBAL_vertex[n].y = ny / (float)m;
+            GLOBAL_vertex[n].z = nz / (float)m;
+        }
+    }
+    finish = clock();
+
+    // printf("   Smooth the quad meshes: CPU Time = %f seconds
+    // \n\n",(double)(finish-begin)/CLOCKS_PER_SEC);
+
+    // Allocate memory
+    std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+
+    // write vertices
+    for (int i = 0; i < GLOBAL_vert_num; i++)
+    {
+        float x = GLOBAL_vertex[i].x * span[0] + orig[0];
+        float y = GLOBAL_vertex[i].y * span[1] + orig[1];
+        float z = GLOBAL_vertex[i].z * span[2] + orig[2];
+
+        mesh->insert<1>({i}, SMVertex({x, y, z}));
+    }
+
+    // write triangles
+    float angle, angle1, angle2;
+
+    for (i = 0; i < GLOBAL_quad_num; i++)
+    {
+        a = GLOBAL_quads[i].a;
+        b = GLOBAL_quads[i].b;
+        c = GLOBAL_quads[i].c;
+        d = GLOBAL_quads[i].d;
+
+        angle1 = -999.0;
+        angle2 = -999.0;
+        angle  = GetAngle(a, b, c);
+
+        if (angle > angle1)
+        {
+            angle1 = angle;
+        }
+        angle = GetAngle(a, d, c);
+
+        if (angle > angle1)
+        {
+            angle1 = angle;
+        }
+        angle = GetAngle(c, a, b);
+
+        if (angle > angle1)
+        {
+            angle1 = angle;
+        }
+        angle = GetAngle(c, a, d);
+
+        if (angle > angle1)
+        {
+            angle1 = angle;
+        }
+
+        angle = GetAngle(b, a, d);
+
+        if (angle > angle2)
+        {
+            angle2 = angle;
+        }
+        angle = GetAngle(b, c, d);
+
+        if (angle > angle2)
+        {
+            angle2 = angle;
+        }
+        angle = GetAngle(d, a, b);
+
+        if (angle > angle2)
+        {
+            angle2 = angle;
+        }
+        angle = GetAngle(d, b, c);
+
+        if (angle > angle2)
+        {
+            angle2 = angle;
+        }
+
+        if (angle1 <= angle2)
+        {
+            mesh->insert<3>({a, b, c});
+            mesh->insert<3>({a, c, d});
+        }
+        else
+        {
+            mesh->insert<3>({a, b, d});
+            mesh->insert<3>({b, c, d});
+        }
+    }
+
+    /* write to disk
+       FILE *fout;
+       if ((fout=fopen("output1.off", "wb"))==NULL){
+       printf("write error...\n");
+       exit(0);
+       };
+
+       fprintf(fout, "OFF\n");
+       fprintf(fout, "%d %d
+          %d\n",GLOBAL_vert_num,quad_num*2,GLOBAL_vert_num+quad_num*2-2);
+       for (i = 0; i < GLOBAL_vert_num; i++)
+       fprintf(fout, "%f %f %f
+          \n",surfmesh->vertex[i].x,surfmesh->vertex[i].y,surfmesh->vertex[i].z);
+
+       for (i = 0; i < quad_num*2; i++) {
+       fprintf(fout, "3 %d %d
+          %d\n",surfmesh->face[i].a,surfmesh->face[i].b,surfmesh->face[i].c);
+       }
+       fclose(fout);
+     */
+
+    free(AllSeeds);
+    free(GLOBAL_segment_index);
+    free(GLOBAL_atom_index);
+    free(min_heap->x);
+    free(min_heap->y);
+    free(min_heap->z);
+    free(min_heap->seed);
+    free(min_heap->dist);
+    free(min_heap);
+    free(GLOBAL_vertex);
+    free(GLOBAL_quads);
+
+    compute_orientation(*mesh);
+    return mesh;
+}
+
 } // end namespace gamer

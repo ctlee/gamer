@@ -41,15 +41,6 @@
 namespace gamer
 {
 
-/**
- * @brief      WIP. Compute the Connolly surface using a distance grid based
- *             strategy
- *
- * @param[in]  filename  The filename
- * @param[in]  radius    The radius
- *
- * @return     { description_of_the_return_value }
- */
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string &filename, const float radius)
 {
     std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);

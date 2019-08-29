@@ -14,7 +14,7 @@ namespace py = pybind11;
 void init_Vector(py::module& mod){
     py::class_<Vector> vector(mod, "Vector", py::buffer_protocol(),
         R"delim(
-            Wrapper around a Vector`
+            Wrapper around a :cpp:type:`Vector`
         )delim"
     );
 

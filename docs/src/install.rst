@@ -7,7 +7,7 @@ If you are an experienced C++ developer and wish to link to ``libGAMer`` start a
 For other users, many of the functions and types provided by GAMer can be accessed through the Python API wrapper (``PyGAMer``) or can be called through an interactive Blender plugin (``BlendGAMer``).
 Check out the :ref:`Getting PyGAMer` and :ref:`Getting BlendGAMer` sections for details on how to install these tools on your system.
 
-.. contents::
+.. contents:: Skip to a Section
    :local:
 
 .. _Prerequisites:
@@ -356,22 +356,26 @@ Fist download the ``get-pip.py`` file from the `pip documentation <https://pip.p
 Execute this script using the bundled ``Python`` from ``Blender``.
 
 .. code-block:: sh
+
    python get-pip.py
 
 The bundled ``Python`` can be found at
 
 .. code-block:: sh
+
    {path to blender}/2.xx/python/bin/python
 
 for Linux and Windows and at
 
 .. code-block:: sh
+
    /blender.app/Contents/Resources/2.79/python/bin
 
 for Mac platforms.
 Now that ``pip`` is installed you can use it to install ``matplotlib``:
 
 .. code-block:: sh
+
    /path/to/blenderspython/pip install matplotlib
 
 ``matplotlib`` should now be installed.

@@ -24,17 +24,21 @@ import bmesh
 
 import blendgamer.report as report
 from blendgamer.util import UNSETMARKER, make_annotations
+import blendgamer.pygamer as pygamer
+
 
 if bpy.app.version < (2,80,0):
     REGION = "TOOLS"
     BULB_ICON = 'LAMP'
     ADD_ICON = 'ZOOMIN'
     REMOVE_ICON = 'ZOOMOUT'
+    LOVE_ICON = 'COLOR_RED'
 else:
     REGION = "UI"
     BULB_ICON = 'LIGHT'
     ADD_ICON = 'ADD'
     REMOVE_ICON = 'REMOVE'
+    LOVE_ICON = 'FUND'
 
 
 class GAMER_PT_versionerror(bpy.types.Panel):
@@ -456,6 +460,27 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
                 row.label(text=tetprops.status, icon="ERROR")
 
 
+class GAMER_PT_version(bpy.types.Panel):
+    bl_label = "BlendGAMer Info"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = REGION
+    bl_category = "GAMer"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return (context.scene is not None)
+
+    def draw_header(self, context):
+        self.layout.label(text="", icon=LOVE_ICON)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.alert = True
+
+        layout.label(text="BlendGAMer %s"%(pygamer.__version__()))
+        layout.operator("wm.url_open", text="How to Acknowledge").url = "https://gamer.readthedocs.io/en/latest/#acknowleding-the-use-of-gamer-in-your-work"
+
 classes = [GAMER_PT_versionerror,
            GAMER_PT_surfacemesh,
            # GAMER_PT_advanced_options,
@@ -463,7 +488,8 @@ classes = [GAMER_PT_versionerror,
            GAMER_PT_boundary_marking,
            GAMER_UL_boundary_list,
            GAMER_UL_domain,
-           GAMER_PT_tetrahedralization]
+           GAMER_PT_tetrahedralization,
+           GAMER_PT_version]
 
 
 def register():

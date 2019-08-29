@@ -105,50 +105,46 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
-# class GAMER_OT_refine_mesh(bpy.types.Operator):
-#     bl_idname = "gamer.refine_mesh"
-#     bl_label = "Quadrisect mesh"
-#     bl_description = "Refine the mesh by quadisction"
-#     bl_options = {'REGISTER', 'UNDO'}
-
-#     def execute(self, context):
-#         if context.scene.gamer.surfmesh_procs.refine_mesh(context, self.report):
-#             self.report({'INFO'}, "GAMer: Refine Mesh complete")
-#             return {'FINISHED'}
-#         else:
-#             return {'CANCELLED'}
 
 class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     dense_rate      = FloatProperty(
-        name="CD_Rate", default=1, min=0.001, max=50.0, precision=4,
-        description="The rate for coarsening dense areas")
+        name="Thresh", default=1, min=0.001, max=50.0, precision=4,
+        description="Threshold for coarsening dense areas")
+
     dense_iter      = IntProperty(
-        name="CD_Iter", default=1, min=1, max=15,
-        description="The number of iterations for coarsening dense areas")
+        name="Iter", default=1, min=1, max=15,
+        description="The number of coarse dense iterations to apply")
+
     flat_rate       = FloatProperty(
-        name="CF_Rate", default=0.016, min=0.00001, max=0.5, precision=4,
+        name="Threshold", default=0.016, min=0.00001, max=0.5, precision=4,
         description="The rate for coarsening flat areas")
+
     flat_iter       = IntProperty(
-        name="CF_Iter", default=1, min=1, max=15,
-        description="The number of iterations for coarsening flat areas")
+        name="Iter", default=1, min=1, max=15,
+        description="The number of coarse flat iterations to apply")
+
     smooth_iter     = IntProperty(
-        name="S_Iter", default=10, min=1, max=50,
-        description="The number of iterations for coarsening dense areas")
+        name="Iter", default=10, min=1, max=50,
+        description="The number smoothing iterations to apply")
+
     preserve_ridges = BoolProperty(
         name="Preserve ridges", default=False,
-        description="Don't flip edges which lie on ridges")
+        description="Skip flipping of edges which lie on ridges")
+
     advanced_options = BoolProperty(
         name="Advanced options", default=False,
         description="Show additional surface mesh improvement options")
+
     autocorrect_normals = BoolProperty(
         name="Autocorrect normals", default=True,
-        description="Auto fix inconsistent normals")
+        description="Automatically flip normals when mesh volume is 'negative'")
+
     verbose         = BoolProperty(name="Verbose", default=False,
-        description="Print information to console")
+        description="Print additional information to console")
+
     rings           = IntProperty(
         name="LST rings", default=2, min=1, max=5,
-        description="The number of neighborhood rings to consider for LST calculation"
-        )
+        description="The number of neighborhood rings to consider for LST calculation")
 
     def coarse_dense(self, context, report):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
