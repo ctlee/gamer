@@ -41,7 +41,7 @@ void init_SMSimplexID(py::module& mod){
     // Bindings for SMVertexID
     py::class_<SMVertexID> vid(mod, "VertexID",
         R"delim(
-            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<1> object.
+            Wrapper around :cpp:type:`gamer::SurfaceMesh`::SimplexID<1> object.
 
             This is a token to represent a 1-simplex object. It serves as a
             reference to the actual object.
@@ -108,7 +108,7 @@ void init_SMSimplexID(py::module& mod){
     // Bindings for SMEdgeID
     py::class_<SMEdgeID> eid(mod, "EdgeID",
         R"delim(
-            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<2> object
+            Wrapper around :cpp:type:`gamer::SurfaceMesh`::SimplexID<2> object
 
             This is a token to represent a 2-simplex object. It serves as a
             reference to the actual object.
@@ -171,7 +171,7 @@ void init_SMSimplexID(py::module& mod){
     // Bindings for SMFaceID
     py::class_<SMFaceID> fid(mod, "FaceID",
         R"delim(
-            Wrapper around :cpp:type:`SurfaceMesh`::SimplexID<3> object
+            Wrapper around :cpp:type:`gamer::SurfaceMesh`::SimplexID<3> object
 
             This is a token to represent a 3-simplex object. It serves as a
             reference to the actual object.

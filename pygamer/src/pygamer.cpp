@@ -100,7 +100,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read OFF file to mesh
 
             Args:
-                filename (str): Filename to read from
+                filename (:py:class:`str`): Filename to read from
             Returns:
                 :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest
         )delim"
@@ -113,7 +113,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read a PDB file into a mesh
 
             Args:
-                filename (str): PDB file to read
+                filename (:py:class:`str`): PDB file to read
             Returns:
                 :py:class:`surfacemesh.SurfaceMesh`: Meshed object
         )delim"
@@ -127,9 +127,9 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read a PDB file into a mesh
 
             Args:
-                filename (str): PDB file to read.
-                blobbyness (float): Blobbiness of the Gaussian
-                isovalue (float): The isocontour value to mesh
+                filename (:py:class:`str`): PDB file to read.
+                blobbyness (:py:class:`float`): Blobbiness of the Gaussian
+                isovalue (:py:class:`float`): The isocontour value to mesh
             Returns:
                 :py:class:`surfacemesh.SurfaceMesh`: Meshed object
         )delim"
@@ -142,7 +142,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read a PQR file into a mesh
 
             Args:
-                filename (str): PQR file to read
+                filename (:py:class:`str`): PQR file to read
             Returns:
                 :py:class:`surfacemesh.SurfaceMesh`: Meshed object
         )delim"
@@ -157,9 +157,9 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read a PQR file into a mesh
 
             Args:
-                filename (str): PQR file to read.
-                blobbyness (float): Blobbiness of the Gaussian
-                isovalue (float): The isocontour value to mesh
+                filename (:py:class:`str`): PQR file to read.
+                blobbyness (:py:class:`float`): Blobbiness of the Gaussian
+                isovalue (:py:class:`float`): The isocontour value to mesh
             Returns:
                 :py:class:`surfacemesh.SurfaceMesh`: Meshed object
         )delim"
@@ -172,7 +172,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in OFF format
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
         )delim"
     );
@@ -184,7 +184,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in OFF format
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
         )delim"
     );
@@ -196,7 +196,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read OBJ file to mesh
 
             Args:
-                filename (str): Filename to read from
+                filename (:py:class:`str`): Filename to read from
             Returns:
                 :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest
         )delim"
@@ -209,7 +209,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in OBJ format
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
         )delim"
     );
@@ -221,7 +221,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in VTK format
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
         )delim"
     );
@@ -233,7 +233,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in Dolfin XML format
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
         )delim"
     );
@@ -245,7 +245,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in Triangle format
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
         )delim"
     );
@@ -256,7 +256,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Print mesh quality info to file
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
                 mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
         )delim"
     );
@@ -268,7 +268,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read Dolfin format mesh into mesh
 
             Args:
-                filename (str): Filename to write to
+                filename (:py:class:`str`): Filename to write to
 
             Returns:
                 :py:class:`tetmesh.TetMesh`: Tetrahedral mesh
@@ -282,7 +282,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Call tetgen to make a TetMesh
 
             Args:
-                meshes (list): List of meshes with filled metadata
+                meshes (:py:class:`list`(:py:class:`surfacemesh.SurfaceMesh`): List of meshes with filled metadata
 
             Returns:
                 :py:class:`tetmesh.TetMesh`: Resulting tetrahedral mesh
@@ -298,7 +298,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Get the full version of PyGAMer
 
             Returns:
-                str: Long version of PyGAMer
+                :py:class:`str`: Long version of PyGAMer
         )delim"
     );
 
@@ -311,7 +311,7 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Get the short version of PyGAMer
 
             Returns:
-                str: Short version of PyGAMer
+                :py:class:`str`: Short version of PyGAMer
         )delim"
     );
 }

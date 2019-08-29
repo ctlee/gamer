@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.4'
-release = 'v2.0.4-dev-12-gff3dfae.dirty'
+release = 'v2.0.4-dev-14-g906bd34.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -151,4 +151,5 @@ html_context = {
 ##############################
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/3/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy', None)}

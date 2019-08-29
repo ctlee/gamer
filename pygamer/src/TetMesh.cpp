@@ -38,7 +38,7 @@ void init_TetMesh(py::module& mod){
     // Bindings for TetMesh
     py::class_<TetMesh> TetMeshCls(mod, "TetMesh",
         R"delim(
-            Python wrapper around a :cpp:type:`TetMesh`.
+            Python wrapper around a :cpp:type:`gamer::TetMesh`.
         )delim"
     );
     TetMeshCls.def(py::init<>(), "Default constructor.");

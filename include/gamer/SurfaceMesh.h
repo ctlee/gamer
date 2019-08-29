@@ -985,6 +985,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
  * @param[in]  flatRate     The flat rate
  * @param[in]  denseWeight  The dense weight
  * @param[in]  rings        Number of neighborhood rings to consider for LST
+ * @param[in]  verbose    Print additional info
  */
 void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2, bool verbose = false);
 
@@ -995,6 +996,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
  * @param[in]  threshold  The threshold
  * @param[in]  weight     The weight
  * @param[in]  rings      Number of neighborhood rings to consider for LST
+ * @param[in]  verbose    Print additional info
  */
 void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
 
@@ -1005,6 +1007,7 @@ void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t ri
  * @param[in]  threshold  The threshold
  * @param[in]  weight     The weight
  * @param[in]  rings      Number of neighborhood rings to consider for LST
+ * @param[in]  verbose    Print additional info
  */
 void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
 
