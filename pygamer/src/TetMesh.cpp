@@ -62,8 +62,8 @@ void init_TetMesh(py::module& mod){
             Inserts a vertex and data based on key.
 
             Args:
-                key (list): Array [1] of vertex key.
-                data (tetmesh.Vertex): Vertex data.
+                key (:py:class:`list`): Array [1] of vertex key.
+                data (:py:class:`Vertex`): Vertex data.
         )delim"
     );
 
@@ -75,7 +75,7 @@ void init_TetMesh(py::module& mod){
             Insert an edge into the mesh.
 
             Args:
-                key (list): Array [2] of edge key.
+                key (:py:class:`list`): Array [2] of edge key.
                 data (tetmesh.Edge): Edge data.
         )delim"
     );
@@ -88,7 +88,7 @@ void init_TetMesh(py::module& mod){
             Insert a face into the mesh.
 
             Args:
-                key (list): Array [3] of face key.
+                key (:py:class:`list`): Array [3] of face key.
                 data (tetmesh.Face): Face data.
         )delim"
     );
@@ -101,7 +101,7 @@ void init_TetMesh(py::module& mod){
             Insert a face into the mesh.
 
             Args:
-                key (list): Array [4] of cell key.
+                key (:py:class:`list`): Array [4] of cell key.
                 data (Cell): Cell data.
         )delim"
     );
@@ -114,7 +114,7 @@ void init_TetMesh(py::module& mod){
             Remove a vertex from the mesh.
 
             Args:
-                key (list): Array [1] of vertex key.
+                key (:py:class:`list`): Array [1] of vertex key.
 
             Returns:
                 removed (int): Number of simplices removed
@@ -144,7 +144,7 @@ void init_TetMesh(py::module& mod){
             Remove an edge from the mesh.
 
             Args:
-                key (list): Array [2] of edge key.
+                key (:py:class:`list`): Array [2] of edge key.
 
             Returns:
                 removed (int): Number of simplices removed
@@ -174,7 +174,7 @@ void init_TetMesh(py::module& mod){
             Remove a face from the mesh.
 
             Args:
-                key (list): Array [3] of face key.
+                key (:py:class:`list`): Array [3] of face key.
 
             Returns:
                 removed (int): Number of simplices removed
@@ -204,7 +204,7 @@ void init_TetMesh(py::module& mod){
             Remove a cell from the mesh.
 
             Args:
-                key (list): Array [3] of cell key.
+                key (:py:class:`list`): Array [3] of cell key.
 
             Returns:
                 removed (int): Number of simplices removed
@@ -238,10 +238,10 @@ void init_TetMesh(py::module& mod){
             Get a simplex by key.
 
             Args:
-                key (list): Array [1] of vertex key.
+                key (:py:class:`list`): Array [1] of vertex key.
 
             Returns:
-                SimplexID (:py:class:`VertexID`): The object.
+                :py:class:`VertexID`: The object.
         )delim"
     );
 
@@ -251,10 +251,10 @@ void init_TetMesh(py::module& mod){
             Get a simplex by key.
 
             Args:
-                key (list): Array [2] of edge key.
+                key (:py:class:`list`): Array [2] of edge key.
 
             Returns:
-                SimplexID (:py:class:`EdgeID`): The object.
+                :py:class:`EdgeID`: The object.
         )delim"
     );
 
@@ -264,10 +264,10 @@ void init_TetMesh(py::module& mod){
             Get a simplex by key.
 
             Args:
-                key (list): Array [3] of vertex key.
+                key (:py:class:`list`): Array [3] of vertex key.
 
             Returns:
-                SimplexID (:py:class:`FaceID`): The object.
+                :py:class:`FaceID`: The object.
         )delim"
     );
 
@@ -278,10 +278,10 @@ void init_TetMesh(py::module& mod){
             Get a simplex by key.
 
             Args:
-                key (list): Array [4] of vertex key.
+                key (:py:class:`list`): Array [4] of vertex key.
 
             Returns:
-                SimplexID (:py:class:`CellID`): The object.
+                :py:class:`CellID`: The object.
         )delim"
     );
 
@@ -295,7 +295,7 @@ void init_TetMesh(py::module& mod){
             Get the global metadata.
 
             Returns:
-                data (:py:class:`Global`): Global mesh metadata.
+                :py:class:`Global`: Global mesh metadata.
         )delim"
     );
 
@@ -309,10 +309,10 @@ void init_TetMesh(py::module& mod){
             Get the name of the vertex
 
             Args:
-                SimplexID  (:py:class`VertexID`): VertexID to get the name of.
+                SimplexID  (:py:class:`VertexID`): VertexID to get the name of.
 
             Returns:
-                key (list): Name of the vertex.
+                :py:class:`list`: Name of the vertex.
         )delim"
     );
 
@@ -320,13 +320,13 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("getName",
         py::overload_cast<TetMesh::SimplexID<2>>(&TetMesh::get_name<2>, py::const_),
         R"delim(
-            Get the name of the edge
+            Get the name of the edge.
 
             Args:
-                SimplexID  (:py:class`EdgeID`): EdgeID to get the name of.
+                SimplexID  (:py:class:`EdgeID`): EdgeID to get the name of.
 
             Returns:
-                key (list): List of vertex indices which make up the edge.
+                :py:class:`list`: List of vertex indices which make up the edge.
         )delim"
     );
 
@@ -334,13 +334,13 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("getName",
         py::overload_cast<TetMesh::SimplexID<3>>(&TetMesh::get_name<3>, py::const_),
         R"delim(
-            Get the name of the vertex
+            Get the name of the face.
 
             Args:
-                SimplexID  (:py:class`FaceID`): FaceID to get the name of.
+                SimplexID  (:py:class:`FaceID`): FaceID to get the name of.
 
             Returns:
-                key (list): List of vertex indices which make up the face.
+                :py:class:`list`: List of vertex indices which make up the face.
         )delim"
     );
 
@@ -348,13 +348,13 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("getName",
         py::overload_cast<TetMesh::SimplexID<4>>(&TetMesh::get_name<4>, py::const_),
         R"delim(
-            Get the name of the vertex
+            Get the name of the cell.
 
             Args:
-                SimplexID  (:py:class`CellID`): CellID to get the name of.
+                SimplexID  (:py:class:`CellID`): CellID to get the name of.
 
             Returns:
-                key (list): List of vertex indices which make up the cell.
+                :py:class:`list`: List of vertex indices which make up the cell.
         )delim"
     );
 
@@ -365,6 +365,9 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<>(&TetMesh::size<1>, py::const_),
         R"delim(
             Get the number of vertices.
+
+            Returns:
+                :py:class:`int`: Number of vertices.
         )delim"
     );
 
@@ -373,6 +376,9 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<>(&TetMesh::size<2>, py::const_),
         R"delim(
             Get the number of edges.
+
+            Return:
+                :py:class:`int`: Number of edges.
         )delim"
     );
 
@@ -381,6 +387,9 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<>(&TetMesh::size<3>, py::const_),
         R"delim(
             Get the number of faces.
+
+            Return:
+                :py:class:`int`: Number of faces.
         )delim"
     );
 
@@ -389,6 +398,9 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<>(&TetMesh::size<4>, py::const_),
         R"delim(
             Get the number of cells.
+
+            Return:
+                :py:class:`int`: Number of cells.
         )delim"
     );
 
@@ -398,7 +410,7 @@ void init_TetMesh(py::module& mod){
             Check if a vertex is on a boundary
 
             Returns:
-                bool: True if vertex is a member of a face on a boundary.
+                :py:class:`bool`: True if vertex is a member of a face on a boundary.
         )delim"
     );
 
@@ -409,7 +421,7 @@ void init_TetMesh(py::module& mod){
             Check if an edge is on a boundary
 
             Returns:
-                bool: True if edge is a member of a face on a boundary.
+                :py:class:`bool`: True if edge is a member of a face on a boundary.
         )delim"
     );
 
@@ -419,7 +431,7 @@ void init_TetMesh(py::module& mod){
             Check if a face is on a boundary
 
             Returns:
-                bool: True if face is on a boundary.
+                :py:class:`bool`: True if face is on a boundary.
         )delim"
     );
 
@@ -429,7 +441,7 @@ void init_TetMesh(py::module& mod){
             Check if a cell is on a boundary
 
             Returns:
-                bool: True if cell has a face on a boundary.
+                :py:class:`bool`: True if cell has a face on a boundary.
         )delim"
     );
 
@@ -439,7 +451,7 @@ void init_TetMesh(py::module& mod){
             Check if a vertex is near a boundary.
 
             Returns:
-                bool: True if vertex touches a boundary
+                :py:class:`bool`: True if vertex touches a boundary
         )delim"
     );
 
@@ -449,7 +461,7 @@ void init_TetMesh(py::module& mod){
             Check if an edge is on a boundary
 
             Returns:
-                bool: True if edge touches a boundary
+                :py:class:`bool`: True if edge touches a boundary
         )delim"
     );
 
@@ -459,7 +471,7 @@ void init_TetMesh(py::module& mod){
             Check if a face is on a boundary
 
             Returns:
-                bool: True if face touches a boundary
+                :py:class:`bool`: True if face touches a boundary
         )delim"
     );
 
@@ -469,7 +481,7 @@ void init_TetMesh(py::module& mod){
             Check if a cell is on a boundary
 
             Returns:
-                bool: True if cell touches a boundary
+                :py:class:`bool`: True if cell touches a boundary
         )delim"
     );
 
@@ -482,7 +494,7 @@ void init_TetMesh(py::module& mod){
                 tetmesh (TetMesh): Tetrahedral mesh to extract from
 
             Returns:
-                SurfaceMesh: Surface mesh of surface
+                :py:class:`SurfaceMesh`: Surface mesh of surface
         )delim"
     );
 
@@ -497,6 +509,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(),
         R"delim(
             A convenience iterator over :py:class:`VertexID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`VertexID`.
         )delim"
     );
 
@@ -509,6 +524,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(), /* Essential: keep object alive while iterator exists */
         R"delim(
             Get an iterator over :py:class:`VertexID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`VertexID`.
         )delim"
     );
 
@@ -521,6 +539,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(),
         R"delim(
             A convenience iterator over :py:class:`EdgeID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`EdgeID`.
         )delim"
     );
 
@@ -533,6 +554,10 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(), /* Essential: keep object alive while iterator exists */
         R"delim(
             Get an iterator over :py:class:`EdgeID`.
+
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`EdgeID`.
         )delim"
     );
 
@@ -545,6 +570,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(),
         R"delim(
             An convenience iterator over :py:class:`FaceID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`FaceID`.
         )delim"
     );
 
@@ -557,6 +585,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(), /* Essential: keep object alive while iterator exists */
         R"delim(
             Get an iterator over :py:class:`FaceID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`FaceID`.
         )delim"
     );
 
@@ -569,6 +600,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(),
         R"delim(
             An convenience iterator over :py:class:`CellID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`CellID`.
         )delim"
     );
 
@@ -581,6 +615,9 @@ void init_TetMesh(py::module& mod){
         py::keep_alive<0, 1>(), /* Essential: keep object alive while iterator exists */
         R"delim(
             Get an iterator over :py:class:`CellID`.
+
+            Returns:
+                :ref:`Iterator <python:iterator-objects>`: An iterator over all :py:class:`CellID`.
         )delim"
     );
 
@@ -603,6 +640,9 @@ void init_TetMesh(py::module& mod){
 
             :py:func:`TetMesh.init_orientation` must be called before this
             function can operate.
+
+            Returns:
+                :py:class:`tuple` (:py:class:`int`, :py:class:`bool`, :py:class:`bool`): Tuple containing: number of connected components, orientability status, and manifoldness.
         )delim"
     );
 
@@ -619,6 +659,16 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<TetMesh&>(&casc::compute_orientation<TetMesh>),
         R"delim(
             Compute orientations of the mesh.
+
+            This is equivalent to the following series of calls:
+
+            >>> init_orientation(mesh)
+            >>> clear_orientation(mesh)
+            >>> check_orientation(mesh)
+
+
+            Returns:
+                :py:class:`tuple` (:py:class:`int`, :py:class:`bool`, :py:class:`bool`): Tuple containing: number of connected components, orientability status, and manifoldness.
         )delim"
     );
 }
