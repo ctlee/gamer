@@ -71,18 +71,24 @@ endif()
 #####################################################################
 # Stage files for Blender plugin packaging
 #####################################################################
+# set(BLENDGAMER_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}/tools/blendgamer/${BLENDER_VERSION_MAJOR}.${BLENDER_VERSION_MINOR}")
+set(BLENDGAMER_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}/tools/blendgamer/src")
+
 add_custom_target(stage_files
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pygamer> ${CMAKE_BINARY_DIR}/plugin/blendgamer/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/tools/blender_addon/src ${CMAKE_BINARY_DIR}/plugin/blendgamer/
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${BLENDGAMER_SOURCE_PREFIX} ${CMAKE_BINARY_DIR}/plugin/blendgamer/
+
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/blendgamer.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/tetrahedralization.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/markers.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/util.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/versions.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/surfacemesh_ops.py
-            ${CMAKE_SOURCE_DIR}/tools/blender_addon/src/ui.py
+
+    DEPENDS ${BLENDGAMER_SOURCE_PREFIX}/util.py
+            ${BLENDGAMER_SOURCE_PREFIX}/blendgamer.py
+            ${BLENDGAMER_SOURCE_PREFIX}/tetrahedralization.py
+            ${BLENDGAMER_SOURCE_PREFIX}/markers.py
+            ${BLENDGAMER_SOURCE_PREFIX}/util.py
+            ${BLENDGAMER_SOURCE_PREFIX}/versions.py
+            ${BLENDGAMER_SOURCE_PREFIX}/surfacemesh_ops.py
+            ${BLENDGAMER_SOURCE_PREFIX}/ui.py
     COMMENT "Staging the GAMer Blender addon files"
     VERBATIM
 )
@@ -96,6 +102,9 @@ if(VERSION_INFO)
         string(CONCAT _ZIPNAME ${_ZIPNAME} "${VERSION_DIRTY}-")
     endif()
 endif()
+
+string(CONCAT _ZIPNAME ${_ZIPNAME} "b${BLENDER_VERSION_MAJOR}.${BLENDER_VERSION_MINOR}-")
+
 string(CONCAT _ZIPNAME ${_ZIPNAME} "${CMAKE_HOST_SYSTEM_NAME}")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -111,10 +120,11 @@ else()
         string(CONCAT _ZIPNAME ${_ZIPNAME} "-i686")
     endif()
 endif()
+
 string(CONCAT _ZIPNAME ${_ZIPNAME} ".zip")
 
 # Configure the Blender addon metadata
-configure_file(${CMAKE_SOURCE_DIR}/tools/blender_addon/__init__.in
+configure_file(${CMAKE_SOURCE_DIR}/tools/blendgamer/__init__.py.in
             ${CMAKE_BINARY_DIR}/plugin/blendgamer/__init__.py @ONLY)
 
 # Target to zip up the plugin

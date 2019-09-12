@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/home/ctlee/gamer/gamer/buildpy37/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build/lib/'))
 
 import os
 import pygamer
@@ -25,8 +25,8 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.3'
-release = 'v2.0.3-dev-21-g2ecdc88.dirty'
+version = '2.0.4'
+release = 'v2.0.4-dev-15-gb0378e0.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -52,7 +52,7 @@ if(True):
 ##############################
 # Breathe Settings
 ##############################
-breathe_projects = { "gamer_project": "/home/ctlee/gamer/gamer/docs/src/_doxyoutput/xml" }
+breathe_projects = { "gamer_project": "/Users/ctlee/gamer/gamer/docs/src/_doxyoutput/xml" }
 breathe_default_project = "gamer_project"
 
 ##############################
@@ -61,23 +61,29 @@ breathe_default_project = "gamer_project"
 
 doxystdin = \
 """
-INPUT = /home/ctlee/gamer/gamer/include
+INPUT = /Users/ctlee/gamer/gamer/include
 OPTIMIZE_OUTPUT_FOR_C  = YES
 EXTRACT_ALL            = YES
 """
 # ENABLED_SECTIONS       = detail
 
 exhale_args = {
-    "containmentFolder":     "/home/ctlee/gamer/gamer/docs/src/_cppapi",
+    "containmentFolder":     "/Users/ctlee/gamer/gamer/docs/src/_cppapi",
     "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
-    "doxygenStripFromPath":  "/home/ctlee/gamer/gamer",
+    "doxygenStripFromPath":  "/Users/ctlee/gamer/gamer",
     # "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
     "exhaleDoxygenStdin":    doxystdin,
 }
 
+##############################
+# Number figures
+##############################
+
+numfig = True
+numfig_secnum_depth = (2)
 
 ##############################
 # Autosummary Settings
@@ -109,7 +115,7 @@ add_function_parentheses = True
 show_authors = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['/home/ctlee/gamer/gamer/docs/src/_templates']
+templates_path = ['/Users/ctlee/gamer/gamer/docs/src/_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -132,7 +138,7 @@ except ImportError:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['/home/ctlee/gamer/gamer/docs/src/_static']
+html_static_path = ['/Users/ctlee/gamer/gamer/docs/src/_static']
 
 html_context = {
     'css_files': [
@@ -145,4 +151,5 @@ html_context = {
 ##############################
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/3/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy', None)}

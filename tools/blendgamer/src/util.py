@@ -57,7 +57,7 @@ def getMarkerLayer(obj):
     markerLayer = obj.data.polygon_layers_int.get('marker')
     # If the layer doesn't exist yet, create it!
     if not markerLayer:
-        markerLayer = obj.data.polygon_layers_int.new('marker')
+        markerLayer = obj.data.polygon_layers_int.new(name='marker')
     return markerLayer.data
 
 
@@ -363,3 +363,18 @@ def bmesh_check_self_intersect_object(obj):
     faces_error = {i for i_pair in overlap for i in i_pair}
 
     return array.array('i', faces_error)
+
+
+def make_annotations(cls):
+    """Converts class fields to annotations if running with Blender 2.8"""
+    if bpy.app.version < (2, 80):
+        return cls
+    bl_props = {k: v for k, v in cls.__dict__.items() if isinstance(v, tuple)}
+    if bl_props:
+        if '__annotations__' not in cls.__dict__:
+            setattr(cls, '__annotations__', {})
+        annotations = cls.__dict__['__annotations__']
+        for k, v in bl_props.items():
+            annotations[k] = v
+            delattr(cls, k)
+    return cls

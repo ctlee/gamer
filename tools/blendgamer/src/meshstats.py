@@ -31,24 +31,17 @@ mpl_spec = importlib.util.find_spec("matplotlib")
 mpl_found = mpl_spec is not None
 
 if mpl_found:
-    from blendgamer.colormap import dataToVertexColor
+    from blendgamer.colormap import dataToVertexColor, colormapEnums
 
 import blendgamer.report as report
 from blendgamer.util import *
-
-# we use per module class registration/unregistration
-def register():
-    bpy.utils.register_module(__name__)
-
-def unregister():
-    bpy.utils.unregister_module(__name__)
 
 
 ## Following ops are from 3D Print Addon
 class GAMER_OT_MeshStats_Select_Report(bpy.types.Operator):
     """Select the data associated with this report"""
-    bl_idname = "gamer.meshstats_select_report"
-    bl_label = "Select Report"
+    bl_idname  = "gamer.meshstats_select_report"
+    bl_label   = "Select Report"
     bl_options = {'INTERNAL'}
 
     index = IntProperty()
@@ -102,8 +95,8 @@ def multiple_obj_warning(self, context):
 
 class GAMER_OT_MeshStats_Info_Volume(bpy.types.Operator):
     """Report the volume of the active mesh"""
-    bl_idname = "gamer.meshstats_info_volume"
-    bl_label = "MeshStats Info Volume"
+    bl_idname  = "gamer.meshstats_info_volume"
+    bl_label   = "MeshStats Info Volume"
 
     @staticmethod
     def main_check(obj,info):
@@ -137,8 +130,8 @@ class GAMER_OT_MeshStats_Info_Volume(bpy.types.Operator):
 
 class GAMER_OT_MeshStats_Info_Area(bpy.types.Operator):
     """Report the surface area of the active mesh"""
-    bl_idname = "gamer.meshstats_info_area"
-    bl_label = "MeshStats Info Area"
+    bl_idname   = "gamer.meshstats_info_area"
+    bl_label    = "MeshStats Info Area"
 
     @staticmethod
     def main_check(obj, info):
@@ -152,8 +145,8 @@ class GAMER_OT_MeshStats_Info_Area(bpy.types.Operator):
 
 class GAMER_OT_MeshStats_Check_Solid(bpy.types.Operator):
     """Check for geometry is solid (has valid inside/outside) and correct normals"""
-    bl_idname = "gamer.meshstats_check_solid"
-    bl_label = "MeshStats Check Solid"
+    bl_idname   = "gamer.meshstats_check_solid"
+    bl_label    = "MeshStats Check Solid"
     bl_description = "Check for non-manifolds and inconsistent normals"
 
     @staticmethod
@@ -186,8 +179,8 @@ class GAMER_OT_MeshStats_Check_Solid(bpy.types.Operator):
 
 class GAMER_OT_MeshStats_Check_Intersections(bpy.types.Operator):
     """Check geometry for self intersections"""
-    bl_idname = "gamer.meshstats_check_intersect"
-    bl_label = "MeshStats Check Intersections"
+    bl_idname   = "gamer.meshstats_check_intersect"
+    bl_label    = "MeshStats Check Intersections"
 
     @staticmethod
     def main_check(obj, info):
@@ -202,9 +195,9 @@ class GAMER_OT_MeshStats_Check_Intersections(bpy.types.Operator):
 class GAMER_OT_MeshStats_Check_Degenerate(bpy.types.Operator):
     """Check for degenerate geometry that may not print properly """ \
     """(zero area faces, zero length edges)"""
-    bl_idname = "gamer.meshstats_check_degenerate"
-    bl_label = "Check Degenerate Faces and Edges"
-    bl_description = "Check for zero length/area edges and faces"
+    bl_idname    = "gamer.meshstats_check_degenerate"
+    bl_label     = "Check Degenerate Faces and Edges"
+    bl_description  = "Check for zero length/area edges and faces"
 
     @staticmethod
     def main_check(obj, info):
@@ -229,8 +222,8 @@ class GAMER_OT_MeshStats_Check_Degenerate(bpy.types.Operator):
 
 
 class GAMER_OT_MeshStats_Check_Wagonwheels(bpy.types.Operator):
-    bl_idname = "gamer.meshstats_check_wagonwheels"
-    bl_label = "Check for wagon wheels"
+    bl_idname    = "gamer.meshstats_check_wagonwheels"
+    bl_label     = "Check for wagon wheels"
     bl_description = "Check for vertices connected to many edges"
 
     @staticmethod
@@ -256,8 +249,8 @@ class GAMER_OT_MeshStats_Check_Wagonwheels(bpy.types.Operator):
 
 
 class GAMER_OT_MeshStats_Check_Sharp(bpy.types.Operator):
-    bl_idname = "gamer.meshstats_check_sharp"
-    bl_label = "Check for small angles"
+    bl_idname   = "gamer.meshstats_check_sharp"
+    bl_label    = "Check for small angles"
     bl_description = "Check for faces with small angles"
 
     @staticmethod
@@ -288,33 +281,36 @@ class GAMER_OT_MeshStats_Check_Sharp(bpy.types.Operator):
 class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
     """Run all checks"""
     bl_idname = "gamer.meshstats_check_all"
-    bl_label = "MeshStats Check All"
-
-    check_cls = (
-        GAMER_OT_MeshStats_Info_Volume,
-        GAMER_OT_MeshStats_Info_Area,
-        GAMER_OT_MeshStats_Check_Wagonwheels,
-        GAMER_OT_MeshStats_Check_Sharp,
-        GAMER_OT_MeshStats_Check_Solid,
-        GAMER_OT_MeshStats_Check_Intersections,
-        GAMER_OT_MeshStats_Check_Degenerate,
-        )
+    bl_label  = "MeshStats Check All"
+    bl_description = "Check all"
 
     def execute(self, context):
         obj = context.active_object
         info = []
-        for cls in self.check_cls:
+
+        check_classes = (
+            GAMER_OT_MeshStats_Info_Volume,
+            GAMER_OT_MeshStats_Info_Area,
+            GAMER_OT_MeshStats_Check_Wagonwheels,
+            GAMER_OT_MeshStats_Check_Sharp,
+            GAMER_OT_MeshStats_Check_Solid,
+            GAMER_OT_MeshStats_Check_Intersections,
+            GAMER_OT_MeshStats_Check_Degenerate,
+        )
+
+        for cls in check_classes:
             cls.main_check(obj, info)
+
         report.update(*info)
         multiple_obj_warning(self, context)
         return {'FINISHED'}
 
 
 class GAMER_OT_write_quality_info(bpy.types.Operator):
-    bl_idname = "gamer.write_quality_info"
-    bl_label = "Print mesh quality info to files"
+    bl_idname      = "gamer.write_quality_info"
+    bl_label       = "Print mesh quality info to files"
     bl_description = "Dump quality info to files"
-    bl_options = {'REGISTER'}
+    bl_options     = {'REGISTER'}
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
@@ -329,10 +325,10 @@ class GAMER_OT_write_quality_info(bpy.types.Operator):
 
 
 class GAMER_OT_compute_curvatures(bpy.types.Operator):
-    bl_idname = "gamer.compute_curvatures"
-    bl_label = "Compute Curvatures"
-    bl_description = "Compute curvatures to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.compute_curvatures"
+    bl_label        = "Compute Curvatures"
+    bl_description  = "Compute curvatures to vertex colors"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
@@ -343,10 +339,10 @@ class GAMER_OT_compute_curvatures(bpy.types.Operator):
             return {'CANCELLED'}
 
 class GAMER_OT_mean_curvature(bpy.types.Operator):
-    bl_idname = "gamer.mean_curvature"
-    bl_label = "Mean Curvature"
-    bl_description = "Compute mean curvature to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.mean_curvature"
+    bl_label        = "Mean Curvature"
+    bl_description  = "Compute mean curvature to vertex colors"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
@@ -358,10 +354,10 @@ class GAMER_OT_mean_curvature(bpy.types.Operator):
 
 
 class GAMER_OT_gaussian_curvature(bpy.types.Operator):
-    bl_idname = "gamer.gaussian_curvature"
-    bl_label = "Gaussian Curvature"
-    bl_description = "Compute gaussian curvature to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.gaussian_curvature"
+    bl_label        = "Gaussian Curvature"
+    bl_description  = "Compute gaussian curvature to vertex colors"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
@@ -373,10 +369,10 @@ class GAMER_OT_gaussian_curvature(bpy.types.Operator):
 
 
 class GAMER_OT_k1_curvature(bpy.types.Operator):
-    bl_idname = "gamer.k1_curvature"
-    bl_label = "k1 Curvature"
-    bl_description = "Compute k1 curvature to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.k1_curvature"
+    bl_label        = "k1 Curvature"
+    bl_description  = "Compute k1 curvature to vertex colors"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
@@ -388,10 +384,10 @@ class GAMER_OT_k1_curvature(bpy.types.Operator):
 
 
 class GAMER_OT_k2_curvature(bpy.types.Operator):
-    bl_idname = "gamer.k2_curvature"
-    bl_label = "k2 Curvature"
-    bl_description = "Compute k2 curvature to vertex colors"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.k2_curvature"
+    bl_label        = "k2 Curvature"
+    bl_description  = "Compute k2 curvature to vertex colors"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         mqp = bpy.context.scene.gamer.mesh_quality_properties
@@ -430,7 +426,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
             default="meshquality", maxlen=1024, subtype='FILE_NAME'
             )
     min_angle = IntProperty(
-        name="Angle Theshold", default=15, min=0, max=180,
+        name="Angle Threshold", default=15, min=0, max=180,
         description="Select faces with angles less than this criteria")
 
     minCurve = FloatProperty(
@@ -473,44 +469,53 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         description="Save the generated plots"
         )
 
-    mixpoint =FloatProperty(
+
+    mixpoint = FloatProperty(
         name = "Color mixing point", default = 0.5, min=0, max=1,
         description="Value for color mixing"
         )
 
     if mpl_found:
+
+        colormap = EnumProperty(
+            name = "Colormap colors",
+            description="Colormap to use",
+            items = colormapEnums,
+            default = 'VIRIDIS'
+            )
+
         def compute_curvatures(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                kh, kg, k1, k2 = gmesh.computeCurvatures(True, self.curveIter)
+                kh, kg, k1, k2 = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="MeanCurvature",
                     axislabel="Mean Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
 
                 dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="GaussianCurvature",
                     axislabel="Gaussian Curvature [$\mu m^{-2}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
 
                 dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="k1Curvature",
                     axislabel="k1 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
 
                 dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="k2Curvature",
                     axislabel="k2 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
                 del kh
                 del kg
                 del k1
@@ -521,15 +526,15 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def mean_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                curvatures = gmesh.meanCurvature(True, self.curveIter)
-                kh, _, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+                # curvatures = gmesh.meanCurvature(self.curveIter)
+                kh, _, _, _ = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="MeanCurvature",
                     axislabel="Mean Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
                 del kh
                 return True
             return False
@@ -537,13 +542,13 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def gaussian_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                _, kg, _, _ = gmesh.computeCurvatures(True, self.curveIter)
+                _, kg, _, _ = gmesh.computeCurvatures(self.curveIter)
                 dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="GaussianCurvature",
                     axislabel="Gaussian Curvature [$\mu m^{-2}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
                 del kg
                 return True
             return False
@@ -552,14 +557,14 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def k1_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                _, _, k1, _ = gmesh.computeCurvatures(True, self.curveIter)
+                _, _, k1, _ = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,
                     vlayer="k1Curvature",
                     axislabel="k1 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
                 del k1
                 return True
             return False
@@ -575,33 +580,62 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
                     vlayer="k2Curvature",
                     axislabel="k2 Curvature [$\mu m^{-1}$]",
                     file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint)
+                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
                 del k2
                 return True
             return False
 
-    # def helfrich_energy(self, context, report):
-    #     gmesh = blenderToGamer(report)
-    #     kappa_h = 20 # bending rigidity, mean curvature [units: kb*T]
-    #     kappa_g = 0.8*kappa_h # bending rigidity, gaussian curvature [units: kb*T]
-    #     if gmesh:
-    #         energy = np.zeros(gmesh.nVertices)
-    #         for i, vID in enumerate(gmesh.vertexIDs):
-    #             energy[i] = 2*kappa_h*gmesh.getMeanCurvature(vID)**2 + kappa_g*gmesh.getGaussianCurvature(vID)
+        # def helfrich_energy(self, context, report):
+        #     gmesh = blenderToGamer(report)
+        #     kappa_h = 20 # bending rigidity, mean curvature [units: kb*T]
+        #     kappa_g = 0.8*kappa_h # bending rigidity, gaussian curvature [units: kb*T]
+        #     if gmesh:
+        #         energy = np.zeros(gmesh.nVertices)
+        #         for i, vID in enumerate(gmesh.vertexIDs):
+        #             energy[i] = 2*kappa_h*gmesh.getMeanCurvature(vID)**2 + kappa_g*gmesh.getGaussianCurvature(vID)
 
-    #         colors = getColor(energy, 'bgr', minV=self.minEnergy,
-    #             maxV=self.maxEnergy, percentTruncate=False)
+        #         colors = getColor(energy, 'bgr', minV=self.minEnergy,
+        #             maxV=self.maxEnergy, percentTruncate=False)
 
-    #         # Use 'curvature' vertex color entry for results
-    #         mesh = bpy.context.object.data
-    #         if "HelfrichEnergy" not in mesh.vertex_colors:
-    #             mesh.vertex_colors.new(name="HelfrichEnergy")
+        #         # Use 'curvature' vertex color entry for results
+        #         mesh = bpy.context.object.data
+        #         if "HelfrichEnergy" not in mesh.vertex_colors:
+        #             mesh.vertex_colors.new(name="HelfrichEnergy")
 
-    #         color_layer = mesh.vertex_colors['HelfrichEnergy']
-    #         mesh.vertex_colors["HelfrichEnergy"].active = True
+        #         color_layer = mesh.vertex_colors['HelfrichEnergy']
+        #         mesh.vertex_colors["HelfrichEnergy"].active = True
 
-    #         mloops = np.zeros((len(mesh.loops)), dtype=np.int)
-    #         mesh.loops.foreach_get("vertex_index", mloops)
-    #         color_layer.data.foreach_set("color", colors[mloops].flatten())
-    #         return True
-    #     return False
+        #         mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+        #         mesh.loops.foreach_get("vertex_index", mloops)
+        #         color_layer.data.foreach_set("color", colors[mloops].flatten())
+        #         return True
+        #     return False
+
+
+classes = [
+    GAMER_OT_MeshStats_Select_Report,
+    GAMER_OT_MeshStats_Info_Volume,
+    GAMER_OT_MeshStats_Info_Area,
+    GAMER_OT_MeshStats_Check_Solid,
+    GAMER_OT_MeshStats_Check_Intersections,
+    GAMER_OT_MeshStats_Check_Degenerate,
+    GAMER_OT_MeshStats_Check_Wagonwheels,
+    GAMER_OT_MeshStats_Check_Sharp,
+    GAMER_OT_MeshStats_Check_All,
+    GAMER_OT_write_quality_info,
+    GAMER_OT_compute_curvatures,
+    GAMER_OT_mean_curvature,
+    GAMER_OT_gaussian_curvature,
+    GAMER_OT_k1_curvature,
+    GAMER_OT_k2_curvature,
+    MeshQualityReportProperties]
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))

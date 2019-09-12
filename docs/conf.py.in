@@ -78,6 +78,12 @@ exhale_args = {
     "exhaleDoxygenStdin":    doxystdin,
 }
 
+##############################
+# Number figures
+##############################
+
+numfig = True
+numfig_secnum_depth = (2)
 
 ##############################
 # Autosummary Settings
@@ -145,4 +151,5 @@ html_context = {
 ##############################
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/3/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy', None)}

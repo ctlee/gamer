@@ -37,7 +37,7 @@ namespace py = pybind11;
 void init_TMCell(py::module& mod){
     py::class_<TMCell> cell(mod, "Cell",
         R"delim(
-            Wrapper around a :cpp:class:`TMCell`.
+            Wrapper around a :cpp:class:`gamer::TMCell`.
         )delim"
     );
     cell.def(py::init<>(), "Default constructor");

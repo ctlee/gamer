@@ -44,6 +44,8 @@ Documentation
 Every function, class, and module that you write must be documented.
 In short, every C++ function, namespace, and other should have a ``doxygen`` compatible description of what the function does, inputs, and outputs.
 All Python functions should have a docstring added.
+Note that github issues and users can be referenced using :issue:`XY` and :user:`username` markups.
+This functionality is enabled by the `sphinx-issue` sphinx extension.
 
 To build the documentation you need the dependencies from the file ``docs/requirements.txt`` which you can install via ``pip``.
 
@@ -59,8 +61,6 @@ afterwards reconfigure your build with CMake you are ready to build the document
 
 The documentation can be found in ``{builddir}/docs/html/``.
 
-- allow github issues and users to easily be referenced using :issue:`XY` and :user:`username` markups.
-This functionality is enabled by the sphinx-issue sphinx extension.
 
 Embedding Widgets in Jupyter-Notebooks
 --------------------------------------

@@ -36,7 +36,7 @@ namespace py = pybind11;
 void init_TMVertex(py::module& mod){
     py::class_<TMVertex> vertex(mod, "Vertex",
         R"delim(
-            Wrapper around a :cpp:class:`TMVertex`.
+            Wrapper around a :cpp:class:`gamer::TMVertex`.
         )delim"
     );
 

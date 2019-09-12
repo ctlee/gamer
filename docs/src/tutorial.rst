@@ -14,7 +14,7 @@ PyGAMer Jupyter Notebook Tutorials
    :maxdepth: 2
 
    tutorials/notebooks/meshingprotein.ipynb
-
+   tutorials/notebooks/diffusion.ipynb
 
 .. _BlendGAMer Tutorials:
 

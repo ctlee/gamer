@@ -36,7 +36,7 @@ namespace py = pybind11;
 void init_SMGlobal(py::module& mod){
     py::class_<SMGlobal> global(mod, "Global",
         R"delim(
-            Wrapper around a :cpp:class:`SMGlobal`.
+            Wrapper around a :cpp:class:`gamer::SMGlobal`.
         )delim"
     );
 

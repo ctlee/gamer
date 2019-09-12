@@ -37,7 +37,7 @@ namespace py = pybind11;
 void init_TMFace(py::module& mod){
     py::class_<TMFace> face(mod, "Face",
         R"delim(
-            Wrapper around a :cpp:class:`Face`.
+            Wrapper around a :cpp:class:`gamer::TMFace`.
         )delim"
     );
     face.def(py::init<>(), "Default constructor");
