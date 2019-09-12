@@ -117,7 +117,7 @@ void init_TetMesh(py::module& mod){
                 key (:py:class:`list`): Array [1] of vertex key.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -132,7 +132,7 @@ void init_TetMesh(py::module& mod){
                 key (:py:class:`VertexID`): SimplexID of vertex.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -147,7 +147,7 @@ void init_TetMesh(py::module& mod){
                 key (:py:class:`list`): Array [2] of edge key.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -162,7 +162,7 @@ void init_TetMesh(py::module& mod){
                 key (:py:class:`EdgeID`): SimplexID of edge.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -177,7 +177,7 @@ void init_TetMesh(py::module& mod){
                 key (:py:class:`list`): Array [3] of face key.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -186,13 +186,13 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<TetMesh::SimplexID<3>>(&TetMesh::remove<3>),
         py::arg("key"),
         R"delim(
-            Remove a face from the mesh
+            Remove a face from the mesh.
 
             Args:
                 key (:py:class:`FaceID`): SimplexID of face.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -207,7 +207,7 @@ void init_TetMesh(py::module& mod){
                 key (:py:class:`list`): Array [3] of cell key.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -216,13 +216,13 @@ void init_TetMesh(py::module& mod){
         py::overload_cast<TetMesh::SimplexID<4>>(&TetMesh::remove<4>),
         py::arg("key"),
         R"delim(
-            Remove a cell from the mesh
+            Remove a cell from the mesh.
 
             Args:
                 key (:py:class:`CellID`): SimplexID of cell.
 
             Returns:
-                removed (int): Number of simplices removed
+                removed (int): Number of simplices removed.
         )delim"
     );
 
@@ -306,7 +306,7 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("getName",
         py::overload_cast<TetMesh::SimplexID<1>>(&TetMesh::get_name<1>, py::const_),
         R"delim(
-            Get the name of the vertex
+            Get the name of the vertex.
 
             Args:
                 SimplexID  (:py:class:`VertexID`): VertexID to get the name of.
@@ -407,7 +407,10 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("onBoundary",
         py::overload_cast<const TetMesh::SimplexID<1>>(&TetMesh::onBoundary<1>, py::const_),
         R"delim(
-            Check if a vertex is on a boundary
+            Check if a vertex is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`VertexID`): VertexID to check.
 
             Returns:
                 :py:class:`bool`: True if vertex is a member of a face on a boundary.
@@ -418,7 +421,10 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("onBoundary",
         py::overload_cast<const TetMesh::SimplexID<2>>(&TetMesh::onBoundary<2>, py::const_),
         R"delim(
-            Check if an edge is on a boundary
+            Check if an edge is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`EdgeID`): EdgeID to check.
 
             Returns:
                 :py:class:`bool`: True if edge is a member of a face on a boundary.
@@ -428,7 +434,10 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("onBoundary",
         py::overload_cast<const TetMesh::SimplexID<3>>(&TetMesh::onBoundary<3>, py::const_),
         R"delim(
-            Check if a face is on a boundary
+            Check if a face is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`FaceID`): FaceID to check.
 
             Returns:
                 :py:class:`bool`: True if face is on a boundary.
@@ -438,7 +447,10 @@ void init_TetMesh(py::module& mod){
     TetMeshCls.def("onBoundary",
         py::overload_cast<const TetMesh::SimplexID<4>>(&TetMesh::onBoundary<4>, py::const_),
         R"delim(
-            Check if a cell is on a boundary
+            Check if a cell is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`CellID`): CellID to check.
 
             Returns:
                 :py:class:`bool`: True if cell has a face on a boundary.
@@ -450,38 +462,50 @@ void init_TetMesh(py::module& mod){
         R"delim(
             Check if a vertex is near a boundary.
 
+            Args:
+                SimplexID (:py:class:`VertexID`): VertexID to check.
+
             Returns:
-                :py:class:`bool`: True if vertex touches a boundary
+                :py:class:`bool`: True if vertex touches a boundary.
         )delim"
     );
 
     TetMeshCls.def("nearBoundary",
         py::overload_cast<const TetMesh::SimplexID<2>>(&TetMesh::nearBoundary<2>, py::const_),
         R"delim(
-            Check if an edge is on a boundary
+            Check if an edge is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`EdgeID`): EdgeID to check.
 
             Returns:
-                :py:class:`bool`: True if edge touches a boundary
+                :py:class:`bool`: True if edge touches a boundary.
         )delim"
     );
 
     TetMeshCls.def("nearBoundary",
         py::overload_cast<const TetMesh::SimplexID<3>>(&TetMesh::nearBoundary<3>, py::const_),
         R"delim(
-            Check if a face is on a boundary
+            Check if a face is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`FaceID`): FaceID to check.
 
             Returns:
-                :py:class:`bool`: True if face touches a boundary
+                :py:class:`bool`: True if face touches a boundary.
         )delim"
     );
 
     TetMeshCls.def("nearBoundary",
         py::overload_cast<const TetMesh::SimplexID<4>>(&TetMesh::nearBoundary<4>, py::const_),
         R"delim(
-            Check if a cell is on a boundary
+            Check if a cell is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`CellID`): CellID to check.
 
             Returns:
-                :py:class:`bool`: True if cell touches a boundary
+                :py:class:`bool`: True if cell touches a boundary.
         )delim"
     );
 
@@ -491,10 +515,10 @@ void init_TetMesh(py::module& mod){
             Extract the surface of the TetMesh.
 
             Args:
-                tetmesh (TetMesh): Tetrahedral mesh to extract from
+                tetmesh (TetMesh): Tetrahedral mesh to extract from.
 
             Returns:
-                :py:class:`SurfaceMesh`: Surface mesh of surface
+                :py:class:`SurfaceMesh`: Surface mesh of surface.
         )delim"
     );
 

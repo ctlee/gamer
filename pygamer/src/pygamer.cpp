@@ -100,9 +100,10 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read OFF file to mesh
 
             Args:
-                filename (:py:class:`str`): Filename to read from
+                filename (:py:class:`str`): Filename to read from.
+
             Returns:
-                :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest
+                :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest/
         )delim"
     );
 
@@ -113,9 +114,10 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Read a PDB file into a mesh
 
             Args:
-                filename (:py:class:`str`): PDB file to read
+                filename (:py:class:`str`): PDB file to read.
+
             Returns:
-                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object.
         )delim"
     );
 
@@ -128,10 +130,11 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
             Args:
                 filename (:py:class:`str`): PDB file to read.
-                blobbyness (:py:class:`float`): Blobbiness of the Gaussian
-                isovalue (:py:class:`float`): The isocontour value to mesh
+                blobbyness (:py:class:`float`): Blobbiness of the Gaussian.
+                isovalue (:py:class:`float`): The isocontour value to mesh.
+
             Returns:
-                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object.
         )delim"
     );
 
@@ -158,10 +161,11 @@ PYBIND11_MODULE(pygamer, pygamer) {
 
             Args:
                 filename (:py:class:`str`): PQR file to read.
-                blobbyness (:py:class:`float`): Blobbiness of the Gaussian
-                isovalue (:py:class:`float`): The isocontour value to mesh
+                blobbyness (:py:class:`float`): Blobbiness of the Gaussian.
+                isovalue (:py:class:`float`): The isocontour value to mesh.
+
             Returns:
-                :py:class:`surfacemesh.SurfaceMesh`: Meshed object
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object.
         )delim"
     );
 
@@ -172,8 +176,8 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in OFF format
 
             Args:
-                filename (:py:class:`str`): Filename to write to
-                mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest
+                filename (:py:class:`str`): Filename to write to.
+                mesh (:py:class:`surfacemesh.SurfaceMesh`): Mesh of interest.
         )delim"
     );
 
@@ -184,8 +188,8 @@ PYBIND11_MODULE(pygamer, pygamer) {
             Write mesh to file in OFF format
 
             Args:
-                filename (:py:class:`str`): Filename to write to
-                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
+                filename (:py:class:`str`): Filename to write to.
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest.
         )delim"
     );
 

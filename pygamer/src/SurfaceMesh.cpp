@@ -476,6 +476,9 @@ void init_SurfaceMesh(py::module& mod){
         R"delim(
             Check if a vertex is on a boundary.
 
+            Args:
+                SimplexID (:py:class:`VertexID`): VertexID to check.
+
             Returns:
                 :py:class:`bool`: True if vertex is a member of an edge on a boundary.
         )delim"
@@ -485,6 +488,9 @@ void init_SurfaceMesh(py::module& mod){
         py::overload_cast<const SurfaceMesh::SimplexID<2>>(&SurfaceMesh::onBoundary<2>, py::const_),
         R"delim(
             Check if an edge is on a boundary.
+
+            Args:
+                SimplexID (:py:class:`EdgeID`): EdgeID to check.
 
             Returns:
                 :py:class:`bool`: True if edge is a boundary.
@@ -496,6 +502,9 @@ void init_SurfaceMesh(py::module& mod){
         R"delim(
             Check if a face is on a boundary.
 
+            Args:
+                SimplexID (:py:class:`FaceID`): FaceID to check.
+
             Returns:
                 :py:class:`bool`: True if face has an edge on a boundary.
         )delim"
@@ -505,6 +514,9 @@ void init_SurfaceMesh(py::module& mod){
         py::overload_cast<const SurfaceMesh::SimplexID<1>>(&SurfaceMesh::nearBoundary<1>, py::const_),
         R"delim(
             Check if a vertex is near a boundary.
+
+            Args:
+                SimplexID (:py:class:`VertexID`): VertexID to check.
 
             Returns:
                 :py:class:`bool`: True if vertex is a member of an edge on a boundary.
@@ -516,6 +528,9 @@ void init_SurfaceMesh(py::module& mod){
         R"delim(
             Check if an edge is near a boundary.
 
+            Args:
+                SimplexID (:py:class:`EdgeID`): EdgeID to check.
+
             Returns:
                 :py:class:`bool`: True if edge is a boundary.
         )delim"
@@ -525,6 +540,9 @@ void init_SurfaceMesh(py::module& mod){
         py::overload_cast<const SurfaceMesh::SimplexID<3>>(&SurfaceMesh::nearBoundary<3>, py::const_),
         R"delim(
             Check if a face is near a boundary.
+
+            Args:
+                SimplexID (:py:class:`FaceID`): FaceID to check.
 
             Returns:
                 :py:class:`bool`: True if face has an edge on a boundary.
@@ -537,6 +555,9 @@ void init_SurfaceMesh(py::module& mod){
                 py::scoped_estream_redirect>(),
         R"delim(
             Split disconnected surfaces into separate meshes.
+
+            Args:
+                SurfaceMesh (:py:class:`SurfaceMesh`): Surface mesh to split into multiple surfaces.
 
             Returns:
                 :py:class:`list` (:py:class:`SurfaceMesh`): List of :py:class:`SurfaceMesh` containing separated surfaces.
@@ -1090,7 +1111,7 @@ void init_SurfaceMesh(py::module& mod){
     SurfMeshCls.def("check_orientation",
         py::overload_cast<SurfaceMesh&>(&casc::check_orientation<SurfaceMesh>),
         R"delim(
-            Check consistency and assign Face orientations
+            Check consistency and assign Face orientations.
 
             :py:func:`SurfaceMesh.init_orientation` must be called before this
             function can operate.
