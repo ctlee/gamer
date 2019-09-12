@@ -11,6 +11,19 @@ Changelog
 - Generalized decimation for Tetrahedral meshes (:pr:`33`). Thanks to :user:`ishantimalsina` and :user:`mvhsan`.
 
 ******************
+2.0.4 (09-12-2019)
+******************
+
+**New Features**:
+
+- Updated `BlendGAMer` to work with newly released `Blender` 2.80.
+- Improvements to the documentation.
+
+**Fixes**:
+
+- Fixes for matplotlib dependency detection in Blender Addon.
+
+******************
 2.0.3 (07-24-2019)
 ******************
 
