@@ -1,5 +1,9 @@
 # Geometry-preserving Adaptive MeshER
 [![DOI](https://zenodo.org/badge/122682242.svg)](https://zenodo.org/badge/latestdoi/122682242)
+[![PyPI](https://img.shields.io/pypi/v/pygamer)](https://pypi.org/project/pygamer/)
+[![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
+[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/master?svg=true)](https://ci.appveyor.com/project/ctlee/gamer)
+[![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
 
 GAMer is a surface mesh improvement library developed to condition surface meshes derived from noisy biological imaging data.
 Using Tetgen, GAMer can generate tetrahedral meshes suitable for finite elements simulations of reaction-diffusion systems among others.
@@ -17,17 +21,6 @@ GAMer has the following main features:
 * Blender addon which enables easy access to GAMer features using the pygamer API.
 * Uses the Colored Abstract Simplicial Complex data ([CASC](http://github.com/ctlee/casc/) structure as the flexible underlying representation of surface and tetrahedral meshes.
 * Code is hosted by [GitHub](http://github.com/ctlee/gamer/) under the Lesser GNU public license (LGPLv2). Please post issues or reports there.
-
-
-## Build Status
-**Master:**<br/>
-[![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
-[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/master?svg=true)](https://ci.appveyor.com/project/ctlee/gamer)
-[![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
-
-**Development:**<br/>
-[![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
-[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
 
 ## Acknowledging your use of GAMer
 Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know.
@@ -80,3 +73,10 @@ complex data structure.
 * Mesh checks in the GAMer Blender addon are inspired or borrowed from 3D Print Toolbox by Campbell Barton and Meshalyzer from CellBlender.
 
 * [Triangle](https://www.cs.cmu.edu/~quake/triangle.html) is also bundled with GAMer but not currently used.
+
+
+## Development Build Status
+
+[![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
+[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
+[![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=development)](https://gamer.readthedocs.io/en/development?badge=development)

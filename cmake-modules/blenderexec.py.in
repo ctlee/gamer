@@ -1,0 +1,9 @@
+import sys;import struct;import bpy;
+f = open('@CMAKE_CURRENT_BINARY_DIR@/found_blender_info', 'w')
+
+f.write('{}\n'.format(str(bpy.app.version[0]) + '.' + str(bpy.app.version[1]) + '.' + str(bpy.app.version[2])))
+f.write('{}\n'.format(bpy.utils.script_path_user()))
+f.write('{}\n'.format('.'.join(str(v) for v in sys.version_info[0:3])));
+f.write('{}\n'.format(bpy.app.binary_path_python))
+f.write('{}\n'.format(struct.calcsize('@P')))
+f.close()

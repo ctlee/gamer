@@ -48,9 +48,13 @@ namespace gamer
 namespace pdbreader_detail
 {
 const double            EPSILON = 1e-3;
+/// Regular expression for parsing PDB file extension
 static const std::regex PDB(".*.pdb", std::regex::icase | std::regex::optimize);
+/// Regular expression for parsing PQR file extension
 static const std::regex PQR(".*.pqr", std::regex::icase | std::regex::optimize);
+/// Regular expression for parsing XYZR file extension
 static const std::regex XYZR(".*.xyzr", std::regex::icase | std::regex::optimize);
+/// Regular expression to parse for lines starting with ATOM
 static const std::regex atom("ATOM.*\n*", std::regex::optimize);
 
 /**
@@ -68,10 +72,10 @@ struct PDBelementInformation
     unsigned char residueIndex;
 };
 
-/// Total number of elements in the table
+/// Total number of elements in the PDBelementTable
 static const std::size_t     MAX_BIOCHEM_ELEMENTS = 167;
 
-/// Lookup table
+/// Basic protein atomic ookup table
 static PDBelementInformation PDBelementTable[MAX_BIOCHEM_ELEMENTS] =
 {
     {" N  ", "GLY", 1.625f, 0.0f, 0.0f, 1.0f,  1, 10 },
@@ -277,14 +281,14 @@ static void initElementMap()
 }
 
 /**
- * @brief      Read a PDB file
+ * @brief      Extracts out x, y, z, radius of atoms in PDB file.
  *
- * @param[in]  filename  The filename
- * @param[in]  inserter  The inserter
+ * @param[in]  filename  File to parse
+ * @param[in]  inserter  Container insertion iterator
  *
- * @tparam     Inserter  Inserter
+ * @tparam     Inserter  Typename of an insertion iterator
  *
- * @return     True if successfully read
+ * @return     True on success
  */
 template <typename Inserter>
 bool readPDB(const std::string &filename, Inserter inserter)
@@ -349,14 +353,14 @@ bool readPDB(const std::string &filename, Inserter inserter)
 }
 
 /**
- * @brief      Reads a pqr.
+ * @brief      Reads PQR file and appends
  *
- * @param[in]  filename  The filename
- * @param[in]  inserter  The inserter
+ * @param[in]  filename  File to parse
+ * @param[in]  inserter  Container insertion iterator
  *
- * @tparam     Inserter  { description }
+ * @tparam     Inserter  Typename of an insertion iterator
  *
- * @return     { description_of_the_return_value }
+ * @return     True on success
  */
 template <typename Inserter>
 bool readPQR(const std::string &filename, Inserter inserter)
@@ -435,8 +439,8 @@ void getMinMax(Iterator begin, Iterator end, f3Vector &min, f3Vector &max, BlurF
 /**
  * @brief      Apply a gaussian blur to a list of atoms
  *
- * @param[in]  begin       The begin
- * @param[in]  end         The end
+ * @param[in]  begin       Iterator to the first atom
+ * @param[in]  end         Iterator to the last ato
  * @param      dataset     The dataset
  * @param[in]  min         The minimum
  * @param[in]  maxMin      The maximum minimum
@@ -527,14 +531,14 @@ void blurAtoms(Iterator begin, Iterator end,
 /**
  * @brief      Compute the grid based Solvent Accessible Area.
  *
- * Assumes that the domain is in the {+,+,+} octant.
+ *             Assumes that the domain is in the {+,+,+} octant.
  *
- * @param[in]  begin       The begin
- * @param[in]  end         The end
- * @param[in]  dim         The dim
- * @param      dataset     The atom index
+ * @param[in]  begin     Iterator to first atom
+ * @param[in]  end       Just past the end iterator
+ * @param[in]  dim       Dimension of the dataset
+ * @param      dataset   Volume of densities
  *
- * @tparam     Iterator    { description }
+ * @tparam     Iterator  Typename of the iterator
  */
 template <typename Iterator>
 void gridSAS(const Iterator begin, const Iterator end, const i3Vector &dim, float* dataset)
@@ -586,6 +590,19 @@ void gridSAS(const Iterator begin, const Iterator end, const i3Vector &dim, floa
     }
 }
 
+
+/**
+ * @brief      Compute the grid based Solvent Excluded Surface.
+ *
+ *             Assumes that the domain is in the {+,+,+} octant.
+ *
+ * @param[in]  begin     Iterator to first atom
+ * @param[in]  end       Just past the end iterator
+ * @param[in]  dim       Dimension of the dataset
+ * @param      dataset   Volume of densities
+ *
+ * @tparam     Iterator  Typename of the iterator
+ */
 template <typename Iterator>
 void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim,
              float* dataset, const float radius)
@@ -627,10 +644,57 @@ void gridSES(const Iterator begin, const Iterator end, const i3Vector &dim,
     }
 }
 
+// TODO: (1) these functions should all take arrays of x,y,z,r instead of filenames
+
+/**
+ * @brief      Generate a mesh from PDB
+ *
+ * @param[in]  filename  File to open
+ *
+ * @return     Meshed object
+ */
 std::unique_ptr<SurfaceMesh> readPDB_molsurf(const std::string &filename);
+
+/**
+ * @brief      Generate a mesh from PDB by Gaussian kernel
+ *
+ * @param[in]  filename    File to open
+ * @param[in]  blobbyness  Blobbyness of the applied Gaussian
+ * @param[in]  isovalue    Isovalue to extract
+ *
+ * @return     Meshed object
+ */
 std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string &filename, float blobbyness, float isovalue);
+
+/**
+ * @brief      [WIP] Compute the Connolly surface using a distance grid based
+ *             strategy
+ *
+ * @param[in]  filename  File to open
+ * @param[in]  radius    Radius in Angstroms of ball to roll over surface
+ *
+ * @return     Meshed object
+ */
 std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string &filename, const float radius);
 
+/**
+ * @brief      Generate a mesh from PQR
+ *
+ * @param[in]  filename  File to open
+ *
+ * @return     Meshed object
+ */
+std::unique_ptr<SurfaceMesh> readPQR_molsurf(const std::string &filename);
+
+/**
+ * @brief      Generate a mesh from PQR
+ *
+ * @param[in]  filename    File to open
+ * @param[in]  blobbyness  Blobbyness of the applied Gaussian
+ * @param[in]  isovalue    Isovalue to extract
+ *
+ * @return     Meshed object
+ */
 std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string &filename, float blobbyness, float isovalue);
 
 } // end namespace gamer

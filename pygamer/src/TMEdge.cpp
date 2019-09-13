@@ -36,7 +36,7 @@ namespace py = pybind11;
 void init_TMEdge(py::module& mod){
     py::class_<TMEdge> edge(mod, "Edge",
         R"delim(
-            Wrapper around a :cpp:class:`Edge`.
+            Wrapper around a :cpp:class:`gamer::TMEdge`.
         )delim"
     );
     edge.def(py::init<>(), "Default constructor.");

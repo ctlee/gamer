@@ -46,7 +46,7 @@ void init_TMSimplexID(py::module& mod){
      ************************************/
     py::class_<TMVertexID> vid(mod, "VertexID",
         R"delim(
-            Wrapper around :cpp:type:`TetMesh`::SimplexID<1> object.
+            Wrapper around :cpp:type:`gamer::TetMesh`::SimplexID<1> object.
 
             This is a token to represent a 1-simplex object. It serves as a
             reference to the actual object.
@@ -104,7 +104,7 @@ void init_TMSimplexID(py::module& mod){
      ************************************/
     py::class_<TMEdgeID> eid(mod, "EdgeID",
         R"delim(
-            Wrapper around :cpp:type:`TetMesh`::SimplexID<2> object
+            Wrapper around :cpp:type:`gamer::TetMesh`::SimplexID<2> object
 
             This is a token to represent a 2-simplex object. It serves as a
             reference to the actual object.
@@ -160,7 +160,7 @@ void init_TMSimplexID(py::module& mod){
      ************************************/
     py::class_<TMFaceID> fid(mod, "FaceID",
         R"delim(
-            Wrapper around :cpp:type:`TetMesh`::SimplexID<3> object
+            Wrapper around :cpp:type:`gamer::TetMesh`::SimplexID<3> object
 
             This is a token to represent a 3-simplex object. It serves as a
             reference to the actual object.
@@ -217,7 +217,7 @@ void init_TMSimplexID(py::module& mod){
      ************************************/
     py::class_<TMCellID> cid(mod, "CellID",
         R"delim(
-            Wrapper around :cpp:type:`TetMesh`::SimplexID<4> object
+            Wrapper around :cpp:type:`gamer::TetMesh`::SimplexID<4> object
 
             This is a token to represent a 4-simplex object. It serves as a
             reference to the actual object.

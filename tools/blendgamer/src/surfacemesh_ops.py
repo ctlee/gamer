@@ -35,19 +35,12 @@ import os, sys
 import numpy as np
 import collections
 
-# we use per module class registration/unregistration
-def register():
-    bpy.utils.register_module(__name__)
-
-def unregister():
-    bpy.utils.unregister_module(__name__)
-
 
 class GAMER_OT_coarse_dense(bpy.types.Operator):
-    bl_idname = "gamer.coarse_dense"
-    bl_label = "Coarse Dense"
-    bl_description = "Decimate selected dense areas of the mesh"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.coarse_dense"
+    bl_label        = "Coarse Dense"
+    bl_description  = "Decimate selected dense areas of the mesh"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if context.scene.gamer.surfmesh_procs.coarse_dense(context, self.report):
@@ -58,10 +51,10 @@ class GAMER_OT_coarse_dense(bpy.types.Operator):
 
 
 class GAMER_OT_coarse_flat(bpy.types.Operator):
-    bl_idname = "gamer.coarse_flat"
-    bl_label = "Coarse Flat"
-    bl_description = "Decimate selected flat areas of the mesh"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.coarse_flat"
+    bl_label        = "Coarse Flat"
+    bl_description  = "Decimate selected flat areas of the mesh"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if context.scene.gamer.surfmesh_procs.coarse_flat(context, self.report):
@@ -73,10 +66,10 @@ class GAMER_OT_coarse_flat(bpy.types.Operator):
 
 
 class GAMER_OT_smooth(bpy.types.Operator):
-    bl_idname = "gamer.smooth"
-    bl_label = "Smooth"
-    bl_description = "Smooth selected vertices of the mesh"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.smooth"
+    bl_label        = "Smooth"
+    bl_description  = "Smooth selected vertices of the mesh"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if context.scene.gamer.surfmesh_procs.smooth(context, self.report):
@@ -87,10 +80,10 @@ class GAMER_OT_smooth(bpy.types.Operator):
 
 
 class GAMER_OT_normal_smooth(bpy.types.Operator):
-    bl_idname = "gamer.normal_smooth"
-    bl_label = "Normal Smooth"
-    bl_description = "Smooth facet normals of selected faces of the mesh"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.normal_smooth"
+    bl_label        = "Normal Smooth"
+    bl_description  = "Smooth facet normals of selected faces of the mesh"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if context.scene.gamer.surfmesh_procs.normal_smooth(context, self.report):
@@ -100,10 +93,10 @@ class GAMER_OT_normal_smooth(bpy.types.Operator):
             return {'CANCELLED'}
 
 class GAMER_OT_fill_holes(bpy.types.Operator):
-    bl_idname = "gamer.fill_holes"
-    bl_label = "Fill Holes"
-    bl_description = "Triangulate holes"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname       = "gamer.fill_holes"
+    bl_label        = "Fill Holes"
+    bl_description  = "Triangulate holes"
+    bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         if context.scene.gamer.surfmesh_procs.fill_holes(context, self.report):
@@ -112,48 +105,46 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
         else:
             return {'CANCELLED'}
 
-# class GAMER_OT_refine_mesh(bpy.types.Operator):
-#     bl_idname = "gamer.refine_mesh"
-#     bl_label = "Quadrisect mesh"
-#     bl_description = "Refine the mesh by quadisction"
-#     bl_options = {'REGISTER', 'UNDO'}
-
-#     def execute(self, context):
-#         if context.scene.gamer.surfmesh_procs.refine_mesh(context, self.report):
-#             self.report({'INFO'}, "GAMer: Refine Mesh complete")
-#             return {'FINISHED'}
-#         else:
-#             return {'CANCELLED'}
 
 class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
-    dense_rate = FloatProperty(
-        name="CD_Rate", default=1, min=0.001, max=50.0, precision=4,
-        description="The rate for coarsening dense areas")
-    dense_iter = IntProperty(
-        name="CD_Iter", default=1, min=1, max=15,
-        description="The number of iterations for coarsening dense areas")
-    flat_rate = FloatProperty(
-        name="CF_Rate", default=0.016, min=0.00001, max=0.5, precision=4,
+    dense_rate      = FloatProperty(
+        name="Thresh", default=1, min=0.001, max=50.0, precision=4,
+        description="Threshold for coarsening dense areas")
+
+    dense_iter      = IntProperty(
+        name="Iter", default=1, min=1, max=15,
+        description="The number of coarse dense iterations to apply")
+
+    flat_rate       = FloatProperty(
+        name="Threshold", default=0.016, min=0.00001, max=0.5, precision=4,
         description="The rate for coarsening flat areas")
-    flat_iter = IntProperty(
-        name="CF_Iter", default=1, min=1, max=15,
-        description="The number of iterations for coarsening flat areas")
-    smooth_iter = IntProperty(
-        name="S_Iter", default=10, min=1, max=50,
-        description="The number of iterations for coarsening dense areas")
+
+    flat_iter       = IntProperty(
+        name="Iter", default=1, min=1, max=15,
+        description="The number of coarse flat iterations to apply")
+
+    smooth_iter     = IntProperty(
+        name="Iter", default=10, min=1, max=50,
+        description="The number smoothing iterations to apply")
+
     preserve_ridges = BoolProperty(
         name="Preserve ridges", default=False,
-        description="Don't flip edges which lie on ridges")
-    advanced_options = BoolProperty(name="Advanced options", default=False,
+        description="Skip flipping of edges which lie on ridges")
+
+    advanced_options = BoolProperty(
+        name="Advanced options", default=False,
         description="Show additional surface mesh improvement options")
-    autocorrect_normals = BoolProperty(name="Autocorrect normals", default=True,
-        description="Auto fix inconsistent normals")
-    verbose = BoolProperty(name="Verbose", default=False,
-        description="Print information to console")
-    rings = IntProperty(
+
+    autocorrect_normals = BoolProperty(
+        name="Autocorrect normals", default=True,
+        description="Automatically flip normals when mesh volume is 'negative'")
+
+    verbose         = BoolProperty(name="Verbose", default=False,
+        description="Print additional information to console")
+
+    rings           = IntProperty(
         name="LST rings", default=2, min=1, max=5,
-        description="The number of neighborhood rings to consider for LST calculation"
-        )
+        description="The number of neighborhood rings to consider for LST calculation")
 
     def coarse_dense(self, context, report):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
@@ -214,13 +205,20 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             return gamerToBlender(report, gmesh)
         return False
 
-    # def refine_mesh(self, context, report):
-    #     gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-    #     if gmesh:
-    #         try:
-    #             g.refine_mesh(gmesh)
-    #         except Exception as e:
-    #             report({'ERROR'}, str(e))
-    #             return False
-    #         return gamerToBlender(report, gmesh)
-    #     return False
+
+classes = [GAMER_OT_coarse_dense,
+           GAMER_OT_coarse_flat,
+           GAMER_OT_smooth,
+           GAMER_OT_normal_smooth,
+           GAMER_OT_fill_holes,
+           SurfaceMeshImprovementProperties]
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))

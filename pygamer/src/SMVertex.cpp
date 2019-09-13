@@ -36,7 +36,7 @@ namespace py = pybind11;
 void init_SMVertex(py::module& mod){
     py::class_<SMVertex> vertex(mod, "Vertex",
         R"delim(
-            Wrapper around a :cpp:class:`SMVertex`.
+            Wrapper around a :cpp:class:`gamer::SMVertex`.
         )delim"
     );
 

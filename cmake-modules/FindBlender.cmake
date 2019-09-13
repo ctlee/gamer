@@ -31,23 +31,27 @@
 # BLENDER_PYTHON_EXECUTABLE     - Path to Blender embedded python
 # BLENDER_PYTHON_SIZEOF_VOID_P  - Number of bits for a void_p
 
-find_program(BLENDER_EXECUTABLE blender)
+find_program(BLENDER_EXECUTABLE NAMES blender Blender)
 
 if(BLENDER_EXECUTABLE)
+
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake-modules/blenderexec.py.in
+        ${CMAKE_CURRENT_BINARY_DIR}/blenderexec.py)
+
     # Get the python path and version from blender
-    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b -noaudio --factory-startup --python-expr
-        "import sys;import struct;import bpy;
-print(str(bpy.app.version[0]) + '.' + str(bpy.app.version[1]) + '.' + str(bpy.app.version[2]))
-print(bpy.utils.script_path_user())
-print('.'.join(str(v) for v in sys.version_info[0:3]));
-print(bpy.app.binary_path_python)
-print(struct.calcsize('@P'))
-"
+    execute_process(COMMAND ${BLENDER_EXECUTABLE} -b -noaudio --factory-startup --python ${CMAKE_CURRENT_BINARY_DIR}/blenderexec.py
                     RESULT_VARIABLE _BLENDER_SUCCESS
                     OUTPUT_VARIABLE _BLENDER_VALUES
                     ERROR_VARIABLE  _BLENDER_ERROR_VALUE)
 
     if(_BLENDER_SUCCESS MATCHES 0)
+        file(READ ${CMAKE_CURRENT_BINARY_DIR}/found_blender_info _BLENDER_VALUES)
+
+        if(GAMER_CMAKE_VERBOSE)
+            message(DEBUG "Blender Values Output:\n ${_BLENDER_VALUES}")
+        endif()
+
         string(REGEX REPLACE "\n" ";" _BLENDER_VALUES ${_BLENDER_VALUES})
         list(GET _BLENDER_VALUES 0 BLENDER_VERSION)
         list(GET _BLENDER_VALUES 1 BLENDER_SCRIPT_PATH)

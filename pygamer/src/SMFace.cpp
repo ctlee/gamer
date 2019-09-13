@@ -36,7 +36,7 @@ namespace py = pybind11;
 void init_SMFace(py::module& mod){
     py::class_<SMFace> face(mod, "Face",
         R"delim(
-            Wrapper around a :cpp:class:`SMFace`.
+            Wrapper around a :cpp:class:`gamer::SMFace`.
         )delim"
     );
     face.def(py::init<>(), "Default constructor");

@@ -36,7 +36,7 @@ namespace py = pybind11;
 void init_TMGlobal(py::module& mod){
     py::class_<TMGlobal> global(mod, "Global",
         R"delim(
-            Wrapper around a :cpp:class:`Global`.
+            Wrapper around a :cpp:class:`gamer::TMGlobal`.
         )delim"
     );
 

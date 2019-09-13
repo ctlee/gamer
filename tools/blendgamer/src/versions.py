@@ -137,8 +137,8 @@ def checkVersion():
                             if 'boundaries' in obj.keys():
                                 del obj['boundaries']
                 scene.gamer.gamer_version = str(newver)
-            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,3)) < 0 :
-                newver = (2,0,3)
+            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,4)) < 0 :
+                newver = (2,0,4)
                 print("Migrating from v%s to v%s"%(str(fileVer), str(newver)))
                 scene.gamer.gamer_version = str(newver)
             else:
@@ -168,3 +168,19 @@ def compare_version(v1, v2):
     """
     return cmp(*zip(*map(lambda x,y:(x or 0, y or 0),
             map(int, v1), map(int, v2))))
+
+
+classes = [GAMER_OT_prompt_update,
+           GAMER_OT_prompt_old_version,
+           GAMER_OT_update_to_2_0_1_from_v_0_1]
+
+def register():
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(make_annotations(cls))
+
+def unregister():
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(make_annotations(cls))
+
