@@ -513,15 +513,6 @@ struct initLocalOrientation<std::integral_constant<std::size_t, SurfaceMesh::top
 bool computeLocalOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
 
 /**
- * @brief      Compute the eigenvalues of a 3x3 matrix.
- *
- * @param[in]  mat   3x3 matrix to compute eigenvalues of.
- *
- * @return     Returns an Eigen::SelfAdjointEigenSolver containing the results
- */
-Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> &mat);
-
-/**
  * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
  *
  * @param[out] mesh      SurfaceMesh of interest.

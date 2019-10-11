@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include <Eigen/Dense>
 #include "gamer/tensor.h"
 
 /// Namespace for all things gamer
@@ -63,6 +64,11 @@ using f3Vector = tensor<float, 3, 1>;
 using i3Vector = tensor<int, 3, 1>;
 /// 3 Vector of std::size_t
 using szt3Vector = tensor<std::size_t, 3, 1>;
+/// Eigen 3x3 Matrix of type REAL
+using EigenMatrix = Eigen::Matrix<REAL, 3, 3>;
+/// Eigen 3 Vector of type REAL
+using EigenVector = Eigen::Matrix<REAL, 3, 1>;
+
 
 /**
  * @brief      Convert 3D array indices to the index of a flat

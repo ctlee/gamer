@@ -38,6 +38,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
+#include "gamer/EigenDiagonalization.h"
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
@@ -668,7 +669,12 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         if (flatRate > 0)
         {
             auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
-            auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
+
+            EigenVector eigenvalues;
+            EigenMatrix eigenvectors;
+
+            EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointMatrix(lst, eigenvalues, eigenvectors);
+
             // The closer this ratio is to 0 the flatter the local region.
             flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
         }
@@ -749,7 +755,12 @@ void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rin
 
         // Curvature as coarsening criteria
         auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
-        auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
+
+        EigenVector eigenvalues;
+        EigenMatrix eigenvectors;
+
+        EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointMatrix(lst, eigenvalues, eigenvectors);
+
         // The closer this ratio is to 0 the flatter the local region.
         flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], weight);
 

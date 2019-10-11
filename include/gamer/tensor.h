@@ -33,6 +33,8 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <Eigen/Dense>
+
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -717,6 +719,51 @@ class tensor
         auto data()
         {
             return _data.data();
+        }
+
+
+        /**
+         * @brief      Returns a eigen representation of the object.
+         *
+         * @return     Eigen representation of the object.
+         */
+        template <std::size_t D = _tensor_rank,
+            typename std::enable_if<D == 1, void>::type* = nullptr>
+        Eigen::Matrix<_ElemType, _vector_dimension, 1> toEigen()
+        {
+        return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>>(_data.data());
+        }
+
+
+        /**
+         * @brief      Returns a eigen representation of the object.
+         *
+         * @return     Eigen representation of the object.
+         */
+        template <std::size_t D = _tensor_rank,
+            typename std::enable_if<D == 1, void>::type* = nullptr>
+        operator Eigen::Matrix<_ElemType, _vector_dimension, 1> ()
+        {
+            return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>>(_data.data());
+        }
+
+        /**
+         * @brief      Returns a eigen representation of the object.
+         *
+         * @return     Eigen representation of the object.
+         */
+        template <std::size_t D = _tensor_rank,
+                typename std::enable_if<D == 2, void>::type* = nullptr>
+        Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> toEigen()
+        {
+            return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>>(_data.data());
+        }
+
+        template <std::size_t D = _tensor_rank,
+                typename std::enable_if<D == 2, void>::type* = nullptr>
+        operator Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> ()
+        {
+            return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>>(_data.data());
         }
 
         /**

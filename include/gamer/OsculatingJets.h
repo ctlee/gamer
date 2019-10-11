@@ -24,131 +24,14 @@
 
 #pragma once
 
-#include <Eigen/Core>
-// #include <Eigen/Sparse>
 #include <Eigen/Eigenvalues>
 #include <Eigen/SVD>
 
 #include "gamer/gamer.h"
+#include "gamer/EigenDiagonalization.h"
 
 namespace gamer
 {
-
-  typedef std::array<FT, dim>                  Vector;
-  typedef std::array<FT, dim*dim>              Matrix;
-  typedef std::array<FT, (dim * (dim+1) / 2)>  Covariance_matrix;
-
-  typedef Eigen::Matrix<FT, dim, dim>            EigenMatrix;
-  typedef Eigen::Matrix<FT, dim, 1>              EigenVector;
-
- /// Construct the covariance matrix
-  static EigenMatrix construct_covariance_matrix(const Covariance_matrix& cov)
-  {
-    EigenMatrix m;
-
-    for(std::size_t i=0; i<dim; ++i)
-    {
-      for(std::size_t j=i; j<dim; ++j)
-      {
-        m(i,j) = static_cast<float>(cov[(dim * i) + j - ((i * (i+1)) / 2)]);
-
-        if(i != j)
-          m(j,i) = m(i,j);
-      }
-    }
-
-    return m;
-  }
-
-  /// Fill `eigenvalues` with the eigenvalues and `eigenvectors` with
-  /// the eigenvectors of the selfadjoint matrix represented by `m`.
-  /// Eigenvalues are sorted by increasing order.
-  /// \return `true` if the operation was successful and `false` otherwise.
-  static bool diagonalize_selfadjoint_matrix(EigenMatrix& m,
-                                             EigenMatrix& eigenvectors,
-                                             EigenVector& eigenvalues)
-  {
-    Eigen::SelfAdjointEigenSolver<EigenMatrix> eigensolver;
-
-#ifndef DO_NOT_USE_EIGEN_COMPUTEDIRECT_FOR_DIAGONALIZATION
-    if(dim == 2 || dim == 3)
-      eigensolver.computeDirect(m);
-    else
-#endif
-      eigensolver.compute(m);
-
-    if(eigensolver.info() != Eigen::Success)
-      return false;
-
-    eigenvalues = eigensolver.eigenvalues();
-    eigenvectors = eigensolver.eigenvectors();
-
-    return true;
-  }
-
-public:
-  /// Fill `eigenvalues` with the eigenvalues of the covariance matrix represented by `cov`.
-  /// Eigenvalues are sorted by increasing order.
-  /// \return `true` if the operation was successful and `false` otherwise.
-  static bool diagonalize_selfadjoint_covariance_matrix(const Covariance_matrix& cov,
-                                                        Vector& eigenvalues)
-  {
-    EigenMatrix m = construct_covariance_matrix(cov);
-
-    // Diagonalizing the matrix
-    EigenVector eigenvalues_;
-    EigenMatrix eigenvectors_;
-    bool res = diagonalize_selfadjoint_matrix(m, eigenvectors_, eigenvalues_);
-
-    if(res)
-    {
-      for(std::size_t i=0; i<dim; ++i)
-        eigenvalues[i] = static_cast<FT>(eigenvalues_[i]);
-    }
-
-    return res;
-  }
-
-  /// Fill `eigenvalues` with the eigenvalues and `eigenvectors` with
-  /// the eigenvectors of the covariance matrix represented by `cov`.
-  /// Eigenvalues are sorted by increasing order.
-  /// \return `true` if the operation was successful and `false` otherwise.
-  static bool diagonalize_selfadjoint_covariance_matrix(const Covariance_matrix& cov,
-                                                        Vector& eigenvalues,
-                                                        Matrix& eigenvectors)
-  {
-    EigenMatrix m = construct_covariance_matrix(cov);
-
-    // Diagonalizing the matrix
-    EigenVector eigenvalues_;
-    EigenMatrix eigenvectors_;
-    bool res = diagonalize_selfadjoint_matrix(m, eigenvectors_, eigenvalues_);
-
-    if(res)
-    {
-      for(std::size_t i=0; i<dim; ++i)
-      {
-        eigenvalues[i] = static_cast<FT>(eigenvalues_[i]);
-
-        for(std::size_t j=0; j<dim; ++j)
-          eigenvectors[dim*i + j] = static_cast<FT>(eigenvectors_(j,i));
-      }
-    }
-    else{
-      for(std::size_t i=0; i<dim; ++i)
-      {
-        eigenvalues[i] = static_cast<FT>(0.);
-
-        for(std::size_t j=0; j<dim; ++j)
-          eigenvectors[dim*i + j] = static_cast<FT>(0.);
-      }
-    }
-
-    return res;
-  }
-
-
-
 
 template<class T>
 class Eigen_vector
@@ -239,14 +122,12 @@ struct Eigen_matrix
 class Eigen_svd
 {
     public:
-        // typedef double                                            REAL;
         typedef Eigen_vector<REAL>                                Vector;
         typedef Eigen_matrix<REAL>                                Matrix;
 
         static REAL solve(const Matrix &M, Vector &B)
         {
-            Eigen::JacobiSVD<Matrix::EigenType>
-            jacobiSvd(M.eigen_object(), ::Eigen::ComputeThinU | ::Eigen::ComputeThinV);
+            Eigen::JacobiSVD<Matrix::EigenType> jacobiSvd(M.eigen_object(), ::Eigen::ComputeThinU | ::Eigen::ComputeThinV);
             B.eigen_object() = jacobiSvd.solve(Vector::EigenType(B.eigen_object()));
             return jacobiSvd.singularValues().array().abs().maxCoeff() /
                    jacobiSvd.singularValues().array().abs().minCoeff();
@@ -494,14 +375,14 @@ compute_PCA(InputIterator begin, InputIterator end)
     //   3 4
     //     5
     std::array<REAL, 6> covariance = {{ xx, xy, xz, yy, yz, zz }};
-    std::array<REAL, 3> eigen_values = {{ 0., 0., 0. }};
-    std::array<REAL, 9> eigen_vectors = {{ 0., 0., 0. }};
+    EigenVector eigen_values;
+    EigenMatrix eigen_vectors;
 
     // solve for eigenvalues and eigenvectors.
     // eigen values are sorted in ascending order,
     // eigen vectors are sorted in accordance.
 
-    CGAL::Default_diagonalize_traits<REAL, 3>::diagonalize_selfadjoint_covariance_matrix
+    EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointCovMatrix
         (covariance, eigen_values, eigen_vectors);
 
     //store in m_pca_basis
