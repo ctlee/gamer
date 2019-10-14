@@ -115,11 +115,9 @@ class EigenDiagonalizeTraits
                                                     _EigenVector           &eigenvalues,
                                                     _EigenMatrix           &eigenvectors)
         {
-            EigenMatrix m = construct_covariance_matrix(cov);
+            _EigenMatrix m   = construct_covariance_matrix(cov);
             bool        res = diagonalizeSelfAdjointMatrix(m, eigenvalues, eigenvectors);
             return res;
         }
-
-
 }; // end class EigenDiagonalizeTraits
 }  // end namespace gamer

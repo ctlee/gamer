@@ -10,7 +10,8 @@
 // either version 3 of the License, or (at your option) any later version.
 //
 // Licensees holding a valid commercial license may use this file in
-// accordance with the commercial license agreement provided with the soREALware.
+// accordance with the commercial license agreement provided with the
+// soREALware.
 //
 // This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,89 +34,99 @@
 namespace gamer
 {
 
+inline
+unsigned int fact(unsigned int n)
+{
+    unsigned int i, p = 1;
+    for (i = 2; i <= n; i++)
+        p *= i;
+    return p;
+}
+
+
 template<class T>
 class Eigen_vector
-  : public Eigen::Matrix<T, Eigen::Dynamic, 1>
+    : public Eigen::Matrix<T, Eigen::Dynamic, 1>
 {
 // Public types
-public:
-  /// \name Types
-  /// @{
-  typedef T                                      NT;
+    public:
+        /// \name Types
+        /// @{
+        typedef T                                      NT;
 
-  /// The internal vector type from \ref thirdpartyEigen "Eigen".
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1>    EigenType;
-  /// @}
+        /// The internal vector type from \ref thirdpartyEigen "Eigen".
+        typedef Eigen::Matrix<T, Eigen::Dynamic, 1>    EigenType;
+    /// @}
 
 // Public operations
-public:
-  Eigen_vector<T>& operator=(const Eigen_vector<T>& other)
-  {
-    return static_cast<EigenType&>(*this) = other.eigen_object();
-  }
+    public:
+        Eigen_vector<T> &operator=(const Eigen_vector<T> &other)
+        {
+            return static_cast<EigenType &>(*this) = other.eigen_object();
+        }
 
-  Eigen_vector<T>& operator=(const EigenType& other)
-  {
-    return static_cast<Eigen_vector<T>&>(static_cast<EigenType&>(*this) = other);
-  }
-  Eigen_vector()
-    : EigenType()
-  {}
+        Eigen_vector<T> &operator=(const EigenType &other)
+        {
+            return static_cast<Eigen_vector<T> &>(static_cast<EigenType &>(*this) = other);
+        }
+        Eigen_vector()
+            : EigenType()
+        {}
 
-  /// Create a vector initialized with zeros.
-  Eigen_vector(std::size_t dimension)
-    : EigenType(static_cast<int>(dimension))
-  {
-    this->setZero();
-  }
+        /// Create a vector initialized with zeros.
+        Eigen_vector(std::size_t dimension)
+            : EigenType(static_cast<int>(dimension))
+        {
+            this->setZero();
+        }
 
-  /// Copy constructor.
-  Eigen_vector(const Eigen_vector& toCopy) : EigenType(toCopy) { }
+        /// Copy constructor.
+        Eigen_vector(const Eigen_vector &toCopy) : EigenType(toCopy) { }
 
-  ~Eigen_vector() { }
+        ~Eigen_vector() { }
 
-  /// Return the vector's number of coefficients.
-  int dimension() const { return static_cast<int>(this->size()); }
+        /// Return the vector's number of coefficients.
+        int dimension() const { return static_cast<int>(this->size()); }
 
-  /// Return the internal vector wrapped by this object.
-  const EigenType& eigen_object() const { return *this; }
+        /// Return the internal vector wrapped by this object.
+        const EigenType &eigen_object() const { return *this; }
 
-  /// Return the internal vector wrapped by this object.
-  EigenType& eigen_object() { return *this; }
+        /// Return the internal vector wrapped by this object.
+        EigenType &eigen_object() { return *this; }
 
-  /// Write access to a vector coefficient: `a_i` <- `value`.
-  void set(std::size_t i, NT value)
-  {
-    this->operator[](static_cast<int>(i)) = value;
-  }
+        /// Write access to a vector coefficient: `a_i` <- `value`.
+        void set(std::size_t i, NT value)
+        {
+            this->operator[](static_cast<int>(i)) = value;
+        }
 
-  /// Return a pointer to the data array of this vector.
-  NT* vector() { return this->data(); }
+        /// Return a pointer to the data array of this vector.
+        NT* vector() { return this->data(); }
 };
 
 template <class FT>
 struct Eigen_matrix
-  : public ::Eigen::Matrix<FT, ::Eigen::Dynamic, ::Eigen::Dynamic>
+    : public ::Eigen::Matrix<FT, ::Eigen::Dynamic, ::Eigen::Dynamic>
 {
-  /// The internal matrix type from \ref thirdpartyEigen "Eigen".
-  typedef ::Eigen::Matrix<FT, ::Eigen::Dynamic, ::Eigen::Dynamic> EigenType;
+    /// The internal matrix type from \ref thirdpartyEigen "Eigen".
+    typedef ::Eigen::Matrix<FT, ::Eigen::Dynamic, ::Eigen::Dynamic> EigenType;
 
-  /// Construct a matrix with `nr` rows and `nc` columns.
-  Eigen_matrix(std::size_t nr, std::size_t nc) : EigenType(nr, nc) { }
+    /// Construct a matrix with `nr` rows and `nc` columns.
+    Eigen_matrix(std::size_t nr, std::size_t nc) : EigenType(nr, nc) { }
 
-  /// Return the matrix number of rows.
-  std::size_t number_of_rows() const { return this->rows(); }
-  /// Return the matrix number of columns.
-  std::size_t number_of_columns() const { return this->cols(); }
+    /// Return the matrix number of rows.
+    std::size_t number_of_rows() const { return this->rows(); }
+    /// Return the matrix number of columns.
+    std::size_t number_of_columns() const { return this->cols(); }
 
-  /// Return the value of the matrix at position (i,j).
-  FT operator()( std::size_t i , std::size_t j ) const { return EigenType::operator()(i,j); }
+    /// Return the value of the matrix at position (i,j).
+    FT operator()( std::size_t i, std::size_t j ) const { return EigenType::operator()(i, j); }
 
-  /// Write access to a matrix coefficient: `a_ij` <- `val`.
-  void set(std::size_t i, std::size_t j, FT value) { this->coeffRef(i,j) = value; }
+    /// Write access to a matrix coefficient: `a_ij` <- `val`.
+    void set(std::size_t i, std::size_t j, FT value) { this->coeffRef(i, j) = value; }
 
-  /// Return the internal matrix, with type `EigenType`.
-  const EigenType& eigen_object() const { return static_cast<const EigenType&>(*this); }
+    /// Return the internal matrix, with type `EigenType`.
+    const EigenType &eigen_object() const { return static_cast<const EigenType &>(*this); }
 };
 
 
@@ -141,7 +152,7 @@ class Monge_via_jet_fitting
         {
             protected:
                 Vector m_origin_pt;
-                Vector m_d1;   // Maximal principal direction
+                Vector m_d1; // Maximal principal direction
                 Vector m_d2; // Minimal principal direction
                 Vector m_n;  // Normal direction
 
@@ -178,28 +189,34 @@ class Monge_via_jet_fitting
 
                 const REAL principal_curvatures(size_t i) const
                 {
-                    if ((i == 0 || i == 1) && coefficients().size() >= 2) {
+                    if ((i == 0 || i == 1) && coefficients().size() >= 2)
+                    {
                         return coefficients()[i];
                     }
-                    else{
+                    else
+                    {
                         throw std::runtime_error("Index out of bounds for principal curvatures.");
                     }
                 }
                 const REAL third_order_coefficients(size_t i) const
                 {
-                    if (i <= 3 && coefficients().size() >= 6) {
+                    if (i <= 3 && coefficients().size() >= 6)
+                    {
                         return coefficients()[i+2];
                     }
-                    else{
+                    else
+                    {
                         throw std::runtime_error("Index out of bounds for third order coefficients.");
                     }
                 }
                 const REAL fourth_order_coefficients(size_t i) const
                 {
-                    if (i <= 4 && coefficients().size() >= 11 ) {
+                    if (i <= 4 && coefficients().size() >= 11)
+                    {
                         return coefficients()[i+6];
                     }
-                    else{
+                    else
+                    {
                         throw std::runtime_error("Index out of bounds for fourth order coefficients.");
                     }
                 }
@@ -229,6 +246,11 @@ class Monge_via_jet_fitting
         /// Default constructor
         Monge_via_jet_fitting();
 
+        /**
+         * { item_description }
+         * @param d         Degree of jet 1 <= degree <= 4
+         * @param dprime    Degree of the Monge representation
+         */
         template <class InputIterator>
         Monge_form operator()(InputIterator begin, InputIterator end,
                               size_t d, size_t dprime);
@@ -293,7 +315,7 @@ class Monge_via_jet_fitting
 
         friend
         std::ostream &
-        operator<<(std::ostream &out_stream,
+        operator<<(std::ostream                                     &out_stream,
                    const typename Monge_via_jet_fitting::Monge_form &monge)
         {
             monge.dump_verbose(out_stream);
@@ -306,17 +328,23 @@ class Monge_via_jet_fitting
 template <class InputIterator>
 typename Monge_via_jet_fitting::Monge_form
 Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
-           size_t d, size_t dprime)
+                                  size_t d, size_t dprime)
 {
     // precondition: on the degrees, jet and monge
     // CGAL_precondition( (d >= 1) && (dprime >= 1)
     //                    && (dprime <= 4) && (dprime <= d) );
+    if (!((d >= 1) && (dprime >= 1) && (dprime <= 4) && (dprime <= d)))
+        throw std::runtime_error("Jet and Monge Degrees are invalid");
+
     this->deg = static_cast<int>(d);
     this->deg_monge = static_cast<int>(dprime);
     this->nb_d_jet_coeff = static_cast<int>((d+1)*(d+2)/2);
     this->nb_input_pts   = static_cast<int>(end - begin);
     // precondition: solvable ls system
     // CGAL_precondition( nb_input_pts >= nb_d_jet_coeff );
+    if (nb_input_pts < nb_d_jet_coeff)
+        throw std::runtime_error("The Jet fitting linear system is not solvable.");
+
 
     //Initialize
     Monge_form monge_form;
@@ -336,14 +364,14 @@ Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
 
 template <class InputIterator>
 void Monge_via_jet_fitting::
-compute_PCA(InputIterator begin, InputIterator end)
+    compute_PCA(InputIterator begin, InputIterator end)
 {
-    int n = this->nb_input_pts;
-    REAL  x, y, z,
-        sumX = 0., sumY = 0., sumZ = 0.,
-        sumX2 = 0., sumY2 = 0., sumZ2 = 0.,
-        sumXY = 0., sumXZ = 0., sumYZ = 0.,
-        xx, yy, zz, xy, xz, yz;
+    int  n = this->nb_input_pts;
+    REAL x, y, z,
+         sumX = 0., sumY = 0., sumZ = 0.,
+         sumX2 = 0., sumY2 = 0., sumZ2 = 0.,
+         sumXY = 0., sumXZ = 0., sumYZ = 0.,
+         xx, yy, zz, xy, xz, yz;
 
     for (; begin != end; begin++)
     {
@@ -375,37 +403,38 @@ compute_PCA(InputIterator begin, InputIterator end)
     //   3 4
     //     5
     std::array<REAL, 6> covariance = {{ xx, xy, xz, yy, yz, zz }};
-    EigenVector eigen_values;
-    EigenMatrix eigen_vectors;
+    EigenVector         eigenvalues;
+    EigenMatrix         eigenvectors;
 
     // solve for eigenvalues and eigenvectors.
     // eigen values are sorted in ascending order,
     // eigen vectors are sorted in accordance.
-
     EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointCovMatrix
-        (covariance, eigen_values, eigen_vectors);
+        (covariance, eigenvalues, eigenvectors);
 
     //store in m_pca_basis
     for (int i = 0; i < 3; i++)
     {
-        m_pca_basis[i].first =  eigen_values[2-i];
+        m_pca_basis[i].first =  eigenvalues[2-i];
     }
 
-    Vector v1({eigen_vectors[6], eigen_vectors[7], eigen_vectors[8]});
+    Vector v1({eigenvectors[6], eigenvectors[7], eigenvectors[8]});
     m_pca_basis[0].second = v1;
-    Vector v2({eigen_vectors[3], eigen_vectors[4], eigen_vectors[5]});
+    Vector v2({eigenvectors[3], eigenvectors[4], eigenvectors[5]});
     m_pca_basis[1].second = v2;
-    Vector v3({eigen_vectors[0], eigen_vectors[1], eigen_vectors[2]});
+    Vector v3({eigenvectors[0], eigenvectors[1], eigenvectors[2]});
     m_pca_basis[2].second = v3;
     switch_to_direct_orientation(m_pca_basis[0].second,
                                  m_pca_basis[1].second,
                                  m_pca_basis[2].second);
 
+    EigenMatrix tmp;
+    tmp << m_pca_basis[0].second[0], m_pca_basis[0].second[1], m_pca_basis[0].second[2],
+        m_pca_basis[1].second[0], m_pca_basis[1].second[1], m_pca_basis[1].second[2],
+        m_pca_basis[2].second[0], m_pca_basis[2].second[1], m_pca_basis[2].second[2];
+
     //Store the change of basis W->F
-    Aff_transformation
-        change_basis (m_pca_basis[0].second[0], m_pca_basis[0].second[1], m_pca_basis[0].second[2],
-                      m_pca_basis[1].second[0], m_pca_basis[1].second[1], m_pca_basis[1].second[2],
-                      m_pca_basis[2].second[0], m_pca_basis[2].second[1], m_pca_basis[2].second[2]);
+    Aff_transformation change_basis (tmp);
 
     this->change_world2fitting = change_basis;
 }

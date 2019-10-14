@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "gamer/gamer"
+#include <Eigen/core>
 
 // #include <casc/casc>
 
@@ -21,7 +22,15 @@
 int  main(int argc, char *argv[])
 {
 
-    std::array<REAL, 6> covariance = {{ 1, 2, 3, 4, 5, 6 }};
+    // std::array<REAL, 6> covariance = {{ 1, 2, 3, 4, 5, 6 }};
+    Eigen::Matrix<double,3,3> m;
+    m << 1,2,3,4,5,6,7,8,9;
+
+    for (int i =0; i < 9; ++i){
+      std::cout << m(i) << std::endl;
+    }
+
+    std::cout << m(1,2) << std::endl;
 
     std::cout << "EOF" << std::endl;
 }

@@ -94,6 +94,8 @@ void Monge_via_jet_fitting::Monge_form::
     dump_4ogl(std::ostream &out_stream, const REAL scale)
 {
     // CGAL_precondition( coefficients().size() >= 2 );
+    if (coefficients().size() < 2)
+        throw std::runtime_error("Insufficient coefficients");
     out_stream << origin()  << " "
                << maximal_principal_direction() * scale << " "
                << minimal_principal_direction() * scale << " "
@@ -110,8 +112,6 @@ Monge_via_jet_fitting::Monge_via_jet_fitting()
     m_pca_basis = std::vector< std::pair<REAL, Vector> >(3);
 }
 
-
-
 template <class InputIterator>
 void Monge_via_jet_fitting::
 fill_matrix(InputIterator begin, InputIterator end,
@@ -123,8 +123,8 @@ fill_matrix(InputIterator begin, InputIterator end,
     //translation ($-p$) and multiplication by $ P_{W\rightarrow F}$.
     Vector            orig({0., 0., 0.});
     Vector           v_point0_orig(orig - point0);
-    Aff_transformation transl(CGAL::TRANSLATION, v_point0_orig);
-    this->translate_p0 = transl;
+
+    this->translate_p0 = Eigen::Translation3d(v_point0_orig);
     Aff_transformation transf_points = this->change_world2fitting *
         this->translate_p0;
 
@@ -132,27 +132,38 @@ fill_matrix(InputIterator begin, InputIterator end,
     std::vector<Vector> pts_in_fitting_basis;
     pts_in_fitting_basis.reserve(this->nb_input_pts);
 
-    CGAL_For_all(begin, end){
-        Vector cur_pt = transf_points(D2L_converter(*begin));
+
+    for(auto it = begin; it != end; ++it){
+        Vector cur_pt = transf_points(D2L_converter(*it));
         pts_in_fitting_basis.push_back(cur_pt);
     }
+    // CGAL_For_all(begin, end){
+    //     Vector cur_pt = transf_points(D2L_converter(*begin));
+    //     pts_in_fitting_basis.push_back(cur_pt);
+    // }
 
     //Compute preconditionning
     REAL precond = 0.;
     typename std::vector<Vector>::iterator itb = pts_in_fitting_basis.begin(),
                                             ite = pts_in_fitting_basis.end();
-    CGAL_For_all(itb, ite) precond += CGAL::abs(itb->x()) + CGAL::abs(itb->y());
+
+    for(auto it = itb; it != ite; ++it){
+        precond += std::abs((*it)[0]) + std::abs((*it)[1]);
+    }
+    // CGAL_For_all(itb, ite) precond += CGAL::abs(itb->x()) + CGAL::abs(itb->y());
     precond /= 2*this->nb_input_pts;
     this->preconditionning = precond;
     //fill matrices M and Z
     itb = pts_in_fitting_basis.begin();
     int line_count = 0;
     REAL  x, y;
-    CGAL_For_all(itb, ite) {
-        x = itb->x();
-        y = itb->y();
+
+    for(auto it = itb; it != ite; ++it){
+    // CGAL_For_all(itb, ite) {
+        x = (*it)[0]; // x
+        y = (*it)[1]; // y
         //  Z[line_count] = itb->z();
-        Z.set(line_count, itb->z());
+        Z.set(line_count, (*it)[2]); //itb->z());
         for (std::size_t k = 0; k <= d; k++)
         {
             for (std::size_t i = 0; i <= k; i++)
@@ -187,10 +198,8 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         Vector normal({-A[1], -A[2], 1.});
         REAL       norm2 = normal | normal;
         normal = normal / std::sqrt(norm2);
-        monge_form.origin() = L2D_converter(
-            (this->translate_p0.inverse() *
-             this->change_world2fitting.inverse())(orig_monge) );
-        monge_form.normal_direction() = L2D_converter(this->change_world2fitting.inverse()(normal));
+        monge_form.origin().toEigen() = (this->translate_p0.inverse() * this->change_world2fitting.inverse())*orig_monge.toEigen();
+        monge_form.normal_direction().toEigen() = this->change_world2fitting.inverse() * normal.toEigen();
     }
     // else (deg_monge >= 2) then 2nd order info are computed
     else
@@ -210,11 +219,13 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         //                   =(n.Xuu, n.Xuv, n.Xuv, n.Xvv)
         //ppal curv are the opposite of the eigenvalues of Weingarten or the
         //  eigenvalues of weingarten = -Weingarten = I^{-1}II
-        typedef typename CGAL::Linear_algebraCd<REAL>::Matrix Matrix;
+
+        using Matrix = Eigen::Matrix<REAL,2,2>;
+        // typedef typename CGAL::Linear_algebraCd<REAL>::Matrix Matrix;
 
         REAL     e = 1+A[1]*A[1], f = A[1]*A[2], g = 1+A[2]*A[2],
                l = A[3], m = A[4], n = A[5];
-        Matrix weingarten(2, 2, 0.);
+        Matrix weingarten;
         weingarten(0, 0) = (g*l-f*m)/ (std::sqrt(norm2)*norm2);
         weingarten(0, 1) = (g*m-f*n)/ (std::sqrt(norm2)*norm2);
         weingarten(1, 0) = (e*m-f*l)/ (std::sqrt(norm2)*norm2);
@@ -227,47 +238,59 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         REAL       normXu = std::sqrt( Xu|Xu );
         Y = Xu / normXu;
         REAL       XudotXv = Xu | Xv;
-        Z = Xv - XudotXv * Xu / (normXu|normXu);
+        Z = Xv - XudotXv * Xu / (normXu*normXu);
         REAL       normZ = std::sqrt( Z|Z );
         Z = Z / normZ;
-        Matrix   change_XuXv2YZ(2, 2, 0.);
+        Matrix   change_XuXv2YZ;
         change_XuXv2YZ(0, 0) = 1 / normXu;
         change_XuXv2YZ(0, 1) = -XudotXv / (normXu * normXu * normZ);
         change_XuXv2YZ(1, 0) = 0;
         change_XuXv2YZ(1, 1) = 1 / normZ;
-        REAL     det = 0.;
-        Matrix inv = CGAL::Linear_algebraCd<REAL>::inverse ( change_XuXv2YZ, det );
+
+        Matrix inv = change_XuXv2YZ.inverse();
+        // REAL     det = change_XuXv2YZ.determinant();
+
         //in the new orthonormal basis (Y,Z) of the tangent plane :
-        weingarten = inv *(1/det) * weingarten * change_XuXv2YZ;
+        // weingarten = inv *(1/det) * weingarten * change_XuXv2YZ;
+        weingarten = inv * weingarten * change_XuXv2YZ;
 
         // diagonalization of weingarten
         std::array<REAL, 3> W = {{ weingarten(0, 0), weingarten(1, 0), weingarten(1, 1) }};
-        std::array<REAL, 2> eval = {{ 0., 0. }};
-        std::array<REAL, 4> evec = {{ 0., 0., 0., 0. }};
+
+        // std::array<REAL, 2> eval = {{ 0., 0. }};
+        // std::array<REAL, 4> evec = {{ 0., 0., 0., 0. }};
+        Eigen::Matrix<REAL,2,1> eval;
+        Eigen::Matrix<REAL,2,2> evec;
 
         //eval in increasing order
-        CGAL::Default_diagonalize_traits<REAL, 2>::diagonalize_selfadjoint_covariance_matrix
-            (W, eval, evec);
+        EigenDiagonalizeTraits<REAL, 2>::diagonalizeSelfAdjointCovMatrix(W, eval, evec);
+        // CGAL::Default_diagonalize_traits<REAL, 2>::diagonalize_selfadjoint_covariance_matrix
+            // (W, eval, evec);
 
-        Vector d_max = evec[2]*Y + evec[3]*Z,
-                 d_min = evec[0]*Y + evec[1]*Z;
+        Vector d_max = evec(2)*Y + evec(3)*Z,
+                 d_min = evec(0)*Y + evec(1)*Z;
 
         switch_to_direct_orientation(d_max, d_min, normal);
-        Aff_transformation change_basis (d_max[0], d_max[1], d_max[2],
-                                         d_min[0], d_min[1], d_min[2],
-                                         normal[0], normal[1], normal[2]);
+        // Aff_transformation change_basis (d_max[0], d_max[1], d_max[2],
+        //                                  d_min[0], d_min[1], d_min[2],
+        //                                  normal[0], normal[1], normal[2]);
+        EigenMatrix tmp;
+        tmp << d_max[0], d_max[1], d_max[2],
+               d_min[0], d_min[1], d_min[2],
+               normal[0], normal[1], normal[2];
+        Aff_transformation change_basis (tmp);
+
         this->change_fitting2monge = change_basis;
 
         //store the monge basis origin and vectors with their world coord
         //store ppal curv
-        monge_form.origin() = L2D_converter(
-            (this->translate_p0.inverse() *
-             this->change_world2fitting.inverse())(orig_monge ));
-        monge_form.maximal_principal_direction() = L2D_converter(this->change_world2fitting.inverse()(d_max));
-        monge_form.minimal_principal_direction() = L2D_converter(this->change_world2fitting.inverse()(d_min));
-        monge_form.normal_direction() = L2D_converter(this->change_world2fitting.inverse()(normal));
-        monge_form.coefficients()[0]  = L2D_NTconverter()(eval[1]);
-        monge_form.coefficients()[1]  = L2D_NTconverter()(eval[0]);
+        monge_form.origin().toEigen() = (this->translate_p0.inverse() *
+             this->change_world2fitting.inverse())*orig_monge.toEigen();
+        monge_form.maximal_principal_direction().toEigen() = this->change_world2fitting.inverse()*d_max.toEigen();
+        monge_form.minimal_principal_direction().toEigen() = this->change_world2fitting.inverse()*d_min.toEigen();
+        monge_form.normal_direction().toEigen() = this->change_world2fitting.inverse()*normal.toEigen();
+        monge_form.coefficients()[0]  = eval[1];
+        monge_form.coefficients()[1]  = eval[0];
     }
     //end else
 }
@@ -292,15 +315,15 @@ void Monge_via_jet_fitting::compute_Monge_coefficients(REAL* A, std::size_t dpri
     //       +...
     // p stores change_fitting2monge^{-1}=change_fitting2monge^{T}
     REAL p[3][3];
-    p[0][0] = this->change_fitting2monge.m(0, 0);
-    p[1][0] = this->change_fitting2monge.m(0, 1);
-    p[2][0] = this->change_fitting2monge.m(0, 2);
-    p[0][1] = this->change_fitting2monge.m(1, 0);
-    p[1][1] = this->change_fitting2monge.m(1, 1);
-    p[2][1] = this->change_fitting2monge.m(1, 2);
-    p[0][2] = this->change_fitting2monge.m(2, 0);
-    p[1][2] = this->change_fitting2monge.m(2, 1);
-    p[2][2] = this->change_fitting2monge.m(2, 2);
+    p[0][0] = this->change_fitting2monge(0, 0);
+    p[1][0] = this->change_fitting2monge(0, 1);
+    p[2][0] = this->change_fitting2monge(0, 2);
+    p[0][1] = this->change_fitting2monge(1, 0);
+    p[1][1] = this->change_fitting2monge(1, 1);
+    p[2][1] = this->change_fitting2monge(1, 2);
+    p[0][2] = this->change_fitting2monge(2, 0);
+    p[1][2] = this->change_fitting2monge(2, 1);
+    p[2][2] = this->change_fitting2monge(2, 2);
 
     // formula are designed for w=sum( Aij ui vj), but we have J_A = sum(
     // Aij/i!j! ui vj)
@@ -406,10 +429,10 @@ void Monge_via_jet_fitting::compute_Monge_coefficients(REAL* A, std::size_t dpri
     REAL b2 = 1/(f3*f3)*(-f122*f3+f13*f22);
     REAL b3 = -1/(f3*f3)*(f222*f3-3*f23*f22);
 
-    monge_form.coefficients()[2] = L2D_NTconverter()(b0);
-    monge_form.coefficients()[3] = L2D_NTconverter()(b1);
-    monge_form.coefficients()[4] = L2D_NTconverter()(b2);
-    monge_form.coefficients()[5] = L2D_NTconverter()(b3);
+    monge_form.coefficients()[2] = b0;
+    monge_form.coefficients()[3] = b1;
+    monge_form.coefficients()[4] = b2;
+    monge_form.coefficients()[5] = b3;
 
     if (dprime == 4)
     {
