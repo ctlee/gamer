@@ -345,16 +345,22 @@ Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
     if (nb_input_pts < nb_d_jet_coeff)
         throw std::runtime_error("The Jet fitting linear system is not solvable.");
 
-
     //Initialize
     Monge_form monge_form;
     monge_form.set_up(dprime);
     //for the system MA=Z
+
+    std::cout << "Nb input pts: " << nb_input_pts << std::endl;
+    std::cout << "NB-d_jet coeff: " << nb_d_jet_coeff << std::endl;
     LAMatrix M(nb_input_pts, nb_d_jet_coeff);
     LAVector Z(nb_input_pts);
 
     compute_PCA(begin, end);
     fill_matrix(begin, end, d, M, Z); //with precond
+
+    std::cout << "M:" << std::endl << M << std::endl;
+    std::cout << "Z:" << std::endl << Z << std::endl;
+
     solve_linear_system(M, Z);        //correct with precond
     compute_Monge_basis(Z.vector(), monge_form);
     if (dprime >= 3)
@@ -375,10 +381,13 @@ void Monge_via_jet_fitting::
 
     for (; begin != end; begin++)
     {
-        Vector lp = *begin;
+        // TODO: clean up this messiness...
+        Vector lp = (**begin).position;
+        // std::cout << lp << std::endl;
         x = lp[0];
         y = lp[1];
         z = lp[2];
+        // std::cout << x << " " << y << " " << z << std::endl;
         sumX  += x / n;
         sumY  += y / n;
         sumZ  += z / n;
@@ -411,31 +420,115 @@ void Monge_via_jet_fitting::
     // eigen vectors are sorted in accordance.
     EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointCovMatrix
         (covariance, eigenvalues, eigenvectors);
+    // std::cout << "Eigenvalues: " << eigenvalues << std::endl;
+    // std::cout << "Eigenvectors: " << std::endl << eigenvectors << std::endl;
 
     //store in m_pca_basis
     for (int i = 0; i < 3; i++)
     {
-        m_pca_basis[i].first =  eigenvalues[2-i];
+        // std::cout << "Eigenvalue[" << i << "]: " << eigenvalues[2-i] << std::endl;;
+        m_pca_basis[i].first = eigenvalues[2-i];
     }
 
-    Vector v1({eigenvectors[6], eigenvectors[7], eigenvectors[8]});
+    Vector v1({eigenvectors(6), eigenvectors(7), eigenvectors(8)});
     m_pca_basis[0].second = v1;
-    Vector v2({eigenvectors[3], eigenvectors[4], eigenvectors[5]});
+    // std::cout << v1 << std::endl;
+    Vector v2({eigenvectors(3), eigenvectors(4), eigenvectors(5)});
     m_pca_basis[1].second = v2;
-    Vector v3({eigenvectors[0], eigenvectors[1], eigenvectors[2]});
+    // std::cout << v2 << std::endl;
+    Vector v3({eigenvectors(0), eigenvectors(1), eigenvectors(2)});
     m_pca_basis[2].second = v3;
+    // std::cout << v3 << std::endl;
+
     switch_to_direct_orientation(m_pca_basis[0].second,
                                  m_pca_basis[1].second,
                                  m_pca_basis[2].second);
+
+    // std::cout << m_pca_basis[0].second << std::endl
+    //           << m_pca_basis[1].second << std::endl
+    //           << m_pca_basis[2].second << std::endl;
+
 
     EigenMatrix tmp;
     tmp << m_pca_basis[0].second[0], m_pca_basis[0].second[1], m_pca_basis[0].second[2],
         m_pca_basis[1].second[0], m_pca_basis[1].second[1], m_pca_basis[1].second[2],
         m_pca_basis[2].second[0], m_pca_basis[2].second[1], m_pca_basis[2].second[2];
 
-    //Store the change of basis W->F
-    Aff_transformation change_basis (tmp);
+    // std::cout << "tmp: " << std::endl << tmp << std::endl;
 
+    //Store the change of basis W->F
+    Aff_transformation change_basis(tmp);
+    std::cout << change_basis.data() << std::endl;
     this->change_world2fitting = change_basis;
+}
+
+
+template <class InputIterator>
+void Monge_via_jet_fitting::
+fill_matrix(InputIterator begin, InputIterator end,
+            std::size_t d, LAMatrix &M, LAVector &Z)
+{
+    //origin of fitting coord system = first input data point
+    Vector point0 = (**begin).position;
+    //transform coordinates of sample points with a
+    //translation ($-p$) and multiplication by $ P_{W\rightarrow F}$.
+    Vector orig({0., 0., 0.});
+    Vector v_point0_orig(orig - point0);
+
+    this->translate_p0 = Eigen::Translation3d(v_point0_orig);
+    Aff_transformation transf_points = this->change_world2fitting *
+                                       this->translate_p0;
+
+    //compute and store transformed points
+    std::vector<Vector> pts_in_fitting_basis;
+    pts_in_fitting_basis.reserve(this->nb_input_pts);
+
+
+    for(auto it = begin; it != end; ++it) {
+        Vector cur_pt;
+        cur_pt.toEigen() = transf_points*(**it).position.toEigen();
+        pts_in_fitting_basis.push_back(cur_pt);
+    }
+    // CGAL_For_all(begin, end){
+    //     Vector cur_pt = transf_points(D2L_converter(*begin));
+    //     pts_in_fitting_basis.push_back(cur_pt);
+    // }
+
+    //Compute preconditionning
+    REAL precond = 0.;
+    typename std::vector<Vector>::iterator itb = pts_in_fitting_basis.begin(),
+                                           ite = pts_in_fitting_basis.end();
+
+    for(auto it = itb; it != ite; ++it) {
+        precond += std::abs( (*it)[0] ) + std::abs( (*it)[1] );
+    }
+    // CGAL_For_all(itb, ite) precond += CGAL::abs(itb->x()) + CGAL::abs(itb->y());
+    precond /= 2 * this->nb_input_pts;
+    this->preconditionning = precond;
+    //fill matrices M and Z
+    itb = pts_in_fitting_basis.begin();
+    int line_count = 0;
+    REAL x, y;
+
+    for(auto it = itb; it != ite; ++it) {
+        // CGAL_For_all(itb, ite) {
+        x = (*it)[0];         // x
+        y = (*it)[1];         // y
+        //  Z[line_count] = itb->z();
+        Z.set(line_count, (*it)[2]);         //itb->z());
+        for (std::size_t k = 0; k <= d; k++)
+        {
+            for (std::size_t i = 0; i <= k; i++)
+            {
+                M.set( line_count, k * (k + 1) / 2 + i,
+                       std::pow( x, static_cast<int>(k - i) )
+                       * std::pow( y, static_cast<int>(i) )
+                       / (fact( static_cast<unsigned int>(i) ) *
+                          fact( static_cast<unsigned int>(k - i) )
+                          * std::pow( this->preconditionning, static_cast<int>(k) ) ) );
+            }
+        }
+        line_count++;
+    }
 }
 } // end namespace gamer

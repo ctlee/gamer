@@ -37,87 +37,87 @@ namespace gamer
 template <typename T = REAL, std::size_t dim = 3>
 class EigenDiagonalizeTraits
 {
-    public:
-        using CovarianceMatrix = std::array<T, (dim*(dim+1)/2)>;
+public:
+using CovarianceMatrix = std::array<T, (dim * (dim + 1) / 2)>;
 
-    private:
-        /// Eigen 3x3 Matrix of type REAL
-        using _EigenMatrix = Eigen::Matrix<T, dim, dim>;
-        /// Eigen 3 Vector of type REAL
-        using _EigenVector = Eigen::Matrix<T, dim, 1>;
+private:
+/// Eigen 3x3 Matrix of type REAL
+using _EigenMatrix = Eigen::Matrix<T, dim, dim>;
+/// Eigen 3 Vector of type REAL
+using _EigenVector = Eigen::Matrix<T, dim, 1>;
 
-        /**
-         * @brief     Construct a covariance matrix
-         */
-        static _EigenMatrix construct_covariance_matrix(const CovarianceMatrix &cov)
+/**
+ * @brief     Construct a covariance matrix
+ */
+static _EigenMatrix construct_covariance_matrix(const CovarianceMatrix &cov)
+{
+    _EigenMatrix m;
+
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+        for (std::size_t j = i; j < 3; ++j)
         {
-            _EigenMatrix m;
+            // std::cout << "Index: " << (3 * i) + j - ((i * (i + 1)) / 2) << std::endl;
+            m(i, j) = static_cast<float>(cov[(3 * i) + j - ( (i * (i + 1) ) / 2)]);
 
-            for (std::size_t i = 0; i < 3; ++i)
-            {
-                for (std::size_t j = i; j < 3; ++j)
-                {
-                    std::cout << "Index: " << (3 * i) + j - ((i * (i+1)) / 2) << std::endl;
-                    m(i, j) = static_cast<float>(cov[(3 * i) + j - ((i * (i+1)) / 2)]);
-
-                    if (i != j)
-                        m(j, i) = m(i, j);
-                }
-            }
-            return m;
+            if (i != j)
+                m(j, i) = m(i, j);
         }
+    }
+    return m;
+}
 
-    public:
-        /**
-         * @brief      Diagonalize a Self Adjoint Matrix
-         *
-         * @param[in]  mat           Self adjoint matrix to diagonalize
-         * @param[out] eigenvalues   Resulting eigenvalues
-         * @param[out] eigenvectors  Resulting eigenvectors
-         *
-         * @return     True on success
-         */
-        static bool diagonalizeSelfAdjointMatrix(const _EigenMatrix &mat,
-                                                 _EigenVector       &eigenvalues,
-                                                 _EigenMatrix       &eigenvectors                                                 )
-        {
-            Eigen::SelfAdjointEigenSolver<_EigenMatrix> eigensolver;
+public:
+/**
+ * @brief      Diagonalize a Self Adjoint Matrix
+ *
+ * @param[in]  mat           Self adjoint matrix to diagonalize
+ * @param[out] eigenvalues   Resulting eigenvalues
+ * @param[out] eigenvectors  Resulting eigenvectors
+ *
+ * @return     True on success
+ */
+static bool diagonalizeSelfAdjointMatrix(const _EigenMatrix &mat,
+                                         _EigenVector       &eigenvalues,
+                                         _EigenMatrix       &eigenvectors                                                 )
+{
+    Eigen::SelfAdjointEigenSolver<_EigenMatrix> eigensolver;
 
-            if (dim == 2 || dim == 3)
-                eigensolver.computeDirect(mat);
-            else
-                eigensolver.compute(mat); // More accurate but slower
+    if (dim == 2 || dim == 3)
+        eigensolver.computeDirect(mat);
+    else
+        eigensolver.compute(mat);         // More accurate but slower
 
-            if (eigensolver.info() != Eigen::Success)
-            {
-                return false;
-                // std::stringstream ss;
-                // ss << "getEigenvalues has encountered Eigen error " <<
-                // eigensolver.info();
-                // throw std::runtime_error(ss.str());
-            }
+    if (eigensolver.info() != Eigen::Success)
+    {
+        return false;
+        // std::stringstream ss;
+        // ss << "getEigenvalues has encountered Eigen error " <<
+        // eigensolver.info();
+        // throw std::runtime_error(ss.str());
+    }
 
-            eigenvalues  = eigensolver.eigenvalues();
-            eigenvectors = eigensolver.eigenvectors();
-            return true;
-        }
+    eigenvalues  = eigensolver.eigenvalues();
+    eigenvectors = eigensolver.eigenvectors();
+    return true;
+}
 
-        /**
-         * @brief      Diagonalize an upper triangular covariance matrix,
-         *
-         * @param[in]  cov           Upper triangular covariance matrix
-         * @param[out] eigenvalues   Resulting eigenvalues
-         * @param[out] eigenvectors  Resulting eigenvectors
-         *
-         * @return     True on success
-         */
-        static bool diagonalizeSelfAdjointCovMatrix(const CovarianceMatrix &cov,
-                                                    _EigenVector           &eigenvalues,
-                                                    _EigenMatrix           &eigenvectors)
-        {
-            _EigenMatrix m   = construct_covariance_matrix(cov);
-            bool        res = diagonalizeSelfAdjointMatrix(m, eigenvalues, eigenvectors);
-            return res;
-        }
+/**
+ * @brief      Diagonalize an upper triangular covariance matrix,
+ *
+ * @param[in]  cov           Upper triangular covariance matrix
+ * @param[out] eigenvalues   Resulting eigenvalues
+ * @param[out] eigenvectors  Resulting eigenvectors
+ *
+ * @return     True on success
+ */
+static bool diagonalizeSelfAdjointCovMatrix(const CovarianceMatrix &cov,
+                                            _EigenVector           &eigenvalues,
+                                            _EigenMatrix           &eigenvectors)
+{
+    _EigenMatrix m   = construct_covariance_matrix(cov);
+    bool res = diagonalizeSelfAdjointMatrix(m, eigenvalues, eigenvectors);
+    return res;
+}
 }; // end class EigenDiagonalizeTraits
 }  // end namespace gamer

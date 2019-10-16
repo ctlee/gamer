@@ -39,6 +39,7 @@
 #include <Eigen/Eigenvalues>
 
 #include "gamer/EigenDiagonalization.h"
+#include "gamer/OsculatingJets.h"
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
@@ -73,15 +74,15 @@ void generateHistogram(const SurfaceMesh &mesh)
     histogram.fill(0);
     for (auto face : mesh.get_level_id<3>())
     {
-        auto   vertexIDs = mesh.get_name(face);
+        auto vertexIDs = mesh.get_name(face);
         // Unpack the ID's for convenience
         Vertex a = *mesh.get_simplex_up<1>({vertexIDs[0]});
         Vertex b = *mesh.get_simplex_up<1>({vertexIDs[1]});
         Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
-        auto   binAngle = [&](double angle) -> std::size_t {
-                return static_cast<std::size_t>(std::floor(angle/10));
-            };
+        auto binAngle = [&](double angle) -> std::size_t {
+                            return static_cast<std::size_t>(std::floor(angle/10));
+                        };
         histogram[binAngle(angleDeg(a, b, c))]++;
         histogram[binAngle(angleDeg(b, a, c))]++;
         histogram[binAngle(angleDeg(c, a, b))]++;
@@ -103,11 +104,11 @@ void generateHistogram(const SurfaceMesh &mesh)
     std::vector<double> lengths;
     for (auto edge : mesh.get_level_id<2>())
     {
-        auto   vertexIDs = mesh.down(edge);
-        auto   t1  = *vertexIDs.cbegin();
-        auto   t2  = *(++vertexIDs.cbegin());
-        auto   v1  = *t1;
-        auto   v2  = *t2;
+        auto vertexIDs = mesh.down(edge);
+        auto t1  = *vertexIDs.cbegin();
+        auto t2  = *(++vertexIDs.cbegin());
+        auto v1  = *t1;
+        auto v2  = *t2;
         double len = length(v2-v1);
         lengths.push_back(len);
     }
@@ -115,8 +116,8 @@ void generateHistogram(const SurfaceMesh &mesh)
 
     std::array<double, 20> histogramLength;
     histogramLength.fill(0);
-    double                 interval = (lengths.back() - lengths.front())/20;
-    double                 low = lengths.front();
+    double interval = (lengths.back() - lengths.front())/20;
+    double low = lengths.front();
 
     if (interval <= 0.0000001) // floating point roundoff prevention
     {
@@ -176,7 +177,7 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
 
     std::stringstream areafilename;
     areafilename << filename << ".area";
-    std::ofstream     areaOut(areafilename.str());
+    std::ofstream areaOut(areafilename.str());
     if (!areaOut.is_open())
     {
         std::stringstream ss;
@@ -203,21 +204,21 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
 
 std::tuple<double, double, int, int> getMinMaxAngles(
     const SurfaceMesh &mesh,
-    double             maxMinAngle,
-    double             minMaxAngle)
+    double maxMinAngle,
+    double minMaxAngle)
 {
     double minAngle = 360;
     double maxAngle = 0;
-    int    small = 0;
-    int    large = 0;
+    int small = 0;
+    int large = 0;
 
     // for each triangle
     for (auto nid : mesh.get_level_id<3>())
     {
-        auto                  name = mesh.get_name(nid);
-        auto                  a = *mesh.get_simplex_up({name[0]});
-        auto                  b = *mesh.get_simplex_up({name[1]});
-        auto                  c = *mesh.get_simplex_up({name[2]});
+        auto name = mesh.get_name(nid);
+        auto a = *mesh.get_simplex_up({name[0]});
+        auto b = *mesh.get_simplex_up({name[1]});
+        auto c = *mesh.get_simplex_up({name[2]});
         std::array<double, 3> angles;
         try
         {
@@ -283,14 +284,14 @@ double getArea(Vertex a, Vertex b, Vertex c)
  */
 double getVolume(const SurfaceMesh &mesh)
 {
-    bool   orientError = false;
+    bool orientError = false;
     double volume = 0;
     for (auto faceID : mesh.get_level_id<3>())
     {
-        auto   name = mesh.get_name(faceID);
-        auto   a = (*mesh.get_simplex_up({name[0]})).position;
-        auto   b = (*mesh.get_simplex_up({name[1]})).position;
-        auto   c = (*mesh.get_simplex_up({name[2]})).position;
+        auto name = mesh.get_name(faceID);
+        auto a = (*mesh.get_simplex_up({name[0]})).position;
+        auto b = (*mesh.get_simplex_up({name[1]})).position;
+        auto c = (*mesh.get_simplex_up({name[2]})).position;
 
         Vector norm;
         double tmp = 0.0;
@@ -407,7 +408,7 @@ void normalSmooth(SurfaceMesh &mesh)
         surfacemesh_detail::normalSmoothH(mesh, nid, 2);
     }
     double min, max;
-    int    nSmall, nLarge;
+    int nSmall, nLarge;
     std::tie(min, max, nSmall, nLarge) = getMinMaxAngles(mesh, 15, 150);
     std::cout << "  Min Angle: " << min << ", Max Angle: " << max
               << ", # Small Angles: " << nSmall
@@ -444,7 +445,7 @@ Vector getNormalFromTangent(const tensor<double, 3, 2> tangent)
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
 {
     Vector norm;
-    auto   faces = mesh.up(mesh.up(vertexID));
+    auto faces = mesh.up(mesh.up(vertexID));
     for (auto faceID : faces)
     {
         norm += getNormal(mesh, faceID);
@@ -456,7 +457,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
 Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 {
     Vector norm;
-    auto   name = mesh.get_name(faceID);
+    auto name = mesh.get_name(faceID);
 
     // Get the three vertices
     auto a = *mesh.get_simplex_up({name[0]});
@@ -487,8 +488,8 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
     double maxMinAngle = 15;
     double minMaxAngle = 165;
     double minAngle, maxAngle;
-    int    nSmall, nLarge;
-    int    nIter = 1;
+    int nSmall, nLarge;
+    int nIter = 1;
 
     if (verbose)
     {
@@ -499,7 +500,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
                   << "# larger-than-" << minMaxAngle << " = " << nLarge << std::endl;
     }
 
-    std::vector<std::pair<SurfaceMesh::SimplexID<1>, Vector>> delta;
+    std::vector<std::pair<SurfaceMesh::SimplexID<1>, Vector> > delta;
 
     // Cache normals before entering loop
     cacheNormals(mesh);
@@ -515,7 +516,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
             //barycenterVertexSmooth(mesh, vertex);
         }
 
-        for (auto pair : delta){
+        for (auto pair : delta) {
             *pair.first += pair.second;
         }
         delta.clear();
@@ -570,11 +571,11 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
 
     for (auto edge : mesh.get_level_id<2>())
     {
-        auto   edgeName = mesh.get_name(edge);
+        auto edgeName = mesh.get_name(edge);
         Vector v1 = (*mesh.get_simplex_up({edgeName[0]})).position;
         Vector v2 = (*mesh.get_simplex_up({edgeName[1]})).position;
 
-        auto   newVertex = refinedMesh->add_vertex(SMVertex(std::move(0.5*(v1+v2))));
+        auto newVertex = refinedMesh->add_vertex(SMVertex(std::move(0.5*(v1+v2))));
         edgeMap.emplace(std::make_pair(edgeName, newVertex));
     }
 
@@ -582,7 +583,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
     for (auto face : mesh.get_level_id<3>())
     {
         auto name = mesh.get_name(face);
-        int  a, b, c;
+        int a, b, c;
 
         // Skip checking if found
         auto it = edgeMap.find({name[0], name[1]});
@@ -624,7 +625,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         {
             auto name =  mesh.get_name(edgeID);
             auto v = *mesh.get_simplex_down(edgeID, name[0])
-                - *mesh.get_simplex_down(edgeID, name[1]);
+                     - *mesh.get_simplex_down(edgeID, name[1]);
             avgLen += length(v);
         }
         avgLen /= static_cast<double>(mesh.size<2>());
@@ -633,7 +634,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     double sparsenessRatio = 1;
     double flatnessRatio   = 1;
 
-    auto   range = mesh.get_level_id<1>();
+    auto range = mesh.get_level_id<1>();
 
     for (auto vertexIDIT = range.begin(); vertexIDIT != range.end();)
     {
@@ -651,13 +652,13 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         if (denseWeight > 0)
         {
             // Get max length of edges.
-            auto   edges  = mesh.up(vertexID);
+            auto edges  = mesh.up(vertexID);
             double maxLen = 0;
             for (auto edgeID : edges)
             {
-                auto   name =  mesh.get_name(edgeID);
-                auto   v = *mesh.get_simplex_down(edgeID, name[0])
-                    - *mesh.get_simplex_down(edgeID, name[1]);
+                auto name =  mesh.get_name(edgeID);
+                auto v = *mesh.get_simplex_down(edgeID, name[0])
+                         - *mesh.get_simplex_down(edgeID, name[1]);
                 double tmpLen = std::sqrt(v|v);
                 if (tmpLen > maxLen)
                     maxLen = tmpLen;
@@ -999,7 +1000,7 @@ std::unique_ptr<SurfaceMesh> cube(int order)
 double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
     Vertex center = *vertexID;
-    int    vKey   = mesh.get_name(vertexID)[0];
+    int vKey   = mesh.get_name(vertexID)[0];
 
     // Get 1-ring around vertexID and order it
     std::vector<int> cover = mesh.get_cover(vertexID);
@@ -1007,10 +1008,10 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
 
     SurfaceMesh::SimplexID<2> eID;
 
-    if(mesh.onBoundary(vertexID)){
+    if(mesh.onBoundary(vertexID)) {
         auto it = cover.begin();
-        for(; it != cover.end(); ++it){
-            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
+        for(; it != cover.end(); ++it) {
+            if(mesh.onBoundary(mesh.get_simplex_up({*it}))) {
                 break;
             }
         }
@@ -1101,18 +1102,18 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
 /// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
 {
-    Vertex           center = *vertexID;
-    int              vKey   = mesh.get_name(vertexID)[0];
+    Vertex center = *vertexID;
+    int vKey   = mesh.get_name(vertexID)[0];
 
     std::vector<int> cover = mesh.get_cover(vertexID);
     std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
 
     SurfaceMesh::SimplexID<2> eID;
 
-    if(mesh.onBoundary(vertexID)){
+    if(mesh.onBoundary(vertexID)) {
         auto it = cover.begin();
-        for(; it != cover.end(); ++it){
-            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
+        for(; it != cover.end(); ++it) {
+            if(mesh.onBoundary(mesh.get_simplex_up({*it}))) {
                 break;
             }
         }
@@ -1321,6 +1322,39 @@ computeCurvatures(const SurfaceMesh & mesh){
     return std::make_tuple(kh, kg, k1, k2, sigma);
 }
 
+void osculatingJets(const SurfaceMesh&mesh){
+    int d_fitting = 2;
+    int d_monge = 2;
+    int min_nb_points = (d_fitting + 1) * (d_fitting + 2) / 2;
+
+
+    for (auto vertexID : mesh.get_level_id<1>()) {
+        Monge_via_jet_fitting::Monge_form mongeForm;
+
+        // Set of neighbors
+        std::set<SurfaceMesh::SimplexID<1> > kNeighbors;
+        // Get list of neighbors
+        casc::kneighbors_up(mesh, vertexID, 1, kNeighbors);
+
+        std::vector<SurfaceMesh::SimplexID<1> > nbors;
+        nbors.push_back(vertexID);
+        std::copy(kNeighbors.begin(), kNeighbors.end(),std::back_inserter(nbors));
+
+        if ( nbors.size() < min_nb_points ) {
+            std::cerr << "Not enough pts (" << nbors.size() << ") for fitting this vertex: " << vertexID << std::endl;
+            continue;
+        }
+
+        Monge_via_jet_fitting monge_fit;
+
+        mongeForm = monge_fit(nbors.begin(), nbors.end(), d_fitting, d_monge);
+        mongeForm.comply_wrt_given_normal(getNormal(mesh, vertexID));
+
+        std::cout << vertexID << std::endl;
+        std::cout << mongeForm << std::endl;
+    }
+}
+
 std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
 {
     // Queue to store the next edges to visit
@@ -1333,7 +1367,7 @@ std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
     using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
     SimplexSet surface;
 
-    int        connected_components = 0;
+    int connected_components = 0;
     for (auto edgeID : mesh.get_level_id<2>())
     {
         // This is a new edge if we haven't visited before
@@ -1382,15 +1416,15 @@ std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
 }
 
 void cacheNormals(SurfaceMesh &mesh){
-    for(auto fID : mesh.get_level_id<3>()){
+    for(auto fID : mesh.get_level_id<3>()) {
         auto norm = getNormal(mesh, fID);
         normalize(norm);
         (*fID).normal = norm;
     }
 
-    for(auto vID: mesh.get_level_id<1>()){
+    for(auto vID: mesh.get_level_id<1>()) {
         Vector norm;
-        auto   faces = mesh.up(mesh.up(vID));
+        auto faces = mesh.up(mesh.up(vID));
         for (auto faceID : faces)
         {
             norm += (*faceID).normal;

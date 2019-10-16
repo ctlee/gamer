@@ -903,6 +903,15 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
 std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType>>
 computeCurvatures(const SurfaceMesh &mesh);
 
+
+/**
+ * @brief      Get the normal, principal directions, and curvatures using
+ *             osculating jets.
+ *
+ * @param[in]  mesh  The mesh
+ */
+void osculatingJets(const SurfaceMesh&mesh);
+
 //
 // @param      mesh  The mesh
 // @param[in]  v     Displacement vector

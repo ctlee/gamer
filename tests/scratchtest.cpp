@@ -14,23 +14,19 @@
 #include <memory>
 
 #include "gamer/gamer"
-#include <Eigen/core>
-
 // #include <casc/casc>
 
 
 int  main(int argc, char *argv[])
 {
-
-    // std::array<REAL, 6> covariance = {{ 1, 2, 3, 4, 5, 6 }};
-    Eigen::Matrix<double,3,3> m;
-    m << 1,2,3,4,5,6,7,8,9;
-
-    for (int i =0; i < 9; ++i){
-      std::cout << m(i) << std::endl;
+    if(argc != 2)
+    {
+        std::cerr << "Wrong arguments passed" << std::endl;
+        return -1;
     }
+    auto mesh = gamer::readOFF(argv[1]);
 
-    std::cout << m(1,2) << std::endl;
+    gamer::osculatingJets(*mesh);
 
     std::cout << "EOF" << std::endl;
 }
