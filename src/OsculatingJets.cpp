@@ -123,13 +123,20 @@ void Monge_via_jet_fitting::solve_linear_system(LAMatrix &M, LAVector &Z)
 
 void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge_form)
 {
+    // std::cout << A[0] << std::endl;
+    // std::cout << A[1] << std::endl;
+    // std::cout << A[2] << std::endl;
+    // std::cout << A[3] << std::endl;
+    // std::cout << A[4] << std::endl;
+    // std::cout << A[5] << std::endl;
+
     // only 1st order info.
     if (this->deg_monge == 1)
     {
         Vector orig_monge({0., 0., A[0]});
         Vector normal({-A[1], -A[2], 1.});
         REAL norm2 = normal | normal;
-        normal = normal / std::sqrt(norm2);
+        normal /= std::sqrt(norm2);
         monge_form.origin().toEigen() = ( this->translate_p0.inverse() * this->change_world2fitting.inverse() ) * orig_monge.toEigen();
         monge_form.normal_direction().toEigen() = this->change_world2fitting.inverse() * normal.toEigen();
     }
@@ -141,7 +148,7 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         //normal = Xu crossprod Xv
         Vector Xu({1., 0., A[1]}), Xv({0., 1., A[2]}), normal({-A[1], -A[2], 1.});
         REAL norm2 = normal | normal;
-        normal = normal / std::sqrt(norm2);
+        normal /= std::sqrt(norm2);
 
         //Surface in fitting_basis : X(u,v)=(u,v,J_A(u,v))
         //in the basis Xu=(1,0,A[1]), Xv=(0,1,A[2]), Weingarten=-I^{-1}II
@@ -172,19 +179,17 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         REAL XudotXv = Xu | Xv;
         Z = Xv - XudotXv * Xu / (normXu * normXu);
         REAL normZ = std::sqrt( Z | Z );
-        Z = Z / normZ;
+        Z /= normZ;
         Matrix change_XuXv2YZ;
         change_XuXv2YZ(0, 0) = 1 / normXu;
         change_XuXv2YZ(0, 1) = -XudotXv / (normXu * normXu * normZ);
         change_XuXv2YZ(1, 0) = 0;
         change_XuXv2YZ(1, 1) = 1 / normZ;
 
-        Matrix inv = change_XuXv2YZ.inverse();
         // REAL     det = change_XuXv2YZ.determinant();
-
         //in the new orthonormal basis (Y,Z) of the tangent plane :
         // weingarten = inv *(1/det) * weingarten * change_XuXv2YZ;
-        weingarten = inv * weingarten * change_XuXv2YZ;
+        weingarten = change_XuXv2YZ.inverse() * weingarten * change_XuXv2YZ;
 
         // diagonalization of weingarten
         std::array<REAL, 3> W = {{ weingarten(0, 0), weingarten(1, 0), weingarten(1, 1) }};
@@ -199,6 +204,12 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         // CGAL::Default_diagonalize_traits<REAL, 2>::diagonalize_selfadjoint_covariance_matrix
         // (W, eval, evec);
 
+        // std::cout << "Weingarten: " << casc::to_string(W) << std::endl;
+        // std::cout << "eigenvalues: " << std::endl << eval << std::endl;
+        // std::cout << "eigenvectors: " << std::endl << evec << std::endl;
+
+        // std::cout << Y << "; " << Z << std::endl;
+
         Vector d_max = evec(2) * Y + evec(3) * Z,
                d_min = evec(0) * Y + evec(1) * Z;
 
@@ -208,8 +219,8 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         //                                  normal[0], normal[1], normal[2]);
         EigenMatrix tmp;
         tmp << d_max[0], d_max[1], d_max[2],
-            d_min[0], d_min[1], d_min[2],
-            normal[0], normal[1], normal[2];
+               d_min[0], d_min[1], d_min[2],
+               normal[0], normal[1], normal[2];
         Aff_transformation change_basis (tmp);
 
         this->change_fitting2monge = change_basis;

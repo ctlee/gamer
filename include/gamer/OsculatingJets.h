@@ -348,20 +348,20 @@ Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
     //Initialize
     Monge_form monge_form;
     monge_form.set_up(dprime);
-    //for the system MA=Z
-
-    std::cout << "Nb input pts: " << nb_input_pts << std::endl;
-    std::cout << "NB-d_jet coeff: " << nb_d_jet_coeff << std::endl;
+    //form the system MA=Z
+    // std::cout << "Nb input pts: " << nb_input_pts << std::endl;
+    // std::cout << "NB-d_jet coeff: " << nb_d_jet_coeff << std::endl;
     LAMatrix M(nb_input_pts, nb_d_jet_coeff);
     LAVector Z(nb_input_pts);
 
     compute_PCA(begin, end);
     fill_matrix(begin, end, d, M, Z); //with precond
 
-    std::cout << "M:" << std::endl << M << std::endl;
-    std::cout << "Z:" << std::endl << Z << std::endl;
+    // std::cout << "M:" << std::endl << M << std::endl;
+    // std::cout << "Z:" << std::endl << Z << std::endl;
 
     solve_linear_system(M, Z);        //correct with precond
+    // std::cout << "Solved Z: " << Z << std::endl;
     compute_Monge_basis(Z.vector(), monge_form);
     if (dprime >= 3)
         compute_Monge_coefficients(Z.vector(), dprime, monge_form);
@@ -458,7 +458,7 @@ void Monge_via_jet_fitting::
 
     //Store the change of basis W->F
     Aff_transformation change_basis(tmp);
-    std::cout << change_basis.data() << std::endl;
+    // std::cout << change_basis.matrix() << std::endl;
     this->change_world2fitting = change_basis;
 }
 
@@ -470,23 +470,27 @@ fill_matrix(InputIterator begin, InputIterator end,
 {
     //origin of fitting coord system = first input data point
     Vector point0 = (**begin).position;
+    // std::cout << "point0: " << point0 << std::endl;
     //transform coordinates of sample points with a
     //translation ($-p$) and multiplication by $ P_{W\rightarrow F}$.
     Vector orig({0., 0., 0.});
     Vector v_point0_orig(orig - point0);
+    // std::cout << "v_point0_orig: " << v_point0_orig << std::endl;
 
     this->translate_p0 = Eigen::Translation3d(v_point0_orig);
     Aff_transformation transf_points = this->change_world2fitting *
                                        this->translate_p0;
+    // std::cout << "transf_points: " << std::endl << transf_points.matrix() << std::endl;
 
     //compute and store transformed points
     std::vector<Vector> pts_in_fitting_basis;
     pts_in_fitting_basis.reserve(this->nb_input_pts);
 
-
     for(auto it = begin; it != end; ++it) {
-        Vector cur_pt;
-        cur_pt.toEigen() = transf_points*(**it).position.toEigen();
+        Vector cur_pt = (**it).position;
+        // std::cout << "Before: " << cur_pt << std::endl;
+        cur_pt.toEigen() = transf_points*cur_pt.toEigen();
+        // std::cout << "After:  " << cur_pt << std::endl;
         pts_in_fitting_basis.push_back(cur_pt);
     }
     // CGAL_For_all(begin, end){
@@ -502,11 +506,11 @@ fill_matrix(InputIterator begin, InputIterator end,
     for(auto it = itb; it != ite; ++it) {
         precond += std::abs( (*it)[0] ) + std::abs( (*it)[1] );
     }
+    // std::cout << "Precond: " << precond << std::endl;
     // CGAL_For_all(itb, ite) precond += CGAL::abs(itb->x()) + CGAL::abs(itb->y());
     precond /= 2 * this->nb_input_pts;
     this->preconditionning = precond;
     //fill matrices M and Z
-    itb = pts_in_fitting_basis.begin();
     int line_count = 0;
     REAL x, y;
 

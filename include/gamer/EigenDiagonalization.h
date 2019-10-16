@@ -53,12 +53,11 @@ static _EigenMatrix construct_covariance_matrix(const CovarianceMatrix &cov)
 {
     _EigenMatrix m;
 
-    for (std::size_t i = 0; i < 3; ++i)
+    for (std::size_t i = 0; i < dim; ++i)
     {
-        for (std::size_t j = i; j < 3; ++j)
+        for (std::size_t j = i; j < dim; ++j)
         {
-            // std::cout << "Index: " << (3 * i) + j - ((i * (i + 1)) / 2) << std::endl;
-            m(i, j) = static_cast<float>(cov[(3 * i) + j - ( (i * (i + 1) ) / 2)]);
+            m(i, j) = static_cast<REAL>(cov[(dim * i) + j - ( (i * (i + 1) ) / 2)]);
 
             if (i != j)
                 m(j, i) = m(i, j);
@@ -116,6 +115,8 @@ static bool diagonalizeSelfAdjointCovMatrix(const CovarianceMatrix &cov,
                                             _EigenMatrix           &eigenvectors)
 {
     _EigenMatrix m   = construct_covariance_matrix(cov);
+
+    std::cout << m << std::endl;
     bool res = diagonalizeSelfAdjointMatrix(m, eigenvalues, eigenvectors);
     return res;
 }

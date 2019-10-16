@@ -1350,7 +1350,7 @@ void osculatingJets(const SurfaceMesh&mesh){
         mongeForm = monge_fit(nbors.begin(), nbors.end(), d_fitting, d_monge);
         mongeForm.comply_wrt_given_normal(getNormal(mesh, vertexID));
 
-        std::cout << vertexID << std::endl;
+        std::cout << vertexID << "@ " << (*vertexID).position << std::endl;
         std::cout << mongeForm << std::endl;
     }
 }

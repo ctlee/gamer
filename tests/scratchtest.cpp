@@ -26,6 +26,11 @@ int  main(int argc, char *argv[])
     }
     auto mesh = gamer::readOFF(argv[1]);
 
+    casc::compute_orientation(*mesh);
+    if(gamer::getVolume(*mesh) < 0 ){
+      gamer::flipNormals(*mesh);
+    }
+
     gamer::osculatingJets(*mesh);
 
     std::cout << "EOF" << std::endl;

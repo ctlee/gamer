@@ -729,7 +729,7 @@ class tensor
          */
         template <std::size_t D = _tensor_rank,
             typename std::enable_if<D == 1, void>::type* = nullptr>
-        Eigen::Matrix<_ElemType, _vector_dimension, 1> toEigen()
+        Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>> toEigen()
         {
         return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>>(_data.data());
         }
@@ -742,7 +742,7 @@ class tensor
          */
         template <std::size_t D = _tensor_rank,
             typename std::enable_if<D == 1, void>::type* = nullptr>
-        operator Eigen::Matrix<_ElemType, _vector_dimension, 1> ()
+        operator Eigen::Matrix<_ElemType, _vector_dimension, 1>()
         {
             return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>>(_data.data());
         }
@@ -754,7 +754,7 @@ class tensor
          */
         template <std::size_t D = _tensor_rank,
                 typename std::enable_if<D == 2, void>::type* = nullptr>
-        Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> toEigen()
+        Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>> toEigen()
         {
             return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>>(_data.data());
         }
