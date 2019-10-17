@@ -121,7 +121,8 @@ struct flattenH<Fn, T, Ts...> {
 template <typename Fn>
 struct flattenH<Fn> {
     template <std::size_t N>
-    static void apply(Fn f) {}
+    static void apply(Fn f) {
+    }
 };
 
 /**
@@ -196,654 +197,727 @@ struct pow<x, 0> {
 template <typename _ElemType, std::size_t _vector_dimension, std::size_t _tensor_rank>
 class tensor
 {
-    public:
-        /// Tensor rank of the tensor
-        constexpr static std::size_t tensor_rank = _tensor_rank;
-        /// Dimension of the vector space
-        constexpr static std::size_t vector_dimension = _vector_dimension;
-        /// Total number of tensor components
-        constexpr static std::size_t total_dimension = detail::pow<vector_dimension, tensor_rank>::value;
-        /// Alias for typename of tensor elements
-        using ElemType = _ElemType;
-        /// Typename of an index for the tensor
-        using IndexType = std::array<std::size_t, tensor_rank>;
-        /// Typename of the underlying flat data representation
-        using DataType = std::array<ElemType, total_dimension>;
+public:
+/// Tensor rank of the tensor
+constexpr static std::size_t tensor_rank = _tensor_rank;
+/// Dimension of the vector space
+constexpr static std::size_t vector_dimension = _vector_dimension;
+/// Total number of tensor components
+constexpr static std::size_t total_dimension = detail::pow<vector_dimension, tensor_rank>::value;
+/// Alias for typename of tensor elements
+using ElemType = _ElemType;
+/// Typename of an index for the tensor
+using IndexType = std::array<std::size_t, tensor_rank>;
+/// Typename of the underlying flat data representation
+using DataType = std::array<ElemType, total_dimension>;
 
-        /**
-         * @brief      Iterator over tensor indices
-         */
-        struct index_iterator : public std::iterator<std::bidirectional_iterator_tag, IndexType>
+/**
+ * @brief      Iterator over tensor indices
+ */
+struct index_iterator : public std::iterator<std::bidirectional_iterator_tag, IndexType>
+{
+    using super = std::iterator<std::bidirectional_iterator_tag, IndexType>;
+    /**
+     * @brief      Copy constructor
+     *
+     * @param[in]  iter  The iterator to copy from
+     */
+    index_iterator(const index_iterator &iter)
+        : i(iter.i)
+    {
+    }
+
+    /**
+     * @brief      Move constructor
+     *
+     * @param[in]  iter  The iterator to move from
+     */
+    index_iterator(const index_iterator &&iter)
+        : i(std::move(iter.i))
+    {
+    }
+
+    /**
+     * @brief      Constructor initialized at end of indices
+     */
+    index_iterator()
+    {
+        i.fill(0);
+        i[0] = vector_dimension;
+    }
+
+    /**
+     * @brief      Constructor initialized at start of indices
+     */
+    index_iterator(int)
+    {
+        i.fill(0);
+    }
+
+    /**
+     * @brief      Prefix incrementation of the index
+     *
+     * @return     Iterator to the next index
+     */
+    index_iterator &operator++()
+    {
+        std::size_t k = tensor_rank - 1;
+        ++(i[k]);
+        while (k > 0)
         {
-            using super = std::iterator<std::bidirectional_iterator_tag, IndexType>;
-            /**
-             * @brief      Copy constructor
-             *
-             * @param[in]  iter  The iterator to copy from
-             */
-            index_iterator(const index_iterator &iter)
-                : i(iter.i)
-            {}
-
-            /**
-             * @brief      Move constructor
-             *
-             * @param[in]  iter  The iterator to move from
-             */
-            index_iterator(const index_iterator &&iter)
-                : i(std::move(iter.i))
-            {}
-
-            /**
-             * @brief      Constructor initialized at end of indices
-             */
-            index_iterator()
+            // incrementing overflows, advance the next index
+            if (i[k] == vector_dimension)
             {
-                i.fill(0);
-                i[0] = vector_dimension;
-            }
-
-            /**
-             * @brief      Constructor initialized at start of indices
-             */
-            index_iterator(int)
-            {
-                i.fill(0);
-            }
-
-            /**
-             * @brief      Prefix incrementation of the index
-             *
-             * @return     Iterator to the next index
-             */
-            index_iterator &operator++()
-            {
-                std::size_t k = tensor_rank - 1;
+                i[k] = 0;
+                --k;
                 ++(i[k]);
-                while (k > 0)
-                {
-                    // incrementing overflows, advance the next index
-                    if (i[k] == vector_dimension)
-                    {
-                        i[k] = 0;
-                        --k;
-                        ++(i[k]);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                return *this;
             }
-
-            /**
-             * @brief      Postfix incrementation of the index
-             *
-             * @return     Iterator to the next index
-             */
-            index_iterator operator++(int) { auto tmp = *this; ++(*this); return tmp; }
-
-            /**
-             * @brief      Prefix decrementation of the index
-             *
-             * @return     Iterator to the previous index
-             */
-            index_iterator &operator--()
+            else
             {
-                std::size_t k = tensor_rank - 1;
+                break;
+            }
+        }
+        return *this;
+    }
 
+    /**
+     * @brief      Postfix incrementation of the index
+     *
+     * @return     Iterator to the next index
+     */
+    index_iterator operator++(int) {
+        auto tmp = *this; ++(*this); return tmp;
+    }
+
+    /**
+     * @brief      Prefix decrementation of the index
+     *
+     * @return     Iterator to the previous index
+     */
+    index_iterator &operator--()
+    {
+        std::size_t k = tensor_rank - 1;
+
+        if (i[k] > 0)
+        {
+            --(i[k]);
+        }
+        else
+        {
+            std::size_t p = 1;
+            while (k > 0)
+            {
+                --k;
+                ++p;
                 if (i[k] > 0)
                 {
                     --(i[k]);
-                }
-                else
-                {
-                    std::size_t p = 1;
-                    while (k > 0)
+                    for (std::size_t j = 1; j < p; ++j)
                     {
-                        --k;
-                        ++p;
-                        if (i[k] > 0)
-                        {
-                            --(i[k]);
-                            for (std::size_t j = 1; j < p; ++j)
-                            {
-                                i[k+j] = vector_dimension - 1;
-                            }
-                            break;
-                        }
+                        i[k+j] = vector_dimension - 1;
                     }
+                    break;
                 }
-
-                return *this;
             }
+        }
 
-            /**
-             * @brief      Postfix decrementation of the index
-             *
-             * @return     Iterator to the previous index
-             */
-            index_iterator operator--(int) { auto tmp = *this; --(*this); return tmp; }
+        return *this;
+    }
 
-            /**
-             * @brief      Equality operator for indices
-             *
-             * @param[in]  j     Other index iterator to compare to
-             *
-             * @return     True if indices are equal
-             */
-            bool operator==(index_iterator j) const
+    /**
+     * @brief      Postfix decrementation of the index
+     *
+     * @return     Iterator to the previous index
+     */
+    index_iterator operator--(int) {
+        auto tmp = *this; --(*this); return tmp;
+    }
+
+    /**
+     * @brief      Equality operator for indices
+     *
+     * @param[in]  j     Other index iterator to compare to
+     *
+     * @return     True if indices are equal
+     */
+    bool operator==(index_iterator j) const
+    {
+        for (std::size_t k = 0; k < tensor_rank; ++k)
+        {
+            if (i[k] != j.i[k])
             {
-                for (std::size_t k = 0; k < tensor_rank; ++k)
-                {
-                    if (i[k] != j.i[k])
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            /**
-             * @brief      { operator_description }
-             *
-             * @param[in]  j     { parameter_description }
-             *
-             * @return     { description_of_the_return_value }
-             */
-            bool operator!=(index_iterator j) const { return !(*this == j); }
-
-            /**
-             * @brief      Dereference the iterator
-             *
-             * @return     Index array of indices
-             */
-            typename super::reference operator*() { return i; }
-
-            /**
-             * @brief      Dereference the iterator
-             *
-             * @return     Index array of indices
-             */
-            typename super::pointer operator->() { return i; }
-
-            protected:
-                /// Array of indices
-                IndexType i;
-        };
-
-        /**
-         * @brief     Default constructor initializes to zero
-         */
-        tensor() { _data.fill(0); }
-
-        /**
-         * @brief      Constructor fill with same value
-         *
-         * @param[in]  s     Value to fill
-         */
-        tensor(const ElemType &s) { _data.fill(s); }
-
-        /**
-         * @brief      Constructor from flat array
-         *
-         * @param[in]  s     Row major array to copy from
-         */
-        tensor(const ElemType (&s)[total_dimension])
-        {
-            std::copy(std::begin(s), std::end(s), std::begin(_data));
-        }
-
-        /**
-         * @brief      Copy constructor
-         *
-         * @param[in]  x     Other tensor to copy
-         */
-        tensor(const tensor &x) : _data(x._data) {}
-
-        /**
-         * @brief      Move constructor
-         *
-         * @param[in]  x     Other tensor to copy from
-         */
-        tensor(const tensor &&x) : _data(std::move(x._data)) {}
-
-
-        /**
-         * @brief      Type casting for numerical typed tensors
-         *
-         * @tparam     NumType    Typename of new tensor data
-         * @tparam     <unnamed>  Check that resulting type is numeric
-         * @tparam     <unnamed>  Check that current type is numeric
-         */
-        template <typename NumType,
-                  typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
-                  typename = std::enable_if_t<std::is_arithmetic<ElemType>::value> >
-        operator tensor<NumType, _vector_dimension, _tensor_rank>() const
-        {
-            tensor<NumType, _vector_dimension, _tensor_rank> t;
-            std::copy(_data.cbegin(), _data.cend(), t.begin());
-            return t;
-        }
-
-        /**
-         * @brief      Print operator overload
-         *
-         * @param      output  The output stream
-         * @param[in]  t       Tensor to print
-         *
-         * @return     Output stream
-         */
-        friend std::ostream &operator<<(std::ostream &output, const tensor &t)
-        {
-            output << "Tensor(";
-            bool first = true;
-            for (auto curr = t.index_begin(); curr != t.index_end(); ++curr)
-            {
-                if (first) {output << "{"; first = false;}
-                else output << "; {";
-
-                bool first2 = true;
-                for (auto x : (*curr))
-                {
-                    if (first2) {output << x; first2 = false;}
-                    else output << "," << x;
-                }
-                output << "}:" << t[*curr];
-            }
-            output << ")";
-            return output;
-        }
-
-        /**
-         * @brief      Returns a string representation of the object.
-         *
-         * @return     String representation of the object.
-         */
-        std::string to_string() const
-        {
-            std::ostringstream output;
-            output << *this;
-            return output.str();
-        }
-
-        /**
-         * @brief      Get element by index
-         *
-         * @param      index  Sequence of indices
-         *
-         * @tparam     Ts     Typenames of indices
-         *
-         * @return     Reference to value stored at the index
-         */
-        template <typename ... Ts>
-        const _ElemType &get(Ts && ... index) const
-        {
-            return _data[get_index(std::forward<Ts>(index)...)];
-        }
-
-        /**
-         * @brief      Get element by index
-         *
-         * @param      index  Sequence of indices
-         *
-         * @tparam     Ts     Typenames of indices
-         *
-         * @return     Reference to value stored at the index
-         */
-        template <typename ... Ts>
-        _ElemType &get(Ts && ... index)
-        {
-            return _data[get_index(std::forward<Ts>(index)...)];
-        }
-
-        /**
-         * @brief      Get element by index
-         *
-         * @param      index  Sequence of indices
-         *
-         * @return     Reference to value stored at the index
-         */
-        const _ElemType &operator[](const IndexType &index) const
-        {
-            return _data[get_index(index)];
-        }
-
-        /**
-         * @brief      Get element by index
-         *
-         * @param      index  Sequence of indices
-         *
-         * @return     Reference to value stored at the index
-         */
-        _ElemType &operator[](const IndexType &index)
-        {
-            return _data[get_index(index)];
-        }
-
-        /**
-         * @brief      Special overload for data accession of 1-tensors
-         *
-         * @param      index  Sequence of indices
-         *
-         * @return     Reference to value stored at the index
-         */
-        const _ElemType &operator[](std::size_t index) const
-        {
-            static_assert(_tensor_rank == 1, "operator[] with integer index only allowed on 1-tensors");
-            return _data[index];
-        }
-
-        /**
-         * @brief      Special overload for data accession of 1-tensors
-         *
-         * @param      index  Sequence of indices
-         *
-         * @return     Reference to value stored at the index
-         */
-        _ElemType &operator[](std::size_t index)
-        {
-            static_assert(_tensor_rank == 1, "operator[] with integer index only allowed on 1-tensors");
-            return _data[index];
-        }
-
-        /**
-         * @brief      Equality comparison of tensors
-         *
-         * @param[in]  rhs   The right hand side
-         *
-         * @return     True if all elements equal or False otherwise
-         */
-        bool operator==(const tensor &rhs) const
-        {
-            auto rhs_curr = rhs.begin();
-            for (auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-            {
-                if (*tcurr != *rhs_curr) return false;
-            }
-            return true;
-        }
-
-        /**
-         * @brief      Inquality comparison of tensors
-         *
-         * @param[in]  rhs   The right hand side
-         *
-         * @return     False if all elements equal or True otherwise
-         */
-        bool operator!=(const tensor &rhs) const
-        {
-            return !(*this == rhs);
-        }
-
-        /**
-         * @brief      Assignment operator
-         *
-         * @param[in]  rhs   The right hand side
-         */
-        void operator=(const tensor &rhs)
-        {
-            auto rhs_curr = rhs.begin();
-            for (auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-            {
-                *tcurr = *rhs_curr;
+                return false;
             }
         }
+        return true;
+    }
 
-        /**
-         * @brief      Elementwise tensor sum operator
-         *
-         * @param[in]  rhs   The right hand side
-         *
-         * @return     Reference to this
-         */
-        tensor &operator+=(const tensor &rhs)
+    /**
+     * @brief      { operator_description }
+     *
+     * @param[in]  j     { parameter_description }
+     *
+     * @return     { description_of_the_return_value }
+     */
+    bool operator!=(index_iterator j) const {
+        return !(*this == j);
+    }
+
+    /**
+     * @brief      Dereference the iterator
+     *
+     * @return     Index array of indices
+     */
+    typename super::reference operator*() {
+        return i;
+    }
+
+    /**
+     * @brief      Dereference the iterator
+     *
+     * @return     Index array of indices
+     */
+    typename super::pointer operator->() {
+        return i;
+    }
+
+protected:
+    /// Array of indices
+    IndexType i;
+};
+
+/**
+ * @brief     Default constructor initializes to zero
+ */
+tensor() {
+    _data.fill(0);
+}
+
+/**
+ * @brief      Constructor fill with same value
+ *
+ * @param[in]  s     Value to fill
+ */
+tensor(const ElemType &s) {
+    _data.fill(s);
+}
+
+/**
+ * @brief      Constructor from flat array
+ *
+ * @param[in]  s     Row major array to copy from
+ */
+tensor(const ElemType (&s)[total_dimension])
+{
+    std::copy(std::begin(s), std::end(s), std::begin(_data));
+}
+
+/**
+ * @brief      Copy constructor
+ *
+ * @param[in]  x     Other tensor to copy
+ */
+tensor(const tensor &x) : _data(x._data) {
+}
+
+/**
+ * @brief      Move constructor
+ *
+ * @param[in]  x     Other tensor to copy from
+ */
+tensor(const tensor &&x) : _data(std::move(x._data)) {
+}
+
+
+/**
+ * @brief      Type casting for numerical typed tensors
+ *
+ * @tparam     NumType    Typename of new tensor data
+ * @tparam     <unnamed>  Check that resulting type is numeric
+ * @tparam     <unnamed>  Check that current type is numeric
+ */
+template <typename NumType,
+          typename = std::enable_if_t<std::is_arithmetic<NumType>::value>,
+          typename = std::enable_if_t<std::is_arithmetic<ElemType>::value> >
+operator tensor<NumType, _vector_dimension, _tensor_rank>() const
+{
+    tensor<NumType, _vector_dimension, _tensor_rank> t;
+    std::copy(_data.cbegin(), _data.cend(), t.begin());
+    return t;
+}
+
+/**
+ * @brief      Print operator overload
+ *
+ * @param      output  The output stream
+ * @param[in]  t       Tensor to print
+ *
+ * @return     Output stream
+ */
+friend std::ostream &operator<<(std::ostream &output, const tensor &t)
+{
+    output << "Tensor(";
+    bool first = true;
+    for (auto curr = t.index_begin(); curr != t.index_end(); ++curr)
+    {
+        if (first) {output << "{"; first = false;}
+        else output << "; {";
+
+        bool first2 = true;
+        for (auto x : (*curr))
         {
-            typename DataType::const_iterator rhs_curr = rhs.begin();
-            for (typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-            {
-                *tcurr += *rhs_curr;
-            }
-            return *this;
+            if (first2) {output << x; first2 = false;}
+            else output << "," << x;
         }
+        output << "}:" << t[*curr];
+    }
+    output << ")";
+    return output;
+}
 
-        /**
-         * @brief      Elementwise tensor difference operator
-         *
-         * @param[in]  rhs   The right hand side
-         *
-         * @return     Reference to this
-         */
-        tensor &operator-=(const tensor &rhs)
-        {
-            typename DataType::const_iterator rhs_curr = rhs.begin();
-            for (typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-            {
-                *tcurr -= *rhs_curr;
-            }
-            return *this;
-        }
+/**
+ * @brief      Returns a string representation of the object.
+ *
+ * @return     String representation of the object.
+ */
+std::string to_string() const
+{
+    std::ostringstream output;
+    output << *this;
+    return output.str();
+}
 
-        /**
-         * @brief      Scalar multiplication
-         *
-         * @param[in]  x     Scalar to multiply by
-         *
-         * @return     Reference to this
-         */
-        tensor &operator*=(ElemType x)
-        {
-            for (auto &a : *this)
-            {
-                a *= x;
-            }
-            return *this;
-        }
+/**
+ * @brief      Get element by index
+ *
+ * @param      index  Sequence of indices
+ *
+ * @tparam     Ts     Typenames of indices
+ *
+ * @return     Reference to value stored at the index
+ */
+template <typename ... Ts>
+const _ElemType &get(Ts && ... index) const
+{
+    return _data[get_index(std::forward<Ts>(index)...)];
+}
 
-        /**
-         * @brief      Scalar division
-         *
-         * @param[in]  x     Scalar to divide by
-         *
-         * @return     Reference to this
-         */
-        tensor &operator/=(ElemType x)
-        {
-            for (auto &a : *this)
-            {
-                a /= x;
-            }
-            return *this;
-        }
+/**
+ * @brief      Get element by index
+ *
+ * @param      index  Sequence of indices
+ *
+ * @tparam     Ts     Typenames of indices
+ *
+ * @return     Reference to value stored at the index
+ */
+template <typename ... Ts>
+_ElemType &get(Ts && ... index)
+{
+    return _data[get_index(std::forward<Ts>(index)...)];
+}
 
-        /**
-         * @brief      Unary negation operator
-         *
-         * @return     Tensor with negated values
-         */
-        tensor operator-() const
-        {
-            tensor rhs;
-            typename DataType::iterator rhs_curr = rhs.begin();
-            for (typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
-            {
-                *rhs_curr = -(*tcurr);
-            }
-            return rhs;
-        }
+/**
+ * @brief      Get element by index
+ *
+ * @param      index  Sequence of indices
+ *
+ * @return     Reference to value stored at the index
+ */
+const _ElemType &operator[](const IndexType &index) const
+{
+    return _data[get_index(index)];
+}
 
-        /**
-         * @brief      Elementwise product with another tensor
-         *
-         * @param[in]  rhs   The right hand side
-         *
-         * @return     Tensor with elementwise product
-         */
-        tensor ElementwiseProduct(const tensor &rhs) const
-        {
-            tensor ret;
-            typename DataType::iterator       ret_curr = ret.begin();
-            typename DataType::const_iterator rhs_curr = rhs.begin();
-            for (typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr, ++ret_curr)
-            {
-                *ret_curr = *tcurr * (*rhs_curr);
-            }
-            return ret;
-        }
+/**
+ * @brief      Get element by index
+ *
+ * @param      index  Sequence of indices
+ *
+ * @return     Reference to value stored at the index
+ */
+_ElemType &operator[](const IndexType &index)
+{
+    return _data[get_index(index)];
+}
 
-        /**
-         * @brief      Elementwise division with another tensor
-         *
-         * @param[in]  rhs   The right hand side
-         *
-         * @return     Tensor with elementwise division
-         */
-        tensor ElementwiseDivision(const tensor &rhs) const
-        {
-            tensor ret;
-            typename DataType::iterator       ret_curr = ret.begin();
-            typename DataType::const_iterator rhs_curr = rhs.begin();
-            for (typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr, ++ret_curr)
-            {
-                *ret_curr = *tcurr / (*rhs_curr);
-            }
-            return ret;
-        }
+/**
+ * @brief      Special overload for data accession of 1-tensors
+ *
+ * @param      index  Sequence of indices
+ *
+ * @return     Reference to value stored at the index
+ */
+const _ElemType &operator[](std::size_t index) const
+{
+    static_assert(_tensor_rank == 1, "operator[] with integer index only allowed on 1-tensors");
+    return _data[index];
+}
 
-        /**
-         * @brief      Direct access to the underlying array data
-         *
-         * @return     Direct access to the underlying array
-         */
-        auto data()
-        {
-            return _data.data();
-        }
+/**
+ * @brief      Special overload for data accession of 1-tensors
+ *
+ * @param      index  Sequence of indices
+ *
+ * @return     Reference to value stored at the index
+ */
+_ElemType &operator[](std::size_t index)
+{
+    static_assert(_tensor_rank == 1, "operator[] with integer index only allowed on 1-tensors");
+    return _data[index];
+}
+
+/**
+ * @brief      Equality comparison of tensors
+ *
+ * @param[in]  rhs   The right hand side
+ *
+ * @return     True if all elements equal or False otherwise
+ */
+bool operator==(const tensor &rhs) const
+{
+    auto rhs_curr = rhs.begin();
+    for (auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+    {
+        if (*tcurr != *rhs_curr) return false;
+    }
+    return true;
+}
+
+/**
+ * @brief      Inquality comparison of tensors
+ *
+ * @param[in]  rhs   The right hand side
+ *
+ * @return     False if all elements equal or True otherwise
+ */
+bool operator!=(const tensor &rhs) const
+{
+    return !(*this == rhs);
+}
+
+/**
+ * @brief      Assignment operator
+ *
+ * @param[in]  rhs   The right hand side
+ */
+void operator=(const tensor &rhs)
+{
+    auto rhs_curr = rhs.begin();
+    for (auto tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+    {
+        *tcurr = *rhs_curr;
+    }
+}
+
+/**
+ * @brief      Assignment operator from Eigen object type
+ *
+ * @param[in]  rhs        Eigen object
+ *
+ * @tparam     D          Dependent template for tensor rank
+ * @tparam     <unnamed>  Enabled only for 1-tensors
+ */
+template <std::size_t D = _tensor_rank,
+          typename std::enable_if<D == 1, void>::type* = nullptr>
+void operator=(const Eigen::Matrix<_ElemType, _vector_dimension, 1>& rhs)
+{
+    EigenMap(*this) = rhs;
+}
+
+/**
+ * @brief      Assignment operator from Eigen object type
+ *
+ * @param[in]  rhs        Eigen object
+ *
+ * @tparam     D          Dependent template for tensor rank
+ * @tparam     <unnamed>  Enabled only for 2-tensors
+ */
+template <std::size_t D = _tensor_rank,
+          typename std::enable_if<D == 2, void>::type* = nullptr>
+void operator=(const Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>& rhs)
+{
+    EigenMap(*this) = rhs;
+}
+
+/**
+ * @brief      Elementwise tensor sum operator
+ *
+ * @param[in]  rhs   The right hand side
+ *
+ * @return     Reference to this
+ */
+tensor &operator+=(const tensor &rhs)
+{
+    typename DataType::const_iterator rhs_curr = rhs.begin();
+    for (typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+    {
+        *tcurr += *rhs_curr;
+    }
+    return *this;
+}
+
+/**
+ * @brief      Elementwise tensor difference operator
+ *
+ * @param[in]  rhs   The right hand side
+ *
+ * @return     Reference to this
+ */
+tensor &operator-=(const tensor &rhs)
+{
+    typename DataType::const_iterator rhs_curr = rhs.begin();
+    for (typename DataType::iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+    {
+        *tcurr -= *rhs_curr;
+    }
+    return *this;
+}
+
+/**
+ * @brief      Scalar multiplication
+ *
+ * @param[in]  x     Scalar to multiply by
+ *
+ * @return     Reference to this
+ */
+tensor &operator*=(ElemType x)
+{
+    for (auto &a : *this)
+    {
+        a *= x;
+    }
+    return *this;
+}
+
+/**
+ * @brief      Scalar division
+ *
+ * @param[in]  x     Scalar to divide by
+ *
+ * @return     Reference to this
+ */
+tensor &operator/=(ElemType x)
+{
+    for (auto &a : *this)
+    {
+        a /= x;
+    }
+    return *this;
+}
+
+/**
+ * @brief      Unary negation operator
+ *
+ * @return     Tensor with negated values
+ */
+tensor operator-() const
+{
+    tensor rhs;
+    typename DataType::iterator rhs_curr = rhs.begin();
+    for (typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr)
+    {
+        *rhs_curr = -(*tcurr);
+    }
+    return rhs;
+}
+
+/**
+ * @brief      Elementwise product with another tensor
+ *
+ * @param[in]  rhs   The right hand side
+ *
+ * @return     Tensor with elementwise product
+ */
+tensor ElementwiseProduct(const tensor &rhs) const
+{
+    tensor ret;
+    typename DataType::iterator ret_curr = ret.begin();
+    typename DataType::const_iterator rhs_curr = rhs.begin();
+    for (typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr, ++ret_curr)
+    {
+        *ret_curr = *tcurr * (*rhs_curr);
+    }
+    return ret;
+}
+
+/**
+ * @brief      Elementwise division with another tensor
+ *
+ * @param[in]  rhs   The right hand side
+ *
+ * @return     Tensor with elementwise division
+ */
+tensor ElementwiseDivision(const tensor &rhs) const
+{
+    tensor ret;
+    typename DataType::iterator ret_curr = ret.begin();
+    typename DataType::const_iterator rhs_curr = rhs.begin();
+    for (typename DataType::const_iterator tcurr = _data.begin(); tcurr != _data.end(); ++tcurr, ++rhs_curr, ++ret_curr)
+    {
+        *ret_curr = *tcurr / (*rhs_curr);
+    }
+    return ret;
+}
+
+/**
+ * @brief      Direct access to the underlying array data
+ *
+ * @return     Direct access to the underlying array
+ */
+auto data()
+{
+    return _data.data();
+}
 
 
-        /**
-         * @brief      Returns a eigen representation of the object.
-         *
-         * @return     Eigen representation of the object.
-         */
-        template <std::size_t D = _tensor_rank,
-            typename std::enable_if<D == 1, void>::type* = nullptr>
-        Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>> toEigen()
-        {
-        return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>>(_data.data());
-        }
+/**
+ * @brief      Returns a eigen representation of the object.
+ *
+ * @return     Eigen representation of the object.
+ */
+template <std::size_t D = _tensor_rank,
+          typename std::enable_if<D == 1, void>::type* = nullptr>
+Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> > mapEigen()
+{
+    return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> >(_data.data());
+}
+
+/**
+ * @brief      Implicit conversion of 1-tensors to Eigen Vector type
+ *
+ * @return     Eigen representation of the object.
+ */
+template <std::size_t D = _tensor_rank,
+          typename std::enable_if<D == 1, void>::type* = nullptr>
+operator Eigen::Matrix<_ElemType, _vector_dimension, 1>()
+{
+    return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> >(_data.data());
+}
+
+/**
+ * @brief      Returns a eigen representation of the object.
+ *
+ * @tparam     D          Tensor rank
+ * @tparam     <unnamed>  Enabled only for 2-tensors
+ *
+ * @return     Eigen representation of the object.
+ */
+template <std::size_t D = _tensor_rank,
+          typename std::enable_if<D == 2, void>::type* = nullptr>
+Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> > mapEigen()
+{
+    return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> >(_data.data());
+}
+
+/**
+ * @brief      Implicit conversion of 2-tensor to Eigen Matrix type
+ *
+ * @tparam     D          Tensor rank
+ * @tparam     <unnamed>  Enabled only for 2-tensors
+ */
+template <std::size_t D = _tensor_rank,
+          typename std::enable_if<D == 2, void>::type* = nullptr>
+operator Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> ()
+{
+    return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> >(_data.data());
+}
 
 
-        /**
-         * @brief      Returns a eigen representation of the object.
-         *
-         * @return     Eigen representation of the object.
-         */
-        template <std::size_t D = _tensor_rank,
-            typename std::enable_if<D == 1, void>::type* = nullptr>
-        operator Eigen::Matrix<_ElemType, _vector_dimension, 1>()
-        {
-            return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1>>(_data.data());
-        }
+/**
+ * @brief      Iterator to first index
+ *
+ * @return     Iterator to first index
+ */
+index_iterator index_begin() {
+    return index_iterator(0);
+}
 
-        /**
-         * @brief      Returns a eigen representation of the object.
-         *
-         * @return     Eigen representation of the object.
-         */
-        template <std::size_t D = _tensor_rank,
-                typename std::enable_if<D == 2, void>::type* = nullptr>
-        Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>> toEigen()
-        {
-            return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>>(_data.data());
-        }
+/**
+ * @brief      Iterator to past the end
+ *
+ * @return     Iterator to past the end
+ */
+index_iterator index_end()   {
+    return index_iterator();
+}
 
-        template <std::size_t D = _tensor_rank,
-                typename std::enable_if<D == 2, void>::type* = nullptr>
-        operator Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> ()
-        {
-            return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension>>(_data.data());
-        }
+/**
+ * @brief      Iterator to first index
+ *
+ * @return     Iterator to first index
+ */
+index_iterator index_begin() const {
+    return index_iterator(0);
+}
 
-        /**
-         * @brief      Iterator to first index
-         *
-         * @return     Iterator to first index
-         */
-        index_iterator index_begin() { return index_iterator(0); }
+/**
+ * @brief      Iterator to past the end
+ *
+ * @return     Iterator to past the end
+ */
+index_iterator index_end()   const {
+    return index_iterator();
+}
 
-        /**
-         * @brief      Iterator to past the end
-         *
-         * @return     Iterator to past the end
-         */
-        index_iterator index_end()   { return index_iterator(); }
+/**
+ * @brief      Direct iterator to beginning of data
+ *
+ * @return     Direct iterator to beginning of data
+ */
+typename DataType::iterator       begin()       {
+    return _data.begin();
+}
 
-        /**
-         * @brief      Iterator to first index
-         *
-         * @return     Iterator to first index
-         */
-        index_iterator index_begin() const { return index_iterator(0); }
+/**
+ * @brief      Direct iterator to end of data
+ *
+ * @return     Direct iterator to end of data
+ */
+typename DataType::iterator       end()         {
+    return _data.end();
+}
 
-        /**
-         * @brief      Iterator to past the end
-         *
-         * @return     Iterator to past the end
-         */
-        index_iterator index_end()   const { return index_iterator(); }
+/**
+ * @brief      Direct iterator to beginning of data
+ *
+ * @return     Direct iterator to beginning of data
+ */
+typename DataType::const_iterator begin() const {
+    return _data.begin();
+}
 
-        /**
-         * @brief      Direct iterator to beginning of data
-         *
-         * @return     Direct iterator to beginning of data
-         */
-        typename DataType::iterator       begin()       { return _data.begin(); }
+/**
+ * @brief      Direct iterator to end of data
+ *
+ * @return     Direct iterator to end of data
+ */
+typename DataType::const_iterator end()   const {
+    return _data.end();
+}
 
-        /**
-         * @brief      Direct iterator to end of data
-         *
-         * @return     Direct iterator to end of data
-         */
-        typename DataType::iterator       end()         { return _data.end();   }
-
-        /**
-         * @brief      Direct iterator to beginning of data
-         *
-         * @return     Direct iterator to beginning of data
-         */
-        typename DataType::const_iterator begin() const { return _data.begin(); }
-
-        /**
-         * @brief      Direct iterator to end of data
-         *
-         * @return     Direct iterator to end of data
-         */
-        typename DataType::const_iterator end()   const { return _data.end();   }
-
-    private:
-        /**
-         * @brief      Gets the index.
-         *
-         * @param[in]  args  List of indices
-         *
-         * @tparam     Ts    Typename of indices
-         *
-         * @return     The flat index to check
-         */
-        template <typename ... Ts>
-        std::size_t get_index(Ts... args) const
-        {
-            std::size_t rval = 0;
-            array_util::flatten([&rval](std::size_t ignored, std::size_t i){
+private:
+/**
+ * @brief      Gets the index.
+ *
+ * @param[in]  args  List of indices
+ *
+ * @tparam     Ts    Typename of indices
+ *
+ * @return     The flat index to check
+ */
+template <typename ... Ts>
+std::size_t get_index(Ts... args) const
+{
+    std::size_t rval = 0;
+    array_util::flatten([&rval](std::size_t ignored, std::size_t i){
                 rval *= vector_dimension;
                 rval += i;
             }, args ...);
-            return rval;
-        }
+    return rval;
+}
 
-        DataType _data;
+DataType _data;
 };
 
 /**
@@ -898,7 +972,7 @@ tensor<ElemType, D, N> Sym(const tensor<ElemType, D, N> &A)
 template <std::size_t N>
 int sgn(const std::array<std::size_t, N> &arr)
 {
-    int                 rval = 1;
+    int rval = 1;
     std::array<bool, N> visited;
     visited.fill(false);
 
@@ -1110,7 +1184,7 @@ tensor<ElemType, D, N> operator/(const tensor<ElemType, D, N> &A, ScalarType x)
 template <typename ElemType, std::size_t D, std::size_t N, std::size_t M>
 tensor<ElemType, D, N+M> operator^(const tensor<ElemType, D, N> &A, const tensor<ElemType, D, M> &B)
 {
-    auto     rval = Alt(A*B);
+    auto rval = Alt(A*B);
     ElemType num  = detail::factorial<N+M>::value;
     ElemType den  = detail::factorial<N>::value * detail::factorial<M>::value;
     rval *= num / den;
@@ -1151,8 +1225,8 @@ template <typename ElemType, std::size_t D, std::size_t N>
 ElemType operator|(const tensor<ElemType, D, N> &A, const tensor<ElemType, D, N> &B)
 {
     ElemType rval  = 0;
-    auto     Acurr = A.begin();
-    auto     Bcurr = B.begin();
+    auto Acurr = A.begin();
+    auto Bcurr = B.begin();
     for (; Acurr != A.end(); ++Acurr, ++Bcurr)
     {
         rval += (*Acurr)*(*Bcurr);
@@ -1179,5 +1253,45 @@ tensor<ElemType, 3, 1> cross(const tensor<ElemType, 3, 1> &x, const tensor<ElemT
     rval[1] = x[2]*y[0] - y[2]*x[0];
     rval[2] = x[0]*y[1] - y[0]*x[1];
     return rval;
+}
+
+/**
+ * @brief      Generate an Eigen Map around 1-tensor data
+ *
+ * @param      t                  1-tensor to wrap
+ *
+ * @tparam     _ElemType          Typename of the data
+ * @tparam     _vector_dimension  Dimension of the vector space
+ * @tparam     _tensor_rank       Rank of the tensor
+ * @tparam     <unnamed>          Enabled only for 1-tensors
+ *
+ * @return     Eigen map object
+ */
+template <typename _ElemType, std::size_t _vector_dimension, std::size_t _tensor_rank,
+          typename std::enable_if<_tensor_rank == 1, void>::type* = nullptr>
+Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> >
+EigenMap(tensor<_ElemType, _vector_dimension, _tensor_rank>& t)
+{
+    return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> >(t.data());
+}
+
+/**
+ * @brief      Generate an Eigen Map around 2-tensor data
+ *
+ * @param      t                  2-tensor to wrap
+ *
+ * @tparam     _ElemType          Typename of the data
+ * @tparam     _vector_dimension  Dimension of the vector space
+ * @tparam     _tensor_rank       Rank of the tensor
+ * @tparam     <unnamed>          Enabled only for 2-tensors
+ *
+ * @return     Eigen map object
+ */
+template <typename _ElemType, std::size_t _vector_dimension, std::size_t _tensor_rank,
+          typename std::enable_if<_tensor_rank == 2, void>::type* = nullptr>
+Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> >
+EigenMap(tensor<_ElemType, _vector_dimension, _tensor_rank>& t)
+{
+    return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> >(t.data());
 }
 } // end namespace gamer

@@ -1329,7 +1329,7 @@ void osculatingJets(const SurfaceMesh&mesh){
 
 
     for (auto vertexID : mesh.get_level_id<1>()) {
-        Monge_via_jet_fitting::Monge_form mongeForm;
+        Monge_via_jet_fitting::MongeForm mongeForm;
 
         // Set of neighbors
         std::set<SurfaceMesh::SimplexID<1> > kNeighbors;

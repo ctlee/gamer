@@ -43,103 +43,16 @@ unsigned int fact(unsigned int n)
     return p;
 }
 
-
-template<class T>
-class Eigen_vector
-    : public Eigen::Matrix<T, Eigen::Dynamic, 1>
-{
-// Public types
-    public:
-        /// \name Types
-        /// @{
-        typedef T                                      NT;
-
-        /// The internal vector type from \ref thirdpartyEigen "Eigen".
-        typedef Eigen::Matrix<T, Eigen::Dynamic, 1>    EigenType;
-    /// @}
-
-// Public operations
-    public:
-        Eigen_vector<T> &operator=(const Eigen_vector<T> &other)
-        {
-            return static_cast<EigenType &>(*this) = other.eigen_object();
-        }
-
-        Eigen_vector<T> &operator=(const EigenType &other)
-        {
-            return static_cast<Eigen_vector<T> &>(static_cast<EigenType &>(*this) = other);
-        }
-        Eigen_vector()
-            : EigenType()
-        {}
-
-        /// Create a vector initialized with zeros.
-        Eigen_vector(std::size_t dimension)
-            : EigenType(static_cast<int>(dimension))
-        {
-            this->setZero();
-        }
-
-        /// Copy constructor.
-        Eigen_vector(const Eigen_vector &toCopy) : EigenType(toCopy) { }
-
-        ~Eigen_vector() { }
-
-        /// Return the vector's number of coefficients.
-        int dimension() const { return static_cast<int>(this->size()); }
-
-        /// Return the internal vector wrapped by this object.
-        const EigenType &eigen_object() const { return *this; }
-
-        /// Return the internal vector wrapped by this object.
-        EigenType &eigen_object() { return *this; }
-
-        /// Write access to a vector coefficient: `a_i` <- `value`.
-        void set(std::size_t i, NT value)
-        {
-            this->operator[](static_cast<int>(i)) = value;
-        }
-
-        /// Return a pointer to the data array of this vector.
-        NT* vector() { return this->data(); }
-};
-
-template <class FT>
-struct Eigen_matrix
-    : public ::Eigen::Matrix<FT, ::Eigen::Dynamic, ::Eigen::Dynamic>
-{
-    /// The internal matrix type from \ref thirdpartyEigen "Eigen".
-    typedef ::Eigen::Matrix<FT, ::Eigen::Dynamic, ::Eigen::Dynamic> EigenType;
-
-    /// Construct a matrix with `nr` rows and `nc` columns.
-    Eigen_matrix(std::size_t nr, std::size_t nc) : EigenType(nr, nc) { }
-
-    /// Return the matrix number of rows.
-    std::size_t number_of_rows() const { return this->rows(); }
-    /// Return the matrix number of columns.
-    std::size_t number_of_columns() const { return this->cols(); }
-
-    /// Return the value of the matrix at position (i,j).
-    FT operator()( std::size_t i, std::size_t j ) const { return EigenType::operator()(i, j); }
-
-    /// Write access to a matrix coefficient: `a_ij` <- `val`.
-    void set(std::size_t i, std::size_t j, FT value) { this->coeffRef(i, j) = value; }
-
-    /// Return the internal matrix, with type `EigenType`.
-    const EigenType &eigen_object() const { return static_cast<const EigenType &>(*this); }
-};
-
-
-class Eigen_svd
+class EigenSVD
 {
     public:
-        typedef Eigen_vector<REAL>                                Vector;
-        typedef Eigen_matrix<REAL>                                Matrix;
+        using Vector = Eigen::Matrix<REAL, Eigen::Dynamic, 1>;
+        using Matrix = Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic>;
 
         static REAL solve(const Matrix &M, Vector &B)
         {
-            Eigen::JacobiSVD<Matrix::EigenType> jacobiSvd(M.eigen_object(), ::Eigen::ComputeThinU | ::Eigen::ComputeThinV);
-            B.eigen_object() = jacobiSvd.solve(Vector::EigenType(B.eigen_object()));
+            Eigen::JacobiSVD<Matrix> jacobiSvd(M, Eigen::ComputeThinU | Eigen::ComputeThinV);
+            B = jacobiSvd.solve(Vector(B));
             return jacobiSvd.singularValues().array().abs().maxCoeff() /
                    jacobiSvd.singularValues().array().abs().minCoeff();
         }
@@ -148,7 +61,7 @@ class Eigen_svd
 class Monge_via_jet_fitting
 {
     public:
-        class Monge_form
+        class MongeForm
         {
             protected:
                 Vector m_origin_pt;
@@ -163,7 +76,7 @@ class Monge_via_jet_fitting
                 std::vector<REAL> m_coefficients;
 
             public:
-                Monge_form()
+                MongeForm()
                 {
                     m_origin_pt = Vector({0., 0., 0.});
                     m_d1 = Vector({0., 0., 0.});
@@ -171,7 +84,7 @@ class Monge_via_jet_fitting
                     m_n  = Vector({0., 0., 0.});
                     m_coefficients = std::vector<REAL>();
                 }
-                ~Monge_form() {}
+                ~MongeForm() {}
 
                 //access
                 const Vector origin() const { return m_origin_pt; }
@@ -234,12 +147,12 @@ class Monge_via_jet_fitting
 
                 void dump_verbose(std::ostream &out_stream) const;
                 void dump_4ogl(std::ostream &out_stream, const REAL scale);
-        }; // end nested class Monge_form
+        }; // end nested class MongeForm
 
     public:
         using Aff_transformation = Eigen::Affine3d;
-        using LAVector = Eigen_svd::Vector;
-        using LAMatrix = Eigen_svd::Matrix;
+        using LAVector = EigenSVD::Vector;
+        using LAMatrix = EigenSVD::Matrix;
 
 
     public:
@@ -252,7 +165,7 @@ class Monge_via_jet_fitting
          * @param dprime    Degree of the Monge representation
          */
         template <class InputIterator>
-        Monge_form operator()(InputIterator begin, InputIterator end,
+        MongeForm operator()(InputIterator begin, InputIterator end,
                               size_t d, size_t dprime);
 
         const REAL condition_number() const {return condition_nb;}
@@ -303,11 +216,11 @@ class Monge_via_jet_fitting
         //change_fitting2monge is computed
         //if deg_monge =1 only 1st order info
         //if deg_monge >= 2 2nd order info are computed
-        void compute_Monge_basis(const REAL* A, Monge_form &monge_form);
+        void compute_Monge_basis(const REAL* A, MongeForm &monge_form);
 
         //if deg_monge >=3 then 3rd (and 4th) order info are computed
         void compute_Monge_coefficients(REAL* A, std::size_t dprime,
-                                        Monge_form &monge_form);
+                                        MongeForm &monge_form);
 
         //for a trihedron (v1,v2,v3) switches v1 to -v1 if det(v1,v2,v3) < 0
         void switch_to_direct_orientation(Vector &v1, const Vector &v2,
@@ -316,7 +229,7 @@ class Monge_via_jet_fitting
         friend
         std::ostream &
         operator<<(std::ostream                                     &out_stream,
-                   const typename Monge_via_jet_fitting::Monge_form &monge)
+                   const typename Monge_via_jet_fitting::MongeForm &monge)
         {
             monge.dump_verbose(out_stream);
             return out_stream;
@@ -326,19 +239,17 @@ class Monge_via_jet_fitting
 
 
 template <class InputIterator>
-typename Monge_via_jet_fitting::Monge_form
+typename Monge_via_jet_fitting::MongeForm
 Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
-                                  size_t d, size_t dprime)
+                                  size_t dJet, size_t dPrime)
 {
     // precondition: on the degrees, jet and monge
-    // CGAL_precondition( (d >= 1) && (dprime >= 1)
-    //                    && (dprime <= 4) && (dprime <= d) );
-    if (!((d >= 1) && (dprime >= 1) && (dprime <= 4) && (dprime <= d)))
+    if (!((dJet >= 1) && (dPrime >= 1) && (dPrime <= 4) && (dPrime <= dJet)))
         throw std::runtime_error("Jet and Monge Degrees are invalid");
 
-    this->deg = static_cast<int>(d);
-    this->deg_monge = static_cast<int>(dprime);
-    this->nb_d_jet_coeff = static_cast<int>((d+1)*(d+2)/2);
+    this->deg = static_cast<int>(dJet);
+    this->deg_monge = static_cast<int>(dPrime);
+    this->nb_d_jet_coeff = static_cast<int>((dJet+1)*(dJet+2)/2);
     this->nb_input_pts   = static_cast<int>(end - begin);
     // precondition: solvable ls system
     // CGAL_precondition( nb_input_pts >= nb_d_jet_coeff );
@@ -346,8 +257,8 @@ Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
         throw std::runtime_error("The Jet fitting linear system is not solvable.");
 
     //Initialize
-    Monge_form monge_form;
-    monge_form.set_up(dprime);
+    MongeForm monge_form;
+    monge_form.set_up(dPrime);
     //form the system MA=Z
     // std::cout << "Nb input pts: " << nb_input_pts << std::endl;
     // std::cout << "NB-d_jet coeff: " << nb_d_jet_coeff << std::endl;
@@ -355,16 +266,16 @@ Monge_via_jet_fitting::operator()(InputIterator begin, InputIterator end,
     LAVector Z(nb_input_pts);
 
     compute_PCA(begin, end);
-    fill_matrix(begin, end, d, M, Z); //with precond
+    fill_matrix(begin, end, dJet, M, Z); //with precond
 
     // std::cout << "M:" << std::endl << M << std::endl;
     // std::cout << "Z:" << std::endl << Z << std::endl;
 
     solve_linear_system(M, Z);        //correct with precond
     // std::cout << "Solved Z: " << Z << std::endl;
-    compute_Monge_basis(Z.vector(), monge_form);
-    if (dprime >= 3)
-        compute_Monge_coefficients(Z.vector(), dprime, monge_form);
+    compute_Monge_basis(Z.data(), monge_form);
+    if (dPrime >= 3)
+        compute_Monge_coefficients(Z.data(), dPrime, monge_form);
     return monge_form;
 }
 
@@ -489,7 +400,7 @@ fill_matrix(InputIterator begin, InputIterator end,
     for(auto it = begin; it != end; ++it) {
         Vector cur_pt = (**it).position;
         // std::cout << "Before: " << cur_pt << std::endl;
-        cur_pt.toEigen() = transf_points*cur_pt.toEigen();
+        cur_pt.mapEigen() = transf_points*cur_pt.mapEigen();
         // std::cout << "After:  " << cur_pt << std::endl;
         pts_in_fitting_basis.push_back(cur_pt);
     }
@@ -518,18 +429,17 @@ fill_matrix(InputIterator begin, InputIterator end,
         // CGAL_For_all(itb, ite) {
         x = (*it)[0];         // x
         y = (*it)[1];         // y
-        //  Z[line_count] = itb->z();
-        Z.set(line_count, (*it)[2]);         //itb->z());
+        Z.coeffRef(line_count) = (*it)[2];         //itb->z());
         for (std::size_t k = 0; k <= d; k++)
         {
             for (std::size_t i = 0; i <= k; i++)
             {
-                M.set( line_count, k * (k + 1) / 2 + i,
+                M.coeffRef(line_count, k * (k + 1) / 2 + i) =
                        std::pow( x, static_cast<int>(k - i) )
                        * std::pow( y, static_cast<int>(i) )
                        / (fact( static_cast<unsigned int>(i) ) *
                           fact( static_cast<unsigned int>(k - i) )
-                          * std::pow( this->preconditionning, static_cast<int>(k) ) ) );
+                          * std::pow( this->preconditionning, static_cast<int>(k) ) );
             }
         }
         line_count++;

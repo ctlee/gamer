@@ -427,7 +427,7 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
 
         // Get a reference vector to shared which lies on the plane of interest.
         Vector disp = center - shared;
-        EigenVector disp_e = disp.toEigen();
+        EigenVector disp_e = disp.mapEigen();
 
         // Perpendicular projector
         auto   perpProj = perpNorm*perpNorm; // tensor product
@@ -464,7 +464,7 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
     //      << eigen_result.eigenvectors() << std::endl;
 
     newPos -= center.position;  // Vector of old position to new position
-    EigenVector newPos_e = newPos.toEigen();
+    EigenVector newPos_e = newPos.mapEigen();
 
     // dot product followed by elementwise-division EQN 4. w is a scale factor.
     auto w = (
@@ -548,14 +548,14 @@ Vector weightedVertexSmoothCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> ve
 
         // Get a reference vector to shared which lies on the plane of interest.
         Vector disp = center - shared;
-        EigenVector disp_e = disp.toEigen();
+        EigenVector disp_e = disp.mapEigen();
 
         // Perpendicular projector
         auto   perpProj = perpNorm*perpNorm; // tensor product
         // Compute perpendicular component
         Vector perp;
-        EigenMatrix perpProj_e = perpProj.toEigen();
-        EigenVector perp_e = perp.toEigen();
+        EigenMatrix perpProj_e = perpProj.mapEigen();
+        EigenVector perp_e = perp.mapEigen();
         perp_e = perpProj_e*disp_e; // matrix (3x3) * vector = vector
 
         sumWeights += alpha;
@@ -583,7 +583,7 @@ Vector weightedVertexSmoothCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> ve
     //      << eigen_result.eigenvectors() << std::endl;
 
     newPos -= center.position;  // Vector of old position to new position
-    EigenVector newPos_e = newPos.toEigen();
+    EigenVector newPos_e = newPos.mapEigen();
 
     // dot product followed by elementwise-division EQN 4. w is a scale factor.
     auto w = (
@@ -663,8 +663,8 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double
         Vector rotAxis = ab;
 
         // build the transformation
-        EigenVector rotAxis_e = rotAxis.toEigen();
-        EigenVector center_e = b.position.toEigen();
+        EigenVector rotAxis_e = rotAxis.mapEigen();
+        EigenVector center_e = b.position.mapEigen();
         Eigen::Affine3d             A = Eigen::Translation3d(center_e) * Eigen::AngleAxisd(angle, rotAxis_e) * Eigen::Translation3d(-center_e);
 
         // Weight the new position by the area of the current face
@@ -900,7 +900,7 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
     norm /= std::sqrt(norm|norm); // normalize
     auto perpProj = norm*norm;    // tensor product
 
-    EigenVector disp_e = disp.toEigen();
+    EigenVector disp_e = disp.mapEigen();
 
     // Compute perpendicular component
     // Vector perp;
@@ -914,8 +914,8 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
         1, 0, 0, 0, 1, 0, 0, 0, 1
     }};
     auto llproj = identity-perpProj; // perpendicular projector
-    EigenMatrix llproj_e  = llproj.toEigen();
-    EigenVector parallel_e = parallel.toEigen();
+    EigenMatrix llproj_e  = llproj.mapEigen();
+    EigenVector parallel_e = parallel.mapEigen();
     parallel_e = llproj_e*disp_e;
 
     (*vertexID).position = (*vertexID).position + parallel;

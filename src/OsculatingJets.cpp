@@ -33,14 +33,14 @@ namespace gamer {
 //-------------------------------------------------------------------
 // Implementation
 //------------------------------------------------------------------
-void Monge_via_jet_fitting::Monge_form::set_up(std::size_t degree)
+void Monge_via_jet_fitting::MongeForm::set_up(std::size_t degree)
 {
     if (degree >= 2)
         std::fill_n(back_inserter(m_coefficients),
                     (degree + 1) * (degree + 2) / 2 - 4, 0.);
 }
 
-void Monge_via_jet_fitting::Monge_form::comply_wrt_given_normal(const Vector &given_normal)
+void Monge_via_jet_fitting::MongeForm::comply_wrt_given_normal(const Vector &given_normal)
 {
     if (dot( given_normal, this->normal_direction() ) < 0)
     {
@@ -67,7 +67,7 @@ void Monge_via_jet_fitting::Monge_form::comply_wrt_given_normal(const Vector &gi
     }
 }
 
-void Monge_via_jet_fitting::Monge_form::dump_verbose(std::ostream &out_stream) const
+void Monge_via_jet_fitting::MongeForm::dump_verbose(std::ostream &out_stream) const
 {
     out_stream << "origin : " << origin() << std::endl
                << "n : " << normal_direction() << std::endl;
@@ -90,7 +90,7 @@ void Monge_via_jet_fitting::Monge_form::dump_verbose(std::ostream &out_stream) c
                    << std::endl;
 }
 
-void Monge_via_jet_fitting::Monge_form::
+void Monge_via_jet_fitting::MongeForm::
 dump_4ogl(std::ostream &out_stream, const REAL scale)
 {
     // CGAL_precondition( coefficients().size() >= 2 );
@@ -114,14 +114,14 @@ Monge_via_jet_fitting::Monge_via_jet_fitting()
 
 void Monge_via_jet_fitting::solve_linear_system(LAMatrix &M, LAVector &Z)
 {
-    condition_nb = Eigen_svd::solve(M, Z);
+    condition_nb = EigenSVD::solve(M, Z);
     for (int k = 0; k <= this->deg; k++)
         for (int i = 0; i <= k; i++)
             // Z[k*(k+1)/2+i] /= std::pow(this->preconditionning,k);
-            Z.set( k * (k + 1) / 2 + i, Z(k * (k + 1) / 2 + i) / std::pow(this->preconditionning, k) );
+            Z( k * (k + 1) / 2 + i) = Z(k * (k + 1) / 2 + i) / std::pow(this->preconditionning, k);
 }
 
-void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge_form)
+void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, MongeForm &monge_form)
 {
     // std::cout << A[0] << std::endl;
     // std::cout << A[1] << std::endl;
@@ -137,8 +137,8 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
         Vector normal({-A[1], -A[2], 1.});
         REAL norm2 = normal | normal;
         normal /= std::sqrt(norm2);
-        monge_form.origin().toEigen() = ( this->translate_p0.inverse() * this->change_world2fitting.inverse() ) * orig_monge.toEigen();
-        monge_form.normal_direction().toEigen() = this->change_world2fitting.inverse() * normal.toEigen();
+        monge_form.origin().mapEigen() = ( this->translate_p0.inverse() * this->change_world2fitting.inverse() ) * orig_monge.mapEigen();
+        monge_form.normal_direction().mapEigen() = this->change_world2fitting.inverse() * normal.mapEigen();
     }
     // else (deg_monge >= 2) then 2nd order info are computed
     else
@@ -227,18 +227,18 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, Monge_form &monge
 
         //store the monge basis origin and vectors with their world coord
         //store ppal curv
-        monge_form.origin().toEigen() = ( this->translate_p0.inverse() *
-                                          this->change_world2fitting.inverse() ) * orig_monge.toEigen();
-        monge_form.maximal_principal_direction().toEigen() = this->change_world2fitting.inverse() * d_max.toEigen();
-        monge_form.minimal_principal_direction().toEigen() = this->change_world2fitting.inverse() * d_min.toEigen();
-        monge_form.normal_direction().toEigen() = this->change_world2fitting.inverse() * normal.toEigen();
+        monge_form.origin() = ( this->translate_p0.inverse() *
+                                          this->change_world2fitting.inverse() ) * orig_monge.mapEigen();
+        monge_form.maximal_principal_direction().mapEigen() = this->change_world2fitting.inverse() * d_max.mapEigen();
+        monge_form.minimal_principal_direction().mapEigen() = this->change_world2fitting.inverse() * d_min.mapEigen();
+        monge_form.normal_direction().mapEigen() = this->change_world2fitting.inverse() * normal.mapEigen();
         monge_form.coefficients()[0]  = eval[1];
         monge_form.coefficients()[1]  = eval[0];
     }
     //end else
 }
 
-void Monge_via_jet_fitting::compute_Monge_coefficients(REAL* A, std::size_t dprime, Monge_form &monge_form)
+void Monge_via_jet_fitting::compute_Monge_coefficients(REAL* A, std::size_t dprime, MongeForm &monge_form)
 {
     //One has the equation w=J_A(u,v) of the fitted surface S
     // in the fitting_basis
