@@ -338,6 +338,7 @@ bool computeLocalOrientation(SurfaceMesh                                   &mesh
                     }
                     else
                     {
+                        // TODO (0): Change to runtime error
                         std::cerr << "ERROR(computeLocalOrientation): Found an edge"
                                   << " connected to " << w.size() << " faces. The SurfaceMesh "
                                   << "is no longer a surface mesh." << std::endl;
