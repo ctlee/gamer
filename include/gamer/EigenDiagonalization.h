@@ -115,8 +115,6 @@ static bool diagonalizeSelfAdjointCovMatrix(const CovarianceMatrix &cov,
                                             _EigenMatrix           &eigenvectors)
 {
     _EigenMatrix m   = construct_covariance_matrix(cov);
-
-    std::cout << m << std::endl;
     bool res = diagonalizeSelfAdjointMatrix(m, eigenvalues, eigenvectors);
     return res;
 }

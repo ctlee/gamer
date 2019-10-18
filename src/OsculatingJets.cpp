@@ -1,25 +1,27 @@
-// Code adapted from CGAL
-// License reproduced as follows
-
-// Copyright (c) 2007  INRIA Sophia-Antipolis (France), INRIA Lorraine LORIA.
-// All rights reserved.
-//
-// This file is part of CGAL (www.cgal.org).
-// You can redistribute it and/or modify it under the terms of the GNU
-// General Public License as published by the Free SoREALware Foundation,
-// either version 3 of the License, or (at your option) any later version.
-//
-// Licensees holding a valid commercial license may use this file in
-// accordance with the commercial license agreement provided with the soREALware.
-//
-// This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-// WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-//
-// $URL$
-// $Id$
-// SPDX-License-Identifier: GPL-3.0+
-//
-// Author(s)     : Marc Pouget and Frédéric Cazals
+/*****************************************************************************
+ * This file is part of the GAMer software.
+ * Copyright (C) 2019
+ * by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
+ *    and Michael Holst
+ *
+ * Copyright (c) 2007  INRIA Sophia-Antipolis (France), INRIA Lorraine LORIA.
+ * all rights reserved.
+ *
+ * You can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free SoREALware Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * Licensees holding a valid commercial license may use this file in
+ * accordance with the commercial license agreement provided with the
+ * software.
+ *
+ * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * Author(s)          : Marc Pouget and Frédéric Cazals
+ * Christopher T. Lee : Adapted from CGAL for GAMER
+ * ***************************************************************************
+ */
 
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
@@ -42,24 +44,26 @@ void Monge_via_jet_fitting::MongeForm::set_up(std::size_t degree)
 
 void Monge_via_jet_fitting::MongeForm::comply_wrt_given_normal(const Vector &given_normal)
 {
-    if (dot( given_normal, this->normal_direction() ) < 0)
+    if (dot(given_normal, this->normal_direction()) < 0)
     {
-        normal_direction() = -normal_direction();
-        std::swap( maximal_principal_direction(), minimal_principal_direction() );
-        if (coefficients().size() >= 2)
-            std::swap(coefficients()[0], coefficients()[1]);
-        if (coefficients().size() >= 6)
+        //normal_direction() = -normal_direction();
+        m_n = -m_n;
+        // std::swap(maximal_principal_direction(), minimal_principal_direction());
+        std::swap(m_d1, m_d2);
+        if (m_coefficients.size() >= 2)
+            std::swap(m_coefficients[0], m_coefficients[1]);
+        if (m_coefficients.size() >= 6)
         {
-            std::swap(coefficients()[2], coefficients()[5]);
-            std::swap(coefficients()[3], coefficients()[4]);
+            std::swap(m_coefficients[2], m_coefficients[5]);
+            std::swap(m_coefficients[3], m_coefficients[4]);
         }
-        if (coefficients().size() >= 11)
+        if (m_coefficients.size() >= 11)
         {
-            std::swap(coefficients()[6], coefficients()[10]);
-            std::swap(coefficients()[7], coefficients()[9]);
+            std::swap(m_coefficients[6], m_coefficients[10]);
+            std::swap(m_coefficients[7], m_coefficients[9]);
         }
-        typename std::vector<REAL>::iterator itb = coefficients().begin(),
-                                             ite = coefficients().end();
+        typename std::vector<REAL>::iterator itb = m_coefficients.begin(),
+                                             ite = m_coefficients.end();
         for (; itb != ite; itb++)
         {
             *itb = -(*itb);
@@ -117,8 +121,7 @@ void Monge_via_jet_fitting::solve_linear_system(LAMatrix &M, LAVector &Z)
     condition_nb = EigenSVD::solve(M, Z);
     for (int k = 0; k <= this->deg; k++)
         for (int i = 0; i <= k; i++)
-            // Z[k*(k+1)/2+i] /= std::pow(this->preconditionning,k);
-            Z( k * (k + 1) / 2 + i) = Z(k * (k + 1) / 2 + i) / std::pow(this->preconditionning, k);
+            Z(k*(k+1)/2+i) /= std::pow(this->preconditionning, k);
 }
 
 void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, MongeForm &monge_form)
@@ -219,8 +222,8 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, MongeForm &monge_
         //                                  normal[0], normal[1], normal[2]);
         EigenMatrix tmp;
         tmp << d_max[0], d_max[1], d_max[2],
-               d_min[0], d_min[1], d_min[2],
-               normal[0], normal[1], normal[2];
+            d_min[0], d_min[1], d_min[2],
+            normal[0], normal[1], normal[2];
         Aff_transformation change_basis (tmp);
 
         this->change_fitting2monge = change_basis;
@@ -228,7 +231,7 @@ void Monge_via_jet_fitting::compute_Monge_basis(const REAL* A, MongeForm &monge_
         //store the monge basis origin and vectors with their world coord
         //store ppal curv
         monge_form.origin() = ( this->translate_p0.inverse() *
-                                          this->change_world2fitting.inverse() ) * orig_monge.mapEigen();
+                                this->change_world2fitting.inverse() ) * orig_monge.mapEigen();
         monge_form.maximal_principal_direction().mapEigen() = this->change_world2fitting.inverse() * d_max.mapEigen();
         monge_form.minimal_principal_direction().mapEigen() = this->change_world2fitting.inverse() * d_min.mapEigen();
         monge_form.normal_direction().mapEigen() = this->change_world2fitting.inverse() * normal.mapEigen();
@@ -441,8 +444,11 @@ void Monge_via_jet_fitting::compute_Monge_coefficients(REAL* A, std::size_t dpri
 
 void Monge_via_jet_fitting::switch_to_direct_orientation(Vector &v1, const Vector &v2, const Vector &v3)
 {
-    if (dot( v1, cross(v2,v3) ) < 0)
+    REAL v = dot(v1, cross(v2,v3));
+    std::cout << "Orientation: " << v << std::endl;
+    if (dot(v1, cross(v2,v3)) > 0.){
         v1 = -v1;
+    }
 }
 
 } // end namespace gamer

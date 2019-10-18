@@ -1323,7 +1323,7 @@ computeCurvatures(const SurfaceMesh & mesh){
 }
 
 void osculatingJets(const SurfaceMesh&mesh){
-    int d_fitting = 2;
+    int d_fitting = 3;
     int d_monge = 2;
     int min_nb_points = (d_fitting + 1) * (d_fitting + 2) / 2;
 
@@ -1334,7 +1334,7 @@ void osculatingJets(const SurfaceMesh&mesh){
         // Set of neighbors
         std::set<SurfaceMesh::SimplexID<1> > kNeighbors;
         // Get list of neighbors
-        casc::kneighbors_up(mesh, vertexID, 1, kNeighbors);
+        casc::kneighbors_up(mesh, vertexID, 4, kNeighbors);
 
         std::vector<SurfaceMesh::SimplexID<1> > nbors;
         nbors.push_back(vertexID);
