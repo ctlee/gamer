@@ -73,12 +73,9 @@ class DivergingNorm(mpl.colors.Normalize):
         self.vcenter = vcenter
         self.vmin = vmin
         self.vmax = vmax
-        if vcenter is not None and vmax is not None and vcenter >= vmax:
-            raise ValueError('vmin, vcenter, and vmax must be in '
-                             'ascending order')
-        if vcenter is not None and vmin is not None and vcenter <= vmin:
-            raise ValueError('vmin, vcenter, and vmax must be in '
-                             'ascending order')
+        if not (vcenter and vmin and vmax) and (vcenter >= vmax or vcenter <= vmin):
+            raise ValueError('vmin(%f), vcenter(%f), and vmax(%f) must be in '
+                             'ascending order'%(vmin, vcenter, vmax))
 
     def autoscale_None(self, A):
         """
@@ -115,10 +112,11 @@ def dataToVertexColor(data, minV=-1000, maxV=1000, percentTruncate=False, vlayer
     fig = plt.figure(figsize=(8,5))
     ax = fig.add_axes([0.1,0.05,0.6,0.9])
 
-    truncMin = np.percentile(data,1)
-    truncMax = np.percentile(data,99)
-    data[data < truncMin] = truncMin
-    data[data > truncMax] = truncMax
+    ## This code helps make the plots easier to read...
+    # truncMin = np.percentile(data,1)
+    # truncMax = np.percentile(data,99)
+    # data[data < truncMin] = truncMin
+    # data[data > truncMax] = truncMax
 
     truncMin = minV
     truncMax = maxV
@@ -182,8 +180,14 @@ def dataToVertexColor(data, minV=-1000, maxV=1000, percentTruncate=False, vlayer
         norm = mpl.colors.Normalize(vmin=amin, vmax=amax)
         curvature_map = cmap
 
+
     # Map values to colors and add vertex color layer
-    colors = curvature_map(norm(data))[:,:3] # Skip alpha channel
+    colors = curvature_map(norm(data))
+
+    # Create view without alpha channel if Blender < 2.80
+    if bpy.app.version < (2,80,0):
+        colors = colors[:,:3]
+
     mesh = bpy.context.object.data
     if vlayer not in mesh.vertex_colors:
         mesh.vertex_colors.new(name=vlayer)

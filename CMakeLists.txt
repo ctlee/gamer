@@ -175,7 +175,6 @@ list(APPEND GAMER_SOURCES
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"
     "src/pdb2mesh.cpp"
-    "src/OsculatingJets.cpp"
 )
 
 #####################################################################

@@ -778,7 +778,7 @@ auto data()
  */
 template <std::size_t D = _tensor_rank,
           typename std::enable_if<D == 1, void>::type* = nullptr>
-Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> > mapEigen()
+Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> > toEigen()
 {
     return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, 1> >(_data.data());
 }
@@ -805,7 +805,7 @@ operator Eigen::Matrix<_ElemType, _vector_dimension, 1>()
  */
 template <std::size_t D = _tensor_rank,
           typename std::enable_if<D == 2, void>::type* = nullptr>
-Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> > mapEigen()
+Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> > toEigen()
 {
     return Eigen::Map<Eigen::Matrix<_ElemType, _vector_dimension, _vector_dimension> >(_data.data());
 }

@@ -573,7 +573,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         def k2_curvature(self, context, report):
             gmesh = blenderToGamer(report)
             if gmesh:
-                _, _, _, k2 = gmesh.computeCurvatures(True, self.curveIter)
+                _, _, _, k2 = gmesh.computeCurvatures(self.curveIter)
 
                 dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
                     percentTruncate=self.curvePercentile,

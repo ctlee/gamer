@@ -1322,32 +1322,27 @@ computeCurvatures(const SurfaceMesh & mesh){
     return std::make_tuple(kh, kg, k1, k2, sigma);
 }
 
-void osculatingJets(const SurfaceMesh&mesh){
-    int d_fitting = 3;
-    int d_monge = 2;
-    int min_nb_points = (d_fitting + 1) * (d_fitting + 2) / 2;
-
+void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet, std::size_t dPrime){
+    int min_nb_points = (dJet + 1) * (dJet + 2) / 2;
 
     for (auto vertexID : mesh.get_level_id<1>()) {
-        Monge_via_jet_fitting::MongeForm mongeForm;
-
         // Set of neighbors
         std::set<SurfaceMesh::SimplexID<1> > kNeighbors;
         // Get list of neighbors
-        casc::kneighbors_up(mesh, vertexID, 4, kNeighbors);
+        casc::kneighbors_up(mesh, vertexID, 1, kNeighbors);
 
         std::vector<SurfaceMesh::SimplexID<1> > nbors;
         nbors.push_back(vertexID);
         std::copy(kNeighbors.begin(), kNeighbors.end(),std::back_inserter(nbors));
 
         if ( nbors.size() < min_nb_points ) {
-            std::cerr << "Not enough pts (" << nbors.size() << ") for fitting this vertex: " << vertexID << std::endl;
+            std::cerr << "Not enough pts (have: " << nbors.size() << ", need: "      << min_nb_points << ") for fitting this vertex: "
+                      << vertexID << std::endl;
             continue;
         }
 
         Monge_via_jet_fitting monge_fit;
-
-        mongeForm = monge_fit(nbors.begin(), nbors.end(), d_fitting, d_monge);
+        auto mongeForm = monge_fit(nbors.begin(), nbors.end(), dJet, dPrime);
         mongeForm.comply_wrt_given_normal(getNormal(mesh, vertexID));
 
         std::cout << vertexID << "@ " << (*vertexID).position << std::endl;

@@ -908,9 +908,11 @@ computeCurvatures(const SurfaceMesh &mesh);
  * @brief      Get the normal, principal directions, and curvatures using
  *             osculating jets.
  *
- * @param[in]  mesh  The mesh
+ * @param[in]  mesh    The mesh
+ * @param[in]  dJet    Fit with a d-Jet
+ * @param[in]  dPrime  Maximal order differential to compute
  */
-void osculatingJets(const SurfaceMesh&mesh);
+void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
 
 //
 // @param      mesh  The mesh
