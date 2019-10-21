@@ -695,125 +695,128 @@ void init_SurfaceMesh(py::module& mod){
     );
 
 
-    /**
-     * This block removed in favor of faster tandem curvature calculation
-     */
+    SurfMeshCls.def("curvatureByMDSB",
+        [](const SurfaceMesh& mesh){
+            double* kh, kg, k1, k2;
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
 
-    // SurfMeshCls.def("meanCurvature",
-    //     [](const SurfaceMesh& mesh, std::size_t nIter){
-    //         std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+            std::tie(kh,kg,k1,k2,sigma) = curvatureByMDSB(mesh);
 
-    //         double *curvature = new double[mesh.size<1>()];
+            auto free_kh  = py::capsule(
+                                kh,
+                                [](void *kh) {
+                                    delete[] reinterpret_cast<double*>(kh);
+                             });
+            auto free_kg  = py::capsule(
+                                kg,
+                                [](void *kg) {
+                                    delete[] reinterpret_cast<double*>(kg);
+                             });
+            auto free_k1  = py::capsule(
+                                k1,
+                                [](void *k1) {
+                                    delete[] reinterpret_cast<double*>(k1);
+                             });
+            auto free_k2  = py::capsule(
+                                k2,
+                                [](void *k2) {
+                                    delete[] reinterpret_cast<double*>(k2);
+                             });
+            return  std::make_tuple(
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            kh,
+                            free_kh),
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            kg,
+                            free_kg),
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            k1,
+                            free_k1),
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            k2,
+                            free_k2)
+                    );
+        },
+        R"delim(
+            Compute the mean, Gaussian, and principal curvatures of the mesh.
 
-    //         std::size_t i = 0;
-    //         for(const auto vertexID : mesh.get_level_id<1>()){
-    //             curvature[i] = getMeanCurvature(mesh, vertexID);
-    //             sigma[vertexID.indices()[0]] = i++;
-    //         }
+            Args:
+                nIter (:py:class:`int`): Number of smoothing iterations to run
 
-    //         if(nIter > 0){
-    //             double* smoothed = new double[mesh.size<1>()];
-    //             for(std::size_t round = 0; round < nIter; ++round){
-    //                 // Smoothing
-    //                 for(const auto vertexID : mesh.get_level_id<1>()) {
-    //                     i = sigma[vertexID.indices()[0]];
-    //                     // double value = scale*curvature[i];
-    //                     double value = curvature[i];
-    //                     auto neighbors = vertexID.cover();
-    //                     for(std::size_t nbor : neighbors) {
-    //                         value += curvature[sigma[nbor]];
-    //                         // value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
-    //                     }
-    //                     // smoothed[i] = value;
-    //                     smoothed[i] = value/static_cast<double>(neighbors.size()+1);
-    //                 }
-    //                 for(std::size_t i = 0; i < mesh.size<1>(); ++i){
-    //                     curvature[i] = smoothed[i];
-    //                 }
-    //             }
-    //             delete[] smoothed;
-    //         }
+            Returns:
+                tuple(:py:class:`numpy.ndarray`, :py:class:`numpy.ndarray`, :py:class:`numpy.ndarray`, :py:class:`numpy.ndarray`): Tuple of arrays containing Mean, Gaussian, First Prinicipal, and Second Principal curvatures.
+        )delim"
+    );
 
-    //         auto free_curvature  = py::capsule(
-    //                                 curvature,
-    //                                 [](void *curvature) {
-    //                                     delete[] reinterpret_cast<double*>(curvature);
-    //                              });
-    //         return  py::array_t<double>(
-    //                     std::array<std::size_t, 1>({mesh.size<1>()}),
-    //                     {sizeof(double)},
-    //                     curvature,
-    //                     free_curvature);
-    //     },
-    //     R"delim(
-    //         Compute the mean curvature of the mesh.
+    SurfMeshCls.def("curvatureByJets",
+        [](const SurfaceMesh& mesh){
+            double* kh, kg, k1, k2;
+            std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
 
-    //         Args:
-    //             :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest.
-    //             int: Number of smoothing iterations to run
+            std::tie(kh,kg,k1,k2,sigma) = curvatureByJets(mesh, 2, 2);
 
-    //         Returns:
-    //             np.ndarray: (nVertices) array of mean curvature values.
-    //     )delim"
-    // );
+            auto free_kh  = py::capsule(
+                                kh,
+                                [](void *kh) {
+                                    delete[] reinterpret_cast<double*>(kh);
+                             });
+            auto free_kg  = py::capsule(
+                                kg,
+                                [](void *kg) {
+                                    delete[] reinterpret_cast<double*>(kg);
+                             });
+            auto free_k1  = py::capsule(
+                                k1,
+                                [](void *k1) {
+                                    delete[] reinterpret_cast<double*>(k1);
+                             });
+            auto free_k2  = py::capsule(
+                                k2,
+                                [](void *k2) {
+                                    delete[] reinterpret_cast<double*>(k2);
+                             });
+            return  std::make_tuple(
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            kh,
+                            free_kh),
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            kg,
+                            free_kg),
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            k1,
+                            free_k1),
+                        py::array_t<double>(
+                            std::array<std::size_t, 1>({mesh.size<1>()}),
+                            {sizeof(double)},
+                            k2,
+                            free_k2)
+                    );
+        },
+        R"delim(
+            Compute the mean, Gaussian, and principal curvatures of the mesh.
 
-    // SurfMeshCls.def("gaussianCurvature",
-    //     [](const SurfaceMesh& mesh, std::size_t nIter){
-    //         std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
+            Args:
+                nIter (:py:class:`int`): Number of smoothing iterations to run
 
-    //         double *curvature = new double[mesh.size<1>()];
+            Returns:
+                tuple(:py:class:`numpy.ndarray`, :py:class:`numpy.ndarray`, :py:class:`numpy.ndarray`, :py:class:`numpy.ndarray`): Tuple of arrays containing Mean, Gaussian, First Prinicipal, and Second Principal curvatures.
+        )delim"
+    );
 
-    //         std::size_t i = 0;
-    //         for(const auto vertexID : mesh.get_level_id<1>()){
-    //             curvature[i] = getGaussianCurvature(mesh, vertexID);
-    //             sigma[vertexID.indices()[0]] = i++;
-    //         }
-
-    //         if(nIter > 0){
-    //             double* smoothed = new double[mesh.size<1>()];
-    //             for(std::size_t round = 0; round < nIter; ++round){
-    //                 // Smoothing
-    //                 for(const auto vertexID : mesh.get_level_id<1>()) {
-    //                     i = sigma[vertexID.indices()[0]];
-    //                     // double value = scale*curvature[i];
-    //                     double value = curvature[i];
-    //                     auto neighbors = vertexID.cover();
-    //                     for(std::size_t nbor : neighbors) {
-    //                         value += curvature[sigma[nbor]];
-    //                         // value += (1-scale)/static_cast<double>(neighbors.size())*curvature[sigma[nbor]];
-    //                     }
-    //                     // smoothed[i] = value;
-    //                     smoothed[i] = value/static_cast<double>(neighbors.size()+1);
-    //                 }
-    //                 for(std::size_t i = 0; i < mesh.size<1>(); ++i){
-    //                     curvature[i] = smoothed[i];
-    //                 }
-    //             }
-    //             delete[] smoothed;
-    //         }
-
-    //         auto free_curvature  = py::capsule(
-    //                                 curvature,
-    //                                 [](void *curvature) {
-    //                                     delete[] reinterpret_cast<double*>(curvature);
-    //                              });
-    //         return  py::array_t<double>(
-    //                     std::array<std::size_t, 1>({mesh.size<1>()}),
-    //                     {sizeof(double)},
-    //                     curvature,
-    //                     free_curvature);
-    //     },
-    //     R"delim(
-    //         Compute the Gaussian curvature of the mesh.
-
-    //         Args:
-    //             :py:class:`surfacemesh.SurfaceMesh`: Mesh of interest.
-    //             int: Number of smoothing iterations to run
-
-    //         Returns:
-    //             np.ndarray: (nVertices) array of Gaussian curvature values.
-    //     )delim"
-    // );
 
 
     SurfMeshCls.def("getNormal",

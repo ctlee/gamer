@@ -465,6 +465,10 @@ class Monge_via_jet_fitting
         // eigen vectors are sorted in accordance.
         EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointCovMatrix
             (covariance, eigenvalues, eigenvectors);
+        // std::cout << "PCA Eigenvalues: "  << std::endl
+        //           << eigenvalues << std::endl;
+        // std::cout << "PCA Eigenvectors: "  << std::endl
+        //           << eigenvectors << std::endl;
 
         // Store eigenvalues in m_pca_basis
         for (int i = 0; i < 3; i++)
@@ -675,7 +679,7 @@ class Monge_via_jet_fitting
      * @param[in]  dprime      Degree differential to compute
      * @param      monge_form  MongeForm object
      */
-    void compute_Monge_coefficients(const REAL* A, std::size_t dprime,
+    void compute_Monge_coefficients(REAL* A, std::size_t dprime,
                                     MongeForm &monge_form){
         //One has the equation w=J_A(u,v) of the fitted surface S
         // in the fitting_basis

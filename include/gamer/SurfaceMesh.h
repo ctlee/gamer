@@ -53,13 +53,13 @@ namespace gamer
 struct SMGlobal
 {
     /// Domain marker to be used when tetrahedralizing.
-    int   marker;
+    int marker;
     /// Volume constraint of the tetrahedralized domain.
     float volumeConstraint;
     /// flag that determines if the volume constraint is used.
-    bool  useVolumeConstraint;
+    bool useVolumeConstraint;
     /// Flag that determines if the mesh represents a hole or not
-    bool  ishole;
+    bool ishole;
 
     /**
      * @brief      Default constructor
@@ -71,7 +71,8 @@ struct SMGlobal
      * @param[in]  ishole               Is this domain a hole?
      */
     SMGlobal(int marker = -1, float volumeConstraint = -1, bool useVolumeConstraint = false, bool ishole = false) :
-        marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {}
+        marker(marker), volumeConstraint(volumeConstraint), useVolumeConstraint(useVolumeConstraint), ishole(ishole) {
+    }
 };
 
 struct SMVertex : Vertex {
@@ -83,19 +84,21 @@ struct SMVertex : Vertex {
 /**
  * @brief      Edge data
  */
-struct SMEdge{
+struct SMEdge {
     /// Selection status of the edge
     bool selected;
 
     /// Default constructor constructs unselected edge
-    SMEdge() : SMEdge(0) {}
+    SMEdge() : SMEdge(0) {
+    }
 
     /**
      * @brief      Overload constructor constructs edge with
      *
      * @param[in]  select  Selection status
      */
-    SMEdge(bool select) : selected(select) {}
+    SMEdge(bool select) : selected(select) {
+    }
 };
 
 /**
@@ -103,7 +106,7 @@ struct SMEdge{
  */
 struct SMFaceProperties
 {
-    int  marker;   /**< @brief Marker */
+    int marker;    /**< @brief Marker */
     bool selected; /**< @brief Selection flag */
     Vector normal; /**< @brief cached normal of face */
 
@@ -114,7 +117,8 @@ struct SMFaceProperties
      * @param[in]  selected  The selected
      */
     SMFaceProperties(int marker, bool selected) :
-        marker(marker), selected(selected) {}
+        marker(marker), selected(selected) {
+    }
 };
 
 /**
@@ -123,7 +127,8 @@ struct SMFaceProperties
 struct SMFace : casc::Orientable, SMFaceProperties
 {
     /// Default constructor
-    SMFace() : SMFace(Orientable{0}, SMFaceProperties{-1, false}) {}
+    SMFace() : SMFace(Orientable{0}, SMFaceProperties{-1, false}) {
+    }
 
     /**
      * @brief      Constructor
@@ -131,7 +136,8 @@ struct SMFace : casc::Orientable, SMFaceProperties
      * @param[in]  marker    Marker value
      * @param[in]  selected  Selection status
      */
-    SMFace(int marker, bool selected) : SMFace(Orientable{0}, SMFaceProperties{marker, selected}) {}
+    SMFace(int marker, bool selected) : SMFace(Orientable{0}, SMFaceProperties{marker, selected}) {
+    }
 
     /**
      * @brief      Constructor
@@ -140,7 +146,8 @@ struct SMFace : casc::Orientable, SMFaceProperties
      * @param[in]  marker    Marker value
      * @param[in]  selected  Selection status
      */
-    SMFace(int orient, int marker, bool selected) : SMFace(Orientable{orient}, SMFaceProperties{marker, selected}) {}
+    SMFace(int orient, int marker, bool selected) : SMFace(Orientable{orient}, SMFaceProperties{marker, selected}) {
+    }
 
     /**
      * @brief      Constructor
@@ -150,7 +157,8 @@ struct SMFace : casc::Orientable, SMFaceProperties
      */
     SMFace(Orientable orient, SMFaceProperties prop)
         : Orientable(orient), SMFaceProperties(prop)
-    {}
+    {
+    }
 
     /**
      * @brief      Print operator overload
@@ -300,7 +308,7 @@ void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::
 tensor<double, 3, 2> computeLocalStructureTensor(
     const SurfaceMesh              &mesh,
     const SurfaceMesh::SimplexID<1> vertexID,
-    const int                       rings);
+    const int rings);
 
 
 /**
@@ -315,7 +323,7 @@ tensor<double, 3, 2> computeLocalStructureTensor(
 tensor<double, 3, 2> computeLSTFromCache(
     const SurfaceMesh              &mesh,
     const SurfaceMesh::SimplexID<1> vertexID,
-    const int                       rings);
+    const int rings);
 
 
 /**
@@ -359,9 +367,9 @@ auto getTangentH(const SurfaceMesh &mesh,
     auto cover = mesh.get_cover(curr);
     for (auto alpha : cover)
     {
-        auto        edge = *mesh.get_edge_up(curr, alpha);
+        auto edge = *mesh.get_edge_up(curr, alpha);
         const auto &v = (*mesh.get_simplex_up({alpha})).position;
-        auto        next = mesh.get_simplex_up(curr, alpha);
+        auto next = mesh.get_simplex_up(curr, alpha);
         rval += edge.orientation * (v-origin) * getTangentH(mesh, origin, next);
     }
     return rval/cover.size();
@@ -413,10 +421,10 @@ auto getTangentF(const SurfaceMesh &mesh,
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
     for (auto alpha : cover)
     {
-        auto        edge = *mesh.get_edge_up(curr, alpha);
+        auto edge = *mesh.get_edge_up(curr, alpha);
         const auto &v = (*mesh.get_simplex_up({alpha})).position;
-        auto        next = mesh.get_simplex_up(curr, alpha);
-        auto        coverup = cover;
+        auto next = mesh.get_simplex_up(curr, alpha);
+        auto coverup = cover;
         coverup.erase(alpha);
         rval += edge.orientation * (v-origin) * getTangentF(mesh, origin, next, coverup);
     }
@@ -453,8 +461,8 @@ struct initLocalOrientation<std::integral_constant<std::size_t, k> >
     template <typename Iterator>
     static void apply(SurfaceMesh          &mesh,
                       const std::set<int> &&names,
-                      Iterator              begin,
-                      Iterator              end)
+                      Iterator begin,
+                      Iterator end)
     {
         std::vector<SurfaceMesh::SimplexID<k+1> > next;
         for (auto curr = begin; curr != end; ++curr)
@@ -497,7 +505,8 @@ struct initLocalOrientation<std::integral_constant<std::size_t, k> >
 template <>
 struct initLocalOrientation<std::integral_constant<std::size_t, SurfaceMesh::topLevel> > {
     template <typename Iterator>
-    static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){}
+    static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){
+    }
 };
 
 /**
@@ -522,8 +531,8 @@ bool computeLocalOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::S
 void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
 
 Vector weightedVertexSmoothCache(SurfaceMesh &mesh,
-                               SurfaceMesh::SimplexID<1> vertexID,
-                               std::size_t rings);
+                                 SurfaceMesh::SimplexID<1> vertexID,
+                                 std::size_t rings);
 
 /**
  * @brief      Traditional barycenter smooth.
@@ -636,10 +645,10 @@ void selectFlipEdges(const SurfaceMesh &mesh,
  * @return     True if edge should be flipped
  */
 bool checkEdgeFlip(const SurfaceMesh &mesh,
-                     bool preserveRidges,
-                     SurfaceMesh::SimplexID<2> edgeID,
-                     std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> &&checkFlip
-                );
+                   bool preserveRidges,
+                   SurfaceMesh::SimplexID<2> edgeID,
+                   std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> &&checkFlip
+                   );
 /**
  * @brief      Check if we should flip an edge to improve the angles.
  *
@@ -900,19 +909,37 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
 double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 
-std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType>>
+/**
+ * @brief      Calculates the curvatures.
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @return     The curvatures.
+ */
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
 computeCurvatures(const SurfaceMesh &mesh);
 
 
 /**
- * @brief      Get the normal, principal directions, and curvatures using
- *             osculating jets.
+ * @brief      Compute the curvature using the Meyer, Desbrun, Schröder, Barr
+ *             algorithms.
  *
  * @param[in]  mesh    The mesh
+ */
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
+curvatureByMDSB(const SurfaceMesh &mesh);
+
+/**
+ * @brief      Compute the curvature using the Cazals-Pouget algorithm.
+ *
  * @param[in]  dJet    Fit with a d-Jet
  * @param[in]  dPrime  Maximal order differential to compute
+ * @param[in]  mesh    The mesh
  */
-void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
+curvatureByJets(const SurfaceMesh &mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
+
+// void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
 
 //
 // @param      mesh  The mesh

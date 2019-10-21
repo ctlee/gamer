@@ -31,7 +31,7 @@ int  main(int argc, char *argv[])
       gamer::flipNormals(*mesh);
     }
 
-    gamer::osculatingJets(*mesh, 2, 2);
+    gamer::curvatureByJets(*mesh, 2, 2);
 
     std::cout << "EOF" << std::endl;
 }
