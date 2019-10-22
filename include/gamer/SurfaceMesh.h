@@ -168,7 +168,7 @@ struct SMFace : casc::Orientable, SMFaceProperties
      *
      * @return     Output stream
      */
-    friend std::ostream &operator<<(std::ostream &output, const SMFace &f)
+    friend std::ostream& operator<<(std::ostream& output, const SMFace& f)
     {
         output << "SMFace("
                << "m:" << f.marker
@@ -230,7 +230,7 @@ using SurfaceMesh = casc::simplicial_complex<surfmesh_detail::surfmesh_traits>;
  *
  * @return     Returns a 2-tensor representing the tangent plane.
  */
-tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+tensor<double, 3, 2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
 
 /**
  * @brief      Compute the tangent of a face.
@@ -243,7 +243,7 @@ tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<
  *
  * @return     Returns a 2-tensor representing the tangent plane.
  */
-tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+tensor<double, 3, 2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
 
 /**
  * @brief      Gets the normal vector from the tangent.
@@ -268,7 +268,7 @@ Vector getNormalFromTangent(const tensor<double, 3, 2> tangent);
  *
  * @return     Returns the Vector normal to the vertex.
  */
-Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
 
 /**
  * @brief      Compute the normal of a face.
@@ -281,7 +281,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
  *
  * @return     Returns a Vector normal to the face.
  */
-Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
 
 /// @cond detail
 /// Namespace for surface mesh detail functions
@@ -294,7 +294,7 @@ namespace surfacemesh_detail
  * @param[in]  vertexID  The vertex id
  * @param[in]  rings     Number of neighborhood rings to consider
  */
-void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings = 2);
+void decimateVertex(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID, std::size_t rings = 2);
 
 /**
  * @brief      Computes the local structure tensor
@@ -306,7 +306,7 @@ void decimateVertex(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, std::
  * @return     The local structure tensor.
  */
 tensor<double, 3, 2> computeLocalStructureTensor(
-    const SurfaceMesh              &mesh,
+    const SurfaceMesh& mesh,
     const SurfaceMesh::SimplexID<1> vertexID,
     const int rings);
 
@@ -321,7 +321,7 @@ tensor<double, 3, 2> computeLocalStructureTensor(
  * @return     The local structure tensor.
  */
 tensor<double, 3, 2> computeLSTFromCache(
-    const SurfaceMesh              &mesh,
+    const SurfaceMesh& mesh,
     const SurfaceMesh::SimplexID<1> vertexID,
     const int rings);
 
@@ -338,8 +338,8 @@ tensor<double, 3, 2> computeLSTFromCache(
  * @return     The tangent h.
  */
 template <std::size_t dimension>
-auto getTangentH(const SurfaceMesh &mesh,
-                 const tensor<double, dimension, 1> &origin,
+auto getTangentH(const SurfaceMesh& mesh,
+                 const tensor<double, dimension, 1>& origin,
                  SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr)
 {
     return (*curr).orientation;
@@ -359,8 +359,8 @@ auto getTangentH(const SurfaceMesh &mesh,
  * @return     The tangent h.
  */
 template <std::size_t level, std::size_t dimension>
-auto getTangentH(const SurfaceMesh &mesh,
-                 const tensor<double, dimension, 1> &origin,
+auto getTangentH(const SurfaceMesh& mesh,
+                 const tensor<double, dimension, 1>& origin,
                  SurfaceMesh::SimplexID<level> curr)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
@@ -368,7 +368,7 @@ auto getTangentH(const SurfaceMesh &mesh,
     for (auto alpha : cover)
     {
         auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto &v = (*mesh.get_simplex_up({alpha})).position;
+        const auto& v = (*mesh.get_simplex_up({alpha})).position;
         auto next = mesh.get_simplex_up(curr, alpha);
         rval += edge.orientation * (v-origin) * getTangentH(mesh, origin, next);
     }
@@ -391,10 +391,10 @@ auto getTangentH(const SurfaceMesh &mesh,
  * @return     Returns a 2-tensor corresponding to the tangent plane.
  */
 template <std::size_t dimension>
-auto getTangentF(const SurfaceMesh &mesh,
-                 const tensor<double, dimension, 1> &origin,
+auto getTangentF(const SurfaceMesh& mesh,
+                 const tensor<double, dimension, 1>& origin,
                  SurfaceMesh::SimplexID<SurfaceMesh::topLevel> curr,
-                 std::set<SurfaceMesh::KeyType> &cover)
+                 std::set<SurfaceMesh::KeyType>& cover)
 {
     return (*curr).orientation;
 }
@@ -413,16 +413,16 @@ auto getTangentF(const SurfaceMesh &mesh,
  * @return     Returns a 2-tensor corresponding to the tangent plane.
  */
 template <std::size_t level, std::size_t dimension>
-auto getTangentF(const SurfaceMesh &mesh,
-                 const tensor<double, dimension, 1> &origin,
+auto getTangentF(const SurfaceMesh& mesh,
+                 const tensor<double, dimension, 1>& origin,
                  SurfaceMesh::SimplexID<level> curr,
-                 std::set<SurfaceMesh::KeyType> &cover)
+                 std::set<SurfaceMesh::KeyType>& cover)
 {
     tensor<double, dimension, SurfaceMesh::topLevel - level> rval;
     for (auto alpha : cover)
     {
         auto edge = *mesh.get_edge_up(curr, alpha);
-        const auto &v = (*mesh.get_simplex_up({alpha})).position;
+        const auto& v = (*mesh.get_simplex_up({alpha})).position;
         auto next = mesh.get_simplex_up(curr, alpha);
         auto coverup = cover;
         coverup.erase(alpha);
@@ -459,8 +459,8 @@ struct initLocalOrientation<std::integral_constant<std::size_t, k> >
      * @tparam     Iterator   Typename of the iterator
      */
     template <typename Iterator>
-    static void apply(SurfaceMesh          &mesh,
-                      const std::set<int> &&names,
+    static void apply(SurfaceMesh& mesh,
+                      const std::set<int>&& names,
                       Iterator begin,
                       Iterator end)
     {
@@ -505,7 +505,7 @@ struct initLocalOrientation<std::integral_constant<std::size_t, k> >
 template <>
 struct initLocalOrientation<std::integral_constant<std::size_t, SurfaceMesh::topLevel> > {
     template <typename Iterator>
-    static void apply(SurfaceMesh &mesh, const std::set<int> &&names, Iterator begin, Iterator end){
+    static void apply(SurfaceMesh& mesh, const std::set<int>&& names, Iterator begin, Iterator end){
     }
 };
 
@@ -519,7 +519,7 @@ struct initLocalOrientation<std::integral_constant<std::size_t, SurfaceMesh::top
  * @return     True if the hole was orientable, False if an inconsistent
  *             orientation was found.
  */
-bool computeLocalOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
+bool computeLocalOrientation(SurfaceMesh& mesh, const std::vector<SurfaceMesh::SimplexID<2> >& edgeList);
 
 /**
  * @brief      Smooth the vertex according to Section 2.2.2 of GAMer paper.
@@ -528,9 +528,9 @@ bool computeLocalOrientation(SurfaceMesh &mesh, const std::vector<SurfaceMesh::S
  * @param[in]  vertexID  SimplexID of the vertex to move.
  * @param[in]  rings     The number of neighbor rings to use to compute the LST.
  */
-void weightedVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
+void weightedVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID, int rings);
 
-Vector weightedVertexSmoothCache(SurfaceMesh &mesh,
+Vector weightedVertexSmoothCache(SurfaceMesh& mesh,
                                  SurfaceMesh::SimplexID<1> vertexID,
                                  std::size_t rings);
 
@@ -540,7 +540,7 @@ Vector weightedVertexSmoothCache(SurfaceMesh &mesh,
  * @param      mesh      SurfaceMesh to manipulate.
  * @param[in]  vertexID  SimplexID of the vertex to move.
  */
-void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID);
+void barycenterVertexSmooth(SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID);
 
 /**
  * @brief      Perform an edge flip operation
@@ -548,9 +548,9 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
  * @param      mesh    SurfaceMesh of interest.
  * @param[in]  edgeID  SimplexID of the edge to flip.
  */
-void edgeFlip(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
+void edgeFlip(SurfaceMesh& mesh, SurfaceMesh::SimplexID<2> edgeID);
 
-void edgeFlipCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
+void edgeFlipCache(SurfaceMesh& mesh, SurfaceMesh::SimplexID<2> edgeID);
 
 /**
  * @brief      Select edges which are good candidates for flipping
@@ -563,9 +563,9 @@ void edgeFlipCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<2> edgeID);
  * @tparam     Inserter        Typename of the inserter.
  */
 template <class Inserter>
-void selectFlipEdges(const SurfaceMesh &mesh,
+void selectFlipEdges(const SurfaceMesh& mesh,
                      bool preserveRidges,
-                     std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> &&checkFlip,
+                     std::function<bool(const SurfaceMesh&, const SurfaceMesh::SimplexID<2> &)>&& checkFlip,
                      Inserter iter)
 {
     casc::NodeSet<SurfaceMesh::SimplexID<2> > ignoredEdges;
@@ -644,10 +644,10 @@ void selectFlipEdges(const SurfaceMesh &mesh,
  *
  * @return     True if edge should be flipped
  */
-bool checkEdgeFlip(const SurfaceMesh &mesh,
+bool checkEdgeFlip(const SurfaceMesh& mesh,
                    bool preserveRidges,
                    SurfaceMesh::SimplexID<2> edgeID,
-                   std::function<bool(const SurfaceMesh &, const SurfaceMesh::SimplexID<2> &)> &&checkFlip
+                   std::function<bool(const SurfaceMesh&, const SurfaceMesh::SimplexID<2> &)>&& checkFlip
                    );
 /**
  * @brief      Check if we should flip an edge to improve the angles.
@@ -658,7 +658,7 @@ bool checkEdgeFlip(const SurfaceMesh &mesh,
  * @return     Returns true if flippiing the edge will improve angles, false
  *             otherwise.
  */
-bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
+bool checkFlipAngle(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID);
 
 /**
  * @brief      Check if we should flip the edge to improve the valence.
@@ -669,7 +669,7 @@ bool checkFlipAngle(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &ed
  * @return     Returns true if flipping the edge will improve the valence, false
  *             otherwise.
  */
-int checkFlipValenceExcess(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<2> &edgeID);
+int checkFlipValenceExcess(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<2>& edgeID);
 
 /**
  * @brief      Apply normal smoothing to a region around a vertex
@@ -678,7 +678,7 @@ int checkFlipValenceExcess(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID
  * @param[in]  vertexID  Vertex of interest
  * @param[in]  k         Anisotropic smoothing factor
  */
-void normalSmoothH(SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID, const double k);
+void normalSmoothH(SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID, const double k);
 
 /**
  * @brief      Traverse mesh and find holes
@@ -686,8 +686,8 @@ void normalSmoothH(SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID, 
  * @param[in]  mesh      SurfaceMesh
  * @param      holeList  List of list of edge rings to store holes in
  */
-void findHoles(const SurfaceMesh                                     &mesh,
-               std::vector<std::vector<SurfaceMesh::SimplexID<2> > > &holeList);
+void findHoles(const SurfaceMesh& mesh,
+               std::vector<std::vector<SurfaceMesh::SimplexID<2> > >& holeList);
 
 /**
  * @brief      Sort a list of boundary edges into ring order.
@@ -707,18 +707,18 @@ void findHoles(const SurfaceMesh                                     &mesh,
  *
  * @return     True if hole ring found. False otherwise.
  */
-bool orderBoundaryEdgeRing(const SurfaceMesh                       &mesh,
-                           std::set<SurfaceMesh::SimplexID<2> >    &unvisitedBdryEdges,
-                           std::vector<SurfaceMesh::SimplexID<1> > &visitedVerts,
-                           std::vector<SurfaceMesh::SimplexID<2> > &bdryRing);
+bool orderBoundaryEdgeRing(const SurfaceMesh& mesh,
+                           std::set<SurfaceMesh::SimplexID<2> >& unvisitedBdryEdges,
+                           std::vector<SurfaceMesh::SimplexID<1> >& visitedVerts,
+                           std::vector<SurfaceMesh::SimplexID<2> >& bdryRing);
 
-void edgeRingToVertices(const SurfaceMesh                                                  &mesh,
-                        std::vector<SurfaceMesh::SimplexID<2> >                            &edgeRing,
+void edgeRingToVertices(const SurfaceMesh& mesh,
+                        std::vector<SurfaceMesh::SimplexID<2> >& edgeRing,
                         std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<1> > > iter);
 
-void triangulateHoleHelper(SurfaceMesh                                                        &mesh,
-                           std::vector<SurfaceMesh::SimplexID<1> >                            &boundary,
-                           const SMFace                                                       &fdata,
+void triangulateHoleHelper(SurfaceMesh& mesh,
+                           std::vector<SurfaceMesh::SimplexID<1> >& boundary,
+                           const SMFace& fdata,
                            std::back_insert_iterator<std::vector<SurfaceMesh::SimplexID<2> > > iter);
 
 /**
@@ -730,10 +730,10 @@ void triangulateHoleHelper(SurfaceMesh                                          
  * @param[in]  fdata     Data to store on each face
  * @param[in]  edgeList  Back inserter to store new edges and boundary edges
  */
-void triangulateHole(SurfaceMesh                             &mesh,
-                     std::vector<SurfaceMesh::SimplexID<1> > &sortedVerts,
-                     const SMFace                            &fdata,
-                     std::vector<SurfaceMesh::SimplexID<2> > &edgeList);
+void triangulateHole(SurfaceMesh& mesh,
+                     std::vector<SurfaceMesh::SimplexID<1> >& sortedVerts,
+                     const SMFace& fdata,
+                     std::vector<SurfaceMesh::SimplexID<2> >& edgeList);
 
 template <typename Complex>
 struct CopyHelper
@@ -742,9 +742,9 @@ struct CopyHelper
     using KeyType = typename Complex::KeyType;
 
     template <std::size_t k>
-    static void apply(Complex          &before,
-                      Complex          &after,
-                      const SimplexSet &S)
+    static void apply(Complex& before,
+                      Complex& after,
+                      const SimplexSet& S)
     {
         for (auto sID : casc::get<k>(S))
         {
@@ -764,7 +764,7 @@ struct CopyHelper
  *
  * @return     Returns a unique_ptr to the SurfaceMesh
  */
-std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
+std::unique_ptr<SurfaceMesh> readOFF(const std::string& filename);
 
 
 /**
@@ -773,7 +773,7 @@ std::unique_ptr<SurfaceMesh> readOFF(const std::string &filename);
  * @param[in]  filename  The filename to write to.
  * @param[in]  mesh      SurfaceMesh of interest.
  */
-void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
+void writeOFF(const std::string& filename, const SurfaceMesh& mesh);
 
 /**
  * @brief      Reads an obj file.
@@ -782,7 +782,7 @@ void writeOFF(const std::string &filename, const SurfaceMesh &mesh);
  *
  * @return     Unique pointer to SurfaceMesh
  */
-std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
+std::unique_ptr<SurfaceMesh> readOBJ(const std::string& filename);
 
 
 /**
@@ -791,14 +791,14 @@ std::unique_ptr<SurfaceMesh> readOBJ(const std::string &filename);
  * @param[in]  filename  The filename to write out to
  * @param[in]  mesh      Surface mesh to output
  */
-void writeOBJ(const std::string &filename, const SurfaceMesh &mesh);
+void writeOBJ(const std::string& filename, const SurfaceMesh& mesh);
 
 /**
  * @brief      Pretty print the mesh.
  *
  * @param[in]  mesh  The mesh to print
  */
-void print(const SurfaceMesh &mesh);
+void print(const SurfaceMesh& mesh);
 
 /**
  * @brief      { function_description }
@@ -806,14 +806,14 @@ void print(const SurfaceMesh &mesh);
  * @param[in]  filename  The filename
  * @param[in]  mesh      The mesh
  */
-void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh);
+void printQualityInfo(const std::string& filename, const SurfaceMesh& mesh);
 
 /**
  * @brief      { function_description }
  *
  * @param[in]  mesh  The mesh
  */
-void generateHistogram(const SurfaceMesh &mesh);
+void generateHistogram(const SurfaceMesh& mesh);
 
 /**
  * @brief      Gets the minimum maximum angles.
@@ -824,7 +824,7 @@ void generateHistogram(const SurfaceMesh &mesh);
  *
  * @return     The minimum maximum angles.
  */
-std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh &mesh,
+std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh& mesh,
                                                      double maxMinAngle, double minMaxAngle);
 
 /**
@@ -834,7 +834,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh &mesh,
  *
  * @return     The area.
  */
-double getArea(const SurfaceMesh &mesh);
+double getArea(const SurfaceMesh& mesh);
 
 /**
  * @brief      Gets the area.
@@ -844,7 +844,7 @@ double getArea(const SurfaceMesh &mesh);
  *
  * @return     The area.
  */
-double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
+double getArea(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID);
 
 /**
  * @brief      Gets the area of a triangle defined by three vertices
@@ -866,7 +866,7 @@ REAL getArea(std::array<Vertex, 3> t);
  *
  * @return     The volume.
  */
-double getVolume(const SurfaceMesh &mesh);
+double getVolume(const SurfaceMesh& mesh);
 
 /**
  * @brief      Determines if a surface mesh contains holes.
@@ -875,7 +875,7 @@ double getVolume(const SurfaceMesh &mesh);
  *
  * @return     True if has hole, False otherwise.
  */
-bool hasHole(const SurfaceMesh &mesh);
+bool hasHole(const SurfaceMesh& mesh);
 
 /**
  * @brief      Gets the number of edges connected to a vertex.
@@ -885,7 +885,7 @@ bool hasHole(const SurfaceMesh &mesh);
  *
  * @return     The valence.
  */
-inline std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID){
+inline std::size_t getValence(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID){
     return mesh.get_cover(vertexID).size();
 }
 
@@ -897,7 +897,7 @@ inline std::size_t getValence(const SurfaceMesh &mesh, const SurfaceMesh::Simple
  *
  * @return     The mean curvature.
  */
-double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+double getMeanCurvature(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID);
 /**
  * @brief      Gets the gaussian curvature.
  *
@@ -906,7 +906,7 @@ double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1>
  *
  * @return     The gaussian curvature.
  */
-double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID);
+double getGaussianCurvature(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID);
 
 
 /**
@@ -916,8 +916,8 @@ double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexI
  *
  * @return     The curvatures.
  */
-std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
-computeCurvatures(const SurfaceMesh &mesh);
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> >
+computeCurvatures(const SurfaceMesh& mesh);
 
 
 /**
@@ -926,8 +926,8 @@ computeCurvatures(const SurfaceMesh &mesh);
  *
  * @param[in]  mesh    The mesh
  */
-std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
-curvatureByMDSB(const SurfaceMesh &mesh);
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> >
+curvatureViaMDSB(const SurfaceMesh& mesh);
 
 /**
  * @brief      Compute the curvature using the Cazals-Pouget algorithm.
@@ -936,16 +936,17 @@ curvatureByMDSB(const SurfaceMesh &mesh);
  * @param[in]  dPrime  Maximal order differential to compute
  * @param[in]  mesh    The mesh
  */
-std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
-curvatureByJets(const SurfaceMesh &mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
+std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> >
+curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
 
-// void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet = 2, std::size_t dPrime = 2);
+// void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet = 2, std::size_t
+// dPrime = 2);
 
 //
 // @param      mesh  The mesh
 // @param[in]  v     Displacement vector
 //
-void translate(SurfaceMesh &mesh, Vector v);
+void translate(SurfaceMesh& mesh, Vector v);
 /**
  * @brief      Translate the mesh
  *
@@ -954,7 +955,7 @@ void translate(SurfaceMesh &mesh, Vector v);
  * @param[in]  dy    Distance to move in y direction
  * @param[in]  dz    Distance to move in z direction
  */
-void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
+void translate(SurfaceMesh& mesh, double dx, double dy, double dz);
 /**
  * @brief      Scale mesh anisotropically
  *
@@ -962,7 +963,7 @@ void translate(SurfaceMesh &mesh, double dx, double dy, double dz);
  * @param[in]  v     Vector with components representing the anisotropic scaling
  *                   factors.
  */
-void scale(SurfaceMesh &mesh, Vector v);
+void scale(SurfaceMesh& mesh, Vector v);
 /**
  * @brief      Scale a mesh anisotropically
  *
@@ -971,14 +972,14 @@ void scale(SurfaceMesh &mesh, Vector v);
  * @param[in]  sy    Scale factor for y axis
  * @param[in]  sz    Scale factor for z axis
  */
-void scale(SurfaceMesh &mesh, double sx, double sy, double sz);
+void scale(SurfaceMesh& mesh, double sx, double sy, double sz);
 /**
  * @brief      Scale a mesh isotropically
  *
  * @param      mesh  The mesh
  * @param[in]  s     Scale factor
  */
-void scale(SurfaceMesh &mesh, double s);
+void scale(SurfaceMesh& mesh, double s);
 
 /**
  * @brief      Compute the center and radius of the mesh
@@ -987,13 +988,13 @@ void scale(SurfaceMesh &mesh, double s);
  *
  * @return     The center and radius.
  */
-std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh);
+std::pair<Vector, double> getCenterRadius(SurfaceMesh& mesh);
 /**
  * @brief      Center the mesh on its center of mass
  *
  * @param      mesh  The mesh
  */
-void centeralize(SurfaceMesh &mesh);
+void centeralize(SurfaceMesh& mesh);
 
 /**
  * @brief      Smooth the surface mesh
@@ -1004,7 +1005,7 @@ void centeralize(SurfaceMesh &mesh);
  * @param[in]  rings           Number of neighborhood rings to consider for LST
  * @param[in]  verbose         Print additional information
  */
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t rings = 2, bool verbose = false);
+void smoothMesh(SurfaceMesh& mesh, int maxIter, bool preserveRidges, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Coarsens the mesh
@@ -1016,7 +1017,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
  * @param[in]  rings        Number of neighborhood rings to consider for LST
  * @param[in]  verbose    Print additional info
  */
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2, bool verbose = false);
+void coarse(SurfaceMesh& mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Coarsens the mesh by selecting vertices first.
@@ -1027,7 +1028,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
  * @param[in]  rings      Number of neighborhood rings to consider for LST
  * @param[in]  verbose    Print additional info
  */
-void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
+void coarse_dense(SurfaceMesh& mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Coarsens flat regions by LST analysis
@@ -1038,35 +1039,35 @@ void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t ri
  * @param[in]  rings      Number of neighborhood rings to consider for LST
  * @param[in]  verbose    Print additional info
  */
-void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
+void coarse_flat(SurfaceMesh& mesh, REAL threshold, REAL weight, std::size_t rings = 2, bool verbose = false);
 
 /**
  * @brief      Perform smoothing of the mesh normals
  *
  * @param      mesh  The mesh
  */
-void normalSmooth(SurfaceMesh &mesh);
+void normalSmooth(SurfaceMesh& mesh);
 
 /**
  * @brief      Fill holes in the mesh
  *
  * @param      mesh  The mesh
  */
-void fillHoles(SurfaceMesh &mesh);
+void fillHoles(SurfaceMesh& mesh);
 
 /**
  * @brief      Flip the normals of the mesh
  *
  * @param      mesh  The mesh
  */
-void flipNormals(SurfaceMesh &mesh);
+void flipNormals(SurfaceMesh& mesh);
 
 /**
  * @brief      Refine the mesh by quadrisection of faces
  *
  * @param      mesh  The mesh
  */
-std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh);
+std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh& mesh);
 
 /**
  * @brief      Create a triangulated octahedron
@@ -1095,7 +1096,7 @@ std::unique_ptr<SurfaceMesh> cube(int order);
  *
  * @return     Vector of surface meshes
  */
-std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh);
+std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh& mesh);
 
-void cacheNormals(SurfaceMesh &mesh);
+void cacheNormals(SurfaceMesh& mesh);
 } // end namespace gamer

@@ -26,13 +26,11 @@ from bpy.props import (BoolProperty, CollectionProperty, EnumProperty,
 from bpy.app.handlers import persistent
 
 from blendgamer.surfacemesh_ops import SurfaceMeshImprovementProperties
-
 from blendgamer.versions import (checkVersion, getGamerVersion)
-
 from blendgamer.meshstats import MeshQualityReportProperties
-
 from blendgamer.tetrahedralization import GAMerTetrahedralizationPropertyGroup
-
+from blendgamer.markers import GAMerBoundaryMarkersList
+from blendgamer.curvatures import GAMerCurvaturesList
 from blendgamer.util import UNSETID, make_annotations
 
 import blendgamer.pygamer as pygamer
@@ -109,8 +107,18 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
         mpl_spec = importlib.util.find_spec("matplotlib")
         self.matplotlib_found = mpl_spec is not None
 
+class GAMerObjectProperties(bpy.types.PropertyGroup):
+    markers = PointerProperty(
+                type=GAMerBoundaryMarkersList,
+                name="Boundary Markers"
+              )
+    curvatures = PointerProperty(
+                    type=GAMerCurvaturesList,
+                    name="Curvature Lists"
+                 )
 
-classes = [GAMerAddonProperties]
+classes = [GAMerAddonProperties,
+           GAMerObjectProperties]
 
 def register():
     from bpy.utils import register_class

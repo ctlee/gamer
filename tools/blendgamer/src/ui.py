@@ -223,38 +223,69 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 
         GAMER_PT_mesh_quality.draw_report(layout, context)
 
-
         col=layout.column()
         col.label(text="Curvature Calculations:")
+
         if context.scene.gamer.matplotlib_found:
+            obj = context.object
+            curveProp = obj.gamer.curvatures
             row = col.row(align=True)
-            row.prop(qProps, "colormap")
-            row = col.row(align=True)
-            row.prop(qProps, "curvePercentile")
-            row.prop(qProps, "showplots")
-            row.prop(qProps, "saveplots")
-            row = col.row(align=True)
-            row.prop(qProps, "mixpoint")
-            row.prop(qProps, "curveIter")
-            row = col.row(align=True)
-            row.prop(qProps, "minCurve")
-            row.prop(qProps, "maxCurve")
+            row.operator("gamer.compute_curvatures")
+            row.prop(curveProp, "algorithm", text="")
+
+            row = layout.row()
+            row.label(text="Computed Curvatures:", icon='FACESEL')
+            row = layout.row()
+            col = row.column()
+            col.template_list("GAMER_UL_curvature_list",
+                    "GAMer Curvature List",
+                    curveProp, "curvature_list",
+                    curveProp, "active_index",
+                    rows=2,
+                    type='DEFAULT'
+                )
 
 
-            col.operator("gamer.compute_curvatures")
-            col.operator("gamer.mean_curvature")
-            col.operator("gamer.gaussian_curvature")
-            col.operator("gamer.k1_curvature")
-            col.operator("gamer.k2_curvature")
+        #     row = col.row(align=True)
+        #     row.prop(qProps, "curvatureCalc")
+        #     row = col.row(align=True)
+        #     row.prop(qProps, "colormap")
+        #     row = col.row(align=True)
+        #     row.prop(qProps, "curvePercentile")
+        #     row.prop(qProps, "showplots")
+        #     row.prop(qProps, "saveplots")
+        #     row = col.row(align=True)
+        #     row.prop(qProps, "mixpoint")
+        #     row.prop(qProps, "curveIter")
+        #     row = col.row(align=True)
+        #     row.prop(qProps, "minCurve")
+        #     row.prop(qProps, "maxCurve")
 
-            # col=layout.column()
-            # col.label(text="Curvature Calculations:")
-            # row = col.row(align=True)
-            # row.prop(qProps, "minEnergy")
-            # row.prop(qProps, "maxEnergy")
-            # col.operator("gamer.helfrich_energy")
+
+        #     col.operator("gamer.compute_curvatures")
+        #     col.operator("gamer.mean_curvature")
+        #     col.operator("gamer.gaussian_curvature")
+        #     col.operator("gamer.k1_curvature")
+        #     col.operator("gamer.k2_curvature")
+
         else:
             col.label(text="Curvature Calculations require matplotlib.", icon='LIGHT')
+
+# Object Boundary Panel:
+class GAMER_UL_curvature_list(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data,
+                  active_propname, index):
+        """
+        Draw the UI list for boundary markers
+        """
+        layout.label(text=item.curvatureType)
+
+        if bpy.app.version < (2,80,0):
+            split = layout.split(percentage = 0.5, align = True)
+        else:
+            split = layout.split(factor = 0.5, align = True)
+        col = split.column()
+        col = split.column()
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):
@@ -276,6 +307,8 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
 
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
+            markerProp = active_obj.gamer.markers
+
             row = layout.row()
             row.label(text="Unmarked marker value = %d"%(UNSETMARKER))
             row = layout.row()
@@ -287,8 +320,8 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
             col = row.column()
             col.template_list("GAMER_UL_boundary_list",
                     "GAMer Boundary List",
-                    active_obj.gamer, "boundary_list",
-                    active_obj.gamer, "active_bnd_index",
+                    markerProp, "boundary_list",
+                    markerProp, "active_bnd_index",
                     rows=2,
                     type='DEFAULT'
                 )
@@ -298,7 +331,7 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
             col.operator("gamer.remove_all_boundaries", icon='X', text="")
 
             # Could have boundary item draw itself in new row here:
-            active_bnd = active_obj.gamer.get_active_boundary()
+            active_bnd = markerProp.get_active_boundary()
             if active_bnd:
                 row = layout.row()
                 row.label(text="Set active boundary properties:")
@@ -344,7 +377,10 @@ class GAMER_UL_boundary_list(bpy.types.UIList):
             layout.label(text=item.boundary_name)
 
         # Show the color swatch in last section only
-        split = layout.split(factor = 0.5, align = True)
+        if bpy.app.version < (2,80,0):
+            split = layout.split(percentage = 0.5, align = True)
+        else:
+            split = layout.split(factor = 0.5, align = True)
         col = split.column()
         col = split.column()
         mats = bpy.data.materials
@@ -485,6 +521,7 @@ classes = [GAMER_PT_versionerror,
            GAMER_PT_surfacemesh,
            # GAMER_PT_advanced_options,
            GAMER_PT_mesh_quality,
+           GAMER_UL_curvature_list,
            GAMER_PT_boundary_marking,
            GAMER_UL_boundary_list,
            GAMER_UL_domain,

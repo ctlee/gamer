@@ -31,7 +31,9 @@ mpl_spec = importlib.util.find_spec("matplotlib")
 mpl_found = mpl_spec is not None
 
 if mpl_found:
-    from blendgamer.colormap import dataToVertexColor, colormapEnums
+    from blendgamer.colormap import dataToVertexColor
+
+from blendgamer.colormap_enums import colormap_enums
 
 import blendgamer.report as report
 from blendgamer.util import *
@@ -324,78 +326,78 @@ class GAMER_OT_write_quality_info(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class GAMER_OT_compute_curvatures(bpy.types.Operator):
-    bl_idname       = "gamer.compute_curvatures"
-    bl_label        = "Compute Curvatures"
-    bl_description  = "Compute curvatures to vertex colors"
-    bl_options      = {'REGISTER', 'UNDO'}
+# class GAMER_OT_compute_curvatures(bpy.types.Operator):
+#     bl_idname       = "gamer.compute_curvatures"
+#     bl_label        = "Compute Curvatures"
+#     bl_description  = "Compute curvatures to vertex colors"
+#     bl_options      = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        mqp = bpy.context.scene.gamer.mesh_quality_properties
-        if mqp.compute_curvatures(context, self.report):
-            self.report({'INFO'}, "GAMer: Compute Curvatures complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
+#     def execute(self, context):
+#         mqp = bpy.context.scene.gamer.mesh_quality_properties
+#         if mqp.compute_curvatures(context, self.report):
+#             self.report({'INFO'}, "GAMer: Compute Curvatures complete")
+#             return {'FINISHED'}
+#         else:
+#             return {'CANCELLED'}
 
-class GAMER_OT_mean_curvature(bpy.types.Operator):
-    bl_idname       = "gamer.mean_curvature"
-    bl_label        = "Mean Curvature"
-    bl_description  = "Compute mean curvature to vertex colors"
-    bl_options      = {'REGISTER', 'UNDO'}
+# class GAMER_OT_mean_curvature(bpy.types.Operator):
+#     bl_idname       = "gamer.mean_curvature"
+#     bl_label        = "Mean Curvature"
+#     bl_description  = "Compute mean curvature to vertex colors"
+#     bl_options      = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        mqp = bpy.context.scene.gamer.mesh_quality_properties
-        if mqp.mean_curvature(context, self.report):
-            self.report({'INFO'}, "GAMer: Mean Curvature complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
-
-
-class GAMER_OT_gaussian_curvature(bpy.types.Operator):
-    bl_idname       = "gamer.gaussian_curvature"
-    bl_label        = "Gaussian Curvature"
-    bl_description  = "Compute gaussian curvature to vertex colors"
-    bl_options      = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        mqp = bpy.context.scene.gamer.mesh_quality_properties
-        if mqp.gaussian_curvature(context, self.report):
-            self.report({'INFO'}, "GAMer: Gaussian Curvature complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
+#     def execute(self, context):
+#         mqp = bpy.context.scene.gamer.mesh_quality_properties
+#         if mqp.mean_curvature(context, self.report):
+#             self.report({'INFO'}, "GAMer: Mean Curvature complete")
+#             return {'FINISHED'}
+#         else:
+#             return {'CANCELLED'}
 
 
-class GAMER_OT_k1_curvature(bpy.types.Operator):
-    bl_idname       = "gamer.k1_curvature"
-    bl_label        = "k1 Curvature"
-    bl_description  = "Compute k1 curvature to vertex colors"
-    bl_options      = {'REGISTER', 'UNDO'}
+# class GAMER_OT_gaussian_curvature(bpy.types.Operator):
+#     bl_idname       = "gamer.gaussian_curvature"
+#     bl_label        = "Gaussian Curvature"
+#     bl_description  = "Compute gaussian curvature to vertex colors"
+#     bl_options      = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        mqp = bpy.context.scene.gamer.mesh_quality_properties
-        if mqp.k1_curvature(context, self.report):
-            self.report({'INFO'}, "GAMer: k1 Curvature complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
+#     def execute(self, context):
+#         mqp = bpy.context.scene.gamer.mesh_quality_properties
+#         if mqp.gaussian_curvature(context, self.report):
+#             self.report({'INFO'}, "GAMer: Gaussian Curvature complete")
+#             return {'FINISHED'}
+#         else:
+#             return {'CANCELLED'}
 
 
-class GAMER_OT_k2_curvature(bpy.types.Operator):
-    bl_idname       = "gamer.k2_curvature"
-    bl_label        = "k2 Curvature"
-    bl_description  = "Compute k2 curvature to vertex colors"
-    bl_options      = {'REGISTER', 'UNDO'}
+# class GAMER_OT_k1_curvature(bpy.types.Operator):
+#     bl_idname       = "gamer.k1_curvature"
+#     bl_label        = "k1 Curvature"
+#     bl_description  = "Compute k1 curvature to vertex colors"
+#     bl_options      = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        mqp = bpy.context.scene.gamer.mesh_quality_properties
-        if mqp.k2_curvature(context, self.report):
-            self.report({'INFO'}, "GAMer: k2 Curvature complete")
-            return {'FINISHED'}
-        else:
-            return {'CANCELLED'}
+#     def execute(self, context):
+#         mqp = bpy.context.scene.gamer.mesh_quality_properties
+#         if mqp.k1_curvature(context, self.report):
+#             self.report({'INFO'}, "GAMer: k1 Curvature complete")
+#             return {'FINISHED'}
+#         else:
+#             return {'CANCELLED'}
+
+
+# class GAMER_OT_k2_curvature(bpy.types.Operator):
+#     bl_idname       = "gamer.k2_curvature"
+#     bl_label        = "k2 Curvature"
+#     bl_description  = "Compute k2 curvature to vertex colors"
+#     bl_options      = {'REGISTER', 'UNDO'}
+
+#     def execute(self, context):
+#         mqp = bpy.context.scene.gamer.mesh_quality_properties
+#         if mqp.k2_curvature(context, self.report):
+#             self.report({'INFO'}, "GAMer: k2 Curvature complete")
+#             return {'FINISHED'}
+#         else:
+#             return {'CANCELLED'}
 
 # class GAMER_OT_helfrich_energy(bpy.types.Operator):
 #     bl_idname = "gamer.helfrich_energy"
@@ -429,161 +431,166 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
         name="Angle Threshold", default=15, min=0, max=180,
         description="Select faces with angles less than this criteria")
 
-    minCurve = FloatProperty(
-        name="Minimum curvature", default=0,
-        description="Lower bound percentile truncation"
-        )
+    # minCurve = FloatProperty(
+    #     name="Minimum curvature", default=0,
+    #     description="Lower bound percentile truncation"
+    #     )
 
-    maxCurve = FloatProperty(
-        name="Maximum curvature", default=1000,
-        description="Upper bound percentile truncation"
-        )
+    # maxCurve = FloatProperty(
+    #     name="Maximum curvature", default=1000,
+    #     description="Upper bound percentile truncation"
+    #     )
 
-    minEnergy = FloatProperty(
-        name="Minimum energy", default = 0,
-        description="Lower bound for plotting/thresholding energy"
-        )
+    # curveIter = IntProperty(
+    #     name="Smooth Curvature Iterations", min=0, default = 5,
+    #     description="How many iterations of curvature smoothing?"
+    #     )
 
-    maxEnergy = FloatProperty(
-        name="Maximum energy", default = 100,
-        description="Maximum bound for plotting/thresholding energy"
-        )
+    # curvePercentile = BoolProperty(
+    #     name="Use Percentiles", default = True,
+    #     description="Treat min and max as percentiles?"
+    #     )
 
-    curveIter = IntProperty(
-        name="Smooth Curvature Iterations", min=0, default = 5,
-        description="How many iterations of curvature smoothing?"
-        )
+    # showplots = BoolProperty(
+    #     name="Show plot", default=False,
+    #     description="Display the plots"
+    #     )
 
-    curvePercentile = BoolProperty(
-        name="Use Percentiles", default = True,
-        description="Treat min and max as percentiles?"
-        )
+    # saveplots = BoolProperty(
+    #     name="Save plots", default=False,
+    #     description="Save the generated plots"
+    #     )
 
-    showplots = BoolProperty(
-        name="Show plot", default=False,
-        description="Display the plots"
-        )
+    # mixpoint = FloatProperty(
+    #     name = "Color mixing point", default = 0.5, min=0, max=1,
+    #     description="Value for color mixing"
+    #     )
 
-    saveplots = BoolProperty(
-        name="Save plots", default=False,
-        description="Save the generated plots"
-        )
+    # if mpl_found:
+    #     colormap = EnumProperty(
+    #         name = "Colormap colors",
+    #         description="Colormap to use",
+    #         items = colormap_enums,
+    #         default = 'VIRIDIS'
+    #         )
 
+    #     curvatureCalcEnums = [
+    #         ('MDSB', 'MDSB', 'Meyer, Desbrun, Schroder, Barr Algorithm'),
+    #         ('JETS', 'JETS', 'Cazal and Pouget Jet Fitting'),
+    #     ]
+    #     curvatureCalcDict = {
+    #       'MDSB': 'curvatureViaMDSB',
+    #       'JETS' : 'curvatureViaJets',
+    #     }
 
-    mixpoint = FloatProperty(
-        name = "Color mixing point", default = 0.5, min=0, max=1,
-        description="Value for color mixing"
-        )
+    #     curvatureCalc = EnumProperty(
+    #         name = "Curvature algorithm",
+    #         description = "Which algorithm to use",
+    #         items = curvatureCalcEnums,
+    #         default = 'MDSB'
+    #         )
 
-    if mpl_found:
+    #     def compute_curvatures(self, context, report):
+    #         gmesh = blenderToGamer(report)
+    #         if gmesh:
+    #             kh, kg, k1, k2 = getattr(gmesh, curvatureCalcDict[self.curvatureCalc])(self.curveIter)
+    #             # kh, kg, k1, k2 = gmesh.computeCurvatures(self.curveIter)
 
-        colormap = EnumProperty(
-            name = "Colormap colors",
-            description="Colormap to use",
-            items = colormapEnums,
-            default = 'VIRIDIS'
-            )
+    #             dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="MeanCurvature",
+    #                 axislabel="Mean Curvature [$\mu m^{-1}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
 
-        def compute_curvatures(self, context, report):
-            gmesh = blenderToGamer(report)
-            if gmesh:
-                kh, kg, k1, k2 = gmesh.computeCurvatures(self.curveIter)
+    #             dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="GaussianCurvature",
+    #                 axislabel="Gaussian Curvature [$\mu m^{-2}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
 
-                dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="MeanCurvature",
-                    axislabel="Mean Curvature [$\mu m^{-1}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="k1Curvature",
+    #                 axislabel="k1 Curvature [$\mu m^{-1}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
 
-                dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="GaussianCurvature",
-                    axislabel="Gaussian Curvature [$\mu m^{-2}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="k2Curvature",
+    #                 axislabel="k2 Curvature [$\mu m^{-1}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             del kh
+    #             del kg
+    #             del k1
+    #             del k2
+    #             return True
+    #         return False
 
-                dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="k1Curvature",
-                    axislabel="k1 Curvature [$\mu m^{-1}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #     def mean_curvature(self, context, report):
+    #         gmesh = blenderToGamer(report)
+    #         if gmesh:
+    #             # curvatures = gmesh.meanCurvature(self.curveIter)
+    #             kh, _, _, _ = gmesh.computeCurvatures(self.curveIter)
 
-                dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="k2Curvature",
-                    axislabel="k2 Curvature [$\mu m^{-1}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
-                del kh
-                del kg
-                del k1
-                del k2
-                return True
-            return False
+    #             dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="MeanCurvature",
+    #                 axislabel="Mean Curvature [$\mu m^{-1}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             del kh
+    #             return True
+    #         return False
 
-        def mean_curvature(self, context, report):
-            gmesh = blenderToGamer(report)
-            if gmesh:
-                # curvatures = gmesh.meanCurvature(self.curveIter)
-                kh, _, _, _ = gmesh.computeCurvatures(self.curveIter)
-
-                dataToVertexColor(kh, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="MeanCurvature",
-                    axislabel="Mean Curvature [$\mu m^{-1}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_MeanCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
-                del kh
-                return True
-            return False
-
-        def gaussian_curvature(self, context, report):
-            gmesh = blenderToGamer(report)
-            if gmesh:
-                _, kg, _, _ = gmesh.computeCurvatures(self.curveIter)
-                dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="GaussianCurvature",
-                    axislabel="Gaussian Curvature [$\mu m^{-2}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
-                del kg
-                return True
-            return False
-
-
-        def k1_curvature(self, context, report):
-            gmesh = blenderToGamer(report)
-            if gmesh:
-                _, _, k1, _ = gmesh.computeCurvatures(self.curveIter)
-
-                dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="k1Curvature",
-                    axislabel="k1 Curvature [$\mu m^{-1}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
-                del k1
-                return True
-            return False
+    #     def gaussian_curvature(self, context, report):
+    #         gmesh = blenderToGamer(report)
+    #         if gmesh:
+    #             _, kg, _, _ = gmesh.computeCurvatures(self.curveIter)
+    #             dataToVertexColor(kg, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="GaussianCurvature",
+    #                 axislabel="Gaussian Curvature [$\mu m^{-2}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_GaussianCurvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             del kg
+    #             return True
+    #         return False
 
 
-        def k2_curvature(self, context, report):
-            gmesh = blenderToGamer(report)
-            if gmesh:
-                _, _, _, k2 = gmesh.computeCurvatures(self.curveIter)
+    #     def k1_curvature(self, context, report):
+    #         gmesh = blenderToGamer(report)
+    #         if gmesh:
+    #             _, _, k1, _ = gmesh.computeCurvatures(self.curveIter)
 
-                dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
-                    percentTruncate=self.curvePercentile,
-                    vlayer="k2Curvature",
-                    axislabel="k2 Curvature [$\mu m^{-1}$]",
-                    file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
-                    showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
-                del k2
-                return True
-            return False
+    #             dataToVertexColor(k1, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="k1Curvature",
+    #                 axislabel="k1 Curvature [$\mu m^{-1}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_k1"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             del k1
+    #             return True
+    #         return False
+
+
+    #     def k2_curvature(self, context, report):
+    #         gmesh = blenderToGamer(report)
+    #         if gmesh:
+    #             _, _, _, k2 = gmesh.computeCurvatures(self.curveIter)
+
+    #             dataToVertexColor(k2, minV=self.minCurve, maxV=self.maxCurve,
+    #                 percentTruncate=self.curvePercentile,
+    #                 vlayer="k2Curvature",
+    #                 axislabel="k2 Curvature [$\mu m^{-1}$]",
+    #                 file_prefix="%s_%s_m%d_M%d_I%d_k2"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, self.minCurve, self.maxCurve, self.curveIter),
+    #                 showplot=self.showplots,saveplot=self.saveplots, mixpoint=self.mixpoint, colormap=self.colormap)
+    #             del k2
+    #             return True
+    #         return False
 
         # def helfrich_energy(self, context, report):
         #     gmesh = blenderToGamer(report)
@@ -623,11 +630,11 @@ classes = [
     GAMER_OT_MeshStats_Check_Sharp,
     GAMER_OT_MeshStats_Check_All,
     GAMER_OT_write_quality_info,
-    GAMER_OT_compute_curvatures,
-    GAMER_OT_mean_curvature,
-    GAMER_OT_gaussian_curvature,
-    GAMER_OT_k1_curvature,
-    GAMER_OT_k2_curvature,
+    # GAMER_OT_compute_curvatures,
+    # GAMER_OT_mean_curvature,
+    # GAMER_OT_gaussian_curvature,
+    # GAMER_OT_k1_curvature,
+    # GAMER_OT_k2_curvature,
     MeshQualityReportProperties]
 
 def register():

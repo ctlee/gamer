@@ -19,7 +19,7 @@
 
 int  main(int argc, char *argv[])
 {
-    if(argc != 2)
+    if (argc != 2)
     {
         std::cerr << "Wrong arguments passed" << std::endl;
         return -1;
@@ -27,11 +27,11 @@ int  main(int argc, char *argv[])
     auto mesh = gamer::readOFF(argv[1]);
 
     casc::compute_orientation(*mesh);
-    if(gamer::getVolume(*mesh) < 0 ){
-      gamer::flipNormals(*mesh);
+    if (gamer::getVolume(*mesh) < 0) {
+        gamer::flipNormals(*mesh);
     }
 
-    gamer::curvatureByJets(*mesh, 2, 2);
+    gamer::curvatureViaJets(*mesh, 2, 2);
 
     std::cout << "EOF" << std::endl;
 }

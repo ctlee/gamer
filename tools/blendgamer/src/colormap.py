@@ -27,11 +27,7 @@ import matplotlib.pyplot as plt
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 
-colormapEnums = [
-  ('VIRIDIS', 'viridis', 'Viridis'),
-  ('PRGN', 'PRGn', 'Purple-Green diverging'),
-]
-
+# Mapping colormap_enums.colormap_enums to values
 colormapDict = {
   'VIRIDIS': plt.cm.viridis,
   'PRGN' : plt.cm.PRGn,

@@ -60,6 +60,15 @@ def getMarkerLayer(obj):
         markerLayer = obj.data.polygon_layers_int.new(name='marker')
     return markerLayer.data
 
+def getCurvatureLayer(obj, algo, curvatureType):
+    name = "%s%s"%(algo,curvatureType)
+    if obj.mode != 'OBJECT':
+        raise RuntimeError("Blender Layers (%s) can only be accessed in 'OBJECT' mode."%(name))
+    layer = obj.data.polygon_layers_float.get(name)
+    # If the layer doesn't exist yet, create it!
+    if not layer:
+        layer = obj.data.polygon_layers_float.new(name=name)
+    return layer.data
 
 def getActiveMeshObject(report):
     """
