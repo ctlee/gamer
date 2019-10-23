@@ -19,7 +19,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-include(FetchContent)
+if(${CMAKE_VERSION} VERSION_LESS 3.11)
+    include(FetchContentLocal)
+else()
+    include(FetchContent)
+endif()
 
 FetchContent_Declare(
     googletest
@@ -65,7 +69,7 @@ add_test(NAME ObjectTests COMMAND objecttests)
 # Configure testing of Python module
 find_package(pytest)
 if(NOT PYTEST_FOUND AND BUILD_PYGAMER)
-    message(ERROR "pytest could not be found! Please install pytest to run python tests.")
+    message(WARNING "pytest could not be found! Please install pytest to run python tests.")
 elseif(BUILD_PYGAMER)
     # Add a test for pytest
     add_test(NAME python-tests

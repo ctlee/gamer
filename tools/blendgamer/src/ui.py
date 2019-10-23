@@ -244,29 +244,38 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
                     rows=2,
                     type='DEFAULT'
                 )
+            col = row.column(align=True)
+            col.operator("gamer.remove_curvature", icon=REMOVE_ICON, text="")
+            col.operator("gamer.remove_all_curvatures", icon='X', text="")
+
+            crv = curveProp.get_active_index()
+            if (crv != None):
+                col = layout.column()
+                row = col.row()
+                row.label(text="Set active curvature properties:")
+
+                row = col.row()
+                row.prop(crv, "colormap")
+                row.prop(crv, "curvePercentile")
+
+                col = layout.column(align=True)
+                row = col.row(align=True)
+                row.prop(crv, "mixpoint")
+                row.prop(crv, "curveIter")
+                row = col.row(align=True)
+                row.prop(crv, "minCurve")
+                row.prop(crv, "maxCurve")
+
+                row = layout.row()
+                row.label(text="Plot Settings:")
+                row = layout.row()
+                row.prop(curveProp, "showplots")
+                row.prop(curveProp, "saveplots")
+
+                row = layout.row()
+                row.operator("gamer.curvature_to_colormap")
 
 
-        #     row = col.row(align=True)
-        #     row.prop(qProps, "curvatureCalc")
-        #     row = col.row(align=True)
-        #     row.prop(qProps, "colormap")
-        #     row = col.row(align=True)
-        #     row.prop(qProps, "curvePercentile")
-        #     row.prop(qProps, "showplots")
-        #     row.prop(qProps, "saveplots")
-        #     row = col.row(align=True)
-        #     row.prop(qProps, "mixpoint")
-        #     row.prop(qProps, "curveIter")
-        #     row = col.row(align=True)
-        #     row.prop(qProps, "minCurve")
-        #     row.prop(qProps, "maxCurve")
-
-
-        #     col.operator("gamer.compute_curvatures")
-        #     col.operator("gamer.mean_curvature")
-        #     col.operator("gamer.gaussian_curvature")
-        #     col.operator("gamer.k1_curvature")
-        #     col.operator("gamer.k2_curvature")
 
         else:
             col.label(text="Curvature Calculations require matplotlib.", icon='LIGHT')
@@ -278,14 +287,10 @@ class GAMER_UL_curvature_list(bpy.types.UIList):
         """
         Draw the UI list for boundary markers
         """
-        layout.label(text=item.curvatureType)
-
-        if bpy.app.version < (2,80,0):
-            split = layout.split(percentage = 0.5, align = True)
-        else:
-            split = layout.split(factor = 0.5, align = True)
-        col = split.column()
-        col = split.column()
+        row = layout.row()
+        row.label(text=layout.enum_item_description(item, 'algorithm', item.algorithm))
+        # row.prop_enum(item, 'algorithm', item.algorithm, text=layout.enum_item_description(item, 'algorithm', item.algorithm))
+        row.prop_enum(item, 'curvatureType', item.curvatureType)
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):

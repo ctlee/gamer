@@ -64,10 +64,10 @@ def getCurvatureLayer(obj, algo, curvatureType):
     name = "%s%s"%(algo,curvatureType)
     if obj.mode != 'OBJECT':
         raise RuntimeError("Blender Layers (%s) can only be accessed in 'OBJECT' mode."%(name))
-    layer = obj.data.polygon_layers_float.get(name)
+    layer = obj.data.vertex_layers_float.get(name)
     # If the layer doesn't exist yet, create it!
     if not layer:
-        layer = obj.data.polygon_layers_float.new(name=name)
+        layer = obj.data.vertex_layers_float.new(name=name)
     return layer.data
 
 def getActiveMeshObject(report):
@@ -335,6 +335,7 @@ def bmesh_from_object(obj):
 def bmesh_to_object(obj, bm):
     """
     Object/Edit Mode update the object.
+    NOTE that this free's the bmesh
     """
     me = obj.data
     is_editmode = (obj.mode == 'EDIT')
@@ -342,6 +343,7 @@ def bmesh_to_object(obj, bm):
         bmesh.update_edit_mesh(me, True)
     else:
         bm.to_mesh(me)
+    bm.free()
     # grr... cause an update
     if me.vertices:
         me.vertices[0].co[0] = me.vertices[0].co[0]
