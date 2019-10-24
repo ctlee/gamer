@@ -228,55 +228,56 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 
         if context.scene.gamer.matplotlib_found:
             obj = context.object
-            curveProp = obj.gamer.curvatures
-            row = col.row(align=True)
-            row.operator("gamer.compute_curvatures")
-            row.prop(curveProp, "algorithm", text="")
-
-            row = layout.row()
-            row.label(text="Computed Curvatures:", icon='FACESEL')
-            row = layout.row()
-            col = row.column()
-            col.template_list("GAMER_UL_curvature_list",
-                    "GAMer Curvature List",
-                    curveProp, "curvature_list",
-                    curveProp, "active_index",
-                    rows=2,
-                    type='DEFAULT'
-                )
-            col = row.column(align=True)
-            col.operator("gamer.remove_curvature", icon=REMOVE_ICON, text="")
-            col.operator("gamer.remove_all_curvatures", icon='X', text="")
-
-            crv = curveProp.get_active_index()
-            if (crv != None):
-                col = layout.column()
-                row = col.row()
-                row.label(text="Set active curvature properties:")
-
-                row = col.row()
-                row.prop(crv, "colormap")
-                row.prop(crv, "curvePercentile")
-
-                col = layout.column(align=True)
+            if obj.type == 'MESH':
+                curveProp = obj.gamer.curvatures
                 row = col.row(align=True)
-                row.prop(crv, "mixpoint")
-                row.prop(crv, "curveIter")
-                row = col.row(align=True)
-                row.prop(crv, "minCurve")
-                row.prop(crv, "maxCurve")
+                row.operator("gamer.compute_curvatures")
+                row.prop(curveProp, "algorithm", text="")
 
                 row = layout.row()
-                row.label(text="Plot Settings:")
+                row.label(text="Computed Curvatures:", icon='FACESEL')
                 row = layout.row()
-                row.prop(curveProp, "showplots")
-                row.prop(curveProp, "saveplots")
+                col = row.column()
+                col.template_list("GAMER_UL_curvature_list",
+                        "GAMer Curvature List",
+                        curveProp, "curvature_list",
+                        curveProp, "active_index",
+                        rows=2,
+                        type='DEFAULT'
+                    )
+                col = row.column(align=True)
+                col.operator("gamer.remove_curvature", icon=REMOVE_ICON, text="")
+                col.operator("gamer.remove_all_curvatures", icon='X', text="")
 
-                row = layout.row()
-                row.operator("gamer.curvature_to_colormap")
+                crv = curveProp.get_active_index()
+                if (crv != None):
+                    col = layout.column()
+                    row = col.row()
+                    row.label(text="Set active curvature properties:")
 
+                    row = col.row()
+                    row.prop(crv, "colormap")
+                    row.prop(crv, "limitsArePercentiles")
 
+                    col = layout.column(align=True)
+                    row = col.row(align=True)
+                    row.prop(crv, "mixpoint")
+                    row.prop(crv, "curveIter")
+                    row = col.row(align=True)
+                    row.prop(crv, "minCurve")
+                    row.prop(crv, "maxCurve")
 
+                    row = layout.row()
+                    row.label(text="Plot Settings:")
+                    row = layout.row()
+                    row.prop(curveProp, "showplots")
+                    row.prop(curveProp, "saveplots")
+
+                    row = layout.row()
+                    row.operator("gamer.plot_curvature")
+                    row.operator("gamer.plot_all_curvatures")
+            else:
+                col.label(text="Select a mesh object to compute curvatures", icon='LIGHT')
         else:
             col.label(text="Curvature Calculations require matplotlib.", icon='LIGHT')
 

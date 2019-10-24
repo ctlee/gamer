@@ -1438,6 +1438,7 @@ curvatureViaMDSB(const SurfaceMesh& mesh){
     return std::make_tuple(kh, kg, k1, k2, sigma);
 }
 
+
 std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType>>
 curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet, std::size_t dPrime){
     std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> sigma;
@@ -1452,14 +1453,9 @@ curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet, std::size_t dPrime){
     // Map VertexIDs to indices
     std::size_t i = 0;
     for (const auto vertexID : mesh.get_level_id<1>()) {
-        // Set of neighbors
-        std::set<SurfaceMesh::SimplexID<1>> kNeighbors;
-        // Get list of neighbors
-        casc::kneighbors_up(mesh, vertexID, 1, kNeighbors);
-
         std::vector<SurfaceMesh::SimplexID<1>> nbors;
         nbors.push_back(vertexID);
-        std::copy(kNeighbors.begin(), kNeighbors.end(), std::back_inserter(nbors));
+        surfacemesh_detail::vertexGrabber(mesh, min_nb_points-1, nbors, vertexID);
 
         if (nbors.size() < min_nb_points) {
             std::cerr << "Not enough pts (have: " << nbors.size() << ", need: "      << min_nb_points << ") for fitting this vertex: "
@@ -1473,6 +1469,8 @@ curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet, std::size_t dPrime){
 
         REAL tk1 = mongeForm.principal_curvatures(0);
         REAL tk2 = mongeForm.principal_curvatures(1);
+
+        std::cout << tk1 << " " << tk2 << std::endl;
 
         k1[i] = tk1;
         k2[i] = tk2;

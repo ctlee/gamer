@@ -72,14 +72,24 @@ class GAMER_OT_remove_all_curvatures(bpy.types.Operator):
         context.object.gamer.curvatures.remove_all_curvatures(context, self.report)
         return {'FINISHED'}
 
-class GAMER_OT_curvature_to_colormap(bpy.types.Operator):
-    bl_idname       = "gamer.curvature_to_colormap"
-    bl_label        = "Apply vertex colorings from curvature"
-    bl_description  = "Map curvature values into vertex colors"
+class GAMER_OT_plot_curvature(bpy.types.Operator):
+    bl_idname       = "gamer.plot_curvature"
+    bl_label        = "Plot the selected curvature"
+    bl_description  = "Plot the selected curvature as a heatmap and generate a corresponding vertex color layer"
     bl_options      = {'REGISTER'}
 
     def execute(self, context):
-        context.object.gamer.curvatures.curvature_to_colormap(context, self.report)
+        context.object.gamer.curvatures.plot_curvature(context, self.report)
+        return {'FINISHED'}
+
+class GAMER_OT_plot_all_curvatures(bpy.types.Operator):
+    bl_idname       = "gamer.plot_all_curvatures"
+    bl_label        = "Plot all curvatures"
+    bl_description  = "Plot all computed curvatures as a heatmap and generate vertex color layers"
+    bl_options      = {'REGISTER'}
+
+    def execute(self, context):
+        context.object.gamer.curvatures.plot_all_curvatures(context, self.report)
         return {'FINISHED'}
 
 class GAMER_OT_compute_curvatures(bpy.types.Operator):
@@ -114,15 +124,15 @@ class GAMerCurvatureItem(bpy.types.PropertyGroup):
         description="Lower bound percentile truncation"
         )
     maxCurve = FloatProperty(
-        name="Maximum curvature", default=1000,
+        name="Maximum curvature", default=100,
         description="Upper bound percentile truncation"
         )
     curveIter = IntProperty(
-        name="Smooth Curvature Iterations", min=0, default = 5,
+        name="Smooth Curvature Iterations", min=0, default = 0,
         description="How many iterations of curvature smoothing?"
         )
-    curvePercentile = BoolProperty(
-        name="Use Percentiles", default = True,
+    limitsArePercentiles = BoolProperty(
+        name="Treat Min/Max as percentiles", default = True,
         description="Treat min and max as percentiles?"
         )
     mixpoint = FloatProperty(
@@ -238,44 +248,6 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
         bmesh_to_object(obj,bm)
         self.active_index = 0
 
-    def curvature_to_colormap(self, context, report):
-        obj = getActiveMeshObject(report)
-        with ObjectMode():
-            bm = bmesh_from_object(obj)
-
-            crv = self.get_active_index()
-            layer = getCurvatureLayer(obj, self.algorithm, 'K1')
-
-            data = np.zeros(len(obj.data.vertices), dtype=np.float)
-            # Copy curvatures over
-            layer.foreach_get('value', data)
-
-
-            if crv.curveIter > 0:
-                for i in range(0, crv.curveIter):
-                    # adjacency = np.zeroes(len(obj.data.vertices), dtype=np.int)
-                    tmp = np.zeros(len(obj.data.vertices), dtype=np.int)
-                    for v in bm.verts:
-                        count = 1
-                        tmp[v.index] = data[v.index]
-
-                        for e in v.link_edges:
-                            v_other = e.other_vert(v)
-
-                            tmp[v.index] += data[v_other.index]
-                            count += 1
-                        tmp[v.index] /= count
-                    data = np.array(tmp, copy=True)
-                    print(data)
-
-            dataToVertexColor(data, minV=crv.minCurve, maxV=crv.maxCurve,
-                        percentTruncate=crv.curvePercentile,
-                        vlayer="FOO",
-                        axislabel="FOO [$\mu m^{-1}$]",
-                        file_prefix="%s_%s_m%d_M%d_I%d_Curvature"%(bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0], context.object.name, crv.minCurve, crv.maxCurve, crv.curveIter),
-                        showplot=self.showplots,saveplot=self.saveplots, mixpoint=crv.mixpoint, colormap=crv.colormap)
-            bm.free()
-
 
     def get_active_index(self):
         idx = None
@@ -283,16 +255,27 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
             idx = self.curvature_list[self.active_index]
         return idx
 
-    def make_plot(self):
-        pass
+    if mpl_found:
+        def plot_curvature(self, context, report):
+            """
+            Wrapper function to avoid importing lots of matplotlib files here.
+            """
+            crv = self.get_active_index()
+            dataToVertexColor(crv, context, report, showplot=self.showplots, saveplot=self.saveplots)
 
-    def toVertexColors(self):
-        pass
+        def plot_all_curvatures(self, context, report):
+            """
+            Wrapper function to plot all curvatures
+            """
+            for crv in self.curvature_list:
+                dataToVertexColor(crv, context, report, showplot=self.showplots, saveplot=self.saveplots)
+
 
 classes = [GAMER_OT_compute_curvatures,
            GAMER_OT_remove_curvature,
            GAMER_OT_remove_all_curvatures,
-           GAMER_OT_curvature_to_colormap,
+           GAMER_OT_plot_curvature,
+           GAMER_OT_plot_all_curvatures,
            GAMerCurvatureItem,
            GAMerCurvaturesList]
 

@@ -754,6 +754,67 @@ struct CopyHelper
         }
     }
 };
+
+template <typename Iterator>
+void vertexGrabber(const SurfaceMesh& F,
+                   int need,
+                   std::vector<SurfaceMesh::SimplexID<1>>& nbors,
+                   Iterator begin,
+                   Iterator end)
+{
+    if (need <= 0) return;
+    std::cout << need << std::endl;
+    std::set<SurfaceMesh::SimplexID<1>> next;
+    for (; begin != end; ++begin)
+    {
+        for (auto a : F.get_cover(*begin))
+        {
+            auto id = F.get_simplex_up(*begin, a);
+            for (auto b : F.get_name(id))
+            {
+                if (b != a){
+                    auto nbor = F.get_simplex_down(id, b);
+                    if (std::find(nbors.begin(), nbors.end(), nbor) == nbors.end())
+                    {
+                        // Haven't visited so push into next ring and
+                        nbors.push_back(nbor);
+                        next.insert(nbor);
+                        if (--need == 0) return;
+                    }
+                }
+            }
+        }
+    }
+    vertexGrabber(F, need, nbors, next.begin(), next.end());
+}
+
+template <class Complex>
+void vertexGrabber(const Complex& F,
+                   int need,
+                   std::vector<typename Complex::template SimplexID<1>>& nbors,
+                   typename Complex::template SimplexID<1> vid)
+{
+    if (need <= 0) return;
+    std::set<SurfaceMesh::SimplexID<1>> next;
+    for (auto a : F.get_cover(vid))
+    {
+        auto id = F.get_simplex_up(vid, a);
+        for (auto b : F.get_name(id))
+        {
+            if (b != a){
+                auto nbor = F.get_simplex_down(id, b);
+                if (std::find(nbors.begin(), nbors.end(), nbor) == nbors.end())
+                {
+                    // Haven't visited so push into next ring and
+                    nbors.push_back(nbor);
+                    next.insert(nbor);
+                    if (--need == 0) return;
+                }
+            }
+        }
+    }
+    vertexGrabber(F, need, nbors, next.begin(), next.end());
+}
 } // end namespace surfacemesh_detail
 /// @endcond
 
