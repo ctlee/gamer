@@ -1422,7 +1422,7 @@ curvatureViaMDSB(const SurfaceMesh& mesh){
 
     for (std::size_t i = 0; i < mesh.size<1>(); ++i) {
         Kh[i] = Kh[i]/(2.0*Amix[i]);
-        kh[i] = std::copysign(length(Kh[i])/2.0, dot(Kh[i], normals[i]));
+        kh[i] = std::copysign(length(Kh[i])/2.0, -dot(Kh[i], normals[i]));
         kg[i] = (2.0*M_PI - kg[i])/Amix[i];
 
         REAL kh2 = kh[i]*kh[i];

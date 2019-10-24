@@ -168,9 +168,8 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
             crv.mixpoint,
             crv.curvatureType)
 
-    if showplot or saveplot:
-        fig = plt.figure(figsize=(8,5))
-        ax = fig.add_axes([0.1,0.05,0.6,0.9])
+    fig = plt.figure(figsize=(8,5))
+    ax = fig.add_axes([0.1,0.05,0.6,0.9])
 
     ## This code helps make the plots easier to read...
     # tmin = np.percentile(data,1)
