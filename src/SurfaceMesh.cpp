@@ -1430,6 +1430,11 @@ curvatureViaMDSB(const SurfaceMesh& mesh){
 
         k1[i] = kh[i] + tmp;
         k2[i] = kh[i] - tmp;
+
+        if (k1[i] < k2[i]) {
+            std::cout << i << " " << k1[i] << " " << k2[i] << std::endl;
+            std::cout << "MDSB FAILURE" << std::endl;
+        }
     }
 
     delete[] Amix;
@@ -1470,10 +1475,13 @@ curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet, std::size_t dPrime){
         REAL tk1 = mongeForm.principal_curvatures(0);
         REAL tk2 = mongeForm.principal_curvatures(1);
 
-        std::cout << tk1 << " " << tk2 << std::endl;
-
         k1[i] = tk1;
         k2[i] = tk2;
+
+        if (tk1 < tk2) {
+            std::cout << vertexID << " " << tk1 << " " << tk2 << std::endl;
+            std::cout << "jets FAILURE" << std::endl;
+        }
 
         kg[i] = tk1*tk2;
         kh[i] = (tk1+tk2)/2.;
@@ -1481,37 +1489,6 @@ curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet, std::size_t dPrime){
     }
     return std::make_tuple(kh, kg, k1, k2, sigma);
 }
-
-// void osculatingJets(const SurfaceMesh&mesh, std::size_t dJet, std::size_t
-// dPrime){
-//     int min_nb_points = (dJet + 1) * (dJet + 2) / 2;
-
-//     for (auto vertexID : mesh.get_level_id<1>()) {
-//         // Set of neighbors
-//         std::set<SurfaceMesh::SimplexID<1> > kNeighbors;
-//         // Get list of neighbors
-//         casc::kneighbors_up(mesh, vertexID, 1, kNeighbors);
-
-//         std::vector<SurfaceMesh::SimplexID<1> > nbors;
-//         nbors.push_back(vertexID);
-//         std::copy(kNeighbors.begin(),
-// kNeighbors.end(),std::back_inserter(nbors));
-
-//         if ( nbors.size() < min_nb_points ) {
-//             std::cerr << "Not enough pts (have: " << nbors.size() << ", need:
-// "      << min_nb_points << ") for fitting this vertex: "
-//                       << vertexID << std::endl;
-//             continue;
-//         }
-
-//         Monge_via_jet_fitting monge_fit;
-//         auto mongeForm = monge_fit(nbors.begin(), nbors.end(), dJet, dPrime);
-//         mongeForm.comply_wrt_given_normal(getNormal(mesh, vertexID));
-
-//         std::cout << vertexID << "@ " << (*vertexID).position << std::endl;
-//         std::cout << mongeForm << std::endl;
-//     }
-// }
 
 std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh& mesh)
 {

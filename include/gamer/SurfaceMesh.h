@@ -763,7 +763,6 @@ void vertexGrabber(const SurfaceMesh& F,
                    Iterator end)
 {
     if (need <= 0) return;
-    std::cout << need << std::endl;
     std::set<SurfaceMesh::SimplexID<1>> next;
     for (; begin != end; ++begin)
     {
