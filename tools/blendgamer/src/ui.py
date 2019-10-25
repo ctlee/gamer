@@ -276,6 +276,8 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
                     row = layout.row()
                     row.operator("gamer.plot_curvature")
                     row.operator("gamer.plot_all_curvatures")
+                    # row = layout.row()
+                    # row.operator("gamer.plot_differences")
             else:
                 col.label(text="Select a mesh object to compute curvatures", icon='LIGHT')
         else:

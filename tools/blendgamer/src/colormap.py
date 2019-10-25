@@ -185,10 +185,10 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
     amedian = np.median(data)
 
     if showplot:
-        plt.hist(data, bins='auto')
-        plt.title("%s Distribution"%(file_prefix))
-        plt.axvline(amin, color='r', linestyle='dashed', linewidth=1)
-        plt.axvline(amax, color='r', linestyle='dashed', linewidth=1)
+        ax.hist(data, bins='auto')
+        ax.set_title("%s Distribution"%(file_prefix))
+        ax.axvline(amin, color='r', linestyle='dashed', linewidth=1)
+        ax.axvline(amax, color='r', linestyle='dashed', linewidth=1)
 
     extend = 'neither'
     # the tmin/tmax values are percentiles instead
@@ -211,8 +211,8 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
         print("Data truncated at %f and %f percentiles\n"%(lowerPercentile,upperPercentile) )
 
     if showplot:
-        plt.axvline(tmin, color='g', linestyle='dashed', linewidth=2)
-        plt.axvline(tmax, color='g', linestyle='dashed', linewidth=2)
+        ax.axvline(tmin, color='g', linestyle='dashed', linewidth=2)
+        ax.axvline(tmax, color='g', linestyle='dashed', linewidth=2)
 
         if tmin > amin and tmax < amax:
             extend = 'both'
@@ -252,6 +252,9 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
     vlayer = "%s%s"%(crv.algorithm, crv.curvatureType)
 
     if vlayer not in mesh.vertex_colors:
+        if len(mesh.vertex_colors) == 8:
+            report({'ERROR'}, "Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue.")
+            return False
         mesh.vertex_colors.new(name=vlayer)
 
     color_layer = mesh.vertex_colors[vlayer]
@@ -294,6 +297,132 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
         plt.savefig(file_prefix+'.pdf', format='pdf')
     if showplot:
         plt.show()
+    plt.close()
+    return True
+
+
+def differencePlotter(context, report, difftype='K1'):
+    obj = getActiveMeshObject(report)
+
+    with ObjectMode():
+        mdbsk1 = getCurvatureLayer(obj, 'MDSB', difftype)
+        jetsk1 = getCurvatureLayer(obj, 'JETS', difftype)
+
+        mdsbk1_data = np.zeros(len(obj.data.vertices), dtype=np.float)
+        mdbsk1.foreach_get('value', mdsbk1_data)
+
+        jetsk1_data = np.zeros(len(obj.data.vertices), dtype=np.float)
+        jetsk1.foreach_get('value', jetsk1_data)
+
+    data = mdsbk1_data - jetsk1_data
+
+    cmap = colormapDict['PRGN']
+    file_prefix = "%s_difference"%(difftype)
+
+    fig = plt.figure(figsize=(8,5))
+    ax = fig.add_axes([0.1,0.05,0.6,0.9])
+
+    amin = np.amin(data)
+    amax = np.amax(data)
+    amean = np.mean(data)
+    amedian = np.median(data)
+
+    plt.hist(data, bins='auto')
+    plt.title("%s Distribution"%(file_prefix))
+    plt.axvline(amin, color='r', linestyle='dashed', linewidth=1)
+    plt.axvline(amax, color='r', linestyle='dashed', linewidth=1)
+
+
+    extend = 'neither'
+    tmin = amin
+    tmax = amax
+    # tmin = np.percentile(data,2)
+    # tmax = np.percentile(data,98)
+
+    ax.axvline(tmin, color='g', linestyle='dashed', linewidth=2)
+    ax.axvline(tmax, color='g', linestyle='dashed', linewidth=2)
+
+    if tmin > amin and tmax < amax:
+        extend = 'both'
+    elif tmin > amin:
+        extend = 'min'
+    elif tmax < amax:
+        extend = 'max'
+
+    data[data < tmin] =tmin
+    data[data > tmax] =tmax
+
+    amin = np.amin(data)
+    amax = np.amax(data)
+
+    # Construct the norm and colorbar
+    if amin < 0 and amax > 0:
+        norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
+        # Python 3.5 matplotlib may not support?
+        # norm = mpl.colors.DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
+        colors_neg = cmap(np.linspace(0, .5, 256))
+        colors_pos = cmap(np.linspace(.5, 1, 256))
+
+        all_colors = np.vstack((colors_neg, colors_pos))
+        curvature_map = mpl.colors.LinearSegmentedColormap.from_list('curvature_map', all_colors)
+    else:
+        norm = mpl.colors.Normalize(vmin=amin, vmax=amax)
+        curvature_map = cmap
+
+    # Map values to colors and add vertex color layer
+    colors = curvature_map(norm(data))
+
+    # Create view without alpha channel if Blender < 2.80
+    if bpy.app.version < (2,80,0):
+        colors = colors[:,:3]
+
+    mesh = bpy.context.object.data
+    vlayer = "%s_diff"%(difftype)
+
+    if vlayer not in mesh.vertex_colors:
+        mesh.vertex_colors.new(name=vlayer)
+
+    color_layer = mesh.vertex_colors[vlayer]
+    mesh.vertex_colors[vlayer].active = True
+
+    mloops = np.zeros((len(mesh.loops)), dtype=np.int)
+    mesh.loops.foreach_get("vertex_index", mloops)
+    color_layer.data.foreach_set("color", colors[mloops].flatten())
+
+    # Add axis for colorbar and plot it
+    ax = fig.add_axes([0.75,0.05,0.05,0.9])
+    cb = mpl.colorbar.ColorbarBase(ax, cmap=curvature_map, norm=norm,
+                orientation='vertical')
+
+    ticks = cb.get_ticks()
+    ticks.sort()
+
+    if amin != ticks[0]:
+        ticks = np.insert(ticks, 0, amin)
+    if amax != ticks[-1]:
+        ticks = np.append(ticks, amax)
+    cb.set_ticks(ticks)
+
+    ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
+
+    extend = 'neither'
+
+    if extend == 'neither':
+       pass
+    elif extend == 'both':
+        ticklabels[0] = "< " + ticklabels[0]
+        ticklabels[-1] = "> " + ticklabels[-1]
+    elif extend == 'max':
+        ticklabels[-1] = "> " + ticklabels[-1]
+    elif extend == 'min':
+        ticklabels[0] = "< " + ticklabels[0]
+    cb.set_ticklabels(ticklabels)
+    cb.ax.tick_params(labelsize=14)
+    cb.set_label("%s [$\mu m^{-1}$]"%(vlayer), size=16)
+
+    plt.show()
+    plt.close()
+
 
 
 def eng_notation(x,pos):

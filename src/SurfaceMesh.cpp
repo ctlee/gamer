@@ -1096,7 +1096,7 @@ double getMeanCurvature(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1>
         curvature += (1.0/tan(angle(center, prev, curr)) + 1.0/tan(angle(center, next, curr)))*(center - curr);
     }
     curvature /= (2.0*Amix);
-    return std::copysign(std::sqrt(curvature|curvature)/2.0, dot(curvature, getNormal(mesh, vertexID)));
+    return std::copysign(std::sqrt(curvature|curvature)/2.0, -dot(curvature, getNormal(mesh, vertexID)));
 }
 
 
@@ -1304,7 +1304,7 @@ computeCurvatures(const SurfaceMesh& mesh){
 
     for (std::size_t i = 0; i < mesh.size<1>(); ++i) {
         Kh[i] = Kh[i]/(2.0*Amix[i]);
-        kh[i] = std::copysign(length(Kh[i])/2.0, dot(Kh[i], normals[i]));
+        kh[i] = std::copysign(length(Kh[i])/2.0, -dot(Kh[i], normals[i]));
         kg[i] = (2.0*M_PI - kg[i])/Amix[i];
 
         REAL kh2 = kh[i]*kh[i];
@@ -1430,11 +1430,6 @@ curvatureViaMDSB(const SurfaceMesh& mesh){
 
         k1[i] = kh[i] + tmp;
         k2[i] = kh[i] - tmp;
-
-        if (k1[i] < k2[i]) {
-            std::cout << i << " " << k1[i] << " " << k2[i] << std::endl;
-            std::cout << "MDSB FAILURE" << std::endl;
-        }
     }
 
     delete[] Amix;
@@ -1477,11 +1472,6 @@ curvatureViaJets(const SurfaceMesh& mesh, std::size_t dJet, std::size_t dPrime){
 
         k1[i] = tk1;
         k2[i] = tk2;
-
-        if (tk1 < tk2) {
-            std::cout << vertexID << " " << tk1 << " " << tk2 << std::endl;
-            std::cout << "jets FAILURE" << std::endl;
-        }
 
         kg[i] = tk1*tk2;
         kh[i] = (tk1+tk2)/2.;

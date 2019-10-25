@@ -32,7 +32,7 @@ mpl_spec = importlib.util.find_spec("matplotlib")
 mpl_found = mpl_spec is not None
 
 if mpl_found:
-    from blendgamer.colormap import dataToVertexColor
+    from blendgamer.colormap import dataToVertexColor, differencePlotter
 
 from blendgamer.util import *
 
@@ -90,6 +90,16 @@ class GAMER_OT_plot_all_curvatures(bpy.types.Operator):
 
     def execute(self, context):
         context.object.gamer.curvatures.plot_all_curvatures(context, self.report)
+        return {'FINISHED'}
+
+class GAMER_OT_plot_differences(bpy.types.Operator):
+    bl_idname       = "gamer.plot_differences"
+    bl_label        = "Plot Differences"
+    bl_description  = "Plot differences between MDSB and JETS"
+    bl_options      = {'REGISTER'}
+
+    def execute(self, context):
+        context.object.gamer.curvatures.plot_differences(context, self.report)
         return {'FINISHED'}
 
 class GAMER_OT_compute_curvatures(bpy.types.Operator):
@@ -270,12 +280,18 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
             for crv in self.curvature_list:
                 dataToVertexColor(crv, context, report, showplot=self.showplots, saveplot=self.saveplots)
 
+        def plot_differences(self, context, report):
+            differencePlotter(context, report, 'K1')
+            differencePlotter(context, report, 'K2')
+            differencePlotter(context, report, 'KG')
+            differencePlotter(context, report, 'KH')
 
 classes = [GAMER_OT_compute_curvatures,
            GAMER_OT_remove_curvature,
            GAMER_OT_remove_all_curvatures,
            GAMER_OT_plot_curvature,
            GAMER_OT_plot_all_curvatures,
+           GAMER_OT_plot_differences,
            GAMerCurvatureItem,
            GAMerCurvaturesList]
 
