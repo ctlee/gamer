@@ -259,7 +259,7 @@ def gamerToBlender(report, gmesh,
             ml[i].value = marker
 
     # Repaint boundaries
-    obj.gamer.repaint_boundaries(bpy.context)
+    obj.gamer.markers.repaint_boundaries(bpy.context)
     # Deselect all first
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
