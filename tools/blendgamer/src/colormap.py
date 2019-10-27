@@ -25,6 +25,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from blendgamer.util import *
 
+# Recommended backend if a non-interactive backend is the default
+# $ pip install pyqt5
+# mpl.use('QT5Agg')
+
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 

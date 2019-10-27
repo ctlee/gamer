@@ -106,6 +106,8 @@ option(GETPYBIND11 "Download pybind11?" ON)
 
 option(GAMER_DOCS "Download and configure documentation?" OFF)
 
+option(VECTORIZE "Enable vectorization?" OFF)
+
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 mark_as_advanced(GAMER_CMAKE_VERBOSE)
 
@@ -133,6 +135,15 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 # Override rules for MSVC static compiler flags
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/c_flag_overrides.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/cxx_flag_overrides.cmake)
+
+if(VECTORIZE)
+    message(WARNING "Vectorization in GAMer is experimental, use at your own risk. Enabling vectorization may make your libraries less portable across machines.")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

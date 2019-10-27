@@ -72,7 +72,6 @@ class Monge_via_jet_fitting
         // b0, b1, b2, b3, //third order
         // c0, c1, c2, c3, c4) //fourth order
       public:
-
         /**
          * @brief      Default constructor
          */
@@ -364,7 +363,16 @@ class Monge_via_jet_fitting
 
         // std::cout << "M:" << std::endl << M << std::endl;
         // std::cout << "Z:" << std::endl << Z << std::endl;
-        solve_linear_system(M, Z);            //correct with precond
+        // Solve MA=Z in the ls sense. The solution A is stored in Z.
+        Eigen::JacobiSVD<Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>> jacobiSvd(M, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Z = jacobiSvd.solve(EigenVectorN(Z));
+        condition_nb = jacobiSvd.singularValues().array().abs().maxCoeff() /
+                       jacobiSvd.singularValues().array().abs().minCoeff();
+
+        for (int k = 0; k <= deg; k++)
+            for (int i = 0; i <= k; i++)
+                Z(k*(k+1)/2+i) /= std::pow(preconditionning, k);
+
         compute_Monge_basis(Z.data(), monge_form);
         if (dPrime >= 3)
             compute_Monge_coefficients(Z.data(), dPrime, monge_form);
@@ -557,32 +565,6 @@ class Monge_via_jet_fitting
             }
             line_count++;
         }
-    }
-
-    //A is computed, solving MA=Z in the ls sense, the solution A is stored
-    // in Z
-    //Preconditionning is needed
-
-
-
-
-    /**
-     * @brief      Solve MA=Z in the ls sense. The solution A is stored in Z.
-     *
-     * Preconditioning must be called first.
-     *
-     * @param      M     Matrix M
-     * @param      Z     Vector Z which is also used for teh result.
-     */
-    void solve_linear_system(EigenMatrixN &M, EigenVectorN &Z){
-        Eigen::JacobiSVD<EigenMatrixN> jacobiSvd(M, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        Z = jacobiSvd.solve(EigenVectorN(Z));
-        condition_nb = jacobiSvd.singularValues().array().abs().maxCoeff() /
-                       jacobiSvd.singularValues().array().abs().minCoeff();
-
-        for (int k = 0; k <= deg; k++)
-            for (int i = 0; i <= k; i++)
-                Z(k*(k+1)/2+i) /= std::pow(preconditionning, k);
     }
 
     /**
