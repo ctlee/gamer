@@ -224,7 +224,7 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         GAMER_PT_mesh_quality.draw_report(layout, context)
 
         col=layout.column()
-        col.label(text="Curvature Calculations:")
+        col.label(text="Curvature Estimation:")
 
         if context.scene.gamer.matplotlib_found:
             obj = context.object
@@ -279,9 +279,9 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
                     # row = layout.row()
                     # row.operator("gamer.plot_differences")
             else:
-                col.label(text="Select a mesh object to compute curvatures", icon='LIGHT')
+                col.label(text="Select a mesh object to enable estimation of curvatures", icon='LIGHT')
         else:
-            col.label(text="Curvature Calculations require matplotlib.", icon='LIGHT')
+            col.label(text="Curvature estimations require matplotlib.", icon='LIGHT')
 
 # Object Boundary Panel:
 class GAMER_UL_curvature_list(bpy.types.UIList):
