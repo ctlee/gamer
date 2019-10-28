@@ -1558,4 +1558,144 @@ void cacheNormals(SurfaceMesh& mesh){
         (*vID).normal = norm;
     }
 }
+
+// http://pub.ist.ac.at/~edels/Papers/1995-J-03-IncrementalBettiNumbers.pdf
+std::tuple<int, int, int> getBettiNumbers(SurfaceMesh& mesh){
+    // Mark all edges and triangles as false
+    for (auto& eid : mesh.get_level<2>()) {
+        eid.selected = false;
+    }
+    for (auto& fid : mesh.get_level<3>()) {
+        fid.selected = false;
+    }
+
+    std::deque<SurfaceMesh::SimplexID<2>> frontier_edges;
+    std::set<SurfaceMesh::SimplexID<2>> visited_edges;
+    std::set<SurfaceMesh::KeyType> visited_verts;
+
+    for (auto eid : mesh.get_level_id<2>())
+    {
+        if (visited_edges.find(eid) == visited_edges.end())
+        {
+            bool hasboundary = false;
+            frontier_edges.push_back(eid);
+
+            while (!frontier_edges.empty())
+            {
+                SurfaceMesh::SimplexID<2> curr = frontier_edges.front();
+                if (visited_edges.find(curr) == visited_edges.end())
+                {
+                    std::array<SurfaceMesh::KeyType, 2> n = curr.indices();
+                    if (visited_verts.find(n[0]) == visited_verts.end()) {
+                        // Have never visited n[0]
+                        visited_verts.insert(n[0]);
+                        // (*curr).selected = true;
+
+                        if (visited_verts.find(n[1]) == visited_verts.end()) {
+                            // Both vertices unvisited
+                            visited_verts.insert(n[1]);
+                        }
+                    }
+                    else{
+                        if (visited_verts.find(n[1]) == visited_verts.end()) {
+                            visited_verts.insert(n[1]);
+                            // (*curr).selected = true;
+                        }else{
+                            //found a closed cycle
+                            (*curr).selected = true;
+                        }
+                    }
+                    visited_edges.insert(curr);
+                    // If on a boundary stop otherwise add neighboring edges to
+                    // the queue
+                    auto w = mesh.get_cover(curr);
+                    if (w.size() == 1) {hasboundary = true;}
+                    else if (w.size() == 2)
+                    {
+                        neighbors_up(mesh, curr, std::back_inserter(frontier_edges));
+                    }
+                }
+                frontier_edges.pop_front();
+            }
+
+            // Add code here to verify whether or not the connected space is closed...
+        }
+    }
+
+    visited_edges.clear();
+    visited_verts.clear();
+
+    // std::deque<SurfaceMesh::SimplexID<3>> frontier_faces;
+    // std::set<SurfaceMesh::SimplexID<3>> visited_faces;
+
+    // for (auto fid : mesh.get_level_id<3>())
+    // {
+    //     if (visited_faces.find(fid) == visited_faces.end())
+    //     {
+    //         frontier_faces.push_back(fid);
+
+    //         while (!frontier_faces.empty())
+    //         {
+    //             SurfaceMesh::SimplexID<3> curr = frontier_faces.front();
+    //             if (visited_faces.find(curr) == visited_faces.end())
+    //             {
+    //                 std::vector<SurfaceMesh::SimplexID<2>> n;
+    //                 mesh.down(curr, std::back_inserter(n));
+
+    //                 if (visited_edges.find(n[0]) == visited_edges.end()) {
+    //                     visited_edges.insert(n[0]);
+
+    //                     if (visited_edges.find(n[1]) == visited_edges.end()) {
+    //                         visited_edges.insert(n[1]);
+    //                     }
+
+    //                     if (visited_edges.find(n[2]) == visited_edges.end()) {
+    //                         visited_edges.insert(n[2]);
+    //                     }
+    //                 }
+    //                 else if (visited_edges.find(n[1]) == visited_edges.end()) {
+    //                     visited_edges.insert(n[1]);
+
+    //                     if (visited_edges.find(n[2]) == visited_edges.end()) {
+    //                         visited_edges.insert(n[2]);
+    //                     }
+    //                 }
+    //                 else if (visited_edges.find(n[2]) == visited_edges.end()) {
+    //                     visited_edges.insert(n[2]);
+    //                 }
+    //                 else{
+    //                     // TRICYCLE
+    //                 }
+    //                 visited_faces.insert(curr);
+    //                 neighbors(mesh, curr, std::back_inserter(frontier_faces));
+    //             }
+    //             frontier_faces.pop_front();
+    //         }
+    //     }
+    // }
+
+    int connected_components = mesh.size<1>();
+    int holes = 0;
+    int voids = 0;
+
+    for (auto eid : mesh.get_level_id<2>()) {
+        if ((*eid).selected) {
+            ++holes;
+        }
+        else{
+            --connected_components;
+        }
+    }
+
+    for (auto fid : mesh.get_level_id<3>()) {
+        if ((*fid).selected) {
+            ++voids;
+        }
+        else{
+            --holes;
+        }
+    }
+
+    return std::make_tuple(connected_components, holes, voids);
+}
 } // end namespace gamer

@@ -1159,4 +1159,6 @@ std::unique_ptr<SurfaceMesh> cube(int order);
 std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh& mesh);
 
 void cacheNormals(SurfaceMesh& mesh);
+
+std::tuple<int, int, int> getBettiNumbers(SurfaceMesh& mesh);
 } // end namespace gamer

@@ -1304,6 +1304,12 @@ void init_SurfaceMesh(py::module& mod){
             Set normals such that mesh volume is positive.
         )delim"
     );
+
+    SurfMeshCls.def("getBettiNumbers", &getBettiNumbers,
+        R"delim(
+            Compute the Betti numbers of the mesh.
+        )delim"
+    );
 }
 
 } // end namespace gamer
