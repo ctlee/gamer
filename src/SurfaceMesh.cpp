@@ -1560,36 +1560,41 @@ void cacheNormals(SurfaceMesh& mesh){
 }
 
 // http://pub.ist.ac.at/~edels/Papers/1995-J-03-IncrementalBettiNumbers.pdf
-std::tuple<int, int, int> getBettiNumbers(SurfaceMesh& mesh){
-    // Mark all edges and triangles as false
-    for (auto& eid : mesh.get_level<2>()) {
-        eid.selected = false;
-    }
-    for (auto& fid : mesh.get_level<3>()) {
-        fid.selected = false;
-    }
+std::tuple<bool, int, int, int> getBettiNumbers(SurfaceMesh& mesh){
+    bool valid = true;
+    int connected_components = mesh.size<1>();
+    int holes = 0;
+    int voids = 0;
 
     std::deque<SurfaceMesh::SimplexID<2>> frontier_edges;
     std::set<SurfaceMesh::SimplexID<2>> visited_edges;
+    std::set<SurfaceMesh::SimplexID<3>> faces;
+
     std::set<SurfaceMesh::KeyType> visited_verts;
+    SurfaceMesh::SimplexID<2> curr;
 
     for (auto eid : mesh.get_level_id<2>())
     {
         if (visited_edges.find(eid) == visited_edges.end())
         {
+            // Does this surface have a boundary edgee?
             bool hasboundary = false;
+            // Does this surface have consistent normals?
+            bool orientable = true;
+            // Is this surface have weird 3+ face intersections?
+            bool pseudo_manifold = true;
             frontier_edges.push_back(eid);
 
             while (!frontier_edges.empty())
             {
-                SurfaceMesh::SimplexID<2> curr = frontier_edges.front();
+                curr = frontier_edges.front();
                 if (visited_edges.find(curr) == visited_edges.end())
                 {
                     std::array<SurfaceMesh::KeyType, 2> n = curr.indices();
                     if (visited_verts.find(n[0]) == visited_verts.end()) {
                         // Have never visited n[0]
                         visited_verts.insert(n[0]);
-                        // (*curr).selected = true;
+                        --connected_components;
 
                         if (visited_verts.find(n[1]) == visited_verts.end()) {
                             // Both vertices unvisited
@@ -1599,103 +1604,56 @@ std::tuple<int, int, int> getBettiNumbers(SurfaceMesh& mesh){
                     else{
                         if (visited_verts.find(n[1]) == visited_verts.end()) {
                             visited_verts.insert(n[1]);
-                            // (*curr).selected = true;
-                        }else{
+                            --connected_components;
+                        } else {
                             //found a closed cycle
-                            (*curr).selected = true;
+                            ++holes;
                         }
                     }
                     visited_edges.insert(curr);
                     // If on a boundary stop otherwise add neighboring edges to
                     // the queue
                     auto w = mesh.get_cover(curr);
-                    if (w.size() == 1) {hasboundary = true;}
+                    if (w.size() == 1) {hasboundary = true;
+                    }
                     else if (w.size() == 2)
                     {
                         neighbors_up(mesh, curr, std::back_inserter(frontier_edges));
                     }
+                    else {
+                        pseudo_manifold = false;
+                        valid = false;
+                    }
+                    neighbors_up(mesh, curr, std::back_inserter(frontier_edges));
+                    for(auto n : w ){
+                        auto fid = curr.get_simplex_up(n);
+                        faces.insert(fid);
+                    }
                 }
                 frontier_edges.pop_front();
             }
-
-            // Add code here to verify whether or not the connected space is closed...
+            // Add code here to verify whether or not the connected space is
+            // closed...
+            int sz = faces.size();
+            if (pseudo_manifold){
+                if (orientable && !hasboundary){
+                    // Unproven: Local space should be a sphere
+                    ++voids;
+                    --sz;
+                }
+                holes -= sz;
+            } else{
+                // TODO: Implement better detection of faces which complete 2-cycles s.t. this can be complete.
+            }
+            faces.clear();
         }
     }
 
     visited_edges.clear();
     visited_verts.clear();
 
-    // std::deque<SurfaceMesh::SimplexID<3>> frontier_faces;
-    // std::set<SurfaceMesh::SimplexID<3>> visited_faces;
-
-    // for (auto fid : mesh.get_level_id<3>())
-    // {
-    //     if (visited_faces.find(fid) == visited_faces.end())
-    //     {
-    //         frontier_faces.push_back(fid);
-
-    //         while (!frontier_faces.empty())
-    //         {
-    //             SurfaceMesh::SimplexID<3> curr = frontier_faces.front();
-    //             if (visited_faces.find(curr) == visited_faces.end())
-    //             {
-    //                 std::vector<SurfaceMesh::SimplexID<2>> n;
-    //                 mesh.down(curr, std::back_inserter(n));
-
-    //                 if (visited_edges.find(n[0]) == visited_edges.end()) {
-    //                     visited_edges.insert(n[0]);
-
-    //                     if (visited_edges.find(n[1]) == visited_edges.end()) {
-    //                         visited_edges.insert(n[1]);
-    //                     }
-
-    //                     if (visited_edges.find(n[2]) == visited_edges.end()) {
-    //                         visited_edges.insert(n[2]);
-    //                     }
-    //                 }
-    //                 else if (visited_edges.find(n[1]) == visited_edges.end()) {
-    //                     visited_edges.insert(n[1]);
-
-    //                     if (visited_edges.find(n[2]) == visited_edges.end()) {
-    //                         visited_edges.insert(n[2]);
-    //                     }
-    //                 }
-    //                 else if (visited_edges.find(n[2]) == visited_edges.end()) {
-    //                     visited_edges.insert(n[2]);
-    //                 }
-    //                 else{
-    //                     // TRICYCLE
-    //                 }
-    //                 visited_faces.insert(curr);
-    //                 neighbors(mesh, curr, std::back_inserter(frontier_faces));
-    //             }
-    //             frontier_faces.pop_front();
-    //         }
-    //     }
-    // }
-
-    int connected_components = mesh.size<1>();
-    int holes = 0;
-    int voids = 0;
-
-    for (auto eid : mesh.get_level_id<2>()) {
-        if ((*eid).selected) {
-            ++holes;
-        }
-        else{
-            --connected_components;
-        }
-    }
-
-    for (auto fid : mesh.get_level_id<3>()) {
-        if ((*fid).selected) {
-            ++voids;
-        }
-        else{
-            --holes;
-        }
-    }
-
-    return std::make_tuple(connected_components, holes, voids);
+    // std::cout << "Valid: " << valid << std::endl;
+    // std::cout << connected_components << " " << holes << " " << voids << std::endl;
+    return std::make_tuple(valid, connected_components, holes, voids);
 }
 } // end namespace gamer
