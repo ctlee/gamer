@@ -190,6 +190,11 @@ Getting PyGAMer
 The Easy Way
 ============
 
+.. note::
+
+   ``PyGAMer`` is developed for use with Python 3 and newer.
+   Other Python versions may work but are untested and may require workarounds.
+
 We recommend that you install ``PyGAMer`` using the ``pip`` utility.
 
 .. code-block:: sh
@@ -199,10 +204,17 @@ We recommend that you install ``PyGAMer`` using the ``pip`` utility.
 The pip utility will automatically sort out the package dependencies for you and potentially build the library.
 Unfortunately ``pip`` is not traditionally bundled with the prepackaged Blender installation consult the :ref:`Getting BlendGAMer` section for instructions on how to build ``BlendGAMer``.
 
+
+
 .. _PyGAMer the Harder Way:
 
 The Harder Way
 ==============
+
+.. note::
+
+   ``PyGAMer`` is developed for use with Python 3 and newer.
+   Other Python versions may work but are untested and may require workarounds.
 
 You can also build ``PyGAMer`` using ``setuptools`` on your own using the alternative build instructions.
 By default, the Python setup enables the compilation of the ``PyGAMer`` Python extension module.
@@ -266,7 +278,7 @@ While this is not strictly necessary, it enables CMake to verify that the Python
 Note that the prebuilt Blender binaries from the Blender Foundation do not contain Python header files and are therefore unsuitable for compilation.
 
 #.  Ensure you have a working Blender installation. And if possible append the Blender executable to your systems ``PATH``.
-    Follow instructions online for `Getting Blender <https://docs.blender.org/manual/en/latest/getting_started/installing/introduction.html#install-blender>`__.
+    Follow instructions online for `Getting Blender <https://docs.blender.org/manual/en/latest/getting_started/installing/>`__.
 
     On Mac add the following commands to ``~/.bash_profile`` pointing to the directory with Blender's binary:
 

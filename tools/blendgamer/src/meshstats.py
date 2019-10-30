@@ -293,12 +293,17 @@ class GAMER_OT_MeshStats_Betti_Numbers(bpy.types.Operator):
             # k, orientable, manifold = gmesh.check_orientation()
             # holes = gmesh.nEdges - gmesh.nVertices + k
 
-            k, h, v = gmesh.getBettiNumbers()
+            valid, k, h, v = gmesh.getBettiNumbers()
 
             info.append(("Euler Characteristic: %d"%(gmesh.nVertices-gmesh.nEdges+gmesh.nFaces), None))
-            info.append(("B0 Connected Components: %d"%(k), None))
-            info.append(("B1 Holes: %d"%(h), None))
-            info.append(("B2 Voids: %d"%(v), None))
+
+            if valid:
+                info.append(("B0 Connected Components: %d"%(k), None))
+                info.append(("B1 Holes: %d"%(h), None))
+                info.append(("B2 Voids: %d"%(v), None))
+            else:
+                info.append(("B0 Connected Components: %d"%(k), None))
+                info.append(("Higher order Betti numbers undetermined", None))
 
     def execute(self, context):
         return execute_check(self,context)
