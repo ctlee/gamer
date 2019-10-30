@@ -76,7 +76,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                     mat.use_fake_user = True
 
                     obj.gamer.add_boundary(context)
-                    newBdry = obj.gamer.boundary_list[obj.gamer.active_bnd_index]
+                    newBdry = obj.gamer.markers.boundary_list[obj.gamer.active_bnd_index]
 
                     newBdry.boundary_name = 'NewBoundaryFrom_%s'%(key)
                     newBdry.marker = bdry['marker']
@@ -153,7 +153,7 @@ def checkVersion():
                 for obj in bpy.data.objects:
                     if obj.type == 'MESH':
                         # Migrate name to boundary_name
-                        for bdry in obj.gamer.boundary_list:
+                        for bdry in obj.gamer.markers.boundary_list:
                             bdry.boundary_name = bdry.name
                             bdry.name = str(bdry.boundary_id)
                             if 'boundaries' in obj.keys():

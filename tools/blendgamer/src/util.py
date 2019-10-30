@@ -164,7 +164,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         # Transfer boundary information
         if map_boundaries:
             bdryMap = {UNSETID: UNSETMARKER}
-            for bdry in obj.gamer.boundary_list:
+            for bdry in obj.gamer.markers.boundary_list:
                 bdryMap[bdry.boundary_id] = bdry.marker
             boundaries = [bdryMap[item.value] for item in ml.values()]
         else:
