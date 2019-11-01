@@ -95,7 +95,14 @@ if(_on_rtd):
     sys.argv.extend(['-G','Unix Makefiles'])
     cmake_args.append('-DGAMER_DOCS=ON')
 
-from skbuild import setup
+try:
+    from skbuild import setup
+except ImportError:
+    print('scikit-build is required to build from source.', file=sys.stderr)
+    print('Please run:', file=sys.stderr)
+    print('', file=sys.stderr)
+    print('  python -m pip install scikit-build')
+    sys.exit(1)
 
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues", "nbsphinx",
 "jupyter_sphinx", "threevis"]
