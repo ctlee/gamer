@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build/lib/'))
+# sys.path.insert(0, os.path.abspath('/home/ctlee/gamer/build/lib/'))
 
 import os
 import pygamer
@@ -25,8 +25,8 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.4'
-release = 'v2.0.4-2-g59c1b6c'
+version = '2.0.5'
+release = 'v2.0.5-dev-22-gd76aa02.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -52,7 +52,7 @@ if(True):
 ##############################
 # Breathe Settings
 ##############################
-breathe_projects = { "gamer_project": "/Users/ctlee/gamer/gamer/docs/src/_doxyoutput/xml" }
+breathe_projects = { "gamer_project": "/home/ctlee/gamer/docs/src/_doxyoutput/xml" }
 breathe_default_project = "gamer_project"
 
 ##############################
@@ -61,17 +61,17 @@ breathe_default_project = "gamer_project"
 
 doxystdin = \
 """
-INPUT = /Users/ctlee/gamer/gamer/include
+INPUT = /home/ctlee/gamer/include
 OPTIMIZE_OUTPUT_FOR_C  = YES
 EXTRACT_ALL            = YES
 """
 # ENABLED_SECTIONS       = detail
 
 exhale_args = {
-    "containmentFolder":     "/Users/ctlee/gamer/gamer/docs/src/_cppapi",
+    "containmentFolder":     "/home/ctlee/gamer/docs/src/_cppapi",
     "rootFileName":          "root.rst",
     "rootFileTitle":         "C++ API Reference",
-    "doxygenStripFromPath":  "/Users/ctlee/gamer/gamer",
+    "doxygenStripFromPath":  "/home/ctlee/gamer",
     # "pageLevelConfigMeta":   ":github_url: https://github.com/ctlee/gamer",
     "createTreeView":        True,
     "exhaleExecutesDoxygen": True,
@@ -115,7 +115,7 @@ add_function_parentheses = True
 show_authors = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['/Users/ctlee/gamer/gamer/docs/src/_templates']
+templates_path = ['/home/ctlee/gamer/docs/src/_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -138,7 +138,7 @@ except ImportError:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['/Users/ctlee/gamer/gamer/docs/src/_static']
+html_static_path = ['/home/ctlee/gamer/docs/src/_static']
 
 html_context = {
     'css_files': [
