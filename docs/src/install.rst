@@ -20,7 +20,7 @@ In order to build GAMer, ``PyGAMer``, and ``BlendGAMer``, you will need several 
 Other than the build toolchain and
 
   * ``C++ compiler``: supporting C++14 standard or newer.
-  * ``CMake``: version 3.11 or newer.
+  * ``CMake``: version 3.10 or newer.
   * ``Eigen 3``: CMake can download and locally configure Eigen for you.
   * ``CASC``: CMake can download and locally configure CASC for you.
   * ``pybind11``: (Required for ``PyGAMer`` and ``BlendGAMer``) CMake can download and locally configure PyBind11 for you.
@@ -37,8 +37,9 @@ Other than the build toolchain and
 Building libGAMer
 *****************
 
-The provided steps will compile **both the shared and static libraries** by default.
+The provided steps will compile **both the shared and static libraries** by default if you are using CMake 3.12 or later.
 There is very little overhead to compiling both libraries since we are taking advantage of CMake's object library capabilities to compile the sources only once.
+Users of earlier CMake versions
 
 If you wish to additionally compile the Blender GAMer addon, GAMer documentation, or other features please refer to the :ref:`Additional CMake Options` section prior to building.
 If you are compiling on Windows using Microsoft Visual Studio please also refer to the :ref:`Compiling on Windows` section.

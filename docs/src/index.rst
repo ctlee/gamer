@@ -89,6 +89,7 @@ Legacy Contributions
    algorithms
    blendgamer
    changelog
+   faq
 
 .. toctree::
    :maxdepth: 2

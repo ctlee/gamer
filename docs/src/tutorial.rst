@@ -26,3 +26,4 @@ BlendGAMer Tutorials
    :maxdepth: 2
 
    tutorials/tutorials/blendertutorial
+   tutorials/notebooks/cru_diffusion.ipynb

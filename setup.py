@@ -98,10 +98,10 @@ if(_on_rtd):
 try:
     from skbuild import setup
 except ImportError:
-    print('scikit-build is required to build from source.', file=sys.stderr)
+    print('\nERROR: scikit-build is required to build from source.', file=sys.stderr)
     print('Please run:', file=sys.stderr)
     print('', file=sys.stderr)
-    print('  python -m pip install scikit-build')
+    print('  python -m pip install scikit-build\n')
     sys.exit(1)
 
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues", "nbsphinx",
