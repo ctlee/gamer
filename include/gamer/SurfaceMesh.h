@@ -950,37 +950,6 @@ inline std::size_t getValence(const SurfaceMesh& mesh, const SurfaceMesh::Simple
 }
 
 /**
- * @brief      Gets the mean curvature.
- *
- * @param[in]  mesh      The mesh
- * @param[in]  vertexID  The vertex id
- *
- * @return     The mean curvature.
- */
-double getMeanCurvature(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID);
-/**
- * @brief      Gets the gaussian curvature.
- *
- * @param[in]  mesh      The mesh
- * @param[in]  vertexID  The vertex id
- *
- * @return     The gaussian curvature.
- */
-double getGaussianCurvature(const SurfaceMesh& mesh, const SurfaceMesh::SimplexID<1> vertexID);
-
-
-/**
- * @brief      Calculates the curvatures.
- *
- * @param[in]  mesh  The mesh
- *
- * @return     The curvatures.
- */
-// std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> >
-// computeCurvatures(const SurfaceMesh& mesh);
-
-
-/**
  * @brief      Compute the curvature using the Meyer, Desbrun, Schröder, Barr
  *             algorithms.
  *

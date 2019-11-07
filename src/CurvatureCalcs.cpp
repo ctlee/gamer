@@ -22,6 +22,17 @@
  * ***************************************************************************
  */
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <array>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <map>
+#include <ostream>
+#include <stdexcept>
+#include <strstream>
+#include <vector>
 
 #include "gamer/EigenDiagonalization.h"
 #include "gamer/OsculatingJets.h"
