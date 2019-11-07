@@ -1,5 +1,5 @@
 # Required for building
-cmake >= 3.11
+cmake >= 3.12
 scikit-build >= 0.10.0
 setuptools
 wheel
@@ -16,6 +16,9 @@ pandoc
 sphinx-issues
 nbsphinx
 jupyter_sphinx
+
+# Required to run FEniCS notebooks
+# dolfin
 
 # Visualization in docs
 threevis

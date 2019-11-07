@@ -88,8 +88,9 @@ Legacy Contributions
    install
    algorithms
    blendgamer
-   changelog
    faq
+   changelog
+
 
 .. toctree::
    :maxdepth: 2
