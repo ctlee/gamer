@@ -101,7 +101,7 @@ except ImportError:
     print('\nERROR: scikit-build is required to build from source.', file=sys.stderr)
     print('Please run:', file=sys.stderr)
     print('', file=sys.stderr)
-    print('  python -m pip install scikit-build\n')
+    print('  python -m pip install scikit-build\n', file=sys.stderr)
     sys.exit(1)
 
 docs_require = ["sphinx", "breathe", "exhale", "sphinx-issues", "nbsphinx",
