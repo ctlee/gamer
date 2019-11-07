@@ -19,7 +19,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-include(FetchContent)
+if(${CMAKE_VERSION} VERSION_LESS 3.11)
+    include(FetchContentLocal)
+else()
+    include(FetchContent)
+endif()
 
 ###########################
 # GET CASC
@@ -27,7 +31,7 @@ include(FetchContent)
 FetchContent_Declare(
     casclib
     GIT_REPOSITORY  https://github.com/ctlee/casc.git
-    GIT_TAG         v1.0.4
+    GIT_TAG         v1.0.5
     SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-src"
     BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-build"
 )

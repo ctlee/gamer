@@ -14,37 +14,24 @@
 #include <memory>
 
 #include "gamer/gamer"
-
 // #include <casc/casc>
 
 
 int  main(int argc, char *argv[])
 {
-    auto mesh = gamer::readPDB_gauss("2jho.pdb", -0.2, 3);
+    if (argc != 2)
+    {
+        std::cerr << "Wrong arguments passed" << std::endl;
+        return -1;
+    }
+    auto mesh = gamer::readOFF(argv[1]);
 
-    gamer::writeOFF("2jho.off", *mesh);
+    casc::compute_orientation(*mesh);
+    if (gamer::getVolume(*mesh) < 0) {
+        gamer::flipNormals(*mesh);
+    }
 
-    // auto mesh = gamer::readOFF("icosa.off");
-
-    // int i = 0;
-    // for(auto v : mesh->get_level_id<1>()){
-    //     auto data = *v;
-    //     std::cout << "mesh->insert({" << i++
-    //         << "}, SMVertex("
-    //         << data[0] << ", "
-    //         << data[1] << ", "
-    //         << data[2] << "));" << std::endl;
-    // }
-
-    // for(auto f : mesh->get_level_id<3>()){
-    //     auto name = f.indices();
-    //     std::cout << "mesh->insert({"
-    //         << name[0] << ","
-    //         << name[1] << ","
-    //         << name[2]
-    //     << "});" << std::endl;
-    // }
-
+    gamer::curvatureViaJets(*mesh, 2, 2);
 
     std::cout << "EOF" << std::endl;
 }

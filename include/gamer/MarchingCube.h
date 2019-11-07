@@ -356,8 +356,8 @@ template <typename NumType, typename = std::enable_if_t<std::is_arithmetic<NumTy
 std::unique_ptr<SurfaceMesh> marchingCubes(
     NumType       * dataset,
     NumType         maxval,
-    const i3Vector &dim,
-    const f3Vector &span,
+    const Vector3i &dim,
+    const Vector3f &span,
     NumType         isovalue,
     Inserter        holelist
     )
@@ -373,10 +373,10 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     // TODO: (4) is it necessary to go through this three step masking process?
 
     // Mask all of the vertices connected to {0,0,0} outside of isosurface
-    std::deque<i3Vector> visit = {i3Vector({0, 0, 0})};
+    std::deque<Vector3i> visit = {Vector3i({0, 0, 0})};
     while (!visit.empty())
     {
-        const i3Vector tmp = visit.front();
+        const Vector3i tmp = visit.front();
         visit.pop_front();
 
         // Look at the neighbor vertices
@@ -390,7 +390,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
                         && !mask[Vect2Index(i, j, k, dim)])
                     {
                         mask[Vect2Index(i, j, k, dim)] = true;
-                        visit.push_back(i3Vector({i, j, k}));
+                        visit.push_back(Vector3i({i, j, k}));
                     }
                 }
             }
@@ -408,13 +408,13 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
                     && !mask[Vect2Index(l, m, n, dim)])
                 {
                     int holesize = 1;
-                    visit.push_back(i3Vector({l, m, n}));
+                    visit.push_back(Vector3i({l, m, n}));
 
                     std::vector<int> holevoxels;
 
                     while (!visit.empty())
                     {
-                        const i3Vector tmp = visit.front();
+                        const Vector3i tmp = visit.front();
                         visit.pop_front();
 
                         // Look at the neighbor vertices
@@ -431,7 +431,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
                                         holevoxels.push_back(idx);
 
                                         mask[idx] = true;
-                                        visit.push_back(i3Vector({i, j, k}));
+                                        visit.push_back(Vector3i({i, j, k}));
                                         holesize++;
                                     }
                                 }
@@ -465,7 +465,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
     size_t              vertexNum = 0;
     size_t              triNum = 0;
     std::array<int, 3>* triangles = new std::array<int, 3>[dim[0]*dim[1]*dim[2]];
-    i3Vector          * edges = new i3Vector[dim[0]*dim[1]*dim[2]];
+    Vector3i          * edges = new Vector3i[dim[0]*dim[1]*dim[2]];
     Vector            * vertices = new Vector[dim[0]*dim[1]*dim[2]];
 
     // This section in particular is weird...
@@ -479,7 +479,7 @@ std::unique_ptr<SurfaceMesh> marchingCubes(
                 // If isovalue is within tolerance make it bigger
                 if ((dataset[idx] > isovalue - 0.0001) && (dataset[idx] < isovalue + 0.0001))
                     dataset[idx] = isovalue + 0.0001;
-                edges[idx] = i3Vector({-1, -1, -1});
+                edges[idx] = Vector3i({-1, -1, -1});
 
                 if (dataset[idx] >= isovalue)
                 {

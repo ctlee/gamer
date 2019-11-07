@@ -60,6 +60,15 @@ def getMarkerLayer(obj):
         markerLayer = obj.data.polygon_layers_int.new(name='marker')
     return markerLayer.data
 
+def getCurvatureLayer(obj, algo, curvatureType):
+    name = "%s%s"%(algo,curvatureType)
+    if obj.mode != 'OBJECT':
+        raise RuntimeError("Blender Layers (%s) can only be accessed in 'OBJECT' mode."%(name))
+    layer = obj.data.vertex_layers_float.get(name)
+    # If the layer doesn't exist yet, create it!
+    if not layer:
+        layer = obj.data.vertex_layers_float.new(name=name)
+    return layer.data
 
 def getActiveMeshObject(report):
     """
@@ -155,7 +164,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         # Transfer boundary information
         if map_boundaries:
             bdryMap = {UNSETID: UNSETMARKER}
-            for bdry in obj.gamer.boundary_list:
+            for bdry in obj.gamer.markers.boundary_list:
                 bdryMap[bdry.boundary_id] = bdry.marker
             boundaries = [bdryMap[item.value] for item in ml.values()]
         else:
@@ -250,7 +259,7 @@ def gamerToBlender(report, gmesh,
             ml[i].value = marker
 
     # Repaint boundaries
-    obj.gamer.repaint_boundaries(bpy.context)
+    obj.gamer.markers.repaint_boundaries(bpy.context)
     # Deselect all first
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
@@ -326,6 +335,7 @@ def bmesh_from_object(obj):
 def bmesh_to_object(obj, bm):
     """
     Object/Edit Mode update the object.
+    NOTE that this free's the bmesh
     """
     me = obj.data
     is_editmode = (obj.mode == 'EDIT')
@@ -333,6 +343,7 @@ def bmesh_to_object(obj, bm):
         bmesh.update_edit_mesh(me, True)
     else:
         bm.to_mesh(me)
+    bm.free()
     # grr... cause an update
     if me.vertices:
         me.vertices[0].co[0] = me.vertices[0].co[0]

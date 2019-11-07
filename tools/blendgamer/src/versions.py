@@ -22,6 +22,8 @@
 import bpy
 import sys
 import re
+
+from bpy.props import PointerProperty
 from ast import literal_eval
 from blendgamer.util import *
 
@@ -74,7 +76,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                     mat.use_fake_user = True
 
                     obj.gamer.add_boundary(context)
-                    newBdry = obj.gamer.boundary_list[obj.gamer.active_bnd_index]
+                    newBdry = obj.gamer.markers.boundary_list[obj.gamer.active_bnd_index]
 
                     newBdry.boundary_name = 'NewBoundaryFrom_%s'%(key)
                     newBdry.marker = bdry['marker']
@@ -100,6 +102,26 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
         context.scene.gamer.gamer_version = "(2,0,1)"
         checkVersion()
         return {'FINISHED'}
+
+
+def migrate2_0_1__2_0_5():
+    for obj in bpy.data.objects:
+        if obj.type == 'MESH':
+            # First initialize the data-blocks
+            markerProp = obj.gamer.markers
+            bl = markerProp.boundary_list
+
+            # Move boundary_list
+            if 'boundary_list' in obj['gamer']:
+                # Migrate boundary marker info
+                obj['gamer']['markers']['boundary_list'] = obj['gamer']['boundary_list']
+                del obj['gamer']['boundary_list']
+            # Remove active_bnd_index
+            if 'active_bnd_index' in obj['gamer']:
+                del obj['gamer']['active_bnd_index']
+            # Remove include
+            if 'include' in obj['gamer']:
+                del obj['gamer']['include']
 
 def getGamerVersion():
     return sys.modules['blendgamer'].bl_info.get('version', (-1, -1, -1))
@@ -131,15 +153,16 @@ def checkVersion():
                 for obj in bpy.data.objects:
                     if obj.type == 'MESH':
                         # Migrate name to boundary_name
-                        for bdry in obj.gamer.boundary_list:
+                        for bdry in obj.gamer.markers.boundary_list:
                             bdry.boundary_name = bdry.name
                             bdry.name = str(bdry.boundary_id)
                             if 'boundaries' in obj.keys():
                                 del obj['boundaries']
                 scene.gamer.gamer_version = str(newver)
-            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,4)) < 0 :
-                newver = (2,0,4)
+            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,5)) < 0 :
+                newver = (2,0,5)
                 print("Migrating from v%s to v%s"%(str(fileVer), str(newver)))
+                migrate2_0_1__2_0_5()
                 scene.gamer.gamer_version = str(newver)
             else:
                 bpy.ops.gamer.prompt_old_version()

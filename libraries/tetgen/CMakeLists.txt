@@ -36,24 +36,49 @@ endif()
 #####################################################################
 # Define library targets
 #####################################################################
-# OBJECT LIBRARY: compiles the sources only once
-add_library(tet_objlib OBJECT tetgen.cxx predicates.cxx)
-target_compile_definitions(tet_objlib PRIVATE TETLIBRARY ${COMPILE_DEFS})
-target_compile_options(tet_objlib PRIVATE -w)   # Suppress warnings
-target_include_directories(tet_objlib INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    )
 
-# SHARED LIBRARY
-add_library(tetshared SHARED $<TARGET_OBJECTS:tet_objlib>)
-target_link_libraries(tetshared PUBLIC tet_objlib)
-install(TARGETS tetshared DESTINATION lib)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
+    # OBJECT LIBRARY: compiles the sources only once
+    add_library(tet_objlib OBJECT tetgen.cxx predicates.cxx)
+    target_compile_definitions(tet_objlib PRIVATE TETLIBRARY ${COMPILE_DEFS})
+    target_compile_options(tet_objlib PRIVATE -w)   # Suppress warnings
+    target_include_directories(tet_objlib INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        )
 
-# STATIC LIBRARY
-add_library(tetstatic STATIC $<TARGET_OBJECTS:tet_objlib>)
-target_link_libraries(tetstatic PUBLIC tet_objlib)
-install(TARGETS tetstatic DESTINATION lib)
+    # SHARED LIBRARY
+    add_library(tetshared SHARED $<TARGET_OBJECTS:tet_objlib>)
+    target_link_libraries(tetshared PUBLIC tet_objlib)
+    install(TARGETS tetshared DESTINATION lib)
+
+    # STATIC LIBRARY
+    add_library(tetstatic STATIC $<TARGET_OBJECTS:tet_objlib>)
+    target_link_libraries(tetstatic PUBLIC tet_objlib)
+    install(TARGETS tetstatic DESTINATION lib)
+
+else() #CMAKE_VERSION < 3.12
+    # SHARED LIBRARY
+    add_library(tetshared SHARED tetgen.cxx predicates.cxx)
+    target_compile_definitions(tetshared PRIVATE TETLIBRARY ${COMPILE_DEFS})
+    target_compile_options(tetshared PRIVATE -w)   # Suppress warnings
+    target_include_directories(tetshared INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        )
+    install(TARGETS tetshared DESTINATION lib)
+
+    # STATIC LIBRARY
+    add_library(tetstatic STATIC tetgen.cxx predicates.cxx)
+    target_compile_definitions(tetstatic PRIVATE TETLIBRARY ${COMPILE_DEFS})
+    target_compile_options(tetstatic PRIVATE -w)   # Suppress warnings
+    target_include_directories(tetstatic INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        )
+    install(TARGETS tetstatic DESTINATION lib)
+endif()
+
 
 #####################################################################
 # Setup binary targets

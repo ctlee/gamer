@@ -11,6 +11,23 @@ Changelog
 - Generalized decimation for Tetrahedral meshes (:pr:`33`). Thanks to :user:`ishantimalsina` and :user:`mvhsan`.
 
 ******************
+2.0.5 (??-??-????)
+******************
+
+**New Features**:
+
+- Betti number calculation for manifold surface meshes.
+- Port of curvature calculations via Osculating Jets from CGAL.
+- Improvement to ``BlendGAMer`` curvature calculation interface.
+- Improvements to documentation.
+- Improved compatibility between ``gamer::tensor<>`` and ``Eigen::Matrix<>`` objects.
+
+**Fixes**:
+
+- Relaxes ``CMake`` minimum required version to be 3.10 to match Ubuntu 18.04 LTS.
+- Fixes flipped sign of mean curvature computed by MDSB algorithm and subsequently k1 and k2.
+
+******************
 2.0.4 (09-12-2019)
 ******************
 

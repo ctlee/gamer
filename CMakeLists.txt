@@ -20,7 +20,7 @@
 # ***************************************************************************
 
 # 3.12 required for FetchContent and objectlib INTERFACE include inheritance
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10)
 
 # Set default buildtype
 set(CMAKE_BUILD_TYPE_INIT Release)
@@ -106,6 +106,8 @@ option(GETPYBIND11 "Download pybind11?" ON)
 
 option(GAMER_DOCS "Download and configure documentation?" OFF)
 
+option(VECTORIZE "Enable vectorization?" OFF)
+
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 mark_as_advanced(GAMER_CMAKE_VERBOSE)
 
@@ -133,6 +135,15 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 # Override rules for MSVC static compiler flags
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/c_flag_overrides.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_LIST_DIR}/cmake-modules/cxx_flag_overrides.cmake)
+
+if(VECTORIZE)
+    message(WARNING "Vectorization in GAMer is experimental, use at your own risk. Enabling vectorization may make your libraries less portable across machines.")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -171,6 +182,7 @@ list(APPEND GAMER_SOURCES
     "src/OBJ_SurfaceMesh.cpp"
     "src/SurfaceMesh.cpp"
     "src/SurfaceMeshDetail.cpp"
+    "src/CurvatureCalcs.cpp"
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"
@@ -180,22 +192,47 @@ list(APPEND GAMER_SOURCES
 #####################################################################
 # LIBRARIES
 #####################################################################
-# OBJECT LIBRARY: compiles the sources only once
-add_library(gamer_objlib OBJECT ${GAMER_SOURCES})
-target_include_directories(gamer_objlib PUBLIC
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
+    # OBJECT LIBRARY: compiles the sources only once
+    add_library(gamer_objlib OBJECT ${GAMER_SOURCES})
+    target_include_directories(gamer_objlib PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        )
+    target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
+
+    # SHARED LIBRARY
+    add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
+    target_link_libraries(gamershared PUBLIC gamer_objlib)
+    # set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
+
+    # STATIC LIBRARY
+    add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
+    target_link_libraries(gamerstatic PUBLIC gamer_objlib)
+    # if(NOT WIN32)
+    #     # Shared and static libs will clobber each other on Windows
+    #     set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
+    # endif()
+else() # CMAKE_VERSION < 3.12
+    # SHARED LIBRARY
+    add_library(gamershared SHARED ${GAMER_SOURCES})
+    target_include_directories(gamershared PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        )
+    target_link_libraries(gamershared PUBLIC casc tetstatic eigen)
+
+    # STATIC LIBRARY
+    add_library(gamerstatic STATIC ${GAMER_SOURCES})
+    target_include_directories(gamerstatic PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
-target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
+    target_link_libraries(gamerstatic PUBLIC casc tetstatic eigen)
+endif()
 
-# SHARED LIBRARY
-add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
-target_link_libraries(gamershared PUBLIC gamer_objlib)
+# Alias library names
 set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
-
-# STATIC LIBRARY
-add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
-target_link_libraries(gamerstatic PUBLIC gamer_objlib)
 if(NOT WIN32)
     # Shared and static libs will clobber each other on Windows
     set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)

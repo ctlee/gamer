@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include <Eigen/Dense>
 #include "gamer/tensor.h"
 
 /// Namespace for all things gamer
@@ -56,13 +57,22 @@ namespace gamer
 /// Floating point vector with precision defined by user at compile time
 using Vector = tensor<REAL, 3, 1>;
 /// 3 Vector of doubles
-using d3Vector = tensor<double, 3, 1>;
+using Vector3d = tensor<double, 3, 1>;
 /// 3 Vector of floats
-using f3Vector = tensor<float, 3, 1>;
+using Vector3f = tensor<float, 3, 1>;
 /// 3 Vector of integers
-using i3Vector = tensor<int, 3, 1>;
+using Vector3i = tensor<int, 3, 1>;
 /// 3 Vector of std::size_t
-using szt3Vector = tensor<std::size_t, 3, 1>;
+using Vector3szt = tensor<std::size_t, 3, 1>;
+
+/// Eigen 3x3 Matrix of type REAL
+using EigenMatrix = Eigen::Matrix<REAL, 3, 3>;
+/// Eigen 3 Vector of type REAL
+using EigenVector = Eigen::Matrix<REAL, 3, 1>;
+/// Dynamically sized Eigen Matrix
+using EigenMatrixN = Eigen::Matrix<REAL, Eigen::Dynamic, Eigen::Dynamic>;
+/// Dynamically sized Eigen Vector
+using EigenVectorN = Eigen::Matrix<REAL, Eigen::Dynamic, 1>;
 
 /**
  * @brief      Convert 3D array indices to the index of a flat
@@ -87,7 +97,7 @@ using szt3Vector = tensor<std::size_t, 3, 1>;
  * @return     Index of flat array corresponding to indices in
  *             3D array.
  */
-inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const szt3Vector &dim)
+inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const Vector3szt &dim)
 {
     return k*dim[0]*dim[1] + j*dim[0] + i;
 }

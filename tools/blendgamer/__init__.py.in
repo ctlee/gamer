@@ -36,6 +36,7 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(blendgamer)
+    importlib.reload(curvatures)
     importlib.reload(markers)
     importlib.reload(meshstats)
     importlib.reload(report)
@@ -46,6 +47,7 @@ if "bpy" in locals():
 else:
     from . import (
             blendgamer,
+            curvatures,
             markers,
             meshstats,
             report,
@@ -60,7 +62,8 @@ import bpy
 from bpy.props import PointerProperty
 
 # Tuple of modules to register
-modules = (markers,
+modules = (curvatures,
+           markers,
            meshstats,
            surfacemesh_ops,
            tetrahedralization,
@@ -85,14 +88,15 @@ def register():
 
     types = bpy.types
     types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)
-    types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
+    # types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
+    types.Object.gamer = PointerProperty(type=blendgamer.GAMerObjectProperties)
     types.Material.gamer = PointerProperty(type=markers.GAMerBoundaryMaterial)
 
     # Add the load_post handlers
     add_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
 
 def unregister():
-    from bpy.utils import unregister_class
+    # from bpy.utils import unregister_class
 
     remove_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
     types = bpy.types

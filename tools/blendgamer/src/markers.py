@@ -38,7 +38,7 @@ class GAMER_OT_add_boundary(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.object.gamer.add_boundary(context)
+        context.object.gamer.markers.add_boundary(context)
         return {'FINISHED'}
 
 
@@ -49,7 +49,7 @@ class GAMER_OT_remove_boundary(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.object.gamer.remove_boundary(context)
+        context.object.gamer.markers.remove_boundary(context)
         return {'FINISHED'}
 
 
@@ -60,7 +60,7 @@ class GAMER_OT_remove_all_boundaries(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.object.gamer.remove_all_boundaries(context)
+        context.object.gamer.markers.remove_all_boundaries(context)
         return {'FINISHED'}
 
 
@@ -71,7 +71,7 @@ class GAMER_OT_assign_boundary_faces(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bnd = context.object.gamer.get_active_boundary()
+        bnd = context.object.gamer.markers.get_active_boundary()
         if bnd:
             bnd.assign_boundary_faces(context)
             return {'FINISHED'}
@@ -87,7 +87,7 @@ class GAMER_OT_remove_boundary_faces(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bnd = context.object.gamer.get_active_boundary()
+        bnd = context.object.gamer.markers.get_active_boundary()
         if bnd:
             bnd.remove_boundary_faces(context)
             return{'FINISHED'}
@@ -103,7 +103,7 @@ class GAMER_OT_select_boundary_faces(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bnd = context.object.gamer.get_active_boundary()
+        bnd = context.object.gamer.markers.get_active_boundary()
         if bnd:
             bnd.select_boundary_faces(context)
             return {'FINISHED'}
@@ -117,7 +117,7 @@ class GAMER_OT_deselect_boundary_faces(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bnd = context.object.gamer.get_active_boundary()
+        bnd = context.object.gamer.markers.get_active_boundary()
         if bnd:
             bnd.deselect_boundary_faces(context)
             return {'FINISHED'}
@@ -130,8 +130,7 @@ class GAMER_OT_select_all_boundary_faces(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        for bnd in context.object.gamer.boundary_list:
-            print(bnd)
+        for bnd in context.object.gamer.markers.boundary_list:
             bnd.select_boundary_faces(context)
         return {'FINISHED'}
 
@@ -401,8 +400,8 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     #     """
     #     Copy boundary metadata from boundaries into object
     #     """
-    #     for bdry in fromObject.gamer.boundary_list:
-    #         toObject.gamer.copyBoundary(toObject, bdry)
+    #     for bdry in fromobject.gamer.markers.boundary_list:
+    #         toobject.gamer.markers.copyBoundary(toObject, bdry)
 
     # TODO: (10) Enforce MCell boundary naming conventions
     # def check_boundary_name(self, bnd_name_list):
