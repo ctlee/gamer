@@ -182,6 +182,7 @@ list(APPEND GAMER_SOURCES
     "src/OBJ_SurfaceMesh.cpp"
     "src/SurfaceMesh.cpp"
     "src/SurfaceMeshDetail.cpp"
+    "src/CurvatureCalcs.cpp"
     "src/Vertex.cpp"
     "src/TetMesh.cpp"
     "src/PDBReader.cpp"

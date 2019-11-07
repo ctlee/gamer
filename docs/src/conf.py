@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/buildfenics/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build/lib/'))
 
 import os
 import pygamer
@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.5'
-release = 'v2.0.5-dev-31-gc6a87ad.dirty'
+release = 'v2.0.5-dev-33-g089201e.dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -46,7 +46,7 @@ extensions = [
 # Github repo
 issues_github_path = 'ctlee/gamer'
 
-if(False):
+if(True):
     extensions.extend(['breathe', 'exhale'])
 
 ##############################
