@@ -976,8 +976,8 @@ double getGaussianCurvature(const SurfaceMesh& mesh, const SurfaceMesh::SimplexI
  *
  * @return     The curvatures.
  */
-std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> >
-computeCurvatures(const SurfaceMesh& mesh);
+// std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> >
+// computeCurvatures(const SurfaceMesh& mesh);
 
 
 /**
