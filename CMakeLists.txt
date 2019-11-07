@@ -142,8 +142,8 @@ if(VECTORIZE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
