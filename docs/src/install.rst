@@ -17,14 +17,15 @@ Prerequisites
 *************
 
 In order to build GAMer, ``PyGAMer``, and ``BlendGAMer``, you will need several tools and libraries on your system.
-Other than the build toolchain and
 
   * ``C++ compiler``: supporting C++14 standard or newer.
-  * ``CMake``: version 3.11 or newer.
+  * ``CMake``: version 3.10 or newer.
   * ``Eigen 3``: CMake can download and locally configure Eigen for you.
   * ``CASC``: CMake can download and locally configure CASC for you.
   * ``pybind11``: (Required for ``PyGAMer`` and ``BlendGAMer``) CMake can download and locally configure PyBind11 for you.
   * ``Python Headers``: (Required for ``PyGAMer`` and ``BlendGAMer``) This is often available by default on your system. Alternatively Python environments can be configured using `Anaconda <https://www.anaconda.com/>`__.
+
+  * ``scikit-build``: Required for build and install using ``pip`` and ``setup.py``. Obtain using ``pip install scikit-build``.
 
   * ``Blender``: (Optional) To build the Blender addon, it is preferable to have a working installation of `Blender <https://www.blender.org/>`__ on your path. This way CMake can verify addon compatibility prior to packaging.
 
@@ -37,8 +38,8 @@ Other than the build toolchain and
 Building libGAMer
 *****************
 
-The provided steps will compile **both the shared and static libraries** by default.
-There is very little overhead to compiling both libraries since we are taking advantage of CMake's object library capabilities to compile the sources only once.
+The provided steps will compile **both the shared and static libraries**.
+For users of CMake 3.12 or later, there is very little overhead to compiling both libraries since we are taking advantage of CMake's object library capabilities to compile the sources only once.
 
 If you wish to additionally compile the Blender GAMer addon, GAMer documentation, or other features please refer to the :ref:`Additional CMake Options` section prior to building.
 If you are compiling on Windows using Microsoft Visual Studio please also refer to the :ref:`Compiling on Windows` section.
@@ -190,7 +191,12 @@ Getting PyGAMer
 The Easy Way
 ============
 
-We recommend that you install ``PyGAMer`` using the ``pip`` utility.
+.. note::
+
+   ``PyGAMer`` is developed for use with Python 3 and newer.
+   Other Python versions may work but are untested and may require workarounds.
+
+We recommend that you install ``PyGAMer`` using the ``pip``>=10.0 utility.
 
 .. code-block:: sh
 
@@ -199,10 +205,20 @@ We recommend that you install ``PyGAMer`` using the ``pip`` utility.
 The pip utility will automatically sort out the package dependencies for you and potentially build the library.
 Unfortunately ``pip`` is not traditionally bundled with the prepackaged Blender installation consult the :ref:`Getting BlendGAMer` section for instructions on how to build ``BlendGAMer``.
 
+.. warning::
+
+   ``pip`` versions < 10.0 do not implement PEP 518 which specifies the installation and local containment of build time dependencies.
+   These can be be resolved by installing these dependencies from a `requirements.txt <https://github.com/ctlee/gamer/blob/master/requirements.txt>`__ file prior to running ``pip install pygamer``.
+
 .. _PyGAMer the Harder Way:
 
 The Harder Way
 ==============
+
+.. note::
+
+   ``PyGAMer`` is developed for use with Python 3 and newer.
+   Other Python versions may work but are untested and may require workarounds.
 
 You can also build ``PyGAMer`` using ``setuptools`` on your own using the alternative build instructions.
 By default, the Python setup enables the compilation of the ``PyGAMer`` Python extension module.
@@ -266,7 +282,7 @@ While this is not strictly necessary, it enables CMake to verify that the Python
 Note that the prebuilt Blender binaries from the Blender Foundation do not contain Python header files and are therefore unsuitable for compilation.
 
 #.  Ensure you have a working Blender installation. And if possible append the Blender executable to your systems ``PATH``.
-    Follow instructions online for `Getting Blender <https://docs.blender.org/manual/en/latest/getting_started/installing/introduction.html#install-blender>`__.
+    Follow instructions online for `Getting Blender <https://docs.blender.org/manual/en/latest/getting_started/installing/>`__.
 
     On Mac add the following commands to ``~/.bash_profile`` pointing to the directory with Blender's binary:
 

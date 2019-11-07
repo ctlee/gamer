@@ -120,6 +120,9 @@ else()
         string(CONCAT _ZIPNAME ${_ZIPNAME} "-i686")
     endif()
 endif()
+if(VECTORIZE)
+    string(CONCAT _ZIPNAME ${_ZIPNAME} "_V")
+endif()
 
 string(CONCAT _ZIPNAME ${_ZIPNAME} ".zip")
 

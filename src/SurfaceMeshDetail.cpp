@@ -35,6 +35,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
+#include "gamer/EigenDiagonalization.h"
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
@@ -337,6 +338,7 @@ bool computeLocalOrientation(SurfaceMesh                                   &mesh
                     }
                     else
                     {
+                        // TODO (0): Change to runtime error
                         std::cerr << "ERROR(computeLocalOrientation): Found an edge"
                                   << " connected to " << w.size() << " faces. The SurfaceMesh "
                                   << "is no longer a surface mesh." << std::endl;
@@ -348,20 +350,6 @@ bool computeLocalOrientation(SurfaceMesh                                   &mesh
         }
     }
     return orientable;
-}
-
-Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> getEigenvalues(tensor<double, 3, 2> &mat)
-{
-    Eigen::Map<Eigen::Matrix3d>                    emat(mat.data());
-    // TODO: (99) How much optimization can we get from having a persistent
-    // eigensolver?
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(emat);
-    if (eigensolver.info() != Eigen::Success){
-        std::stringstream ss;
-        ss << "getEigenvalues has encountered Eigen error " << eigensolver.info();
-        throw std::runtime_error(ss.str());
-    }
-    return eigensolver;
 }
 
 void weightedVertexSmooth(SurfaceMesh              &mesh,
@@ -439,10 +427,10 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
 
         // Get a reference vector to shared which lies on the plane of interest.
         Vector disp = center - shared;
-        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+        auto disp_e = EigenMap(disp);
 
         // Perpendicular projector
-        auto   perpProj = perpNorm*perpNorm; // tensor product
+        auto perpProj = perpNorm*perpNorm; // tensor product
         // Compute perpendicular component
         Vector perp;
         Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
@@ -462,7 +450,13 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
      */
     auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
 
-    auto eigen_result = getEigenvalues(lst);
+    EigenVector eigenvalues;
+    EigenMatrix eigenvectors;
+
+    EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointMatrix(lst, eigenvalues, eigenvectors);
+
+    // auto eigen_result = getEigenvalues(lst);
+
     // std::cout << "Eigenvalues(LST): "
     //      << eigen_result.eigenvalues().transpose() << std::endl;
     // std::cout << "Here's a matrix whose columns are eigenvectors of LST \n"
@@ -470,14 +464,14 @@ void weightedVertexSmooth(SurfaceMesh              &mesh,
     //      << eigen_result.eigenvectors() << std::endl;
 
     newPos -= center.position;  // Vector of old position to new position
-    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+    auto newPos_e = EigenMap(newPos);
 
     // dot product followed by elementwise-division EQN 4. w is a scale factor.
     auto w = (
-        (eigen_result.eigenvectors().transpose()*newPos_e).array()
-        / (eigen_result.eigenvalues().array()+1)
+        (eigenvectors.transpose()*newPos_e).array()
+        / (eigenvalues.array()+1)
         ).matrix();                           // vector 3x1
-    newPos_e = eigen_result.eigenvectors()*w; // matrix 3x3 * vector = vector
+    newPos_e = eigenvectors*w; // matrix 3x3 * vector = vector
     center.position += newPos;
 }
 
@@ -554,14 +548,14 @@ Vector weightedVertexSmoothCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> ve
 
         // Get a reference vector to shared which lies on the plane of interest.
         Vector disp = center - shared;
-        Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+        auto disp_e = EigenMap(disp);
 
         // Perpendicular projector
         auto   perpProj = perpNorm*perpNorm; // tensor product
         // Compute perpendicular component
         Vector perp;
-        Eigen::Map<Eigen::Matrix3d> perpProj_e(perpProj.data());
-        Eigen::Map<Eigen::Vector3d> perp_e(perp.data());
+        auto perpProj_e = EigenMap(perpProj);
+        auto perp_e = EigenMap(perp);
         perp_e = perpProj_e*disp_e; // matrix (3x3) * vector = vector
 
         sumWeights += alpha;
@@ -575,9 +569,13 @@ Vector weightedVertexSmoothCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> ve
      * \bar{x} = x + \sum_{k=1}^3 \frac{1}{1+\lambda_k}((\bar{x} - x)\cdot
      * \vec{e_k})\vec{e_k}
      */
-    auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
+    auto lst = computeLocalStructureTensor(mesh, vertexID, rings);
 
-    auto eigen_result = getEigenvalues(lst);
+    EigenVector eigenvalues;
+    EigenMatrix eigenvectors;
+
+    EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointMatrix(lst, eigenvalues, eigenvectors);
+
     // std::cout << "Eigenvalues(LST): "
     //      << eigen_result.eigenvalues().transpose() << std::endl;
     // std::cout << "Here's a matrix whose columns are eigenvectors of LST \n"
@@ -585,14 +583,14 @@ Vector weightedVertexSmoothCache(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> ve
     //      << eigen_result.eigenvectors() << std::endl;
 
     newPos -= center.position;  // Vector of old position to new position
-    Eigen::Map<Eigen::Vector3d> newPos_e(newPos.data());
+    auto newPos_e = EigenMap(newPos);
 
     // dot product followed by elementwise-division EQN 4. w is a scale factor.
     auto w = (
-        (eigen_result.eigenvectors().transpose()*newPos_e).array()
-        / (eigen_result.eigenvalues().array()+1)
+        (eigenvectors.transpose()*newPos_e).array()
+        / (eigenvalues.array()+1)
         ).matrix();                           // vector 3x1
-    newPos_e = eigen_result.eigenvectors()*w; // matrix 3x3 * vector = vector
+    newPos_e = eigenvectors*w; // matrix 3x3 * vector = vector
     // center.position += newPos;
     return newPos;
 }
@@ -665,8 +663,8 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID, double
         Vector rotAxis = ab;
 
         // build the transformation
-        Eigen::Map<Eigen::Vector3d> rotAxis_e(rotAxis.data());
-        Eigen::Map<Eigen::Vector3d> center_e(b.position.data());
+        auto rotAxis_e = EigenMap(rotAxis);
+        auto center_e = EigenMap(b.position);
         Eigen::Affine3d             A = Eigen::Translation3d(center_e) * Eigen::AngleAxisd(angle, rotAxis_e) * Eigen::Translation3d(-center_e);
 
         // Weight the new position by the area of the current face
@@ -902,7 +900,7 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
     norm /= std::sqrt(norm|norm); // normalize
     auto perpProj = norm*norm;    // tensor product
 
-    Eigen::Map<Eigen::Vector3d> disp_e(disp.data());
+    auto disp_e = EigenMap(disp);
 
     // Compute perpendicular component
     // Vector perp;
@@ -916,8 +914,8 @@ void barycenterVertexSmooth(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexI
         1, 0, 0, 0, 1, 0, 0, 0, 1
     }};
     auto llproj = identity-perpProj; // perpendicular projector
-    Eigen::Map<Eigen::Matrix3d> llproj_e(llproj.data());
-    Eigen::Map<Eigen::Vector3d> parallel_e(parallel.data());
+    auto llproj_e  = EigenMap(llproj);
+    auto parallel_e = EigenMap(parallel);
     parallel_e = llproj_e*disp_e;
 
     (*vertexID).position = (*vertexID).position + parallel;

@@ -32,3 +32,4 @@
 #include "gamer/tensor.h"
 #include "gamer/TetMesh.h"
 #include "gamer/Vertex.h"
+#include "gamer/EigenDiagonalization.h"

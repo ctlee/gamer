@@ -53,7 +53,7 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string &filename, const
         return mesh;
     }
     std::cout << "Atoms: " << atoms.size() << std::endl;
-    f3Vector min, max;
+    Vector3f min, max;
     getMinMax(atoms.cbegin(), atoms.cend(), min, max, [&radius](const float atomRadius) -> float {
             return DIM_SCALE*(atomRadius + radius);
         });
@@ -61,16 +61,16 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string &filename, const
     float min_dimension = std::min((max[0] - min[0]), std::min((max[1] - min[1]), (max[2] - min[2])));
     std::cout << "Min Dimension: " << min_dimension << std::endl;
 
-    i3Vector dim;
-    f3Vector maxMin = max-min;
+    Vector3i dim;
+    Vector3f maxMin = max-min;
 
-    dim = static_cast<i3Vector>((maxMin) + f3Vector({1, 1, 1})) * DIM_SCALE;
+    dim = static_cast<Vector3i>((maxMin) + Vector3f({1, 1, 1})) * DIM_SCALE;
 
     std::cout << "Dimension: " << dim << std::endl;
     std::cout << "Min:" << min << std::endl;
     std::cout << "Max:" << max << std::endl;
 
-    f3Vector span = (maxMin).ElementwiseDivision(static_cast<f3Vector>(dim) - f3Vector({1, 1, 1}));
+    Vector3f span = (maxMin).ElementwiseDivision(static_cast<Vector3f>(dim) - Vector3f({1, 1, 1}));
     std::cout << "Delta: " << span << std::endl;
 
     // Move dataset to positive octant and scale
@@ -92,9 +92,9 @@ std::unique_ptr<SurfaceMesh> readPDB_distgrid(const std::string &filename, const
 
     for (auto curr = atoms.cbegin(); curr != atoms.cend(); ++curr)
     {
-        f3Vector pos = curr->pos;
+        Vector3f pos = curr->pos;
         // compute the dataset coordinates of the atom's center
-        i3Vector c;
+        Vector3i c;
         std::transform(pos.begin(), pos.end(), c.begin(), [](float v) -> int {
                 return round(v);
             });
@@ -148,7 +148,7 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string &filename,
 
     std::cout << "Atoms: " << atoms.size() << std::endl;
 
-    f3Vector min, max;
+    Vector3f min, max;
     getMinMax(atoms.cbegin(), atoms.cend(), min, max,
               [&blobbyness](const float atomRadius) -> float{
             return atomRadius * sqrt(1.0 + log(pdbreader_detail::EPSILON) / blobbyness);
@@ -158,17 +158,17 @@ std::unique_ptr<SurfaceMesh> readPDB_gauss(const std::string &filename,
 
     std::cout << "Min Dimension: " << min_dimension << std::endl;
 
-    i3Vector dim;
+    Vector3i dim;
 
-    f3Vector maxMin = max-min;
+    Vector3f maxMin = max-min;
 
-    dim = static_cast<i3Vector>((maxMin) + f3Vector({1, 1, 1})) * DIM_SCALE;
+    dim = static_cast<Vector3i>((maxMin) + Vector3f({1, 1, 1})) * DIM_SCALE;
 
     std::cout << "Dimension: " << dim << std::endl;
     std::cout << "Min:" << min << std::endl;
     std::cout << "Max:" << max << std::endl;
 
-    f3Vector span = (maxMin).ElementwiseDivision(static_cast<f3Vector>(dim) - f3Vector({1, 1, 1}));
+    Vector3f span = (maxMin).ElementwiseDivision(static_cast<Vector3f>(dim) - Vector3f({1, 1, 1}));
     std::cout << "Delta: " << span << std::endl;
 
     float* dataset = new float[dim[0]*dim[1]*dim[2]]();
@@ -234,7 +234,7 @@ std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string &filename,
 
     std::cout << "Atoms: " << atoms.size() << std::endl;
 
-    f3Vector min, max;
+    Vector3f min, max;
     getMinMax(atoms.cbegin(), atoms.cend(), min, max,
               [&blobbyness](const float atomRadius) -> float{
             return atomRadius * sqrt(1.0 + log(pdbreader_detail::EPSILON) / blobbyness);
@@ -244,17 +244,17 @@ std::unique_ptr<SurfaceMesh> readPQR_gauss(const std::string &filename,
 
     std::cout << "Min Dimension: " << min_dimension << std::endl;
 
-    i3Vector dim;
+    Vector3i dim;
 
-    f3Vector maxMin = max-min;
+    Vector3f maxMin = max-min;
 
-    dim = static_cast<i3Vector>((maxMin) + f3Vector({1, 1, 1})) * DIM_SCALE;
+    dim = static_cast<Vector3i>((maxMin) + Vector3f({1, 1, 1})) * DIM_SCALE;
 
     std::cout << "Dimension: " << dim << std::endl;
     std::cout << "Min:" << min << std::endl;
     std::cout << "Max:" << max << std::endl;
 
-    f3Vector span = (maxMin).ElementwiseDivision(static_cast<f3Vector>(dim) - f3Vector({1, 1, 1}));
+    Vector3f span = (maxMin).ElementwiseDivision(static_cast<Vector3f>(dim) - Vector3f({1, 1, 1}));
     std::cout << "Delta: " << span << std::endl;
 
     float* dataset = new float[dim[0]*dim[1]*dim[2]]();

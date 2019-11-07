@@ -18,7 +18,12 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
-include(FetchContent)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.11)
+    include(FetchContentLocal)
+else()
+    include(FetchContent)
+endif()
 
 ###########################
 # GET TUTORIALS

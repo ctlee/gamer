@@ -38,13 +38,14 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
+#include "gamer/EigenDiagonalization.h"
 #include "gamer/SurfaceMesh.h"
 #include "gamer/Vertex.h"
 
 /// Namespace for all things gamer
 namespace gamer
 {
-void print(const SurfaceMesh &mesh)
+void print(const SurfaceMesh& mesh)
 {
     std::cout << "Level: 1" << std::endl;
     for (auto node : mesh.get_level_id<1>())
@@ -65,29 +66,29 @@ void print(const SurfaceMesh &mesh)
     }
 }
 
-void generateHistogram(const SurfaceMesh &mesh)
+void generateHistogram(const SurfaceMesh& mesh)
 {
     // compute angle distribution
     std::array<double, 18> histogram;
     histogram.fill(0);
     for (auto face : mesh.get_level_id<3>())
     {
-        auto   vertexIDs = mesh.get_name(face);
+        auto vertexIDs = mesh.get_name(face);
         // Unpack the ID's for convenience
         Vertex a = *mesh.get_simplex_up<1>({vertexIDs[0]});
         Vertex b = *mesh.get_simplex_up<1>({vertexIDs[1]});
         Vertex c = *mesh.get_simplex_up<1>({vertexIDs[2]});
 
-        auto   binAngle = [&](double angle) -> std::size_t {
-                return static_cast<std::size_t>(std::floor(angle/10));
-            };
+        auto binAngle = [&](double angle) -> std::size_t {
+                            return static_cast<std::size_t>(std::floor(angle/10));
+                        };
         histogram[binAngle(angleDeg(a, b, c))]++;
         histogram[binAngle(angleDeg(b, a, c))]++;
         histogram[binAngle(angleDeg(c, a, b))]++;
     }
 
     std::size_t factor = mesh.size<3>()*3;
-    std::for_each(histogram.begin(), histogram.end(), [&factor](double &n){
+    std::for_each(histogram.begin(), histogram.end(), [&factor](double& n){
             n = 100.0*n/factor;
         });
 
@@ -102,11 +103,11 @@ void generateHistogram(const SurfaceMesh &mesh)
     std::vector<double> lengths;
     for (auto edge : mesh.get_level_id<2>())
     {
-        auto   vertexIDs = mesh.down(edge);
-        auto   t1  = *vertexIDs.cbegin();
-        auto   t2  = *(++vertexIDs.cbegin());
-        auto   v1  = *t1;
-        auto   v2  = *t2;
+        auto vertexIDs = mesh.down(edge);
+        auto t1  = *vertexIDs.cbegin();
+        auto t2  = *(++vertexIDs.cbegin());
+        auto v1  = *t1;
+        auto v2  = *t2;
         double len = length(v2-v1);
         lengths.push_back(len);
     }
@@ -114,8 +115,8 @@ void generateHistogram(const SurfaceMesh &mesh)
 
     std::array<double, 20> histogramLength;
     histogramLength.fill(0);
-    double                 interval = (lengths.back() - lengths.front())/20;
-    double                 low = lengths.front();
+    double interval = (lengths.back() - lengths.front())/20;
+    double low = lengths.front();
 
     if (interval <= 0.0000001) // floating point roundoff prevention
     {
@@ -129,7 +130,7 @@ void generateHistogram(const SurfaceMesh &mesh)
         }
 
         factor = mesh.size<2>();
-        std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double &n){
+        std::for_each(histogramLength.begin(), histogramLength.end(), [&factor](double& n){
                 n = 100.0*n/factor;
             });
 
@@ -159,7 +160,7 @@ void generateHistogram(const SurfaceMesh &mesh)
     std::cout << std::endl << std::endl;
 }
 
-void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
+void printQualityInfo(const std::string& filename, const SurfaceMesh& mesh)
 {
 
     std::stringstream anglefilename;
@@ -175,7 +176,7 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
 
     std::stringstream areafilename;
     areafilename << filename << ".area";
-    std::ofstream     areaOut(areafilename.str());
+    std::ofstream areaOut(areafilename.str());
     if (!areaOut.is_open())
     {
         std::stringstream ss;
@@ -201,22 +202,22 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh)
 }
 
 std::tuple<double, double, int, int> getMinMaxAngles(
-    const SurfaceMesh &mesh,
-    double             maxMinAngle,
-    double             minMaxAngle)
+    const SurfaceMesh& mesh,
+    double maxMinAngle,
+    double minMaxAngle)
 {
     double minAngle = 360;
     double maxAngle = 0;
-    int    small = 0;
-    int    large = 0;
+    int small = 0;
+    int large = 0;
 
     // for each triangle
     for (auto nid : mesh.get_level_id<3>())
     {
-        auto                  name = mesh.get_name(nid);
-        auto                  a = *mesh.get_simplex_up({name[0]});
-        auto                  b = *mesh.get_simplex_up({name[1]});
-        auto                  c = *mesh.get_simplex_up({name[2]});
+        auto name = mesh.get_name(nid);
+        auto a = *mesh.get_simplex_up({name[0]});
+        auto b = *mesh.get_simplex_up({name[1]});
+        auto c = *mesh.get_simplex_up({name[2]});
         std::array<double, 3> angles;
         try
         {
@@ -224,7 +225,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
             angles[1] = angleDeg(b, a, c);
             angles[2] = angleDeg(a, c, b);
         }
-        catch (std::runtime_error &e)
+        catch (std::runtime_error& e)
         {
             std::cout << e.what() << std::endl;
             throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles of face with zero area.");
@@ -253,7 +254,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(
     return std::make_tuple(minAngle, maxAngle, small, large);
 }
 
-double getArea(const SurfaceMesh &mesh)
+double getArea(const SurfaceMesh& mesh)
 {
     double area = 0.0;
     for (auto faceID : mesh.get_level_id<3>())
@@ -261,7 +262,7 @@ double getArea(const SurfaceMesh &mesh)
     return area;
 }
 
-double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
+double getArea(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID)
 {
     auto name = mesh.get_name(faceID);
     auto a = *mesh.get_simplex_up({name[0]});
@@ -280,16 +281,16 @@ double getArea(Vertex a, Vertex b, Vertex c)
  * http://research.microsoft.com/en-us/um/people/chazhang/publications/icip01_ChaZhang.pdf
  * http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf
  */
-double getVolume(const SurfaceMesh &mesh)
+double getVolume(const SurfaceMesh& mesh)
 {
-    bool   orientError = false;
+    bool orientError = false;
     double volume = 0;
     for (auto faceID : mesh.get_level_id<3>())
     {
-        auto   name = mesh.get_name(faceID);
-        auto   a = (*mesh.get_simplex_up({name[0]})).position;
-        auto   b = (*mesh.get_simplex_up({name[1]})).position;
-        auto   c = (*mesh.get_simplex_up({name[2]})).position;
+        auto name = mesh.get_name(faceID);
+        auto a = (*mesh.get_simplex_up({name[0]})).position;
+        auto b = (*mesh.get_simplex_up({name[1]})).position;
+        auto c = (*mesh.get_simplex_up({name[2]})).position;
 
         Vector norm;
         double tmp = 0.0;
@@ -332,21 +333,21 @@ double getVolume(const SurfaceMesh &mesh)
     return volume/6;
 }
 
-void translate(SurfaceMesh &mesh, Vector v)
+void translate(SurfaceMesh& mesh, Vector v)
 {
-    for (auto &vertex : mesh.get_level<1>())
+    for (auto& vertex : mesh.get_level<1>())
         vertex += v;
 }
 
-void translate(SurfaceMesh &mesh, double dx, double dy, double dz)
+void translate(SurfaceMesh& mesh, double dx, double dy, double dz)
 {
     Vector v = Vector({dx, dy, dz});
     translate(mesh, v);
 }
 
-void scale(SurfaceMesh &mesh, Vector v)
+void scale(SurfaceMesh& mesh, Vector v)
 {
-    for (auto &vertex : mesh.get_level<1>())
+    for (auto& vertex : mesh.get_level<1>())
     {
         vertex[0] *= v[0];
         vertex[1] *= v[1];
@@ -354,21 +355,21 @@ void scale(SurfaceMesh &mesh, Vector v)
     }
 }
 
-void scale(SurfaceMesh &mesh, double sx, double sy, double sz)
+void scale(SurfaceMesh& mesh, double sx, double sy, double sz)
 {
     Vector v = Vector();
     v[0] = sx; v[1] = sy; v[2] = sz;
     scale(mesh, v);
 }
 
-void scale(SurfaceMesh &mesh, double s)
+void scale(SurfaceMesh& mesh, double s)
 {
     Vector v = Vector();
     v[0] = s; v[1] = s; v[2] = s;
     scale(mesh, v);
 }
 
-std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh)
+std::pair<Vector, double> getCenterRadius(SurfaceMesh& mesh)
 {
     Vector center = Vector();
     double radius = 0;
@@ -391,7 +392,7 @@ std::pair<Vector, double> getCenterRadius(SurfaceMesh &mesh)
     return std::make_pair(center, radius);
 }
 
-void centeralize(SurfaceMesh &mesh)
+void centeralize(SurfaceMesh& mesh)
 {
     Vector center;
     double radius;
@@ -399,26 +400,26 @@ void centeralize(SurfaceMesh &mesh)
     translate(mesh, -center);
 }
 
-void normalSmooth(SurfaceMesh &mesh)
+void normalSmooth(SurfaceMesh& mesh)
 {
     for (auto nid : mesh.get_level_id<1>())
     {
         surfacemesh_detail::normalSmoothH(mesh, nid, 2);
     }
     double min, max;
-    int    nSmall, nLarge;
+    int nSmall, nLarge;
     std::tie(min, max, nSmall, nLarge) = getMinMaxAngles(mesh, 15, 150);
     std::cout << "  Min Angle: " << min << ", Max Angle: " << max
               << ", # Small Angles: " << nSmall
               << ", # Large Angles: " << nLarge << std::endl;
 }
 
-tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+tensor<double, 3, 2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID)
 {
     return surfacemesh_detail::getTangentH(mesh, (*vertexID).position, vertexID);
 }
 
-tensor<double, 3, 2> getTangent(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
+tensor<double, 3, 2> getTangent(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID)
 {
     auto cover = mesh.get_name(faceID);
     auto vertexID = mesh.get_simplex_up({cover[0]});
@@ -440,10 +441,10 @@ Vector getNormalFromTangent(const tensor<double, 3, 2> tangent)
     return xp;
 }
 
-Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<1> vertexID)
 {
     Vector norm;
-    auto   faces = mesh.up(mesh.up(vertexID));
+    auto faces = mesh.up(mesh.up(vertexID));
     for (auto faceID : faces)
     {
         norm += getNormal(mesh, faceID);
@@ -452,10 +453,10 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID)
     return norm;
 }
 
-Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
+Vector getNormal(const SurfaceMesh& mesh, SurfaceMesh::SimplexID<3> faceID)
 {
     Vector norm;
-    auto   name = mesh.get_name(faceID);
+    auto name = mesh.get_name(faceID);
 
     // Get the three vertices
     auto a = *mesh.get_simplex_up({name[0]});
@@ -481,13 +482,13 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID)
 }
 
 
-void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t rings, bool verbose)
+void smoothMesh(SurfaceMesh& mesh, int maxIter, bool preserveRidges, std::size_t rings, bool verbose)
 {
     double maxMinAngle = 15;
     double minMaxAngle = 165;
     double minAngle, maxAngle;
-    int    nSmall, nLarge;
-    int    nIter = 1;
+    int nSmall, nLarge;
+    int nIter = 1;
 
     if (verbose)
     {
@@ -508,20 +509,21 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
         {
             if ((*vertex).selected == true)
             {
-                // surfacemesh_detail::weightedVertexSmooth(mesh, vertex, rings);
+                // surfacemesh_detail::weightedVertexSmooth(mesh, vertex,
+                // rings);
                 delta.push_back(std::make_pair(vertex, surfacemesh_detail::weightedVertexSmoothCache(mesh, vertex, rings)));
             }
             //barycenterVertexSmooth(mesh, vertex);
         }
 
-        for (auto pair : delta){
+        for (auto pair : delta) {
             *pair.first += pair.second;
         }
         delta.clear();
         cacheNormals(mesh);
 
         // ATOMIC EDGE FLIP
-        std::vector<SurfaceMesh::SimplexID<2> > edgesToFlip;
+        std::vector<SurfaceMesh::SimplexID<2>> edgesToFlip;
         // Get set of good, non-interfering edges to flip according to the
         // Angle based criteria.
         surfacemesh_detail::selectFlipEdges(mesh,
@@ -553,7 +555,7 @@ void smoothMesh(SurfaceMesh &mesh, int maxIter, bool preserveRidges, std::size_t
  *
  * @param      mesh  The mesh
  */
-std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
+std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh& mesh)
 {
     std::unique_ptr<SurfaceMesh> refinedMesh(new SurfaceMesh);
 
@@ -569,11 +571,11 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
 
     for (auto edge : mesh.get_level_id<2>())
     {
-        auto   edgeName = mesh.get_name(edge);
+        auto edgeName = mesh.get_name(edge);
         Vector v1 = (*mesh.get_simplex_up({edgeName[0]})).position;
         Vector v2 = (*mesh.get_simplex_up({edgeName[1]})).position;
 
-        auto   newVertex = refinedMesh->add_vertex(SMVertex(std::move(0.5*(v1+v2))));
+        auto newVertex = refinedMesh->add_vertex(SMVertex(std::move(0.5*(v1+v2))));
         edgeMap.emplace(std::make_pair(edgeName, newVertex));
     }
 
@@ -581,7 +583,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
     for (auto face : mesh.get_level_id<3>())
     {
         auto name = mesh.get_name(face);
-        int  a, b, c;
+        int a, b, c;
 
         // Skip checking if found
         auto it = edgeMap.find({name[0], name[1]});
@@ -611,7 +613,7 @@ std::unique_ptr<SurfaceMesh> refineMesh(const SurfaceMesh &mesh)
 }
 
 
-void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings, bool verbose)
+void coarse(SurfaceMesh& mesh, double coarseRate, double flatRate, double denseWeight, std::size_t rings, bool verbose)
 {
     // TODO: Check if all polygons are closed (0)
 
@@ -623,7 +625,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         {
             auto name =  mesh.get_name(edgeID);
             auto v = *mesh.get_simplex_down(edgeID, name[0])
-                - *mesh.get_simplex_down(edgeID, name[1]);
+                     - *mesh.get_simplex_down(edgeID, name[1]);
             avgLen += length(v);
         }
         avgLen /= static_cast<double>(mesh.size<2>());
@@ -632,7 +634,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     double sparsenessRatio = 1;
     double flatnessRatio   = 1;
 
-    auto   range = mesh.get_level_id<1>();
+    auto range = mesh.get_level_id<1>();
 
     for (auto vertexIDIT = range.begin(); vertexIDIT != range.end();)
     {
@@ -650,13 +652,13 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         if (denseWeight > 0)
         {
             // Get max length of edges.
-            auto   edges  = mesh.up(vertexID);
+            auto edges  = mesh.up(vertexID);
             double maxLen = 0;
             for (auto edgeID : edges)
             {
-                auto   name =  mesh.get_name(edgeID);
-                auto   v = *mesh.get_simplex_down(edgeID, name[0])
-                    - *mesh.get_simplex_down(edgeID, name[1]);
+                auto name =  mesh.get_name(edgeID);
+                auto v = *mesh.get_simplex_down(edgeID, name[0])
+                         - *mesh.get_simplex_down(edgeID, name[1]);
                 double tmpLen = std::sqrt(v|v);
                 if (tmpLen > maxLen)
                     maxLen = tmpLen;
@@ -668,7 +670,12 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
         if (flatRate > 0)
         {
             auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
-            auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
+
+            EigenVector eigenvalues;
+            EigenMatrix eigenvectors;
+
+            EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointMatrix(lst, eigenvalues, eigenvectors);
+
             // The closer this ratio is to 0 the flatter the local region.
             flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], flatRate);
         }
@@ -681,7 +688,7 @@ void coarse(SurfaceMesh &mesh, double coarseRate, double flatRate, double denseW
     }
 }
 
-void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings, bool verbose)
+void coarse_dense(SurfaceMesh& mesh, REAL threshold, REAL weight, std::size_t rings, bool verbose)
 {
     // Compute the average edge length
     REAL avgLen = 0;
@@ -731,7 +738,7 @@ void coarse_dense(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t ri
     }
 }
 
-void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rings, bool verbose){
+void coarse_flat(SurfaceMesh& mesh, REAL threshold, REAL weight, std::size_t rings, bool verbose){
     REAL flatnessRatio = 1;
 
     auto range = mesh.get_level_id<1>();
@@ -749,7 +756,12 @@ void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rin
 
         // Curvature as coarsening criteria
         auto lst = surfacemesh_detail::computeLocalStructureTensor(mesh, vertexID, rings);
-        auto eigenvalues = surfacemesh_detail::getEigenvalues(lst).eigenvalues();
+
+        EigenVector eigenvalues;
+        EigenMatrix eigenvectors;
+
+        EigenDiagonalizeTraits<REAL, 3>::diagonalizeSelfAdjointMatrix(lst, eigenvalues, eigenvectors);
+
         // The closer this ratio is to 0 the flatter the local region.
         flatnessRatio = std::pow(eigenvalues[1]/eigenvalues[2], weight);
 
@@ -762,29 +774,29 @@ void coarse_flat(SurfaceMesh &mesh, REAL threshold, REAL weight, std::size_t rin
 }
 
 
-void fillHoles(SurfaceMesh &mesh)
+void fillHoles(SurfaceMesh& mesh)
 {
-    std::vector<std::vector<SurfaceMesh::SimplexID<2> > > holeList;
+    std::vector<std::vector<SurfaceMesh::SimplexID<2>>> holeList;
     surfacemesh_detail::findHoles(mesh, holeList);
 
-    for (auto &holeEdges : holeList)
+    for (auto& holeEdges : holeList)
     {
-        std::vector<SurfaceMesh::SimplexID<1> > sortedVertices;
+        std::vector<SurfaceMesh::SimplexID<1>> sortedVertices;
         surfacemesh_detail::edgeRingToVertices(mesh, holeEdges, std::back_inserter(sortedVertices));
 
         surfacemesh_detail::triangulateHole(mesh, sortedVertices, SMFace(), holeEdges);
     }
 }
 
-void flipNormals(SurfaceMesh &mesh)
+void flipNormals(SurfaceMesh& mesh)
 {
-    for (auto &fdata : mesh.get_level<3>())
+    for (auto& fdata : mesh.get_level<3>())
     {
         fdata.orientation *= -1;
     }
 }
 
-bool hasHole(const SurfaceMesh &mesh)
+bool hasHole(const SurfaceMesh& mesh)
 {
     for (auto eID : mesh.get_level_id<2>())
     {
@@ -843,86 +855,86 @@ std::unique_ptr<SurfaceMesh> sphere(int order)
     mesh->insert({39}, SMVertex(-0.425323, -0.309011, 0.850654));
     mesh->insert({40}, SMVertex(-0.425323, 0.309011, 0.850654));
     mesh->insert({41}, SMVertex(0.162456, 0.499995, 0.850654));
-    mesh->insert({0,12,13});
-    mesh->insert({1,13,15});
-    mesh->insert({0,12,17});
-    mesh->insert({0,17,19});
-    mesh->insert({0,16,19});
-    mesh->insert({1,15,22});
-    mesh->insert({2,14,24});
-    mesh->insert({3,18,26});
-    mesh->insert({4,20,28});
-    mesh->insert({5,21,30});
-    mesh->insert({1,22,25});
-    mesh->insert({2,24,27});
-    mesh->insert({3,26,29});
-    mesh->insert({4,28,31});
-    mesh->insert({5,23,30});
-    mesh->insert({6,32,37});
-    mesh->insert({7,33,39});
-    mesh->insert({8,34,40});
-    mesh->insert({9,35,41});
-    mesh->insert({10,36,38});
-    mesh->insert({11,38,41});
-    mesh->insert({36,38,41});
-    mesh->insert({9,36,41});
-    mesh->insert({11,40,41});
-    mesh->insert({35,40,41});
-    mesh->insert({8,35,40});
-    mesh->insert({11,39,40});
-    mesh->insert({34,39,40});
-    mesh->insert({7,34,39});
-    mesh->insert({11,37,39});
-    mesh->insert({33,37,39});
-    mesh->insert({6,33,37});
-    mesh->insert({11,37,38});
-    mesh->insert({32,37,38});
-    mesh->insert({10,32,38});
-    mesh->insert({10,23,36});
-    mesh->insert({23,30,36});
-    mesh->insert({9,30,36});
-    mesh->insert({9,31,35});
-    mesh->insert({28,31,35});
-    mesh->insert({8,28,35});
-    mesh->insert({8,29,34});
-    mesh->insert({26,29,34});
-    mesh->insert({7,26,34});
-    mesh->insert({7,27,33});
-    mesh->insert({24,27,33});
-    mesh->insert({6,24,33});
-    mesh->insert({6,25,32});
-    mesh->insert({22,25,32});
-    mesh->insert({10,22,32});
-    mesh->insert({9,30,31});
-    mesh->insert({21,30,31});
-    mesh->insert({4,21,31});
-    mesh->insert({8,28,29});
-    mesh->insert({20,28,29});
-    mesh->insert({3,20,29});
-    mesh->insert({7,26,27});
-    mesh->insert({18,26,27});
-    mesh->insert({2,18,27});
-    mesh->insert({6,24,25});
-    mesh->insert({14,24,25});
-    mesh->insert({1,14,25});
-    mesh->insert({10,22,23});
-    mesh->insert({15,22,23});
-    mesh->insert({5,15,23});
-    mesh->insert({5,16,21});
-    mesh->insert({16,19,21});
-    mesh->insert({4,19,21});
-    mesh->insert({4,19,20});
-    mesh->insert({17,19,20});
-    mesh->insert({3,17,20});
-    mesh->insert({3,17,18});
-    mesh->insert({12,17,18});
-    mesh->insert({2,12,18});
-    mesh->insert({5,15,16});
-    mesh->insert({13,15,16});
-    mesh->insert({0,13,16});
-    mesh->insert({2,12,14});
-    mesh->insert({12,13,14});
-    mesh->insert({1,13,14});
+    mesh->insert({0, 12, 13});
+    mesh->insert({1, 13, 15});
+    mesh->insert({0, 12, 17});
+    mesh->insert({0, 17, 19});
+    mesh->insert({0, 16, 19});
+    mesh->insert({1, 15, 22});
+    mesh->insert({2, 14, 24});
+    mesh->insert({3, 18, 26});
+    mesh->insert({4, 20, 28});
+    mesh->insert({5, 21, 30});
+    mesh->insert({1, 22, 25});
+    mesh->insert({2, 24, 27});
+    mesh->insert({3, 26, 29});
+    mesh->insert({4, 28, 31});
+    mesh->insert({5, 23, 30});
+    mesh->insert({6, 32, 37});
+    mesh->insert({7, 33, 39});
+    mesh->insert({8, 34, 40});
+    mesh->insert({9, 35, 41});
+    mesh->insert({10, 36, 38});
+    mesh->insert({11, 38, 41});
+    mesh->insert({36, 38, 41});
+    mesh->insert({9, 36, 41});
+    mesh->insert({11, 40, 41});
+    mesh->insert({35, 40, 41});
+    mesh->insert({8, 35, 40});
+    mesh->insert({11, 39, 40});
+    mesh->insert({34, 39, 40});
+    mesh->insert({7, 34, 39});
+    mesh->insert({11, 37, 39});
+    mesh->insert({33, 37, 39});
+    mesh->insert({6, 33, 37});
+    mesh->insert({11, 37, 38});
+    mesh->insert({32, 37, 38});
+    mesh->insert({10, 32, 38});
+    mesh->insert({10, 23, 36});
+    mesh->insert({23, 30, 36});
+    mesh->insert({9, 30, 36});
+    mesh->insert({9, 31, 35});
+    mesh->insert({28, 31, 35});
+    mesh->insert({8, 28, 35});
+    mesh->insert({8, 29, 34});
+    mesh->insert({26, 29, 34});
+    mesh->insert({7, 26, 34});
+    mesh->insert({7, 27, 33});
+    mesh->insert({24, 27, 33});
+    mesh->insert({6, 24, 33});
+    mesh->insert({6, 25, 32});
+    mesh->insert({22, 25, 32});
+    mesh->insert({10, 22, 32});
+    mesh->insert({9, 30, 31});
+    mesh->insert({21, 30, 31});
+    mesh->insert({4, 21, 31});
+    mesh->insert({8, 28, 29});
+    mesh->insert({20, 28, 29});
+    mesh->insert({3, 20, 29});
+    mesh->insert({7, 26, 27});
+    mesh->insert({18, 26, 27});
+    mesh->insert({2, 18, 27});
+    mesh->insert({6, 24, 25});
+    mesh->insert({14, 24, 25});
+    mesh->insert({1, 14, 25});
+    mesh->insert({10, 22, 23});
+    mesh->insert({15, 22, 23});
+    mesh->insert({5, 15, 23});
+    mesh->insert({5, 16, 21});
+    mesh->insert({16, 19, 21});
+    mesh->insert({4, 19, 21});
+    mesh->insert({4, 19, 20});
+    mesh->insert({17, 19, 20});
+    mesh->insert({3, 17, 20});
+    mesh->insert({3, 17, 18});
+    mesh->insert({12, 17, 18});
+    mesh->insert({2, 12, 18});
+    mesh->insert({5, 15, 16});
+    mesh->insert({13, 15, 16});
+    mesh->insert({0, 13, 16});
+    mesh->insert({2, 12, 14});
+    mesh->insert({12, 13, 14});
+    mesh->insert({1, 13, 14});
 
     for (int i = 1; i < order; ++i)
     {
@@ -932,7 +944,7 @@ std::unique_ptr<SurfaceMesh> sphere(int order)
     casc::compute_orientation(*mesh);
     if (getVolume(*mesh) < 0)
     {
-        for (auto &data : mesh->get_level<3>())
+        for (auto& data : mesh->get_level<3>())
             data.orientation *= -1;
     }
     return mesh;
@@ -978,351 +990,25 @@ std::unique_ptr<SurfaceMesh> cube(int order)
     casc::compute_orientation(*mesh);
     if (getVolume(*mesh) < 0)
     {
-        for (auto &data : mesh->get_level<3>())
+        for (auto& data : mesh->get_level<3>())
             data.orientation *= -1;
     }
     return mesh;
 }
 
-/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
-double getMeanCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
-{
-    Vertex center = *vertexID;
-    int    vKey   = mesh.get_name(vertexID)[0];
-
-    // Get 1-ring around vertexID and order it
-    std::vector<int> cover = mesh.get_cover(vertexID);
-    std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
-
-    SurfaceMesh::SimplexID<2> eID;
-
-    if(mesh.onBoundary(vertexID)){
-        auto it = cover.begin();
-        for(; it != cover.end(); ++it){
-            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
-                break;
-            }
-        }
-        eID = mesh.get_simplex_up(vertexID, *it);
-        cover.erase(it);
-        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
-    }
-    else{
-        eID = mesh.get_simplex_up(vertexID, cover.back());
-        cover.pop_back();
-        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
-    }
-
-    while (!cover.empty())
-    {
-        auto ecover = mesh.get_cover(eID);
-        for (int nKey : ecover)
-        {
-            auto it = std::find(cover.begin(), cover.end(), nKey);
-            if (it != cover.end())
-            {
-                eID = mesh.get_simplex_up(vertexID, *it);
-                cover.erase(it);
-                orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
-                break;
-            }
-        }
-    }
-
-    double Amix = 0;
-    Vector curvature;
-    for (int i = 0; i < orderedNbhd.size(); ++i)
-    {
-        Vertex prev, curr, next;
-        if (i == 0)
-        {
-            prev = *orderedNbhd.back();
-        }
-        else
-        {
-            prev = *orderedNbhd[i-1];
-        }
-
-        curr = *orderedNbhd[i];
-
-        if (i+1 == orderedNbhd.size())
-        {
-            next = *orderedNbhd.front();
-        }
-        else
-        {
-            next = *orderedNbhd[i+1];
-        }
-
-        // Consider the triangle vID, i, i+1 with wrapping
-        std::array<double, 3> ls;
-        ls[0] = distance(center, curr);
-        ls[1] = distance(center, next);
-        ls[2] = distance(curr, next);
-        std::sort(ls.begin(), ls.end());
-
-        if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
-        {
-            // Triangle is obtuse!
-            if (angle(curr, center, next) > M_PI_2)
-            {
-                // The angle of T at center is obtuse
-                Amix += getArea(center, curr, next)/2.0;
-            }
-            else
-            {
-                Amix += getArea(center, curr, next)/4.0;
-            }
-        }
-        else
-        {
-            // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8.0;
-        }
-        curvature += (1.0/tan(angle(center, prev, curr)) + 1.0/tan(angle(center, next, curr)))*(center - curr);
-    }
-    curvature /= (2.0*Amix);
-    return std::copysign(std::sqrt(curvature|curvature)/2.0, dot(curvature, getNormal(mesh, vertexID)));
-}
-
-
-/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
-double getGaussianCurvature(const SurfaceMesh &mesh, const SurfaceMesh::SimplexID<1> vertexID)
-{
-    Vertex           center = *vertexID;
-    int              vKey   = mesh.get_name(vertexID)[0];
-
-    std::vector<int> cover = mesh.get_cover(vertexID);
-    std::vector<SurfaceMesh::SimplexID<1> > orderedNbhd;
-
-    SurfaceMesh::SimplexID<2> eID;
-
-    if(mesh.onBoundary(vertexID)){
-        auto it = cover.begin();
-        for(; it != cover.end(); ++it){
-            if(mesh.onBoundary(mesh.get_simplex_up({*it}))){
-                break;
-            }
-        }
-        eID = mesh.get_simplex_up(vertexID, *it);
-        cover.erase(it);
-        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
-    }
-    else{
-        eID = mesh.get_simplex_up(vertexID, cover.back());
-        cover.pop_back();
-        orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
-    }
-
-    while (!cover.empty())
-    {
-        auto ecover = mesh.get_cover(eID);
-        for (int nKey : ecover)
-        {
-            auto it = std::find(cover.begin(), cover.end(), nKey);
-            if (it != cover.end())
-            {
-                eID = mesh.get_simplex_up(vertexID, *it);
-                cover.erase(it);
-                orderedNbhd.push_back(mesh.get_simplex_down(eID, vKey));
-                break;
-            }
-        }
-    }
-
-    double Amix = 0;
-    double angleSum = 0;
-    for (int i = 0; i < orderedNbhd.size(); ++i)
-    {
-        Vertex prev, curr, next;
-        if (i == 0)
-        {
-            prev = *orderedNbhd.back();
-        }
-        else
-        {
-            prev = *orderedNbhd[i-1];
-        }
-
-        curr = *orderedNbhd[i];
-
-        if (i+1 == orderedNbhd.size())
-        {
-            next = *orderedNbhd.front();
-        }
-        else
-        {
-            next = *orderedNbhd[i+1];
-        }
-
-        // Consider the triangle vID, i, i+1 with wrapping
-        std::array<double, 3> ls;
-        ls[0] = distance(center, curr);
-        ls[1] = distance(center, next);
-        ls[2] = distance(curr, next);
-        std::sort(ls.begin(), ls.end());
-
-        if (ls[0]*ls[0] + ls[1]*ls[1] < ls[2]*ls[2])
-        {
-            // Triangle is obtuse!
-            if (angle(curr, center, next) > M_PI_2)
-            {
-                // The angle of T at center is obtuse
-                Amix += getArea(center, curr, next)/2;
-            }
-            else
-            {
-                Amix += getArea(center, curr, next)/4;
-            }
-        }
-        else
-        {
-            // Compute using voronoi formula
-            Amix += (pow(distance(center, curr), 2)/tan(angle(center, next, curr))
-                     + pow(distance(center, next), 2)/tan(angle(center, curr, next)))/8;
-        }
-        angleSum += angle(curr, center, next);
-    }
-    return (2*M_PI-angleSum)/Amix;
-}
-
-
-/// http://www.geometry.caltech.edu/pubs/DMSB_III.pdf
-std::tuple<REAL*, REAL*, REAL*, REAL*, std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> >
-computeCurvatures(const SurfaceMesh & mesh){
-    std::map<typename SurfaceMesh::KeyType,typename SurfaceMesh::KeyType> sigma;
-
-    REAL *Amix = new REAL[mesh.size<1>()];
-    REAL *kg = new REAL[mesh.size<1>()];
-    REAL *kh = new REAL[mesh.size<1>()];
-    REAL *k1 = new REAL[mesh.size<1>()];
-    REAL *k2 = new REAL[mesh.size<1>()];
-    Vector *Kh = new Vector[mesh.size<1>()];
-    Vector *normals = new Vector[mesh.size<1>()];
-
-    // Map VertexIDs to indices
-    std::size_t i = 0;
-    for(const auto vertexID : mesh.get_level_id<1>()) {
-        Amix[i] = 0;
-        kg[i] = 0;
-        kh[i] = 0;
-        k1[i] = 0;
-        k2[i] = 0;
-        normals[i] = getNormal(mesh, vertexID);
-        sigma[vertexID.indices()[0]] = i++;
-    }
-
-    for(const auto faceID : mesh.get_level_id<3>()) {
-        auto indices = faceID.indices(); // Face vertex indices
-        std::array<Vertex, 3> vertices;  // Vertex data for indices
-        std::array<typename SurfaceMesh::KeyType, 2> keysDown; // Tmp to store keys
-
-        // Fill vertices in order corresponding to indices
-        for(std::size_t skip = 0; skip < 3; ++skip) {
-            std::size_t j = 0;
-            std::size_t k = 0;
-            while (k < 2) {
-                if (j == skip) ++j;
-                else{
-                    keysDown[k++] = indices[j++];
-                }
-            }
-            vertices[skip] = *mesh.get_simplex_down(faceID, keysDown);
-        }
-
-        // TODO: (15) This section computes the same distances a bunch of time
-        std::array<REAL, 3> dist;
-        dist[0] = distance(vertices[0], vertices[1]);
-        dist[1] = distance(vertices[1], vertices[2]);
-        dist[2] = distance(vertices[0], vertices[2]);
-        std::sort(dist.begin(), dist.end());
-
-        // Check if the triangle is obtuse...
-        bool obtuse = dist[0]*dist[0] + dist[1]*dist[1] < dist[2]*dist[2];
-
-        REAL t_area = 0; // Area of the face
-        // Populate t_area if obtuse
-        if (obtuse) t_area = getArea(vertices[0], vertices[1], vertices[2]);
-
-        // List of indices to rotate
-        std::array<std::size_t, 3> idxmap = {0,1,2};
-        for(std::size_t i = 0; i < 3; ++i) {
-            // idxmap[0] is the current vertex
-            REAL ang = angle(vertices[idxmap[2]],vertices[idxmap[0]],vertices[idxmap[1]]);
-
-            std::size_t i0 = sigma[indices[idxmap[0]]];
-            std::size_t i1 = sigma[indices[idxmap[1]]];
-            std::size_t i2 = sigma[indices[idxmap[2]]];
-
-            // Add angle to Gaussian Curvature
-            kg[i0] += ang;
-
-            // Vectors of other edges
-            Vector v1 = vertices[idxmap[1]] - vertices[idxmap[2]];
-            Vector v2 = vertices[idxmap[2]] - vertices[idxmap[1]];
-
-            REAL cot = 1.0/tan(ang);
-
-            if(obtuse) {
-                if (ang > M_PI/2.0) {
-                    Amix[i0] += t_area/2.0;
-                }
-                else{
-                    Amix[i0] += t_area/4.0;
-                }
-            }
-            else{
-                REAL tmp = cot/8.0;
-                REAL lenSq = length(v1);
-                lenSq *= lenSq;
-                Amix[i1] += tmp*lenSq;
-                Amix[i2] += tmp*lenSq;
-            }
-
-            // Add value to Mean Curvature
-            Kh[i1] += cot*v1;
-            Kh[i2] += cot*v2;
-
-            std::rotate(idxmap.begin(), idxmap.begin() + 1, idxmap.end());
-        }
-    }
-
-    for (std::size_t i = 0; i < mesh.size<1>(); ++i) {
-        Kh[i] = Kh[i]/(2.0*Amix[i]);
-        kh[i] = std::copysign(length(Kh[i])/2.0, dot(Kh[i], normals[i]));
-        kg[i] = (2.0*M_PI - kg[i])/Amix[i];
-
-        REAL kh2 = kh[i]*kh[i];
-        REAL tmp = kh2 < kg[i] ? 0 : std::sqrt(kh2-kg[i]);
-
-        k1[i] = kh[i] + tmp;
-        k2[i] = kh[i] - tmp;
-    }
-
-    delete[] Amix;
-    delete[] Kh;
-    delete[] normals;
-    // delete[] kg;
-    // delete[] kh;
-    // delete[] k1;
-    // delete[] k2;
-    return std::make_tuple(kh, kg, k1, k2, sigma);
-}
-
-std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
+std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh& mesh)
 {
     // Queue to store the next edges to visit
-    std::deque<SurfaceMesh::SimplexID<2> >     frontier;
+    std::deque<SurfaceMesh::SimplexID<2>>     frontier;
     // Set of visited edges
-    std::set<SurfaceMesh::SimplexID<2> >       visited;
+    std::set<SurfaceMesh::SimplexID<2>>       visited;
 
-    std::vector<std::unique_ptr<SurfaceMesh> > meshes;
+    std::vector<std::unique_ptr<SurfaceMesh>> meshes;
 
     using SimplexSet = typename casc::SimplexSet<SurfaceMesh>;
     SimplexSet surface;
 
-    int        connected_components = 0;
+    int connected_components = 0;
     for (auto edgeID : mesh.get_level_id<2>())
     {
         // This is a new edge if we haven't visited before
@@ -1352,7 +1038,7 @@ std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
             casc::getStar(mesh, tmp, surface);
 
             std::unique_ptr<SurfaceMesh> newSMPtr(new SurfaceMesh);
-            auto &newSM = *newSMPtr;
+            auto& newSM = *newSMPtr;
 
             util::int_for_each<std::size_t, typename SimplexSet::cLevelIndex>(surfacemesh_detail::CopyHelper<SurfaceMesh>(), mesh, newSM, surface);
 
@@ -1370,16 +1056,16 @@ std::vector<std::unique_ptr<SurfaceMesh> > splitSurfaces(SurfaceMesh &mesh)
     return meshes;
 }
 
-void cacheNormals(SurfaceMesh &mesh){
-    for(auto fID : mesh.get_level_id<3>()){
+void cacheNormals(SurfaceMesh& mesh){
+    for (auto fID : mesh.get_level_id<3>()) {
         auto norm = getNormal(mesh, fID);
         normalize(norm);
         (*fID).normal = norm;
     }
 
-    for(auto vID: mesh.get_level_id<1>()){
+    for (auto vID: mesh.get_level_id<1>()) {
         Vector norm;
-        auto   faces = mesh.up(mesh.up(vID));
+        auto faces = mesh.up(mesh.up(vID));
         for (auto faceID : faces)
         {
             norm += (*faceID).normal;
@@ -1387,5 +1073,100 @@ void cacheNormals(SurfaceMesh &mesh){
         normalize(norm);
         (*vID).normal = norm;
     }
+}
+
+// http://pub.ist.ac.at/~edels/Papers/1995-J-03-IncrementalBettiNumbers.pdf
+std::tuple<bool, int, int, int> getBettiNumbers(SurfaceMesh& mesh){
+    bool valid = true;
+    int connected_components = mesh.size<1>();
+    int holes = 0;
+    int voids = 0;
+
+    std::deque<SurfaceMesh::SimplexID<2>> frontier_edges;
+    std::set<SurfaceMesh::SimplexID<2>> visited_edges;
+    std::set<SurfaceMesh::SimplexID<3>> faces;
+
+    std::set<SurfaceMesh::KeyType> visited_verts;
+    SurfaceMesh::SimplexID<2> curr;
+
+    for (auto eid : mesh.get_level_id<2>())
+    {
+        if (visited_edges.find(eid) == visited_edges.end())
+        {
+            // Does this surface have a boundary edgee?
+            bool hasboundary = false;
+            // Does this surface have consistent normals?
+            bool orientable = true;
+            // Is this surface have weird 3+ face intersections?
+            bool pseudo_manifold = true;
+            frontier_edges.push_back(eid);
+
+            while (!frontier_edges.empty())
+            {
+                curr = frontier_edges.front();
+                if (visited_edges.find(curr) == visited_edges.end())
+                {
+                    std::array<SurfaceMesh::KeyType, 2> n = curr.indices();
+                    if (visited_verts.find(n[0]) == visited_verts.end()) {
+                        // Have never visited n[0]
+                        visited_verts.insert(n[0]);
+                        --connected_components;
+
+                        if (visited_verts.find(n[1]) == visited_verts.end()) {
+                            // Both vertices unvisited
+                            visited_verts.insert(n[1]);
+                        }
+                    }
+                    else{
+                        if (visited_verts.find(n[1]) == visited_verts.end()) {
+                            visited_verts.insert(n[1]);
+                            --connected_components;
+                        } else {
+                            //found a closed cycle
+                            ++holes;
+                        }
+                    }
+                    visited_edges.insert(curr);
+                    // If on a boundary stop otherwise add neighboring edges to
+                    // the queue
+                    auto w = mesh.get_cover(curr);
+                    if (w.size() == 1) {hasboundary = true;
+                    }
+                    else if (w.size() == 2)
+                    {
+                        neighbors_up(mesh, curr, std::back_inserter(frontier_edges));
+                    }
+                    else {
+                        pseudo_manifold = false;
+                        valid = false;
+                    }
+                    neighbors_up(mesh, curr, std::back_inserter(frontier_edges));
+                    for(auto n : w ){
+                        auto fid = curr.get_simplex_up(n);
+                        faces.insert(fid);
+                    }
+                }
+                frontier_edges.pop_front();
+            }
+
+            int sz = faces.size();
+            if (pseudo_manifold){
+                if (orientable && !hasboundary){
+                    // Local space should be a sphere
+                    ++voids;
+                    --sz;
+                }
+                holes -= sz;
+            } else{
+                // TODO: Implement better detection of faces which complete 2-cycles s.t. this can be complete.
+            }
+            faces.clear();
+        }
+    }
+
+    visited_edges.clear();
+    visited_verts.clear();
+
+    return std::make_tuple(valid, connected_components, holes, voids);
 }
 } // end namespace gamer
