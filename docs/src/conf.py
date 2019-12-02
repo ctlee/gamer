@@ -25,8 +25,8 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.5'
-release = 'v2.0.5-dev-33-g089201e.dirty'
+version = '2.0.6'
+release = 'v2.0.6-dev.dirty'
 
 # -- General configuration ---------------------------------------------------
 

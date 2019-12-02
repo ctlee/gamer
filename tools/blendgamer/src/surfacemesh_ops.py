@@ -131,6 +131,10 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         name="Preserve ridges", default=False,
         description="Skip flipping of edges which lie on ridges")
 
+    normSmoothAniso = FloatProperty(
+        name="Anisotropic control", default=1.0, min=0,
+        description="The degree of anisotropy in LST correction for normal smooth")
+
     advanced_options = BoolProperty(
         name="Advanced options", default=False,
         description="Show additional surface mesh improvement options")
@@ -186,7 +190,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
         gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
         if gmesh:
             try:
-                gmesh.normalSmooth()
+                gmesh.normalSmooth(self.normSmoothAniso)
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False

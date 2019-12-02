@@ -1075,7 +1075,7 @@ void coarse_flat(SurfaceMesh& mesh, REAL threshold, REAL weight, std::size_t rin
  *
  * @param      mesh  The mesh
  */
-void normalSmooth(SurfaceMesh& mesh);
+void normalSmooth(SurfaceMesh& mesh, double k = 1.0);
 
 /**
  * @brief      Fill holes in the mesh

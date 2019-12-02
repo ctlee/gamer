@@ -101,7 +101,9 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
 
             col = layout.column()
             col.label(text="Global mesh operations:")
-            col.operator("gamer.normal_smooth")
+            row = col.row(align=True)
+            row.operator("gamer.normal_smooth")
+            row.prop(smprops, "normSmoothAniso")
             col.operator("gamer.fill_holes")
 
             if active_obj.mode == 'EDIT':
