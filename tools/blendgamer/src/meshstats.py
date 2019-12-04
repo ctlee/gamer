@@ -35,7 +35,7 @@ if mpl_found:
 
 from blendgamer.colormap_enums import colormap_enums
 
-import blendgamer.report as report
+import blendgamer.report as meshreport
 from blendgamer.util import *
 
 
@@ -62,7 +62,7 @@ class GAMER_OT_MeshStats_Select_Report(bpy.types.Operator):
 
     def execute(self, context):
         obj = context.edit_object
-        info = report.info()
+        info = meshreport.info()
         text, data = info[self.index]
         bm_type, bm_array = data
 
@@ -83,11 +83,14 @@ class GAMER_OT_MeshStats_Select_Report(bpy.types.Operator):
 
 
 # Helper method to get object and run main_check
-def execute_check(self, context):
+def execute_check(self, context, report=None):
     obj = context.active_object
     info = []
-    self.main_check(obj, info)
-    report.update(*info)
+    if not report:
+        self.main_check(obj, info)
+    else:
+        self.main_check(obj, info, report)
+    meshreport.update(*info)
     multiple_obj_warning(self, context)
     return {'FINISHED'}
 
@@ -282,17 +285,14 @@ class GAMER_OT_MeshStats_Check_Sharp(bpy.types.Operator):
 
 
 class GAMER_OT_MeshStats_Betti_Numbers(bpy.types.Operator):
-    bl_idname   = "gamer.meshstats_betti"
+    bl_idname   = "gamer.meshstats_compute_betti"
     bl_label    = "Report Betti numbers"
     bl_description = "Compute the first three Betti numbers"
 
     @staticmethod
-    def main_check(obj, info):
+    def main_check(obj, info, report):
         gmesh = blenderToGamer(report, autocorrect_normals=False)
         if gmesh:
-            # k, orientable, manifold = gmesh.check_orientation()
-            # holes = gmesh.nEdges - gmesh.nVertices + k
-
             valid, k, h, v = gmesh.getBettiNumbers()
 
             info.append(("Euler Characteristic: %d"%(gmesh.nVertices-gmesh.nEdges+gmesh.nFaces), None))
@@ -306,7 +306,7 @@ class GAMER_OT_MeshStats_Betti_Numbers(bpy.types.Operator):
                 info.append(("Higher order Betti numbers undetermined", None))
 
     def execute(self, context):
-        return execute_check(self,context)
+        return execute_check(self,context, self.report)
 
 
 class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
@@ -327,13 +327,12 @@ class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
             GAMER_OT_MeshStats_Check_Solid,
             GAMER_OT_MeshStats_Check_Intersections,
             GAMER_OT_MeshStats_Check_Degenerate,
-            GAMER_OT_MeshStats_Betti_Numbers,
         )
 
         for cls in check_classes:
             cls.main_check(obj, info)
 
-        report.update(*info)
+        meshreport.update(*info)
         multiple_obj_warning(self, context)
         return {'FINISHED'}
 
@@ -373,6 +372,17 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     min_angle = IntProperty(
         name="Angle Threshold", default=15, min=0, max=180,
         description="Select faces with angles less than this criteria")
+
+    compute_betti = BoolProperty(
+            name="Compute Betti Numbers",
+            description="Calculate the first 3 betti numbers of a mesh",
+            default=False
+        )
+
+    show_extras = BoolProperty(
+        name="Additional Reports", default=False,
+        description="Show additional report generation options")
+
 
 classes = [
     GAMER_OT_MeshStats_Select_Report,

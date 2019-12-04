@@ -104,7 +104,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def migrate2_0_1__2_0_5():
+def migrate2_0_1__2_0_6():
     for obj in bpy.data.objects:
         if obj.type == 'MESH':
             # First initialize the data-blocks
@@ -145,8 +145,14 @@ def checkVersion():
 
     while(scene.gamer.versionerror < 0):
         if scene.gamer.versionerror == -1:
+
+            # Throw an error for older versions of GAMer
+            if compare_version(fileVer, (2,0,0)) < 0:
+                bpy.ops.gamer.prompt_old_version()
+                break
+
             # Update from 2.0.0 to current
-            if compare_version(fileVer, (2,0,0)) == 0:
+            elif compare_version(fileVer, (2,0,0)) == 0:
                 newver = (2,0,1)
                 print("Metadata version is out of date.",
                         "Migrating from v(2,0,0) to v%s"%(str(newver)))
@@ -159,14 +165,19 @@ def checkVersion():
                             if 'boundaries' in obj.keys():
                                 del obj['boundaries']
                 scene.gamer.gamer_version = str(newver)
-            if compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,5)) < 0 :
+
+            # Update 2.0.1--2.0.4 metadata to 2.0.5
+            elif compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,5)) < 0 :
                 newver = (2,0,5)
                 print("Migrating from v%s to v%s"%(str(fileVer), str(newver)))
                 migrate2_0_1__2_0_5()
                 scene.gamer.gamer_version = str(newver)
-            else:
-                bpy.ops.gamer.prompt_old_version()
-                break
+
+            # No changes since 2.0.5... yet!
+            elif compare_version(fileVer, (2,0,5)) >= 0:
+                print("Migrating from v%s to v%s"%(str(fileVer), str(currVer)))
+                scene.gamer.gamer_version = str(currVer)
+
         fileVer = literal_eval(scene.gamer.gamer_version)
         scene.gamer.versionerror = compare_version(fileVer, currVer)
 

@@ -200,16 +200,11 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         # Mesh quality properties object
         qProps = context.scene.gamer.mesh_quality_properties
 
-        box = layout.box()
-        col = box.column()
-        col.prop(qProps, "export_path")
-        col.prop(qProps, "export_filebase")
-        col.operator("gamer.write_quality_info")
-
         col = layout.column(align=True)
         col.operator("gamer.meshstats_check_solid")
         col.operator("gamer.meshstats_check_degenerate")
         col.operator("gamer.meshstats_check_intersect")
+        col.operator("gamer.meshstats_compute_betti")
 
         row = col.row(align=True)
         row.operator("gamer.meshstats_check_wagonwheels")
@@ -218,7 +213,6 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         row = col.row(align=True)
         row.operator("gamer.meshstats_check_sharp")
         row.prop(qProps, "min_angle")
-
         col = layout.column()
         col.label(text="Mesh analysis:")
         col.operator("gamer.meshstats_check_all", text="Generate Mesh Report")
@@ -284,6 +278,18 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
                 col.label(text="Select a mesh object to enable estimation of curvatures", icon='LIGHT')
         else:
             col.label(text="Curvature estimations require matplotlib.", icon='LIGHT')
+
+
+        box = layout.box()
+        col = box.column()
+
+        if not qProps.show_extras:
+            col.prop(qProps, "show_extras", icon='TRIA_RIGHT', emboss=False)
+        else:
+            col.prop(qProps, "show_extras", icon='TRIA_DOWN', emboss=False)
+            col.prop(qProps, "export_path")
+            col.prop(qProps, "export_filebase")
+            col.operator("gamer.write_quality_info")
 
 # Object Boundary Panel:
 class GAMER_UL_curvature_list(bpy.types.UIList):
