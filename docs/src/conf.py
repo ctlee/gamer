@@ -26,7 +26,7 @@ copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
 version = '2.0.6'
-release = 'v2.0.6-dev-1-ge5723eb.dirty'
+release = 'v2.0.6-dev-2-g46f49ba.dirty'
 
 # -- General configuration ---------------------------------------------------
 
