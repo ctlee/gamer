@@ -354,12 +354,13 @@ def differencePlotter(context, report, difftype='K1'):
     plt.axvline(amin, color='r', linestyle='dashed', linewidth=1)
     plt.axvline(amax, color='r', linestyle='dashed', linewidth=1)
 
-
+    # Save full data
+    np.savez(context.object.name+'difference'+difftype+'.npz', data)
     extend = 'neither'
-    tmin = amin
-    tmax = amax
-    # tmin = np.percentile(data,2)
-    # tmax = np.percentile(data,98)
+    # tmin = amin
+    # tmax = amax
+    tmin = np.percentile(data,1)
+    tmax = np.percentile(data,99)
 
     ax.axvline(tmin, color='g', linestyle='dashed', linewidth=2)
     ax.axvline(tmax, color='g', linestyle='dashed', linewidth=2)
@@ -427,7 +428,7 @@ def differencePlotter(context, report, difftype='K1'):
 
     ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
 
-    extend = 'neither'
+    # extend = 'neither'
 
     if extend == 'neither':
        pass
@@ -442,8 +443,8 @@ def differencePlotter(context, report, difftype='K1'):
     cb.ax.tick_params(labelsize=14)
     cb.set_label("%s [$\mu m^{-1}$]"%(vlayer), size=16)
 
-    plt.show()
-    plt.savefig('difference'+difftype+'.pdf', format='pdf')
+    plt.savefig(context.object.name+'difference'+difftype+'.pdf', format='pdf')
+    # plt.show()
     plt.close()
 
 
