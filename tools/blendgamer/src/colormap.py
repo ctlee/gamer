@@ -307,18 +307,36 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
 
 def differencePlotter(context, report, difftype='K1'):
     obj = getActiveMeshObject(report)
+    bm = bmesh_from_object(obj)
 
     with ObjectMode():
-        mdbsk1 = getCurvatureLayer(obj, 'MDSB', difftype)
-        jetsk1 = getCurvatureLayer(obj, 'JETS', difftype)
+        mdsb = getCurvatureLayer(obj, 'MDSB', difftype)
+        jets = getCurvatureLayer(obj, 'JETS', difftype)
 
-        mdsbk1_data = np.zeros(len(obj.data.vertices), dtype=np.float)
-        mdbsk1.foreach_get('value', mdsbk1_data)
+        mdsb_data = np.zeros(len(obj.data.vertices), dtype=np.float)
+        mdsb.foreach_get('value', mdsb_data)
 
-        jetsk1_data = np.zeros(len(obj.data.vertices), dtype=np.float)
-        jetsk1.foreach_get('value', jetsk1_data)
+        jets_data = np.zeros(len(obj.data.vertices), dtype=np.float)
+        jets.foreach_get('value', jets_data)
 
-    data = mdsbk1_data - jetsk1_data
+        tmpmdsb = np.zeros(len(obj.data.vertices), dtype=np.float)
+        tmpjets = np.zeros(len(obj.data.vertices), dtype=np.float)
+        for v in bm.verts:
+            count = 1
+            tmpmdsb[v.index] = mdsb_data[v.index]
+            tmpjets[v.index] = jets_data[v.index]
+
+            for e in v.link_edges:
+                v_other = e.other_vert(v)
+
+                tmpmdsb[v.index] += mdsb_data[v_other.index]
+                tmpjets[v.index] += jets_data[v_other.index]
+                count += 1
+            tmpmdsb[v.index] /= count
+            tmpjets[v.index] /= count
+        mdsb_data = np.array(tmpmdsb, copy=True)
+        jets_data = np.array(tmpjets, copy=True)
+    data = mdsb_data - jets_data
 
     cmap = colormapDict['PRGN']
     file_prefix = "%s_difference"%(difftype)
@@ -425,6 +443,7 @@ def differencePlotter(context, report, difftype='K1'):
     cb.set_label("%s [$\mu m^{-1}$]"%(vlayer), size=16)
 
     plt.show()
+    plt.savefig('difference'+difftype+'.pdf', format='pdf')
     plt.close()
 
 

@@ -283,8 +283,8 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
         def plot_differences(self, context, report):
             differencePlotter(context, report, 'K1')
             differencePlotter(context, report, 'K2')
-            differencePlotter(context, report, 'KG')
-            differencePlotter(context, report, 'KH')
+            # differencePlotter(context, report, 'KG')
+            # differencePlotter(context, report, 'KH')
 
 classes = [GAMER_OT_compute_curvatures,
            GAMER_OT_remove_curvature,
