@@ -564,25 +564,30 @@ void writeOFF(const std::string &filename, const TetMesh &mesh)
     fout.close();
 }
 
+
 void writeGmsh2(const std::string &filename, const TetMesh &mesh, const bool &is_binary)
 {
     // mesh format is always in ascii
-    std::ofstream temp_out(filename);
+    std::ofstream fout(filename);
     float msh_version = 2.2; // make argument 2 or 4
     size_t data_size = 8;
 
-    temp_out << "$MeshFormat\n"
+    fout << "$MeshFormat\n"
          << msh_version << " " << is_binary << " " << data_size << "\n";
-    temp_out.close();
-    temp_out.clear();
+    fout.close();
+    fout.clear();
 
-    std::ofstream fout(filename, std::ios::app);
     // if writing out in binary, we now open up fout as binary
     if (is_binary)
     {
-        std::ofstream fout(filename, std::ios::binary | std::ios::app);
-        fout << 1 << "\n"; // little or big endian
-    } 
+        fout.open(filename, std::ios::app | std::ios::binary);
+        int i = 1;
+        fout.write(reinterpret_cast<const char*>(&i), sizeof(i)); // little or big endian
+        fout << "\n";
+    } else 
+    {
+        fout.open(filename, std::ios::app);
+    }
     // check that fout opened
     if (!fout.is_open())
     {
@@ -596,7 +601,7 @@ void writeGmsh2(const std::string &filename, const TetMesh &mesh, const bool &is
          << mesh.size<1>() << "\n";
 
     // maps casc ID to count
-    std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma_1; // for verts
+    std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
     size_t cnt = 1;
 
     // Print out Vertices
@@ -604,43 +609,108 @@ void writeGmsh2(const std::string &filename, const TetMesh &mesh, const bool &is
     for (const auto vertexID : mesh.get_level_id<1>())
     {
         size_t idx = cnt; // why in loop?
-        sigma_1[mesh.get_name(vertexID)[0]] = cnt++;
+        sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto   vertex = *vertexID;
-        //fout << vertexID.indices()[0] << " " << vertex[0] << " " << vertex[1] << " " << vertex[2] << "\n";
-        fout << idx << " " << vertex[0] << " " << vertex[1] << " " << vertex[2] << "\n";
+        std::string ostr = std::to_string(idx) + " " + std::to_string(vertex[0]) 
+                           + " " + std::to_string(vertex[1]) 
+                           + " " + std::to_string(vertex[2]) + "\n";
+        if (is_binary){
+
+            std::string binary_outputInformations;
+            for (std::size_t i = 0; i < ostr.size(); ++i)
+            {
+            std::bitset<32> b(ostr.c_str()[i]);
+                binary_outputInformations+= b.to_string();
+            }
+
+            fout<<binary_outputInformations;
+            //fout.write(reinterpret_cast<const char*>(&ostr), sizeof(ostr));
+        } else {
+            fout << ostr;
+        }
     }
 
     // Print out triangles
     fout << "$EndNodes\n"
          << "$Elements\n"
-         << mesh.size<3>() + mesh.size<4>() << "\n";
+         << mesh.size<3>() + mesh.size<4>()
+         << "\n";
+    // int num_ele = mesh.size<3>() + mesh.size<4>();
+    // std::string ostr = std::to_string(num_ele) + "\n";
+    // if (is_binary){
+    //     //fout.write(reinterpret_cast<const char*>(&ostr), sizeof(ostr));
+    //     //fout.write(&ostr[0], sizeof(ostr));
+    //     std::string binary_outputInformations;
+    //     for (std::size_t i = 0; i < ostr.size(); ++i)
+    //     {
+    //     bitset<8> b(ostr.c_str()[i]);
+    //         binary_outputInformations+= b.to_string();
+    //     }
 
-    //std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma_2; // for faces
-    //cnt = 1;
+    //     fout<<binary_outputInformations;
+    //     fout.close();
+    //     fout.clear();
+    //     fout.open(filename, std::ios::app | std::ios::binary);
+    //     fout.write(reinterpret_cast<const char*>(&ostr), sizeof(ostr));
+    // } else{
+    //     fout << ostr;
+    // }
 
+    cnt = 1;
     for (const auto faceID : mesh.get_level_id<3>())
     {
         size_t idx = cnt++;
-//        sigma_2[mesh.get_name(faceID)] = cnt++;
         //auto face = *faceID;
         auto w = mesh.get_name(faceID);
-        fout << idx << " 2 0  " << sigma_1[w[0]] << " "
-             <<  sigma_1[w[1]] << " "
-             <<  sigma_1[w[2]] << "\n";
+        std::string ostr = std::to_string(idx) + " 2 0  " + std::to_string(sigma[w[0]]) + " "
+             +  std::to_string(sigma[w[1]]) + " "
+             +  std::to_string(sigma[w[2]]) + "\n";
+        if (is_binary){
+            //fout.write(&ostr[0], sizeof(ostr));
+            //fout.write(reinterpret_cast<const char*>(&ostr), sizeof(ostr));
+            std::string binary_outputInformations;
+            for (std::size_t i = 0; i < ostr.size(); ++i)
+            {
+            std::bitset<32> b(ostr.c_str()[i]);
+                binary_outputInformations+= b.to_string();
+            }
+
+            fout<<binary_outputInformations;
+        } else {
+            fout << ostr;
+        }
     }
 
     // Print out tetrahedra
-    cnt = 1;
+    //cnt = 1;
     for (const auto tetID : mesh.get_level_id<4>())
     {
         size_t idx = cnt++;
         auto w = mesh.get_name(tetID);
-        fout << idx << " 4 0  " << sigma_1[w[0]] << " "
-             << sigma_1[w[1]] << " "
-             << sigma_1[w[2]] << " "
-             << sigma_1[w[3]] << "\n";
+        std::string ostr = std::to_string(idx) + " 4 0  " + std::to_string(sigma[w[0]]) + " "
+             + std::to_string(sigma[w[1]]) + " "
+             + std::to_string(sigma[w[2]]) + " "
+             + std::to_string(sigma[w[3]]) + "\n";
+        if (is_binary){
+            //fout.write(reinterpret_cast<const char*>(&ostr), sizeof(ostr));
+            //fout.write(&ostr[0], sizeof(ostr));
+            std::string binary_outputInformations;
+            for (std::size_t i = 0; i < ostr.size(); ++i)
+            {
+            std::bitset<32> b(ostr.c_str()[i]);
+                binary_outputInformations+= b.to_string();
+            }
+
+            fout<<binary_outputInformations;
+
+        } else {
+            fout << ostr;
+        }
     }
 
+    if (is_binary){
+        fout << "\n";
+    }
     fout << "$EndElements";
     fout.close();
 
