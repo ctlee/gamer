@@ -230,6 +230,17 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+    pygamer.def("writeGmsh2", &writeGmsh2,
+        py::arg("filename"), py::arg("mesh"), py::arg("is_binary"),
+        R"delim(
+            Write mesh to file in Dolfin XML format
+
+            Args:
+                filename (:py:class:`str`): Filename to write to
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
+                is_binary (:py:class:`bool`): Should output be binary?
+        )delim"
+    );
 
     pygamer.def("writeDolfin", &writeDolfin,
         py::arg("filename"), py::arg("mesh"),

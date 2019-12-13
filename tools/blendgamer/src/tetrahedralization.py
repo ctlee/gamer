@@ -171,6 +171,14 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             name="Paraview", default=False,
             description="Generate Paraview output")
 
+    gmsh2 = BoolProperty(
+            name="Gmsh2", default=False,
+            description="Generate Gmsh version 2 output")
+
+    gmsh2_binary = BoolProperty(
+            name="Gmsh2_binary", default=False,
+            description="Generate Gmsh version 2 (binary) output")
+
     status = StringProperty ( name="status", default="" )
 
 
@@ -228,7 +236,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
         # filename = self.tet_path
         filename = self.export_path + self.export_filebase
-        if not (self.dolfin or self.paraview):
+        if not (self.dolfin or self.paraview or self.gmsh2 or self.gmsh2_binary):
             self.status = "Please select an output format in Tetrahedralization Settings"
             print(self.status)
         else:
@@ -239,6 +247,10 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 mesh_formats.append("dolfin")
             if self.paraview:
                 mesh_formats.append("paraview")
+            if self.gmsh2:
+                mesh_formats.append("gmsh2")
+            if self.gmsh2_binary:
+                mesh_formats.append("gmsh2_binary")
 
             # Vector of SurfaceMeshes
             # gmeshes = g.VectorSM()
@@ -297,17 +309,25 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 #     g.smoothMesh(tetmesh)
 
                 # Store mesh to files
-                tetmesh_formats  = ["dolfin", "paraview"]
-                tetmesh_suffices = [  ".xml", ".vtk"]
+                tetmesh_format_suffix = {"dolfin": ".xml",
+                                         "paraview": ".vtk",
+                                         "gmsh2": ".msh",
+                                         "gmsh2_binary": ".msh",
+                                         "gmsh4": ".msh",
+                                         "gmsh4_binary": ".msh"}
 
                 for fmt in mesh_formats:
                     try:
-                        suffix = tetmesh_suffices[tetmesh_formats.index(fmt)]
+                        suffix = tetmesh_format_suffix[fmt]
                         print ( "Writing to " + fmt + " file: " + filename + suffix )
                         if fmt == 'dolfin':
                             g.writeDolfin(filename+suffix, tetmesh)
                         if fmt == 'paraview':
                             g.writeVTK(filename+suffix, tetmesh)
+                        if fmt == 'gmsh2':
+                            g.writeGmsh2(filename+suffix, tetmesh, False)
+                        if fmt == 'gmsh2_binary':
+                            g.writeGmsh2(filename+suffix, tetmesh, True)
                     except Exception as ex:
                         print ( "Error: Unable to write to " + fmt + " file: " + filename + suffix )
                         print ( "   " + str(ex) )

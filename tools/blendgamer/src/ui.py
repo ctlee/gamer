@@ -501,10 +501,14 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
                 col.prop(tetprops, "dolfin")
                 col = row.column()
                 col.prop(tetprops, "paraview")
+                col = row.column()
+                col.prop(tetprops, "gmsh2")
+                col = row.column()
+                col.prop(tetprops, "gmsh2_binary")
 
             row = layout.row()
             icon = 'PROP_OFF'
-            if tetprops.dolfin or tetprops.paraview:
+            if tetprops.dolfin or tetprops.paraview or tetprops.gmsh2 or tetprops.gmsh2_binary:
                 icon = 'PROP_ON'
             row.operator("gamer.tetrahedralize", text="Tetrahedralize", icon=icon)
             if len(tetprops.status) > 0:

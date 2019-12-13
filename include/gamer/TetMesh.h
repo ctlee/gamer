@@ -380,6 +380,15 @@ void writeVTK(const std::string &filename, const TetMesh &mesh);
 void writeOFF(const std::string &filename, const TetMesh &mesh);
 
 /**
+ * @brief      Writes the mesh out in GMSH 2 format.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ * @param[in]  is_binary Should the file be output in binary?
+ */
+void writeGmsh2(const std::string &filename, const TetMesh &mesh, const bool &is_binary);
+
+/**
  * @brief      Writes the mesh out in dolfin XML format.
  *
  * @param[in]  filename  The filename

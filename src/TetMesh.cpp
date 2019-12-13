@@ -564,6 +564,91 @@ void writeOFF(const std::string &filename, const TetMesh &mesh)
     fout.close();
 }
 
+void writeGmsh2(const std::string &filename, const TetMesh &mesh, const bool &is_binary)
+{
+    // mesh format is always in ascii
+    std::ofstream temp_out(filename);
+    float msh_version = 2.2; // make argument 2 or 4
+    size_t data_size = 8;
+
+    temp_out << "$MeshFormat\n"
+         << msh_version << " " << is_binary << " " << data_size << "\n";
+    temp_out.close();
+    temp_out.clear();
+
+    std::ofstream fout(filename, std::ios::app);
+    // if writing out in binary, we now open up fout as binary
+    if (is_binary)
+    {
+        std::ofstream fout(filename, std::ios::binary | std::ios::app);
+        fout << 1 << "\n"; // little or big endian
+    } 
+    // check that fout opened
+    if (!fout.is_open())
+    {
+        std::cerr << "File '" << filename
+                  << "' could not be writen to." << std::endl;
+        exit(1);
+    }
+
+    fout << "$EndMeshFormat\n"
+         << "$Nodes\n"
+         << mesh.size<1>() << "\n";
+
+    // maps casc ID to count
+    std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma_1; // for verts
+    size_t cnt = 1;
+
+    // Print out Vertices
+    fout.precision(6);
+    for (const auto vertexID : mesh.get_level_id<1>())
+    {
+        size_t idx = cnt; // why in loop?
+        sigma_1[mesh.get_name(vertexID)[0]] = cnt++;
+        auto   vertex = *vertexID;
+        //fout << vertexID.indices()[0] << " " << vertex[0] << " " << vertex[1] << " " << vertex[2] << "\n";
+        fout << idx << " " << vertex[0] << " " << vertex[1] << " " << vertex[2] << "\n";
+    }
+
+    // Print out triangles
+    fout << "$EndNodes\n"
+         << "$Elements\n"
+         << mesh.size<3>() + mesh.size<4>() << "\n";
+
+    //std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma_2; // for faces
+    //cnt = 1;
+
+    for (const auto faceID : mesh.get_level_id<3>())
+    {
+        size_t idx = cnt++;
+//        sigma_2[mesh.get_name(faceID)] = cnt++;
+        //auto face = *faceID;
+        auto w = mesh.get_name(faceID);
+        fout << idx << " 2 0  " << sigma_1[w[0]] << " "
+             <<  sigma_1[w[1]] << " "
+             <<  sigma_1[w[2]] << "\n";
+    }
+
+    // Print out tetrahedra
+    cnt = 1;
+    for (const auto tetID : mesh.get_level_id<4>())
+    {
+        size_t idx = cnt++;
+        auto w = mesh.get_name(tetID);
+        fout << idx << " 4 0  " << sigma_1[w[0]] << " "
+             << sigma_1[w[1]] << " "
+             << sigma_1[w[2]] << " "
+             << sigma_1[w[3]] << "\n";
+    }
+
+    fout << "$EndElements";
+    fout.close();
+
+    // Print out tetrahedra
+
+
+}
+
 void writeDolfin(const std::string &filename, const TetMesh &mesh)
 {
 
@@ -597,6 +682,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
         size_t idx = cnt;
         sigma[mesh.get_name(vertexID)[0]] = cnt++;
         auto   vertex = *vertexID;
+        std::cout << "mesh.get_name(): " << mesh.get_name(vertexID)[0] << "cnt: " << cnt << "vertexID.indices()" << vertexID.indices()[0] << std::endl;
 
         fout << "      <vertex index=\"" << vertexID.indices()[0] << "\" "
              << "x=\"" << vertex[0] << "\" "
