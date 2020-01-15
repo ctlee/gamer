@@ -27,6 +27,7 @@ from bpy.props import PointerProperty
 from ast import literal_eval
 from blendgamer.util import *
 
+
 class GAMER_OT_prompt_update(bpy.types.Operator):
     bl_idname = "gamer.prompt_update"
     bl_label = "Warn to update GAMer addon"
@@ -34,8 +35,9 @@ class GAMER_OT_prompt_update(bpy.types.Operator):
 
     def execute(self, context):
         self.report({'WARNING'},
-            "Blendfile was generated with a newer version of GAMer.")
+                    "Blendfile was generated with a newer version of GAMer.")
         return {'FINISHED'}
+
 
 class GAMER_OT_prompt_old_version(bpy.types.Operator):
     bl_idname = "gamer.prompt_old_version"
@@ -44,8 +46,9 @@ class GAMER_OT_prompt_old_version(bpy.types.Operator):
 
     def execute(self, context):
         self.report({'WARNING'},
-            "Blendfile was generated with a version that does not support automatic conversion.")
+                    "Blendfile was generated with a version that does not support automatic conversion.")
         return {'FINISHED'}
+
 
 class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
     bl_idname = "gamer.update_to_2_0_1_from_v_0_1"
@@ -57,7 +60,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
         for obj in context.scene.objects:
             # bpy.context.scene.objects.active = obj
             if obj.type == 'MESH':
-                print("\n"+"="*30+"\n",obj,"\n"+"="*30)
+                print("\n" + "=" * 30 + "\n", obj, "\n" + "=" * 30)
                 if not 'boundaries' in obj:
                     continue
                 hidden = False
@@ -66,11 +69,11 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                     obj.hide = False
                 obj.gamer.remove_all_boundaries(context)
                 for key, bdry in obj['boundaries'].items():
-                    print("Migrating boundary: %s"%(key))
+                    print("Migrating boundary: %s" % (key))
 
                     # First move the material...
-                    mat = bpy.data.materials[key+'_mat']
-                    newBdryID = context.scene.gamer.boundary_id_counter+1
+                    mat = bpy.data.materials[key + '_mat']
+                    newBdryID = context.scene.gamer.boundary_id_counter + 1
                     mat.name = materialNamer(newBdryID)
                     mat.gamer.boundary_id = newBdryID
                     mat.use_fake_user = True
@@ -78,7 +81,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                     obj.gamer.add_boundary(context)
                     newBdry = obj.gamer.markers.boundary_list[obj.gamer.active_bnd_index]
 
-                    newBdry.boundary_name = 'NewBoundaryFrom_%s'%(key)
+                    newBdry.boundary_name = 'NewBoundaryFrom_%s' % (key)
                     newBdry.marker = bdry['marker']
 
                     # # Deselect all
@@ -105,6 +108,9 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
 
 
 def migrate2_0_1__2_0_6():
+    """
+    Migrate metadata formats from 2.0.1 <= v < 2.0.6 to v2.0.6
+    """
     for obj in bpy.data.objects:
         if obj.type == 'MESH':
             # First initialize the data-blocks
@@ -123,15 +129,33 @@ def migrate2_0_1__2_0_6():
             if 'include' in obj['gamer']:
                 del obj['gamer']['include']
 
+
 def getGamerVersion():
+    """
+    Gets the BlendGAMer version
+
+    Returns:
+    tuple
+        Tuple corresponding to the BlendGAMer version
+    """
     return sys.modules['blendgamer'].bl_info.get('version', (-1, -1, -1))
+
 
 def checkVersion():
     """
-    Check the version
+    Checks the blendfile metadata version with the current addon version.
+
+    This function checks the version and attempts to migrate from older
+    metadata formats when possible.
+
+    Warnings
+    --------
+    This function toggles versionerror to trigger UI changes for the end user
+    if it cannot migrate metadata automatically.
     """
     scene = bpy.context.scene
-    print("Blendfile contains GAMer v%s metadata"%(scene.gamer.gamer_version))
+    print("Blendfile contains GAMer v%s metadata" %
+          (scene.gamer.gamer_version))
 
     fileVer = scene.gamer.gamer_version
     isTupleStr = re.compile('\(.*\)')
@@ -147,15 +171,15 @@ def checkVersion():
         if scene.gamer.versionerror == -1:
 
             # Throw an error for older versions of GAMer
-            if compare_version(fileVer, (2,0,0)) < 0:
+            if compare_version(fileVer, (2, 0, 0)) < 0:
                 bpy.ops.gamer.prompt_old_version()
                 break
 
             # Update from 2.0.0 to current
-            elif compare_version(fileVer, (2,0,0)) == 0:
-                newver = (2,0,1)
+            elif compare_version(fileVer, (2, 0, 0)) == 0:
+                newver = (2, 0, 1)
                 print("Metadata version is out of date.",
-                        "Migrating from v(2,0,0) to v%s"%(str(newver)))
+                      "Migrating from v(2,0,0) to v%s" % (str(newver)))
                 for obj in bpy.data.objects:
                     if obj.type == 'MESH':
                         # Migrate name to boundary_name
@@ -167,15 +191,17 @@ def checkVersion():
                 scene.gamer.gamer_version = str(newver)
 
             # Update 2.0.1--2.0.4 metadata to 2.0.5
-            elif compare_version(fileVer, (2,0,1)) >= 0 and compare_version(fileVer, (2,0,5)) < 0 :
-                newver = (2,0,5)
-                print("Migrating from v%s to v%s"%(str(fileVer), str(newver)))
+            elif compare_version(fileVer, (2, 0, 1)) >= 0 and compare_version(fileVer, (2, 0, 5)) < 0:
+                newver = (2, 0, 5)
+                print("Migrating from v%s to v%s" %
+                      (str(fileVer), str(newver)))
                 migrate2_0_1__2_0_5()
                 scene.gamer.gamer_version = str(newver)
 
             # No changes since 2.0.5... yet!
-            elif compare_version(fileVer, (2,0,5)) >= 0:
-                print("Migrating from v%s to v%s"%(str(fileVer), str(currVer)))
+            elif compare_version(fileVer, (2, 0, 5)) >= 0:
+                print("Migrating from v%s to v%s" %
+                      (str(fileVer), str(currVer)))
                 scene.gamer.gamer_version = str(currVer)
 
         fileVer = literal_eval(scene.gamer.gamer_version)
@@ -185,36 +211,46 @@ def checkVersion():
         bpy.ops.gamer.prompt_update()
 
 
-## VERSION UTILITY FUNCTIONS
+# VERSION UTILITY FUNCTIONS
 def cmp(a, b):
     """
     Compare a and b. Returns -1 if b > a, 1 if a > b, or 0 if a == b
     """
     return (a > b) - (a < b)
 
+
 def compare_version(v1, v2):
     """
     Compare version tuples
 
-    Return 1:  v1 >  v2
-    Return 0:  v1 == v2
-    Return -1: v1 <  v2
+    Parameters
+    ----------
+    v1 : tuple
+    v2 : tuple
+
+    Returns
+    -------
+    int
+        Return 1:  v1 >  v2
+        Return 0:  v1 == v2
+        Return -1: v1 <  v2
     """
-    return cmp(*zip(*map(lambda x,y:(x or 0, y or 0),
-            map(int, v1), map(int, v2))))
+    return cmp(*zip(*map(lambda x, y: (x or 0, y or 0),
+                         map(int, v1), map(int, v2))))
 
 
 classes = [GAMER_OT_prompt_update,
            GAMER_OT_prompt_old_version,
            GAMER_OT_update_to_2_0_1_from_v_0_1]
 
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(make_annotations(cls))
 
+
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(make_annotations(cls))
-
