@@ -9,6 +9,6 @@ endif(PYTHONINTERP_FOUND)
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(breathe DEFAULT_MSG
+find_package_handle_standard_args(Breathe DEFAULT_MSG
     BREATHE_IMPORT_STATUS
 )
