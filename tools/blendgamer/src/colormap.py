@@ -231,6 +231,11 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
     amin = np.amin(data)
     amax = np.amax(data)
 
+    # if amin > tmin:
+    #     amin = tmin
+    # if amax < tmax:
+    #     amax = tmax
+
     # Construct the norm and colorbar
     if amin < 0 and amax > 0:
         norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)

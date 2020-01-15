@@ -23,7 +23,7 @@ import bpy
 import bmesh
 
 import blendgamer.report as report
-from blendgamer.util import UNSETMARKER, make_annotations
+from blendgamer.util import UNSETID, UNSETMARKER, make_annotations, getBoundaryMaterial
 import blendgamer.pygamer as pygamer
 
 
@@ -328,7 +328,9 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
             row = layout.row()
             row.label(text="Unmarked marker value = %d"%(UNSETMARKER))
             row = layout.row()
-            row.prop(bpy.data.materials['bnd_unset_mat'], 'diffuse_color', text = "Unmarked boundary color")
+
+            bnd_unset_mat = getBoundaryMaterial(UNSETID)
+            row.prop(bnd_unset_mat, 'diffuse_color', text = "Unmarked boundary color")
 
             row = layout.row()
             row.label(text="Defined Boundaries:", icon='FACESEL')
@@ -399,10 +401,12 @@ class GAMER_UL_boundary_list(bpy.types.UIList):
             split = layout.split(factor = 0.5, align = True)
         col = split.column()
         col = split.column()
-        mats = bpy.data.materials
-        bnd_mat = [ mat for mat in mats if mat.gamer.boundary_id == item.boundary_id ][0]
-        col.prop(bnd_mat, 'diffuse_color', text='')
 
+        bnd_mat = getBoundaryMaterial(item.boundary_id)
+        col.prop(bnd_mat, 'diffuse_color', text='')
+        # Currently no check for if the referenced material does not exist
+        # Also doesn't check if it's associated in a material slot for the
+        # active object.
 
 class GAMER_UL_domain(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):

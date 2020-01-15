@@ -44,6 +44,8 @@ Documentation
 Every function, class, and module that you write must be documented.
 In short, every C++ function, namespace, and other should have a ``doxygen`` compatible description of what the function does, inputs, and outputs.
 All Python functions should have a docstring added.
+There is a mild preference for numpydoc style doctrings.
+You can read more about it `here <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
 Note that github issues and users can be referenced using :issue:`XY` and :user:`username` markups.
 This functionality is enabled by the `sphinx-issue` sphinx extension.
 

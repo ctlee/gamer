@@ -181,34 +181,40 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
         # Get list of materials
         mats = bpy.data.materials
-        if 'bnd_unset_mat' not in mats:
-            # if bnd_unset_mat is not defined, then create it
+        # if 'bnd_unset_mat' not in mats:
+        #     # if bnd_unset_mat is not defined, then create it
+        #     bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
+        #     bnd_unset_mat.use_fake_user = True
+        #     bnd_unset_mat.gamer.boundary_id = UNSETID
+
+        bnd_unset_mat = getBoundaryMaterial(UNSETID)
+        # if bnd_unset_mat is not defined, then create it
+        if bnd_unset_mat is None:
             bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
             bnd_unset_mat.use_fake_user = True
             bnd_unset_mat.gamer.boundary_id = UNSETID
 
-        if 'bnd_unset_mat' not in obj.material_slots:
+        # Ensure bnd_unset_mat is in object.material_slots
+        if bnd_unset_mat.name not in obj.material_slots:
             # Add bnd_unset to material_slots...
             bpy.ops.object.material_slot_add()  # Add new material slot
-            obj.material_slots[-1].material = mats['bnd_unset_mat']
+            obj.material_slots[-1].material = bnd_unset_mat
 
+        # Create a new boundary material. It shouldn't exist already
+        # unless GAMerAddonProperties has been tampered with...
         bnd_mat_name = materialNamer(bnd_id)
-        if bnd_mat_name not in mats:
-            bnd_mat = bpy.data.materials.new(bnd_mat_name)
-            # Ensure material is saved even if nothing is allocated to it
-            bnd_mat.use_fake_user = True
-            bnd_mat.gamer.boundary_id = bnd_id
-        else:
-            bnd_mat = mats[bnd_mat_name]
+        bnd_mat = bpy.data.materials.new(bnd_mat_name)
+        # Ensure material is saved even if nothing is allocated to it
+        bnd_mat.use_fake_user = True
+        bnd_mat.gamer.boundary_id = bnd_id
 
-        # Add new material to object
+        # Add new material to the end of object.material_slots
         bpy.ops.object.material_slot_add()
         obj.material_slots[-1].material = bnd_mat
 
         self.boundary_id = bnd_id
         self.marker = bnd_id
         self.boundary_name = bnd_name
-
 
 
     def delete_boundary(self, context):

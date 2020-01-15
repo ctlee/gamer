@@ -28,28 +28,56 @@ from collections import deque
 import blendgamer.pygamer as pygamer
 import blendgamer.pygamer.surfacemesh as sm
 
-# bpy.context.tool_settings.mesh_select_mode = (True, False, False)
-
 # DEFINITIONS
-UNSETID = 0     # Default should match MeshPolygonIntProperty default
-UNSETMARKER = -1
+UNSETID = 0         # ID value for unset markers
+                    # Default should match MeshPolygonIntProperty default
+UNSETMARKER = -1    # Marker value to output for unset faces
 materialNamer = lambda bnd_id: "%s_mat"%(bnd_id)
 ##
 
 class ObjectMode():
+    """
+    Class defining a Blender Object mode context for with statement semantics
+
+    Attributes
+    ----------
+    mode : str
+        Enum of Blender's mode
+    """
+
     def __enter__(self):
+        """
+        Enter runtime context to cache current mode and switch to Object mode.
+        """
         self.mode = bpy.context.active_object.mode
         bpy.ops.object.mode_set(mode='OBJECT')
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Exit runtime context and restore mode prior to enter.
+        """
         # print("Changing to %s mode"%(self.mode))
         bpy.ops.object.mode_set(mode=self.mode)
 
 def getBoundaryMaterial(boundary_id):
+    """
+    Gets a boundary material from bpy.data.materials by boundary ID.
+
+    Parameters
+    ----------
+    boundary_id : int
+        The boundary ID to search for.
+
+    Returns
+    -------
+    bpy.types.Material or None
+        Returns the material if found or None if not.
+    """
     mats = bpy.data.materials
     for mat in mats:
         if mat.gamer.boundary_id == boundary_id:
             return mat
+    return None
 
 def getMarkerLayer(obj):
     if obj.mode != 'OBJECT':

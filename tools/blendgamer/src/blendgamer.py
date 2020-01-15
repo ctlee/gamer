@@ -31,7 +31,7 @@ from blendgamer.meshstats import MeshQualityReportProperties
 from blendgamer.tetrahedralization import GAMerTetrahedralizationPropertyGroup
 from blendgamer.markers import GAMerBoundaryMarkersList
 from blendgamer.curvatures import GAMerCurvaturesList
-from blendgamer.util import UNSETID, make_annotations
+from blendgamer.util import UNSETID, make_annotations, getBoundaryMaterial
 
 import blendgamer.pygamer as pygamer
 
@@ -55,8 +55,9 @@ def gamer_load_post(dummy):
         checkVersion()
         return
 
-    mats = bpy.data.materials
-    if 'bnd_unset_mat' not in mats:
+    bnd_unset_mat = getBoundaryMaterial(UNSETID)
+    # if 'bnd_unset_mat' not in mats:
+    if not bnd_unset_mat:
         # if bnd_unset_mat is not defined, then create it
         bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
         bnd_unset_mat.use_fake_user = True
@@ -64,6 +65,9 @@ def gamer_load_post(dummy):
 
 
 class GAMerAddonProperties(bpy.types.PropertyGroup):
+    """
+    Property group to store GAMer addon metadata
+    """
     initialized         = BoolProperty(name="GAMer Initialized", default=False)
     matplotlib_found    = BoolProperty(name="Is matplotlib available", default=False)
     gamer_version       = StringProperty(name="GAMer Version", default="0")
