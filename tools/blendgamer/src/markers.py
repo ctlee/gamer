@@ -135,12 +135,10 @@ class GAMER_OT_select_all_boundary_faces(bpy.types.Operator):
             bnd.select_boundary_faces(context)
         return {'FINISHED'}
 
-# PROPERTYGROUPS
-
 
 class GAMerBoundaryMaterial(bpy.types.PropertyGroup):
     """
-    @brief      Class for GAMer boundary material property group.
+    Class for GAMer boundary material property group.
     """
     boundary_id = IntProperty(
         name="Boundary ID associated with material", default=-1)
@@ -148,7 +146,7 @@ class GAMerBoundaryMaterial(bpy.types.PropertyGroup):
 
 class GAMerBoundaryMarker(bpy.types.PropertyGroup):
     """
-    @brief      Class for GAMer boundary markers property group.
+    Class for GAMer boundary markers property group.
     """
     boundary_id = IntProperty(
         name="Boundary ID",
@@ -180,23 +178,16 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         self.name = str(bnd_id)
 
         obj = context.active_object
-        with ObjectMode():
-            ml = getMarkerLayer(obj)
+
+        with BMeshContext(obj) as bm:
+            ml = getBMeshMarkerLayer
+
+        # with ObjectMode():
+        #     ml = getMarkerLayer(obj)
 
         # Get list of materials
         mats = bpy.data.materials
-        # if 'bnd_unset_mat' not in mats:
-        #     # if bnd_unset_mat is not defined, then create it
-        #     bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
-        #     bnd_unset_mat.use_fake_user = True
-        #     bnd_unset_mat.gamer.boundary_id = UNSETID
-
-        bnd_unset_mat = getBoundaryMaterial(UNSETID)
-        # if bnd_unset_mat is not defined, then create it
-        if bnd_unset_mat is None:
-            bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
-            bnd_unset_mat.use_fake_user = True
-            bnd_unset_mat.gamer.boundary_id = UNSETID
+        bnd_unset_mat = getBndUnsetMat()
 
         # Ensure bnd_unset_mat is in object.material_slots
         if bnd_unset_mat.name not in obj.material_slots:
@@ -212,9 +203,8 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         bnd_mat.use_fake_user = True
         bnd_mat.gamer.boundary_id = bnd_id
 
-        # Add new material to the end of object.material_slots
-        bpy.ops.object.material_slot_add()
-        obj.material_slots[-1].material = bnd_mat
+        # Add new material to object material slots
+        obj.data.materials.append(bnd_mat)
 
         self.boundary_id = bnd_id
         self.marker = bnd_id
@@ -227,44 +217,30 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         obj = context.active_object
         mesh = obj.data
 
-        with ObjectMode():
-            ml = getMarkerLayer(obj)
+        # Clean up the materials
+        mats = bpy.data.materials
+        bnd_mat = getMatByBndID(self.boundary_id)
 
-            # Collect faces and reset marker value
-            faces = []
-            for i, marker in enumerate(ml):
-                if marker.value == self.boundary_id:
-                    marker.value = UNSETID
-                    faces.append(i)
+        objmats = obj.data.materials
+        # First remove all instances from slots
+        while bnd_mat.name in objmats:
+            objmats.pop(index = objmats.find(bnd_mat.name))
 
-            # Iterate through faces and select accordingly
-            idx = 0
-            for i in range(0, len(mesh.polygons)):
-                if idx <= len(faces) - 1:
-                    if i == faces[idx]:
-                        mesh.polygons[i].select = True
-                        idx += 1
-                    else:
-                        mesh.polygons[i].select = False
-                else:
-                    mesh.polygons[i].select = False
+        # Remove the global material
+        mats.remove(bnd_mat)
 
-            # Clean up the materials
-            mats = bpy.data.materials
-            bnd_mat_name = materialNamer(self.boundary_id)
-            # First remove from slots
-            obj.active_material_index = obj.material_slots.find(bnd_mat_name)
-            bpy.ops.object.material_slot_remove()
+        # Assign unset material to members
+        bnd_unset_mat = getBndUnsetMat()
+        bnd_unset_mat_idx = obj.material_slots.find(bnd_unset_mat.name)
 
-            # Remove the global materials
-            if bnd_mat_name in mats:
-                bnd_mat = mats[bnd_mat_name]
-                mats.remove(bnd_mat)
+        with BMeshContext(obj) as bm:
+            ml = getBMeshMarkerLayer(bm)
 
-            # Assign unset material to members
-            bnd_unset_mat_idx = obj.material_slots.find('bnd_unset_mat')
-            obj.active_material_index = bnd_unset_mat_idx
-            bpy.ops.object.material_slot_assign()
+            for face in bm.faces:
+                if face[ml] == self.boundary_id:
+                    face[ml] = UNSETID
+                    face.material_index = bnd_unset_mat_idx
+
 
     def assign_boundary_faces(self, context):
         obj = context.active_object
@@ -280,7 +256,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
             mats = bpy.data.materials
             bnd_id = self.boundary_id
 
-            bnd_mat = getBoundaryMaterial(bnd_id)
+            bnd_mat = getMatByBndID(bnd_id)
             # Cache current active material index
             act_mat_idx = obj.active_material_index
 

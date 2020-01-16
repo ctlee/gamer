@@ -59,7 +59,33 @@ class ObjectMode():
         # print("Changing to %s mode"%(self.mode))
         bpy.ops.object.mode_set(mode=self.mode)
 
-def getBoundaryMaterial(boundary_id):
+
+class BMeshContext():
+    def __init__(self, obj):
+        self.obj = obj
+        me = self.obj.data
+        if self.obj.mode == 'EDIT':
+            self.bmeshInstance = bmesh.from_edit_mesh(me)
+        else:
+            self.bmeshInstance = bmesh.new()
+            self.bmeshInstance.from_mesh(me)
+
+    def __enter__(self):
+        return self.bmeshInstance
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        me = self.obj.data
+        if self.obj.mode == 'EDIT':
+            bmesh.update_edit_mesh(me, loop_triangles=True)
+        else:
+            self.bmeshInstance.to_mesh(me)
+        self.bmeshInstance.free()
+        # # grr... cause an update
+        # if me.vertices:
+        #     me.vertices[0].co[0] = me.vertices[0].co[0]
+
+
+def getMatByBndID(boundary_id):
     """
     Gets a boundary material from bpy.data.materials by boundary ID.
 
@@ -79,6 +105,27 @@ def getBoundaryMaterial(boundary_id):
             return mat
     return None
 
+
+def getBndUnsetMat():
+    """
+    Get the material for unset boundaries.
+
+    Initializes the material if it does not already exist.
+
+    Returns
+    -------
+    bpy.types.Material
+        Returns the material corresponding to unmarked boundaries.
+    """
+    bnd_unset_mat = getMatByBndID(UNSETID)
+    # if bnd_unset_mat is not defined, then create it
+    if bnd_unset_mat is None:
+        bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
+        bnd_unset_mat.use_fake_user = True
+        bnd_unset_mat.gamer.boundary_id = UNSETID
+
+    return bnd_unset_mat
+
 def getMarkerLayer(obj):
     if obj.mode != 'OBJECT':
         raise RuntimeError("Blender Layers (Markers) can only be accessed in 'OBJECT' mode.")
@@ -87,6 +134,13 @@ def getMarkerLayer(obj):
     if not markerLayer:
         markerLayer = obj.data.polygon_layers_int.new(name='marker')
     return markerLayer.data
+
+def getBMeshMarkerLayer(bm):
+    markerLayer = bm.faces.layers.int.get('marker')
+    if not markerLayer:
+        markerLayer = bm.faces.layers.int.new(name='marker')
+    bm.faces.ensure_lookup_table()
+    return markerLayer
 
 def getCurvatureLayer(obj, algo, curvatureType):
     name = "%s%s"%(algo,curvatureType)
@@ -300,7 +354,6 @@ def gamerToBlender(report, gmesh,
     bmesh_to_object(obj, bm)
     bpy.ops.object.mode_set(mode=mode)
     return True
-
 
 
 ## Following functions are from 3D Print Addon

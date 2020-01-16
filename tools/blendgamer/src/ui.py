@@ -23,7 +23,7 @@ import bpy
 import bmesh
 
 import blendgamer.report as report
-from blendgamer.util import UNSETID, UNSETMARKER, make_annotations, getBoundaryMaterial
+from blendgamer.util import UNSETID, UNSETMARKER, make_annotations, getMatByBndID
 import blendgamer.pygamer as pygamer
 
 
@@ -341,7 +341,7 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
             row.label(text="Unmarked marker value = %d" % (UNSETMARKER))
             row = layout.row()
 
-            bnd_unset_mat = getBoundaryMaterial(UNSETID)
+            bnd_unset_mat = getMatByBndID(UNSETID)
             row.prop(bnd_unset_mat, 'diffuse_color',
                      text="Unmarked boundary color")
 
@@ -420,7 +420,7 @@ class GAMER_UL_boundary_list(bpy.types.UIList):
         col = split.column()
         col = split.column()
 
-        bnd_mat = getBoundaryMaterial(item.boundary_id)
+        bnd_mat = getMatByBndID(item.boundary_id)
         col.prop(bnd_mat, 'diffuse_color', text='')
         # Currently no check for if the referenced material does not exist
         # Also doesn't check if it's associated in a material slot for the
