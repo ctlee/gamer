@@ -118,7 +118,7 @@ def curveToData(crv, context, report):
     :returns:   Array of converted
     :rtype:     numpy.ndarray
     """
-    obj = getActiveMeshObject(report)
+    obj = getActiveMeshObject()
     bm = bmesh_from_object(obj)
 
     with ObjectMode():

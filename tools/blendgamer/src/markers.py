@@ -182,6 +182,7 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         with BMeshContext(obj) as bm:
             ml = getBMeshMarkerLayer
 
+        # The older deprecated way by manipulating modes...
         # with ObjectMode():
         #     ml = getMarkerLayer(obj)
 
@@ -243,32 +244,27 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
 
 
     def assign_boundary_faces(self, context):
+        """Assign boundary marker to selected faces
+
+        Args:
+            context (TYPE): Blender context
+        """
         obj = context.active_object
         mesh = obj.data
 
+        # Material to associate
+        bnd_mat = getMatByBndID(self.boundary_id)
+        matID = obj.material_slots.find(bnd_mat.name)
+
         if mesh.total_face_sel > 0:
-            # Collect list of faces
-            face_set = set()
-            with ObjectMode():
-                for f in mesh.polygons:
-                    if f.select:
-                        face_set.add(f.index)
-            mats = bpy.data.materials
-            bnd_id = self.boundary_id
+            with BMeshContext(obj) as bm:
+                ml = getBMeshMarkerLayer(bm)
+                for face in bm.faces:
+                    # Apply boundary marker label if selected
+                    if face.select == True:
+                        face[ml] = self.boundary_id
+                        face.material_index = matID
 
-            bnd_mat = getMatByBndID(bnd_id)
-            # Cache current active material index
-            act_mat_idx = obj.active_material_index
-
-            # Assign material to selected
-            bnd_mat_idx = obj.material_slots.find(bnd_mat.name)
-            obj.active_material_index = bnd_mat_idx
-            bpy.ops.object.material_slot_assign()
-
-            # Reset to cached active material index
-            obj.active_material_index = act_mat_idx
-            # Set the internal GAMer marker layer values
-            self.set_boundary_faces(context, face_set)
 
     def repaint_boundary_faces(self, context):
         obj = context.active_object

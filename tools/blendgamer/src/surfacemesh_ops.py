@@ -158,7 +158,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
-            return gamerToBlender(report, gmesh)
+            return gamerToBlender(gmesh)
         return False
 
 
@@ -170,7 +170,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
-            return gamerToBlender(report, gmesh)
+            return gamerToBlender(gmesh)
         return False
 
 
@@ -182,7 +182,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
-            return gamerToBlender(report, gmesh)
+            return gamerToBlender(gmesh)
         return False
 
 
@@ -194,7 +194,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
-            return gamerToBlender(report, gmesh)
+            return gamerToBlender(gmesh)
         return False
 
 
@@ -206,7 +206,7 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
             except Exception as e:
                 report({'ERROR'}, str(e))
                 return False
-            return gamerToBlender(report, gmesh)
+            return gamerToBlender(gmesh)
         return False
 
 
