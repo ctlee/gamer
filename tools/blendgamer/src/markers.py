@@ -135,6 +135,17 @@ class GAMER_OT_select_all_boundary_faces(bpy.types.Operator):
             bnd.select_boundary_faces(context)
         return {'FINISHED'}
 
+class GAMER_OT_deselect_all_boundary_faces(bpy.types.Operator):
+    bl_idname = "gamer.deselect_all_boundary_faces"
+    bl_label = "Deselect all marked faces"
+    bl_description = "Deselect all faces of selected boundary"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        for bnd in context.object.gamer.markers.boundary_list:
+            bnd.deselect_boundary_faces(context)
+        return {'FINISHED'}
+
 
 class GAMerBoundaryMaterial(bpy.types.PropertyGroup):
     """
@@ -182,10 +193,6 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         with BMeshContext(obj) as bm:
             ml = getBMeshMarkerLayer
 
-        # The older deprecated way by manipulating modes...
-        # with ObjectMode():
-        #     ml = getMarkerLayer(obj)
-
         # Get list of materials
         mats = bpy.data.materials
         bnd_unset_mat = getBndUnsetMat()
@@ -222,10 +229,17 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         mats = bpy.data.materials
         bnd_mat = getMatByBndID(self.boundary_id)
 
-        objmats = obj.data.materials
-        # First remove all instances from slots
-        while bnd_mat.name in objmats:
-            objmats.pop(index = objmats.find(bnd_mat.name))
+        with ObjectMode():
+            # Material slots can only be removed in object mode!
+            objmats = obj.data.materials
+            # First remove all instances from slots
+            while bnd_mat.name in objmats:
+                idx = objmats.find(bnd_mat.name)
+                if bpy.app.version < (2, 81, 0):
+                    objmats.pop(index = idx, update_data = True)
+                else:
+                    objmats.pop(index = idx)
+
 
         # Remove the global material
         mats.remove(bnd_mat)
@@ -233,6 +247,10 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         # Assign unset material to members
         bnd_unset_mat = getBndUnsetMat()
         bnd_unset_mat_idx = obj.material_slots.find(bnd_unset_mat.name)
+        # Link the material to the object if it's somehow missing
+        if bnd_unset_mat_idx == -1:
+            obj.data.materials.append(bnd_unset_mat)
+            bnd_unset_mat_idx = obj.material_slots.find(bnd_unset_mat.name)
 
         with BMeshContext(obj) as bm:
             ml = getBMeshMarkerLayer(bm)
@@ -255,6 +273,10 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         # Material to associate
         bnd_mat = getMatByBndID(self.boundary_id)
         matID = obj.material_slots.find(bnd_mat.name)
+        # Link the material to the object if it's somehow missing
+        if matID == -1:
+            obj.data.materials.append(bnd_mat)
+            matID = obj.material_slots.find(bnd_mat.name)
 
         if mesh.total_face_sel > 0:
             with BMeshContext(obj) as bm:
@@ -270,113 +292,69 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         obj = context.active_object
         mats = bpy.data.materials
 
-        bnd_id = self.boundary_id
+        # Add unset boundary to materials
+        bnd_mat = getBndUnsetMat()
+        matID = obj.material_slots.find(bnd_mat.name)
+        # Link the material to the object if it's somehow missing
+        if matID == -1:
+            obj.data.materials.append(bnd_mat)
+            matID = obj.material_slots.find(bnd_mat.name)
 
-        if 'bnd_unset_mat' not in obj.material_slots:
-            # Add bnd_unset to material_slots...
-            bpy.ops.object.material_slot_add()  # Add new material slot
-            obj.material_slots[-1].material = mats['bnd_unset_mat']
+        # Material to associate
+        bnd_mat = getMatByBndID(self.boundary_id)
+        matID = obj.material_slots.find(bnd_mat.name)
+        # Link the material to the object if it's somehow missing
+        if matID == -1:
+            obj.data.materials.append(bnd_mat)
+            matID = obj.material_slots.find(bnd_mat.name)
 
-        bnd_mat_name = materialNamer(bnd_id)
-        # Check if material slot is associated
-        if bnd_mat_name not in obj.material_slots:
-            bpy.ops.object.material_slot_add()  # Add new material slot
-            obj.material_slots[-1].material = mats[bnd_mat_name]
-
-        # Deselect all first
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        # Select marked faces
-        self.select_boundary_faces(context)
-        bpy.ops.object.mode_set(mode='EDIT')
-
-        # Repaint boundary
-        bnd_mat_idx = obj.material_slots.find(bnd_mat_name)
-        obj.active_material_index = bnd_mat_idx
-        bpy.ops.object.material_slot_assign()
+        with BMeshContext(obj) as bm:
+            ml = getBMeshMarkerLayer(bm)
+            for face in bm.faces:
+                # Apply boundary marker material
+                if face[ml] == self.boundary_id:
+                    face.material_index = matID
 
     def remove_boundary_faces(self, context):
         obj = context.active_object
         mesh = obj.data
 
-        if (mesh.total_face_sel > 0):
-            face_set = self.get_boundary_faces(context)
+        # Material to associate
+        bnd_mat = getBndUnsetMat()
+        matID = obj.material_slots.find(bnd_mat.name)
+        # Link the material to the object if it's somehow missing
+        if matID == -1:
+            obj.data.materials.append(bnd_mat)
+            matID = obj.material_slots.find(bnd_mat.name)
 
-            with ObjectMode():
-                ml = getMarkerLayer(obj)
-                for f in mesh.polygons:
-                    if f.select:
-                        if f.index in face_set:
-                            ml[f.index].value = UNSETID
-                        else:   # Remove selection from set to not mess up materials
-                            f.select = False
-            bnd_unset_mat_idx = obj.material_slots.find('bnd_unset_mat')
-            obj.active_material_index = bnd_unset_mat_idx
-            # Assign selected material to selected
-            bpy.ops.object.material_slot_assign()
+        if (mesh.total_face_sel > 0):
+            with BMeshContext(obj) as bm:
+                ml = getBMeshMarkerLayer(bm)
+                for face in bm.faces:
+                    if face.select and face[ml] == self.boundary_id:
+                        face[ml] = UNSETID
+                        face.material_index = matID
 
     def select_boundary_faces(self, context):
         obj = context.active_object
-        face_set = self.get_boundary_faces(context)
 
-        bm = bmesh_from_object(obj)
-        bm.faces.ensure_lookup_table()
-        for f in face_set:
-            bm.faces[f].select_set(True)
+        with BMeshContext(obj) as bm:
+            ml = getBMeshMarkerLayer(bm)
 
-        bmesh_to_object(obj, bm)
+            for face in bm.faces:
+                if face[ml] == self.boundary_id:
+                    face.select_set(True)
 
     def deselect_boundary_faces(self, context):
         obj = context.active_object
 
-        face_set = self.get_boundary_faces(context)
-        bm = bmesh_from_object(obj)
-        bm.faces.ensure_lookup_table()
-        for f in face_set:
-            bm.faces[f].select_set(False)
+        with BMeshContext(obj) as bm:
+            ml = getBMeshMarkerLayer(bm)
 
-        bmesh_to_object(obj, bm)
-
-    def get_boundary_faces(self, context):
-        """
-        Given return the set of boundary face indices for this boundary
-
-        @param      self     The object
-        @param      context  The context
-
-        @return     The boundary faces.
-        """
-        face_set = set()
-        with ObjectMode():
-            ml = getMarkerLayer(context.active_object)
-            for i, marker in enumerate(ml):
-                if marker.value == self.boundary_id:
-                    face_set.add(i)
-        return face_set
-
-    def set_boundary_faces(self, context, face_set):
-        """
-        Sets the value of the Boundary Marker Layer
-        Set the faces of a given boundary on object, given a set of faces
-
-        @param      context   The context
-        @param      face_set  The face set
-        """
-        obj = context.active_object
-
-        with ObjectMode():
-            ml = getMarkerLayer(obj)
-            for face in face_set:
-                ml[face].value = self.boundary_id
-
-    # def copyBoundaries(self, fromObject, toObject):
-    #     """
-    #     Copy boundary metadata from boundaries into object
-    #     """
-    #     for bdry in fromobject.gamer.markers.boundary_list:
-    #         toobject.gamer.markers.copyBoundary(toObject, bdry)
+            for face in bm.faces:
+                if face[ml] == self.boundary_id:
+                    face.select_set(False)
+            # bm.select_flush_mode()
 
     # TODO: (10) Enforce MCell boundary naming conventions
     # def check_boundary_name(self, bnd_name_list):
@@ -472,7 +450,8 @@ classes = [GAMerBoundaryMarker,
            GAMER_OT_remove_boundary_faces,
            GAMER_OT_select_boundary_faces,
            GAMER_OT_deselect_boundary_faces,
-           GAMER_OT_select_all_boundary_faces]
+           GAMER_OT_select_all_boundary_faces,
+           GAMER_OT_deselect_all_boundary_faces]
 
 
 def register():

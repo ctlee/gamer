@@ -394,6 +394,8 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
                 row = layout.row()
                 row.operator("gamer.select_all_boundary_faces",
                              text="Select All Marked Boundaries")
+                row.operator("gamer.deselect_all_boundary_faces",
+                             text="Deselect All Marked Boundaries")
         else:
             layout.label(
                 text="Select a mesh object to use GAMer boundary marking features", icon='HAND')
