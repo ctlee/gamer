@@ -240,32 +240,6 @@ def getMeshVertices(obj, get_selected_vertices=False):
         return vertices
 
 
-def createMesh(mesh_name, verts, faces):
-    """
-    @brief      Creates a new blender mesh from arrays of vertex and face
-
-    Parameters
-    ----------
-    mesh_name : TYPE
-        Description
-    verts : TYPE
-        Description
-    faces : TYPE
-        Description
-
-    Returns
-    -------
-    TYPE
-        Description
-    """
-    mesh = bpy.data.meshes.new(mesh_name)
-    mesh.from_pydata(verts, [], faces)
-    # mesh.validate(verbose=True)
-    mesh.update()
-    mesh.calc_normals()
-    return mesh
-
-
 def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=True):
     """Convert object to GAMer mesh.
 
@@ -424,13 +398,24 @@ def gamerToBlender(gmesh,
         markersList.append(face.marker)
 
     with ObjectMode():
-        # Save old mesh data...
-        # Can't delete yet or object goes out of context
-        oldmesh = obj.data
-        # Create new mesh and delete old
-        newmesh = createMesh(mesh_name, verts, faces)
-        obj.data = newmesh
-        bpy.data.meshes.remove(oldmesh)
+        if bpy.app.version < (2, 81, 0):
+            # Save old mesh data...
+            # Can't delete yet or object goes out of context
+            oldmesh = obj.data
+            # Create new mesh and delete old
+            mesh = bpy.data.meshes.new(mesh_name)
+            mesh.from_pydata(verts, [], faces)
+            # mesh.validate(verbose=True)
+            mesh.update()
+            # mesh.calc_normals()
+            obj.data = newmesh
+            bpy.data.meshes.remove(oldmesh)
+        else:
+            mesh = obj.data
+            mesh.clear_geometry()
+            mesh.from_pydata(verts, [], faces)
+            mesh.update()
+            # mesh.calc_normals()
 
         ml = getMarkerLayer(obj)
         for i, marker in enumerate(markersList):

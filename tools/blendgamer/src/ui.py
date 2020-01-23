@@ -300,8 +300,6 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
             col.prop(qProps, "export_filebase")
             col.operator("gamer.write_quality_info")
 
-# Object Boundary Panel:
-
 
 class GAMER_UL_curvature_list(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data,
@@ -399,8 +397,6 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
         else:
             layout.label(
                 text="Select a mesh object to use GAMer boundary marking features", icon='HAND')
-
-# Object Boundary Panel:
 
 
 class GAMER_UL_boundary_list(bpy.types.UIList):

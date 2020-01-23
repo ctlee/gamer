@@ -196,12 +196,10 @@ class GAMerBoundaryMarker(bpy.types.PropertyGroup):
         # Get list of materials
         mats = bpy.data.materials
         bnd_unset_mat = getBndUnsetMat()
-
         # Ensure bnd_unset_mat is in object.material_slots
         if bnd_unset_mat.name not in obj.material_slots:
             # Add bnd_unset to material_slots...
-            bpy.ops.object.material_slot_add()  # Add new material slot
-            obj.material_slots[-1].material = bnd_unset_mat
+            obj.data.materials.append(bnd_unset_mat)
 
         # Create a new boundary material. It shouldn't exist already
         # unless GAMerAddonProperties has been tampered with...
@@ -411,10 +409,10 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         for bnd in self.boundary_list:
             bnd.repaint_boundary_faces(context)
 
-        # Select all
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.object.mode_set(mode='OBJECT')
+        # # Select all
+        # bpy.ops.object.mode_set(mode='EDIT')
+        # bpy.ops.mesh.select_all(action='SELECT')
+        # bpy.ops.object.mode_set(mode='OBJECT')
 
     def remove_all_boundaries(self, context):
         for i in range(len(self.boundary_list)):
