@@ -240,24 +240,28 @@ def getMeshVertices(obj, get_selected_vertices=False):
         return vertices
 
 
-def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=True):
+def blenderToGamer(obj=None, map_boundaries=False, autocorrect_normals=True):
     """Convert object to GAMer mesh.
 
     Parameters
     ----------
-    report : TYPE
-        Description
     obj : None, optional
-        Description
+        Object to convert
     map_boundaries : bool, optional
         True if boundary values should be mapped to markers
         instead of boundary_id
     autocorrect_normals : bool, optional
-        Description
+        Automatically flip normals so that volume is positive
 
     Returns
     -------
-    gamer.SurfaceMesh or None: Description
+    gamer.SurfaceMesh
+        GAMer surface mesh from Blender mesh
+
+    Raises
+    ------
+    RuntimeError
+        Complains if something prevents conversion to a valid GAMer mesh.
     """
     # Get the selected mesh
     if not obj:
@@ -313,8 +317,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         for face in faces:
             vertices = deque(face.vertices)
             if len(vertices) != 3:
-                report({'ERROR'}, "Encountered a non-triangular face. GAMer only works with triangulated meshes.")
-                return None
+                raise RuntimeError("Encountered a non-triangular face. GAMer only works with triangulated meshes.")
 
             # Get the orientation from Blender
             max_val = max(vertices)
@@ -334,9 +337,8 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         if autocorrect_normals:
             gmesh.flipNormals()
         else:
-            report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
-            return None
-    return  gmesh
+            raise RuntimeError("Mesh has negative volume. Recompute normals to be outward facing.")
+    return gmesh
 
 
 def gamerToBlender(gmesh,
@@ -353,15 +355,10 @@ def gamerToBlender(gmesh,
     mesh_name : str, optional
         Name of the new mesh data block
 
-    Returns
-    -------
-    bool
-        True on success or False on failure
-
     Raises
     ------
     RuntimeError
-    If an undefined behavior encountered
+        If an undefined behavior encountered
     """
     # Check arguments
     if not isinstance(gmesh, sm.SurfaceMesh):
@@ -370,7 +367,7 @@ def gamerToBlender(gmesh,
     if not obj:
         obj = getActiveMeshObject()
         if not obj:
-            return False
+            raise RuntimeError("Active object is not a MESH.")
 
     mode = obj.mode
 
@@ -434,7 +431,6 @@ def gamerToBlender(gmesh,
         bm.faces[f].select_set(True)
     bmesh_to_object(obj, bm)
     bpy.ops.object.mode_set(mode=mode)
-    return True
 
 
 ## Following functions are from 3D Print Addon

@@ -43,10 +43,16 @@ class GAMER_OT_coarse_dense(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.coarse_dense(context, self.report):
-            self.report({'INFO'}, "GAMer: Coarse Dense complete")
+        try:
+            p = context.scene.gamer.surfmesh_improvement_properties
+            gmesh = blenderToGamer(autocorrect_normals=p.autocorrect_normals)
+            gmesh.coarse_dense(rate=p.dense_rate, numiter=p.dense_iter, rings=p.rings, verbose=p.verbose)
+            gamerToBlender(gmesh)
+
+            self.report({'INFO'}, "GAMer: coarse dense complete")
             return {'FINISHED'}
-        else:
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
 
 
@@ -57,13 +63,18 @@ class GAMER_OT_coarse_flat(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.coarse_flat(context, self.report):
-            self.report({'INFO'}, "GAMer: Coarse Flat complete")
-            return {'FINISHED'}
-        else:
-            self.report({"ERROR"}, result)
-            return {'CANCELLED'}
+        try:
 
+            p = context.scene.gamer.surfmesh_improvement_properties
+            gmesh = blenderToGamer(autocorrect_normals=p.autocorrect_normals)
+            gmesh.coarse_flat(rate=p.flat_rate, numiter=p.flat_iter, rings=p.rings, verbose=p.verbose)
+            gamerToBlender(gmesh)
+
+            self.report({'INFO'}, "GAMer: coarse flat complete")
+            return {'FINISHED'}
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+            return {'CANCELLED'}
 
 class GAMER_OT_smooth(bpy.types.Operator):
     bl_idname       = "gamer.smooth"
@@ -72,10 +83,16 @@ class GAMER_OT_smooth(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.smooth(context, self.report):
+        try:
+            p = context.scene.gamer.surfmesh_improvement_properties
+            gmesh = blenderToGamer(autocorrect_normals=p.autocorrect_normals)
+            gmesh.smooth(max_iter=p.smooth_iter, preserve_ridges=p.preserve_ridges, rings=p.rings, verbose=p.verbose)
+            gamerToBlender(gmesh)
+
             self.report({'INFO'}, "GAMer: Smooth Mesh complete")
             return {'FINISHED'}
-        else:
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
 
 
@@ -86,10 +103,16 @@ class GAMER_OT_normal_smooth(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.normal_smooth(context, self.report):
+        try:
+            p = context.scene.gamer.surfmesh_improvement_properties
+            gmesh = blenderToGamer(autocorrect_normals=p.autocorrect_normals)
+            gmesh.normalSmooth(p.normSmoothAniso)
+            gamerToBlender(gmesh)
+
             self.report({'INFO'}, "GAMer: Normal Smooth complete")
             return {'FINISHED'}
-        else:
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
 
 class GAMER_OT_fill_holes(bpy.types.Operator):
@@ -99,10 +122,16 @@ class GAMER_OT_fill_holes(bpy.types.Operator):
     bl_options      = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        if context.scene.gamer.surfmesh_procs.fill_holes(context, self.report):
+        try:
+            p = context.scene.gamer.surfmesh_improvement_properties
+            gmesh = blenderToGamer(autocorrect_normals=p.autocorrect_normals)
+            gmesh.fillHoles()
+            gamerToBlender(gmesh)
+
             self.report({'INFO'}, "GAMer: Fill Holes complete")
             return {'FINISHED'}
-        else:
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
 
 
@@ -149,65 +178,6 @@ class SurfaceMeshImprovementProperties(bpy.types.PropertyGroup):
     rings           = IntProperty(
         name="LST rings", default=2, min=1, max=5,
         description="The number of neighborhood rings to consider for LST calculation")
-
-    def coarse_dense(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            try:
-                gmesh.coarse_dense(rate=self.dense_rate, numiter=self.dense_iter, rings=self.rings, verbose=self.verbose)
-            except Exception as e:
-                report({'ERROR'}, str(e))
-                return False
-            return gamerToBlender(gmesh)
-        return False
-
-
-    def coarse_flat(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            try:
-                gmesh.coarse_flat(rate=self.flat_rate, numiter=self.flat_iter, rings=self.rings, verbose=self.verbose)
-            except Exception as e:
-                report({'ERROR'}, str(e))
-                return False
-            return gamerToBlender(gmesh)
-        return False
-
-
-    def smooth(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            try:
-                gmesh.smooth(max_iter=self.smooth_iter, preserve_ridges=self.preserve_ridges, rings=self.rings, verbose=self.verbose)
-            except Exception as e:
-                report({'ERROR'}, str(e))
-                return False
-            return gamerToBlender(gmesh)
-        return False
-
-
-    def normal_smooth(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            try:
-                gmesh.normalSmooth(self.normSmoothAniso)
-            except Exception as e:
-                report({'ERROR'}, str(e))
-                return False
-            return gamerToBlender(gmesh)
-        return False
-
-
-    def fill_holes(self, context, report):
-        gmesh = blenderToGamer(report, autocorrect_normals=self.autocorrect_normals)
-        if gmesh:
-            try:
-                gmesh.fillHoles()
-            except Exception as e:
-                report({'ERROR'}, str(e))
-                return False
-            return gamerToBlender(gmesh)
-        return False
 
 
 classes = [GAMER_OT_coarse_dense,

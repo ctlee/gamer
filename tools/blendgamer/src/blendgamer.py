@@ -74,9 +74,9 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
     boundary_id_counter = IntProperty(name="GAMer Boundary id Counter")
     versionerror = IntProperty(name="Version mismatch", default=0)
 
-    surfmesh_procs = PointerProperty(
+    surfmesh_improvement_properties = PointerProperty(
         type=SurfaceMeshImprovementProperties,
-        name="GAMer Surface Mesh Improvement"
+        name="GAMer Surface Mesh Improvement Properties"
     )
 
     mesh_quality_properties = PointerProperty(

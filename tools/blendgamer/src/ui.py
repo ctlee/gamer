@@ -91,7 +91,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        smprops = context.scene.gamer.surfmesh_procs
+        smprops = context.scene.gamer.surfmesh_improvement_properties
         active_obj = context.active_object
         if active_obj and (active_obj.type == 'MESH'):
             box = layout.box()
@@ -154,7 +154,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
 #     def draw(self, context):
 #         layout = self.layout
 
-#         smprops = context.scene.gamer.surfmesh_procs
+#         smprops = context.scene.gamer.surfmesh_improvement_properties
 #         active_obj = context.active_object
 
 #         col = layout.column(align=True)

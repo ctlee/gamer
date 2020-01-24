@@ -409,11 +409,6 @@ class GAMerBoundaryMarkersList(bpy.types.PropertyGroup):
         for bnd in self.boundary_list:
             bnd.repaint_boundary_faces(context)
 
-        # # Select all
-        # bpy.ops.object.mode_set(mode='EDIT')
-        # bpy.ops.mesh.select_all(action='SELECT')
-        # bpy.ops.object.mode_set(mode='OBJECT')
-
     def remove_all_boundaries(self, context):
         for i in range(len(self.boundary_list)):
             # First remove boundary data from mesh:
