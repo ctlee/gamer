@@ -90,10 +90,19 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
     )
 
     def allocate_boundary_id(self):
+        """Allocate the next avilable boundary ID.
+
+        Returns
+        -------
+        int
+            The boundary ID.
+        """
         self.boundary_id_counter += 1
         return self.boundary_id_counter
 
     def init_properties(self):
+        """Initialize BlendGAMer addon properties
+        """
         self.gamer_version = str(getGamerVersion())
         self.boundary_id_counter = 0  # Start counting at 0
 
@@ -103,11 +112,9 @@ class GAMerAddonProperties(bpy.types.PropertyGroup):
             bnd_unset_mat.gamer.boundary_id = UNSETID
             self.initialized = True
 
-    """"
-    Initialize if matplotlib is available
-    """
-
     def check_for_matplotlib(self):
+        """Check if matplotlib is available and set an internal flag.
+        """
         import importlib.util
         mpl_spec = importlib.util.find_spec("matplotlib")
         self.matplotlib_found = mpl_spec is not None

@@ -62,21 +62,61 @@ class ObjectMode():
 
 @contextmanager
 def BMeshContext(obj):
+    if obj.type != 'MESH':
+        raise RuntimeError('Expected object of MESH type.')
+
+    me = obj.data
     if obj.mode == 'EDIT':
-        bm = bmesh.from_edit_mesh(obj.data)
+        bm = bmesh.from_edit_mesh(me)
     else:
         bm = bmesh.new()
-        bm.from_mesh(obj.data)
+        bm.from_mesh(me)
 
     yield bm
 
     if obj.mode == 'EDIT':
-        bmesh.update_edit_mesh(obj.data, loop_triangles=True)
+        bmesh.update_edit_mesh(me, loop_triangles=True)
         # BMesh from edit meshes should never be freed!
         # https://developer.blender.org/T39121
     else:
-        bm.to_mesh(obj.data)
+        bm.to_mesh(me)
         bm.free()
+        del bm
+
+@contextmanager
+def copiedBMeshContext(obj, transform = False, triangulate = False, apply_modifiers = False):
+    """Context for a bmesh copied from the mesh. Changes are not written back to the original mesh.
+    """
+    if obj.type != 'MESH':
+        raise RuntimeError('Expected object of MESH type.')
+
+    if apply_modifiers and obj.modifiers:
+        if bpy.app.version < (2, 80, 0):
+            me = obj.to_mesh(bpy.context.scene, apply_modifiers=True, settings='PREVIEW')
+        else:
+            me = obj.to_mesh()
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    else:
+        me = obj.data
+        if obj.mode == 'EDIT':
+            bm_orig = bmesh.from_edit_mesh(me)
+            bm = bm_orig.copy()
+        else:
+            bm = bmesh.new()
+            bm.from_mesh(me)
+
+    if transform:
+        bm.transform(obj.matrix_world)
+
+    if triangulate:
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+
+    yield bm
+
+    bm.free()
+    del bm
 
 
 def getMatByBndID(boundary_id):
@@ -445,53 +485,6 @@ def clean_float(text):
     return text
 
 
-def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifiers=False):
-    """
-    Returns a transformed, triangulated copy of the mesh
-
-    Parameters
-    ----------
-    obj : TYPE
-        Description
-    transform : bool, optional
-        Description
-    triangulate : bool, optional
-        Description
-    apply_modifiers : bool, optional
-        Description
-
-    Returns
-    -------
-    TYPE
-        Description
-    """
-
-    assert obj.type == 'MESH'
-
-    if apply_modifiers and obj.modifiers:
-        import bpy
-        me = obj.to_mesh(bpy.context.scene, apply_modifiers=True, settings='PREVIEW')
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        bpy.data.meshes.remove(me)
-        del bpy
-    else:
-        me = obj.data
-        if obj.mode == 'EDIT':
-            bm_orig = bmesh.from_edit_mesh(me)
-            bm = bm_orig.copy()
-        else:
-            bm = bmesh.new()
-            bm.from_mesh(me)
-
-    if transform:
-        bm.transform(obj.matrix_world)
-
-    if triangulate:
-        bmesh.ops.triangulate(bm, faces=bm.faces)
-
-    return bm
-
 
 def bmesh_from_object(obj):
     """
@@ -541,60 +534,16 @@ def bmesh_to_object(obj, bm):
         me.vertices[0].co[0] = me.vertices[0].co[0]
 
 
-def bmesh_calc_area(bm):
-    """
-    Calculate the surface area.
-
-    Parameters
-    ----------
-    bm : bmesh
-        BMesh to get surface area of
-
-    Returns
-    -------
-    float
-        Surface area of the mesh
-    """
-    return sum(f.calc_area() for f in bm.faces)
-
-
-def bmesh_check_self_intersect_object(obj):
-    """
-    Check if any faces self intersect
-
-    returns an array of edge index values.
-
-    Parameters
-    ----------
-    obj : TYPE
-        Description
-
-    Returns
-    -------
-    TYPE
-        Description
-    """
-    import array
-    import mathutils
-
-    if not obj.data.polygons:
-        return array.array('i', ())
-
-    bm = bmesh_copy_from_object(obj, transform=False, triangulate=False)
-    tree = mathutils.bvhtree.BVHTree.FromBMesh(bm, epsilon=0.00001)
-    overlap = tree.overlap(tree)
-    faces_error = {i for i_pair in overlap for i in i_pair}
-
-    return array.array('i', faces_error)
-
-
 def make_annotations(cls):
     """Converts class fields to annotations if running with Blender 2.8
 
+    This is a helper function allow code from 2.79 to work with 2.8x versions
+    of Blender. All calls in register and unregister to pass through this.
+
     Returns
     -------
-    TYPE
-        Description
+    class
+        Converted class
     """
     if bpy.app.version < (2, 80):
         return cls

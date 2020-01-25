@@ -251,7 +251,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
             for d in self.domain_list:
                 obj = bpy.data.objects[d.object_name]
-                gmesh = blenderToGamer(report, obj=obj, map_boundaries=True)
+                gmesh = blenderToGamer(obj=obj, map_boundaries=True)
                 if not gmesh:
                     print("blenderToGamer returned a gmesh of None")
                 else:
