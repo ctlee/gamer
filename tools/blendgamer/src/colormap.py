@@ -106,17 +106,21 @@ class DivergingNorm(mpl.colors.Normalize):
         return result
 
 
-def curveToData(crv, context, report):
+def curveToData(crv, context):
     """
     Helper function to take a curvature object and return smoothed data.
 
-    :param      crv:       Curvature object
-    :type       crv:       RNA object with curvature meta information
-    :param      context:   Context of the scene
-    :type       context:   bpy context
+    Parameters
+    ----------
+    crv : Curvature object
+        RNA object with curvature meta information
+    context : Context of the scene
+        Description
 
-    :returns:   Array of converted
-    :rtype:     numpy.ndarray
+    Returns
+    -------
+    numpy.ndarray
+        Array of data values
     """
     obj = getActiveMeshObject()
     bm = bmesh_from_object(obj)
@@ -145,23 +149,23 @@ def curveToData(crv, context, report):
     return data
 
 
-def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
+def dataToVertexColor(crv, context, showplot=False, saveplot=False):
     """
     Convert curvature object to colormap
 
-    :param      crv:       Curvature object
-    :type       crv:       RNA object with curvature meta information
-    :param      context:   Context of the scene
-    :type       context:   bpy context
-    :param      report:    Reporter to return info to the UI
-    :type       report:    bpy reporter
-    :param      showplot:  Show the generated plots
-    :type       showplot:  bool
-    :param      saveplot:  Save plots to file
-    :type       saveplot:  bool
+    Parameters
+    ----------
+    crv : TYPE
+        Description
+    context : TYPE
+        Description
+    showplot : bool, optional
+        Description
+    saveplot : bool, optional
+        Description
     """
 
-    data = curveToData(crv, context, report)
+    data = curveToData(crv, context)
     cmap = colormapDict[crv.colormap]
     file_prefix = "%s_%s_m%dM%dI%dmx%0.2f%s"%(
             bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0],
@@ -262,8 +266,7 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
 
     if vlayer not in mesh.vertex_colors:
         if len(mesh.vertex_colors) == 8:
-            report({'ERROR'}, "Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue.")
-            return False
+            raise RuntimeError("Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue.")
         mesh.vertex_colors.new(name=vlayer)
 
     color_layer = mesh.vertex_colors[vlayer]
@@ -307,11 +310,10 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
     if showplot:
         plt.show()
     plt.close()
-    return True
 
 
-def differencePlotter(context, report, difftype='K1'):
-    obj = getActiveMeshObject(report)
+def differencePlotter(context, difftype='K1'):
+    obj = getActiveMeshObject()
     bm = bmesh_from_object(obj)
 
     with ObjectMode():
@@ -434,7 +436,6 @@ def differencePlotter(context, report, difftype='K1'):
     ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
 
     # extend = 'neither'
-
     if extend == 'neither':
        pass
     elif extend == 'both':

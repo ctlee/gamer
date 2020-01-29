@@ -63,7 +63,7 @@ class ObjectMode():
 @contextmanager
 def BMeshContext(obj):
     if obj.type != 'MESH':
-        raise RuntimeError('Expected object of MESH type.')
+        raise RuntimeError('Expected an object of MESH type.')
 
     me = obj.data
     if obj.mode == 'EDIT':
@@ -75,7 +75,10 @@ def BMeshContext(obj):
     yield bm
 
     if obj.mode == 'EDIT':
-        bmesh.update_edit_mesh(me, loop_triangles=True)
+        if bpy.app.version < (2, 80, 0):
+            bmesh.update_edit_mesh(me, tessface=True)
+        else:
+            bmesh.update_edit_mesh(me, loop_triangles=True)
         # BMesh from edit meshes should never be freed!
         # https://developer.blender.org/T39121
     else:
@@ -445,7 +448,7 @@ def gamerToBlender(gmesh,
             # mesh.validate(verbose=True)
             mesh.update()
             # mesh.calc_normals()
-            obj.data = newmesh
+            obj.data = mesh
             bpy.data.meshes.remove(oldmesh)
         else:
             mesh = obj.data
@@ -466,10 +469,12 @@ def gamerToBlender(gmesh,
     bpy.ops.object.mode_set(mode='OBJECT')
 
     bm = bmesh_from_object(obj)
-    bm.faces.ensure_lookup_table()
-    for f in selectedFaces:
-        bm.faces[f].select_set(True)
-    bmesh_to_object(obj, bm)
+
+    with BMeshContext(obj) as bm:
+        bm.faces.ensure_lookup_table()
+        for f in selectedFaces:
+            bm.faces[f].select_set(True)
+
     bpy.ops.object.mode_set(mode=mode)
 
 

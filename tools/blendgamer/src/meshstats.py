@@ -314,8 +314,12 @@ class GAMER_OT_MeshStats_Check_All(bpy.types.Operator):
             GAMER_OT_MeshStats_Check_Degenerate,
         )
 
-        for cls in check_classes:
-            cls.main_check(obj, info)
+        try:
+            for cls in check_classes:
+                cls.main_check(obj, info)
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+            return {'CANCELLED'}
 
         meshreport.update(*info)
         multiple_obj_warning(self, context)
