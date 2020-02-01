@@ -131,6 +131,7 @@ class GAMER_OT_compute_curvatures(bpy.types.Operator):
     def execute(self, context):
         try:
             obj = getActiveMeshObject()
+            curvatures = obj.gamer.curvatures
             algorithm = obj.gamer.curvatures.algorithm
 
             gmesh = blenderToGamer()
@@ -140,22 +141,22 @@ class GAMER_OT_compute_curvatures(bpy.types.Operator):
                 ml = getCurvatureLayer(obj, algorithm, 'K1')
                 for i in range(0, len(k1)):
                     ml[i].value = k1[i]
-                self.add_curvature(context, 'K1')
+                curvatures.add_curvature(context, 'K1')
 
                 ml = getCurvatureLayer(obj, algorithm, 'K2')
                 for i in range(0, len(k1)):
                     ml[i].value = k2[i]
-                self.add_curvature(context, 'K2')
+                curvatures.add_curvature(context, 'K2')
 
                 ml = getCurvatureLayer(obj, algorithm, 'KG')
                 for i in range(0, len(k1)):
                     ml[i].value = kg[i]
-                self.add_curvature(context, 'KG')
+                curvatures.add_curvature(context, 'KG')
 
                 ml = getCurvatureLayer(obj, algorithm, 'KH')
                 for i in range(0, len(k1)):
                     ml[i].value = kh[i]
-                self.add_curvature(context, 'KH')
+                curvatures.add_curvature(context, 'KH')
 
             # Explicitly free curvature arrays
             del kh
