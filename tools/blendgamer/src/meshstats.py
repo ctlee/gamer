@@ -355,7 +355,7 @@ class MeshQualityReportProperties(bpy.types.PropertyGroup):
     export_path = StringProperty(
             name="Export Directory",
             description="Path to directory where files will be created",
-            default="./", maxlen=1024, subtype='DIR_PATH')
+            default="//", maxlen=1024, subtype='DIR_PATH')
 
     export_filebase = StringProperty(
             name="Filename",

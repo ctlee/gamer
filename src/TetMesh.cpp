@@ -89,7 +89,6 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
     if (nRegions < 1)
     {
-        std::cerr << "Error(makeTetMesh): Expected at least one non-hole SurfaceMesh." << std::endl;
         throw std::runtime_error("No non-hole Surface Meshes found. makeTetMesh expects at least one non-hole SurfaceMesh");
     }
 
@@ -411,9 +410,10 @@ void writeVTK(const std::string &filename, const TetMesh &mesh)
     std::ofstream fout(filename);
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     fout << "# vtk DataFile Version 2.0\n"
@@ -500,9 +500,10 @@ void writeOFF(const std::string &filename, const TetMesh &mesh)
     std::ofstream fout(filename);
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     fout << "OFF\n";
@@ -570,16 +571,16 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
 
     if ((*mesh.get_simplex_up()).higher_order == true)
     {
-        std::cerr << "Dolfin output does not support higher order mesh..." << std::endl;
-        exit(1);
+        throw std::runtime_error("Dolfin output does not support higher order meshes.");
     }
 
     std::ofstream fout(filename);
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     fout << "<?xml version=\"1.0\"?>\n"
@@ -704,9 +705,10 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh)
     std::ofstream fout(filename + ".node");
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename + ".node"
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename + ".node"
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
@@ -737,9 +739,10 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh)
     std::ofstream foutEle(filename + ".ele");
     if (!foutEle.is_open())
     {
-        std::cerr << "File '" << filename + ".ele"
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename + ".ele"
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     // nTetrahedra, nodes per tet, nAttributes

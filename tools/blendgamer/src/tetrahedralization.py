@@ -132,7 +132,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     export_path = StringProperty(
             name="Export Directory",
             description="Path to directory where files will be created",
-            default="./", maxlen=1024, subtype='DIR_PATH'
+            default="//", maxlen=1024, subtype='DIR_PATH'
             )
     export_filebase = StringProperty(
             name="Filename",
@@ -228,6 +228,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
         # filename = self.tet_path
         filename = self.export_path + self.export_filebase
+        filename = bpy.path.abspath(filename)
         if not (self.dolfin or self.paraview):
             self.status = "Please select an output format in Tetrahedralization Settings"
             print(self.status)
@@ -255,14 +256,6 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 if not gmesh:
                     print("blenderToGamer returned a gmesh of None")
                 else:
-                    # # Necessary to prevent garbage collection of gmesh when
-                    # # passing into GAMer
-                    # gmesh.thisown = 0;
-
-                    # # Collect boundary information
-                    # for boundary_name, boundary in zip(boundaries.keys(), boundaries.values()):
-                    #     boundary_markers.append((boundary["marker"], boundary_name))
-
                     print("Mesh %s: num verts: %d numfaces: %d" %(obj_name, gmesh.nVertices, gmesh.nFaces))
                     # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
                     print("Closed: %d; Marker: %d"%(d.is_hole, d.marker))
@@ -272,8 +265,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     globalInfo.marker = d.marker
                     globalInfo.useVolumeConstraint = d.constrain_vol
                     globalInfo.volumeConstraint = d.vol_constraint
+
                     # Write surface mesh to file for debug
-                    g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
+                    # g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
 
                     # Add the mesh
                     gmeshes.append(gmesh)
@@ -281,9 +275,11 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             # Tetrahedralize mesh
             if len(gmeshes) > 0:
 
-                quality_str = "q%.4f/%.4fO8/7AYVC"%(self.max_aspect_ratio,self.min_dihedral)
+                quality_str = "q%.4f/%.4fO8/7AYVCa"%(self.max_aspect_ratio,self.min_dihedral)
 
-                # a%.8f volume constraint..
+                # if self.constrain_vol:
+                #     # a%.8f volume constraint..
+                #     quality_str.append('a%.8f', self.vol_constraint)
                 quality_str += "o2" if self.ho_mesh else ""
 
                 print("========================================")
@@ -303,14 +299,13 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 for fmt in mesh_formats:
                     try:
                         suffix = tetmesh_suffices[tetmesh_formats.index(fmt)]
-                        print ( "Writing to " + fmt + " file: " + filename + suffix )
+                        report({'INFO'}, "Writing to " + fmt + " file: " + filename + suffix)
                         if fmt == 'dolfin':
-                            g.writeDolfin(filename+suffix, tetmesh)
+                                g.writeDolfin(filename+suffix, tetmesh)
                         if fmt == 'paraview':
                             g.writeVTK(filename+suffix, tetmesh)
                     except Exception as ex:
-                        print ( "Error: Unable to write to " + fmt + " file: " + filename + suffix )
-                        print ( "   " + str(ex) )
+                        report({'ERROR'}, str(ex))
 
         print ( "######################## End Tetrahedralize ########################" )
 
