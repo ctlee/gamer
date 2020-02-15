@@ -111,7 +111,7 @@ option(VECTORIZE "Enable vectorization?" OFF)
 option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
 mark_as_advanced(GAMER_CMAKE_VERBOSE)
 
-option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." OFF)
+option(FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." OFF)
 if (FORCE_COLORED_OUTPUT)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
        add_compile_options (-fdiagnostics-color=always)
@@ -142,6 +142,8 @@ if(VECTORIZE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
 
+# Compile GAMer in memory where possible. Note that this can break compilation
+# on remote VMs such at readthedocs.io
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 

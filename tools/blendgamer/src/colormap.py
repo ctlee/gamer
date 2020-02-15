@@ -106,19 +106,23 @@ class DivergingNorm(mpl.colors.Normalize):
         return result
 
 
-def curveToData(crv, context, report):
+def curveToData(crv, context):
     """
     Helper function to take a curvature object and return smoothed data.
 
-    :param      crv:       Curvature object
-    :type       crv:       RNA object with curvature meta information
-    :param      context:   Context of the scene
-    :type       context:   bpy context
+    Parameters
+    ----------
+    crv : Curvature object
+        RNA object with curvature meta information
+    context : Context of the scene
+        Description
 
-    :returns:   Array of converted
-    :rtype:     numpy.ndarray
+    Returns
+    -------
+    numpy.ndarray
+        Array of data values
     """
-    obj = getActiveMeshObject(report)
+    obj = getActiveMeshObject()
     bm = bmesh_from_object(obj)
 
     with ObjectMode():
@@ -145,23 +149,23 @@ def curveToData(crv, context, report):
     return data
 
 
-def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
+def dataToVertexColor(crv, context, showplot=False, saveplot=False):
     """
     Convert curvature object to colormap
 
-    :param      crv:       Curvature object
-    :type       crv:       RNA object with curvature meta information
-    :param      context:   Context of the scene
-    :type       context:   bpy context
-    :param      report:    Reporter to return info to the UI
-    :type       report:    bpy reporter
-    :param      showplot:  Show the generated plots
-    :type       showplot:  bool
-    :param      saveplot:  Save plots to file
-    :type       saveplot:  bool
+    Parameters
+    ----------
+    crv : TYPE
+        Description
+    context : TYPE
+        Description
+    showplot : bool, optional
+        Description
+    saveplot : bool, optional
+        Description
     """
 
-    data = curveToData(crv, context, report)
+    data = curveToData(crv, context)
     cmap = colormapDict[crv.colormap]
     file_prefix = "%s_%s_m%dM%dI%dmx%0.2f%s"%(
             bpy.path.basename(bpy.context.blend_data.filepath).split('.')[0],
@@ -231,6 +235,11 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
     amin = np.amin(data)
     amax = np.amax(data)
 
+    # if amin > tmin:
+    #     amin = tmin
+    # if amax < tmax:
+    #     amax = tmax
+
     # Construct the norm and colorbar
     if amin < 0 and amax > 0:
         norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
@@ -257,8 +266,7 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
 
     if vlayer not in mesh.vertex_colors:
         if len(mesh.vertex_colors) == 8:
-            report({'ERROR'}, "Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue.")
-            return False
+            raise RuntimeError("Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue.")
         mesh.vertex_colors.new(name=vlayer)
 
     color_layer = mesh.vertex_colors[vlayer]
@@ -302,23 +310,40 @@ def dataToVertexColor(crv, context, report, showplot=False, saveplot=False):
     if showplot:
         plt.show()
     plt.close()
-    return True
 
 
-def differencePlotter(context, report, difftype='K1'):
-    obj = getActiveMeshObject(report)
+def differencePlotter(context, difftype='K1'):
+    obj = getActiveMeshObject()
+    bm = bmesh_from_object(obj)
 
     with ObjectMode():
-        mdbsk1 = getCurvatureLayer(obj, 'MDSB', difftype)
-        jetsk1 = getCurvatureLayer(obj, 'JETS', difftype)
+        mdsb = getCurvatureLayer(obj, 'MDSB', difftype)
+        jets = getCurvatureLayer(obj, 'JETS', difftype)
 
-        mdsbk1_data = np.zeros(len(obj.data.vertices), dtype=np.float)
-        mdbsk1.foreach_get('value', mdsbk1_data)
+        mdsb_data = np.zeros(len(obj.data.vertices), dtype=np.float)
+        mdsb.foreach_get('value', mdsb_data)
 
-        jetsk1_data = np.zeros(len(obj.data.vertices), dtype=np.float)
-        jetsk1.foreach_get('value', jetsk1_data)
+        jets_data = np.zeros(len(obj.data.vertices), dtype=np.float)
+        jets.foreach_get('value', jets_data)
 
-    data = mdsbk1_data - jetsk1_data
+        tmpmdsb = np.zeros(len(obj.data.vertices), dtype=np.float)
+        tmpjets = np.zeros(len(obj.data.vertices), dtype=np.float)
+        for v in bm.verts:
+            count = 1
+            tmpmdsb[v.index] = mdsb_data[v.index]
+            tmpjets[v.index] = jets_data[v.index]
+
+            for e in v.link_edges:
+                v_other = e.other_vert(v)
+
+                tmpmdsb[v.index] += mdsb_data[v_other.index]
+                tmpjets[v.index] += jets_data[v_other.index]
+                count += 1
+            tmpmdsb[v.index] /= count
+            tmpjets[v.index] /= count
+        mdsb_data = np.array(tmpmdsb, copy=True)
+        jets_data = np.array(tmpjets, copy=True)
+    data = mdsb_data - jets_data
 
     cmap = colormapDict['PRGN']
     file_prefix = "%s_difference"%(difftype)
@@ -336,12 +361,13 @@ def differencePlotter(context, report, difftype='K1'):
     plt.axvline(amin, color='r', linestyle='dashed', linewidth=1)
     plt.axvline(amax, color='r', linestyle='dashed', linewidth=1)
 
-
+    # Save full data
+    np.savez(context.object.name+'difference'+difftype+'.npz', data)
     extend = 'neither'
-    tmin = amin
-    tmax = amax
-    # tmin = np.percentile(data,2)
-    # tmax = np.percentile(data,98)
+    # tmin = amin
+    # tmax = amax
+    tmin = np.percentile(data,1)
+    tmax = np.percentile(data,99)
 
     ax.axvline(tmin, color='g', linestyle='dashed', linewidth=2)
     ax.axvline(tmax, color='g', linestyle='dashed', linewidth=2)
@@ -409,8 +435,7 @@ def differencePlotter(context, report, difftype='K1'):
 
     ticklabels = [r"{:0.1f}".format(tick) for tick in ticks]
 
-    extend = 'neither'
-
+    # extend = 'neither'
     if extend == 'neither':
        pass
     elif extend == 'both':
@@ -424,7 +449,8 @@ def differencePlotter(context, report, difftype='K1'):
     cb.ax.tick_params(labelsize=14)
     cb.set_label("%s [$\mu m^{-1}$]"%(vlayer), size=16)
 
-    plt.show()
+    plt.savefig(context.object.name+'difference'+difftype+'.pdf', format='pdf')
+    # plt.show()
     plt.close()
 
 
