@@ -3,15 +3,24 @@ Changelog
 #########
 
 ******************
-2.1.0 (??-??-????)
+2.0.6 (02-25-2020)
 ******************
+
+This is a maintenance release which improves compatibility with ``blender`` add-on development ideals along with some fixes.
 
 **New Features**:
 
-- Generalized decimation for Tetrahedral meshes (:pr:`33`). Thanks to :user:`ishantimalsina` and :user:`mvhsan`.
+- Broad adoption of ``BMesh`` API to reduce calls to ``ops``.
+- Improved error handling in ``BlendGAMer``
+- In ``BlendGAMer``, Boundary marked materials are no longer looked up by name.
+
+**Fixes**:
+
+- Resolves premature exit from ``tetrahedralize``.
+- Cell markers are now correctly propagated from ``tetgen``.
 
 ******************
-2.0.5 (??-??-????)
+2.0.5 (11-11-2019)
 ******************
 
 **New Features**:
