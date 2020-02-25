@@ -1130,7 +1130,7 @@ std::tuple<bool, int, int, int> getBettiNumbers(SurfaceMesh& mesh){
                     // If on a boundary stop otherwise add neighboring edges to
                     // the queue
                     auto w = mesh.get_cover(curr);
-                    if (w.size() == 1) {hasboundary = true;
+                    if (w.size() <= 1) {hasboundary = true;
                     }
                     else if (w.size() == 2)
                     {
