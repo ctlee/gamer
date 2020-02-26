@@ -88,7 +88,6 @@ def register():
 
     types = bpy.types
     types.Scene.gamer = PointerProperty(type=blendgamer.GAMerAddonProperties)
-    # types.Object.gamer = PointerProperty(type=markers.GAMerBoundaryMarkersList)
     types.Object.gamer = PointerProperty(type=blendgamer.GAMerObjectProperties)
     types.Material.gamer = PointerProperty(type=markers.GAMerBoundaryMaterial)
 
@@ -96,8 +95,6 @@ def register():
     add_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
 
 def unregister():
-    # from bpy.utils import unregister_class
-
     remove_handler(bpy.app.handlers.load_post, blendgamer.gamer_load_post)
     types = bpy.types
     del types.Material.gamer

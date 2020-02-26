@@ -19,6 +19,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
 
+
+find_package(Git)
+if(NOT Git_FOUND)
+  message(FATAL_ERROR "Git could not be found. The install process requires Git to download dependencies.")
+endif()
+
 if(${CMAKE_VERSION} VERSION_LESS 3.11)
     include(FetchContentLocal)
 else()

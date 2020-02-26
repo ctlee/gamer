@@ -248,10 +248,6 @@ Getting BlendGAMer
 
 .. _BlendGAMer the Easy Way:
 
-.. warning::
-   Currently ``BlendGAMer`` only supports ``Blender`` v2.79b.
-   If you have another version of ``Blender``, please install `Blender v2.79b <https://download.blender.org/release/Blender2.79/>`__ before proceeding.
-
 The Easy Way
 ============
 
@@ -268,7 +264,7 @@ The zip file can be installed by following the traditional `Blender addon instal
 
 .. _github releases: https://github.com/ctlee/gamer/releases
 
-.. _Blender addon installation instructions: https://docs.blender.org/manual/en/latest/preferences/addons.html#header
+.. _Blender addon installation instructions: https://docs.blender.org/manual/en/dev/editors/preferences/addons.html
 
 
 .. _BlendGAMer the Harder Way:
@@ -322,6 +318,7 @@ Note that the prebuilt Blender binaries from the Blender Foundation do not conta
           Blender Version  Python Version
           ===============  ==============
           2.79b            3.5
+          2.8X             3.7
           ===============  ==============
 
           Create a new environment corresponding to the Python version.
@@ -368,6 +365,15 @@ For advanced users only, if you wish to run curvature calculations in ``BlendGAM
 For ``Blender`` versions using the bundled system ``Python``, you may only need to install the relevant ``python3-matplotlib`` or related package for your system.
 
 Otherwise, if you are using a prepackaged version of ``Blender``, the currently recommended method to get ``matplotlib`` is through ``pip``.
+Since ``Blender v2.81``, ``pip`` is included with the bundle.
+Locate the bundled python executable and run the following to install ``pip``.
+
+.. code-block:: sh
+
+   /Applications/Blender2.82.app/Contents/Resources/2.82/python/bin/python3.7m -m pip install matplotlib
+
+
+For earlier ``blender`` versions, continue reading to install ``pip``.
 Fist download the ``get-pip.py`` file from the `pip documentation <https://pip.pypa.io/en/stable/installing/>`__.
 Execute this script using the bundled ``Python`` from ``Blender``.
 

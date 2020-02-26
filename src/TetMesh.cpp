@@ -89,7 +89,6 @@ std::unique_ptr<TetMesh> makeTetMesh(
 
     if (nRegions < 1)
     {
-        std::cerr << "Error(makeTetMesh): Expected at least one non-hole SurfaceMesh." << std::endl;
         throw std::runtime_error("No non-hole Surface Meshes found. makeTetMesh expects at least one non-hole SurfaceMesh");
     }
 
@@ -160,7 +159,7 @@ std::unique_ptr<TetMesh> makeTetMesh(
             p->vertexlist[1] = sigma[w[1]];
             p->vertexlist[2] = sigma[w[2]];
 
-            in.facetmarkerlist[nFaces] = (*faceID).marker == -1 ? 0 : (*faceID).marker;
+            in.facetmarkerlist[nFaces] = (*faceID).marker;
             ++nFaces;
         }
 
@@ -287,15 +286,16 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio)
         // Set marker
         int marker = 0;
 
-        if (tetio.numberoftetrahedronattributes > 0)
+        if (tetio.numberoftetrahedronattributes > 0){
             marker = (int) tetio.tetrahedronattributelist[i * tetio.numberoftetrahedronattributes];
+        }
 
         // Get vertex id's
         int *ptr = &tetio.tetrahedronlist[i*tetio.numberofcorners];
 
         vertices.insert({ptr[0], ptr[1], ptr[2], ptr[3]});
         mesh->insert<4>({ptr[0], ptr[1], ptr[2], ptr[3]},
-                        TMCell(0, marker));
+                        TMCell(marker, false));
     }
 
     // std::cout << "Number of vertices: " << mesh->size<1>() << std::endl;
@@ -410,9 +410,10 @@ void writeVTK(const std::string &filename, const TetMesh &mesh)
     std::ofstream fout(filename);
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     fout << "# vtk DataFile Version 2.0\n"
@@ -499,9 +500,10 @@ void writeOFF(const std::string &filename, const TetMesh &mesh)
     std::ofstream fout(filename);
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     fout << "OFF\n";
@@ -569,16 +571,16 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
 
     if ((*mesh.get_simplex_up()).higher_order == true)
     {
-        std::cerr << "Dolfin output does not support higher order mesh..." << std::endl;
-        exit(1);
+        throw std::runtime_error("Dolfin output does not support higher order meshes.");
     }
 
     std::ofstream fout(filename);
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     fout << "<?xml version=\"1.0\"?>\n"
@@ -609,8 +611,8 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
     // Print out Tetrahedra
     // std::cout << "Printing Tetrahedra" << std::endl;
     cnt = 0;
-    std::vector<std::array<std::size_t, 3> > faceMarkerList;
-    std::vector<std::array<std::size_t, 2> > cellMarkerList;
+    std::vector<std::tuple<std::size_t, std::size_t, int> > faceMarkerList;
+    std::vector<std::tuple<std::size_t, int> > cellMarkerList;
     bool orientationError = false;
 
     fout << "    <cells size=\"" << mesh.size<4>() << "\">\n";
@@ -652,13 +654,11 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
         for (std::size_t i = 0; i < 4; ++i)
         {
             auto        faceID = mesh.get_simplex_down(tetID, tetName[i]);
-            std::size_t mark   = (*faceID).marker;
-            // std::cout << casc::to_string(mesh.get_name(faceID)) << " " << i << std::endl;
-    
-            if (mark != 0)
-                faceMarkerList.push_back({idx, i, mark});
+            int marker = (*faceID).marker;
+            if (marker != 0)
+                faceMarkerList.push_back(std::make_tuple(idx, i, marker));
         }
-        cellMarkerList.push_back({idx, static_cast<std::size_t>((*tetID).marker)});
+        cellMarkerList.push_back(std::make_tuple(idx, (*tetID).marker));
     }
     if (orientationError)
     {
@@ -670,21 +670,27 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh)
     fout << "    <domains>\n";
 
     fout << "      <mesh_value_collection name=\"m\" type=\"uint\" dim=\"2\" size=\"" << faceMarkerList.size() << "\">\n";
-    for (const auto marker : faceMarkerList)
+    for (const auto markerItem : faceMarkerList)
     {
-        fout << "        <value cell_index=\"" << marker[0] << "\" "
-             << " local_entity=\"" << marker[1] << "\" "
-             << " value=\"" << marker[2] << "\" />\n";
+        std::size_t idx, local_entity;
+        int marker;
+        std::tie(idx, local_entity, marker) = markerItem;
+        fout << "        <value cell_index=\"" << idx << "\" "
+             << " local_entity=\"" << local_entity << "\" "
+             << " value=\"" << marker << "\" />\n";
     }
 
     fout << "      </mesh_value_collection>\n";
     fout << "      <mesh_value_collection name=\"m\" type=\"uint\" dim=\"3\" size=\"" << mesh.size<4>() << "\">\n";
 
-    for (const auto marker : cellMarkerList)
+    for (const auto markerItem : cellMarkerList)
     {
-        fout << "        <value cell_index=\"" << marker[0] << "\" "
+        std::size_t idx;
+        int marker;
+        std::tie(idx, marker) = markerItem;
+        fout << "        <value cell_index=\"" << idx  << "\" "
              << " local_entity=\"0\" "
-             << " value=\"" << marker[1] << "\" />\n";
+             << " value=\"" << marker << "\" />\n";
     }
     fout << "      </mesh_value_collection>\n";
     fout << "    </domains>\n";
@@ -699,9 +705,10 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh)
     std::ofstream fout(filename + ".node");
     if (!fout.is_open())
     {
-        std::cerr << "File '" << filename + ".node"
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename + ".node"
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
@@ -732,9 +739,10 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh)
     std::ofstream foutEle(filename + ".ele");
     if (!foutEle.is_open())
     {
-        std::cerr << "File '" << filename + ".ele"
-                  << "' could not be writen to." << std::endl;
-        exit(1);
+        std::stringstream ss;
+        ss << "File '" << filename + ".ele"
+                  << "' could not be written to.";
+        throw std::runtime_error(ss.str());
     }
 
     // nTetrahedra, nodes per tet, nAttributes

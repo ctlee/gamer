@@ -24,34 +24,163 @@ import bmesh
 
 import numpy as np
 from collections import deque
+from contextlib import contextmanager
 
 import blendgamer.pygamer as pygamer
 import blendgamer.pygamer.surfacemesh as sm
 
-# bpy.context.tool_settings.mesh_select_mode = (True, False, False)
-
 # DEFINITIONS
-UNSETID = 0     # Default should match MeshPolygonIntProperty default
-UNSETMARKER = -1
+UNSETID = 0         # ID value for unset markers
+                    # Default should match MeshPolygonIntProperty default
+UNSETMARKER = -1    # Marker value to output for unset faces
 materialNamer = lambda bnd_id: "%s_mat"%(bnd_id)
 ##
 
 class ObjectMode():
+    """Class defining a Blender Object mode context for with statement semantics
+
+    Attributes
+    ----------
+    mode : str
+        Enum of Blender's mode
+    """
     def __enter__(self):
+        """
+        Enter runtime context to cache current mode and switch to Object mode.
+        """
         self.mode = bpy.context.active_object.mode
         bpy.ops.object.mode_set(mode='OBJECT')
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Exit runtime context and restore mode prior to enter.
+        """
         # print("Changing to %s mode"%(self.mode))
         bpy.ops.object.mode_set(mode=self.mode)
+        # Uncomment to handle exceptions
+        # return True
 
-def getBoundaryMaterial(boundary_id):
+@contextmanager
+def BMeshContext(obj):
+    if obj.type != 'MESH':
+        raise RuntimeError('Expected an object of MESH type.')
+
+    me = obj.data
+    if obj.mode == 'EDIT':
+        bm = bmesh.from_edit_mesh(me)
+    else:
+        bm = bmesh.new()
+        bm.from_mesh(me)
+
+    yield bm
+
+    if obj.mode == 'EDIT':
+        if bpy.app.version < (2, 80, 0):
+            bmesh.update_edit_mesh(me, tessface=True)
+        else:
+            bmesh.update_edit_mesh(me, loop_triangles=True)
+        # BMesh from edit meshes should never be freed!
+        # https://developer.blender.org/T39121
+    else:
+        bm.to_mesh(me)
+        bm.free()
+        del bm
+
+@contextmanager
+def copiedBMeshContext(obj, transform = False, triangulate = False, apply_modifiers = False):
+    """Context for a bmesh copied from the mesh. Changes are not written back to the original mesh.
+    """
+    if obj.type != 'MESH':
+        raise RuntimeError('Expected object of MESH type.')
+
+    if apply_modifiers and obj.modifiers:
+        if bpy.app.version < (2, 80, 0):
+            me = obj.to_mesh(bpy.context.scene, apply_modifiers=True, settings='PREVIEW')
+        else:
+            me = obj.to_mesh()
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    else:
+        me = obj.data
+        if obj.mode == 'EDIT':
+            bm_orig = bmesh.from_edit_mesh(me)
+            bm = bm_orig.copy()
+        else:
+            bm = bmesh.new()
+            bm.from_mesh(me)
+
+    if transform:
+        bm.transform(obj.matrix_world)
+
+    if triangulate:
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+
+    yield bm
+
+    bm.free()
+    del bm
+
+
+def getMatByBndID(boundary_id):
+    """
+    Gets a boundary material from bpy.data.materials by boundary ID.
+
+    Parameters
+    ----------
+    boundary_id : int
+        The boundary ID to search for.
+
+    Returns
+    -------
+    bpy.types.Material or None
+        Returns the material if found or None if not.
+    """
     mats = bpy.data.materials
     for mat in mats:
         if mat.gamer.boundary_id == boundary_id:
             return mat
+    return None
+
+
+def getBndUnsetMat():
+    """
+    Get the material for unset boundaries.
+
+    Initializes the material if it does not already exist.
+
+    Returns
+    -------
+    bpy.types.Material
+        Returns the material corresponding to unmarked boundaries.
+    """
+    bnd_unset_mat = getMatByBndID(UNSETID)
+    # if bnd_unset_mat is not defined, then create it
+    if bnd_unset_mat is None:
+        bnd_unset_mat = bpy.data.materials.new('bnd_unset_mat')
+        bnd_unset_mat.use_fake_user = True
+        bnd_unset_mat.gamer.boundary_id = UNSETID
+
+    return bnd_unset_mat
 
 def getMarkerLayer(obj):
+    """Gets the boundary marker layer data of an object
+
+    Parameters
+    ----------
+    obj : bpy.types.Object
+        Object of interest
+
+    Returns
+    -------
+    bpy.types.bpy_prop_collection
+        Containing `bpy.types.MeshPolygonIntProperty` values corresponding to marker boundaryIDs
+
+    Raises
+    ------
+    RuntimeError
+        Data layers can only be accessed in 'OBJECT' mode
+    """
     if obj.mode != 'OBJECT':
         raise RuntimeError("Blender Layers (Markers) can only be accessed in 'OBJECT' mode.")
     markerLayer = obj.data.polygon_layers_int.get('marker')
@@ -60,7 +189,34 @@ def getMarkerLayer(obj):
         markerLayer = obj.data.polygon_layers_int.new(name='marker')
     return markerLayer.data
 
+def getBMeshMarkerLayer(bm):
+    markerLayer = bm.faces.layers.int.get('marker')
+    if not markerLayer:
+        markerLayer = bm.faces.layers.int.new('marker')
+    return markerLayer
+
 def getCurvatureLayer(obj, algo, curvatureType):
+    """Get the data layer corresponding to a specific curvature type
+
+    Parameters
+    ----------
+    obj : bpy.types.Object
+        Object of interest
+    algo : TYPE
+        Description
+    curvatureType : TYPE
+        Description
+
+    Returns
+    -------
+    TYPE
+        Description
+
+    Raises
+    ------
+    RuntimeError
+    Description
+    """
     name = "%s%s"%(algo,curvatureType)
     if obj.mode != 'OBJECT':
         raise RuntimeError("Blender Layers (%s) can only be accessed in 'OBJECT' mode."%(name))
@@ -70,9 +226,19 @@ def getCurvatureLayer(obj, algo, curvatureType):
         layer = obj.data.vertex_layers_float.new(name=name)
     return layer.data
 
-def getActiveMeshObject(report):
+def getActiveMeshObject():
     """
     Returns the active object if it is a mesh or None
+
+    Returns
+    -------
+    bpy.types.Object
+        Mesh object of interest
+
+    Raises
+    ------
+    RuntimeError
+        If active object is not a Mesh or no active object exists.
     """
     obj = bpy.context.active_object
     if obj:
@@ -84,15 +250,26 @@ def getActiveMeshObject(report):
             # if obj.select:
             return obj
         else:
-            report({'ERROR'}, "Active object is not a MESH. Please select a MESH to use this feature.")
+            raise RuntimeError("Active object is not a MESH. Please select a MESH to use this feature.")
     else:
-        report({'ERROR'}, "No active object! Please select a MESH to use this feature.")
-    return None
+        raise RuntimeError("No active object! Please select a MESH to use this feature.")
 
 
 def getMeshVertices(obj, get_selected_vertices=False):
     """
     Get the vertices of mesh object
+
+    Parameters
+    ----------
+    obj : TYPE
+        Description
+    get_selected_vertices : bool, optional
+        Description
+
+    Returns
+    -------
+    TYPE
+        Description
     """
     mesh = obj.data
     vertToVec = lambda v : [v[0], v[1], v[2]]
@@ -106,30 +283,32 @@ def getMeshVertices(obj, get_selected_vertices=False):
         return vertices
 
 
-def createMesh(mesh_name, verts, faces):
-    """
-    @brief      Creates a new blender mesh from arrays of vertex and face
-    """
-    mesh = bpy.data.meshes.new(mesh_name)
-    mesh.from_pydata(verts, [], faces)
-    # mesh.validate(verbose=True)
-    mesh.update()
-    mesh.calc_normals()
-    return mesh
+def blenderToGamer(obj=None, map_boundaries=False, autocorrect_normals=True):
+    """Convert object to GAMer mesh.
 
+    Parameters
+    ----------
+    obj : None, optional
+        Object to convert
+    map_boundaries : bool, optional
+        True if boundary values should be mapped to markers
+        instead of boundary_id
+    autocorrect_normals : bool, optional
+        Automatically flip normals so that volume is positive
 
-def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=True):
-    """
-    Convert object to GAMer mesh.
+    Returns
+    -------
+    gamer.SurfaceMesh
+        GAMer surface mesh from Blender mesh
 
-    map_boundaries: True if boundary values should be mapped to markers
-                    instead of boundary_id
-
-    @Returns    gamer.SurfaceMesh object or None
+    Raises
+    ------
+    RuntimeError
+        Complains if something prevents conversion to a valid GAMer mesh.
     """
     # Get the selected mesh
     if not obj:
-        obj = getActiveMeshObject(report)
+        obj = getActiveMeshObject()
         # Ensure object is good
         if not obj:
             return False
@@ -181,8 +360,7 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         for face in faces:
             vertices = deque(face.vertices)
             if len(vertices) != 3:
-                report({'ERROR'}, "Encountered a non-triangular face. GAMer only works with triangulated meshes.")
-                return None
+                raise RuntimeError("Encountered a non-triangular face. GAMer only works with triangulated meshes.")
 
             # Get the orientation from Blender
             max_val = max(vertices)
@@ -202,23 +380,37 @@ def blenderToGamer(report, obj=None, map_boundaries=False, autocorrect_normals=T
         if autocorrect_normals:
             gmesh.flipNormals()
         else:
-            report({'ERROR'}, "Mesh has negative volume. Recompute normals to be outward facing.")
-            return None
-    return  gmesh
+            raise RuntimeError("Mesh has negative volume. Recompute normals to be outward facing.")
+    return gmesh
 
 
-def gamerToBlender(report, gmesh,
+def gamerToBlender(gmesh,
         obj = None,
         mesh_name="gamer_improved"):
+    """Pass GAMer Surface Mesh back to Blender
+
+    Parameters
+    ----------
+    gmesh : gamer.SurfaceMesh
+        GAMer surface mesh
+    obj : None, optional
+        Object to operate on. Active object is used if unset
+    mesh_name : str, optional
+        Name of the new mesh data block
+
+    Raises
+    ------
+    RuntimeError
+        If an undefined behavior encountered
+    """
     # Check arguments
     if not isinstance(gmesh, sm.SurfaceMesh):
-        report({'ERROR'}, "gamerToBlender expected a pygamer.surfacemesh.SurfaceMesh object")
-        return False
+        raise RuntimeError("gamerToBlender expected a pygamer.surfacemesh.SurfaceMesh object.")
 
     if not obj:
-        obj = getActiveMeshObject(report)
+        obj = getActiveMeshObject()
         if not obj:
-            return False
+            raise RuntimeError("Active object is not a MESH.")
 
     mode = obj.mode
 
@@ -246,13 +438,24 @@ def gamerToBlender(report, gmesh,
         markersList.append(face.marker)
 
     with ObjectMode():
-        # Save old mesh data...
-        # Can't delete yet or object goes out of context
-        oldmesh = obj.data
-        # Create new mesh and delete old
-        newmesh = createMesh(mesh_name, verts, faces)
-        obj.data = newmesh
-        bpy.data.meshes.remove(oldmesh)
+        if bpy.app.version < (2, 81, 0):
+            # Save old mesh data...
+            # Can't delete yet or object goes out of context
+            oldmesh = obj.data
+            # Create new mesh and delete old
+            mesh = bpy.data.meshes.new(mesh_name)
+            mesh.from_pydata(verts, [], faces)
+            # mesh.validate(verbose=True)
+            mesh.update()
+            # mesh.calc_normals()
+            obj.data = mesh
+            bpy.data.meshes.remove(oldmesh)
+        else:
+            mesh = obj.data
+            mesh.clear_geometry()
+            mesh.from_pydata(verts, [], faces)
+            mesh.update()
+            # mesh.calc_normals()
 
         ml = getMarkerLayer(obj)
         for i, marker in enumerate(markersList):
@@ -266,13 +469,13 @@ def gamerToBlender(report, gmesh,
     bpy.ops.object.mode_set(mode='OBJECT')
 
     bm = bmesh_from_object(obj)
-    bm.faces.ensure_lookup_table()
-    for f in selectedFaces:
-        bm.faces[f].select_set(True)
-    bmesh_to_object(obj, bm)
-    bpy.ops.object.mode_set(mode=mode)
-    return True
 
+    with BMeshContext(obj) as bm:
+        bm.faces.ensure_lookup_table()
+        for f in selectedFaces:
+            bm.faces[f].select_set(True)
+
+    bpy.ops.object.mode_set(mode=mode)
 
 
 ## Following functions are from 3D Print Addon
@@ -286,41 +489,21 @@ def clean_float(text):
         text = head + tail
     return text
 
-def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifiers=False):
-    """
-    Returns a transformed, triangulated copy of the mesh
-    """
-
-    assert obj.type == 'MESH'
-
-    if apply_modifiers and obj.modifiers:
-        import bpy
-        me = obj.to_mesh(bpy.context.scene, apply_modifiers=True, settings='PREVIEW')
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        bpy.data.meshes.remove(me)
-        del bpy
-    else:
-        me = obj.data
-        if obj.mode == 'EDIT':
-            bm_orig = bmesh.from_edit_mesh(me)
-            bm = bm_orig.copy()
-        else:
-            bm = bmesh.new()
-            bm.from_mesh(me)
-
-    if transform:
-        bm.transform(obj.matrix_world)
-
-    if triangulate:
-        bmesh.ops.triangulate(bm, faces=bm.faces)
-
-    return bm
 
 
 def bmesh_from_object(obj):
     """
     Object/Edit Mode get mesh, use bmesh_to_object() to write back.
+
+    Parameters
+    ----------
+    obj : TYPE
+        Description
+
+    Returns
+    -------
+    TYPE
+        Description
     """
     me = obj.data
     is_editmode = (obj.mode == 'EDIT')
@@ -336,6 +519,13 @@ def bmesh_to_object(obj, bm):
     """
     Object/Edit Mode update the object.
     NOTE that this free's the bmesh
+
+    Parameters
+    ----------
+    obj : TYPE
+        Description
+    bm : TYPE
+        Description
     """
     me = obj.data
     is_editmode = (obj.mode == 'EDIT')
@@ -343,41 +533,23 @@ def bmesh_to_object(obj, bm):
         bmesh.update_edit_mesh(me, True)
     else:
         bm.to_mesh(me)
-    bm.free()
+        bm.free()
     # grr... cause an update
     if me.vertices:
         me.vertices[0].co[0] = me.vertices[0].co[0]
 
 
-def bmesh_calc_area(bm):
-    """
-    Calculate the surface area.
-    """
-    return sum(f.calc_area() for f in bm.faces)
-
-
-def bmesh_check_self_intersect_object(obj):
-    """
-    Check if any faces self intersect
-
-    returns an array of edge index values.
-    """
-    import array
-    import mathutils
-
-    if not obj.data.polygons:
-        return array.array('i', ())
-
-    bm = bmesh_copy_from_object(obj, transform=False, triangulate=False)
-    tree = mathutils.bvhtree.BVHTree.FromBMesh(bm, epsilon=0.00001)
-    overlap = tree.overlap(tree)
-    faces_error = {i for i_pair in overlap for i in i_pair}
-
-    return array.array('i', faces_error)
-
-
 def make_annotations(cls):
-    """Converts class fields to annotations if running with Blender 2.8"""
+    """Converts class fields to annotations if running with Blender 2.8
+
+    This is a helper function allow code from 2.79 to work with 2.8x versions
+    of Blender. All calls in register and unregister to pass through this.
+
+    Returns
+    -------
+    class
+        Converted class
+    """
     if bpy.app.version < (2, 80):
         return cls
     bl_props = {k: v for k, v in cls.__dict__.items() if isinstance(v, tuple)}

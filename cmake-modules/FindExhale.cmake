@@ -9,6 +9,6 @@ endif(PYTHONINTERP_FOUND)
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(exhale DEFAULT_MSG
+find_package_handle_standard_args(Exhale DEFAULT_MSG
     EXHALE_IMPORT_STATUS
 )

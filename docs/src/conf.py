@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build2.82/lib/'))
 
 import os
 import pygamer
@@ -25,8 +25,8 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.5'
-release = 'v2.0.5-dev-33-g089201e.dirty'
+version = '2.0.6'
+release = 'v2.0.6-dev-21-gdcd4750.dirty'
 
 # -- General configuration ---------------------------------------------------
 

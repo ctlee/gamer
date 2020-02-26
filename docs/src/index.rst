@@ -31,6 +31,24 @@ To acknowledge our contributions please cite the following:
 
 **Referencing the Code:** |GAMer Zenodo|
 
+
+**Reference manuscript:**
+
+.. code-block:: sh
+
+  @article{,
+    title = {An Open Source Mesh Generation Platform for Biophysical Modeling
+             Using Realistic Cellular Geometries},
+    author = {Lee, Christopher T. and Laughlin, Justin G. and Moody, John B.
+              and Amaro, Rommie E. and McCammon, J. Andrew
+              and Holst, Michael J. and Rangamani, Padmini},
+    year = {2020},
+    month = jan,
+    issn = {0006-3495},
+    doi = {10.1016/j.bpj.2019.11.3400},
+    journal = {Biophysical Journal},
+  }
+
 **Technical manuscript:**
 
 .. code-block:: sh

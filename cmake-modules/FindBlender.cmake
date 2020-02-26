@@ -68,14 +68,13 @@ if(BLENDER_EXECUTABLE)
         list(GET _BPY_VERSION 0 BLENDER_PYTHON_VERSION_MAJOR)
         list(GET _BPY_VERSION 1 BLENDER_PYTHON_VERSION_MINOR)
         list(GET _BPY_VERSION 2 BLENDER_PYTHON_VERSION_PATCH)
-    elseif(NOT blender_FIND_QUIETLY)
+    elseif(NOT Blender_FIND_QUIETLY)
             message(WARNING "Blender config failure:\n${_BLENDER_ERROR_VALUE}")
     endif()
 endif()
 
 include(FindPackageHandleStandardArgs)
-
-find_package_handle_standard_args(BLENDER
+find_package_handle_standard_args(Blender
         REQUIRED_VARS
             BLENDER_EXECUTABLE
             BLENDER_VERSION

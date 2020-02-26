@@ -1027,6 +1027,9 @@ void init_SurfaceMesh(py::module& mod){
     SurfMeshCls.def("normalSmooth", &normalSmooth,
         R"delim(
             Perform smoothing of mesh face normals.
+
+            Args:
+                anisotropy (float): Degree of anisotropy.
         )delim"
     );
 

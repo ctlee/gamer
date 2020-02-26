@@ -400,11 +400,11 @@ void centeralize(SurfaceMesh& mesh)
     translate(mesh, -center);
 }
 
-void normalSmooth(SurfaceMesh& mesh)
+void normalSmooth(SurfaceMesh& mesh, double k)
 {
     for (auto nid : mesh.get_level_id<1>())
     {
-        surfacemesh_detail::normalSmoothH(mesh, nid, 2);
+        surfacemesh_detail::normalSmoothH(mesh, nid, k);
     }
     double min, max;
     int nSmall, nLarge;
@@ -1130,7 +1130,7 @@ std::tuple<bool, int, int, int> getBettiNumbers(SurfaceMesh& mesh){
                     // If on a boundary stop otherwise add neighboring edges to
                     // the queue
                     auto w = mesh.get_cover(curr);
-                    if (w.size() == 1) {hasboundary = true;
+                    if (w.size() <= 1) {hasboundary = true;
                     }
                     else if (w.size() == 2)
                     {
