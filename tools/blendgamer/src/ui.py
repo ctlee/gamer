@@ -230,9 +230,9 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
         col.label(text="Curvature Estimation:")
 
         if context.scene.gamer.matplotlib_found:
-            obj = context.object
-            if obj.type == 'MESH':
-                curveProp = obj.gamer.curvatures
+            active_obj = context.active_object
+            if active_obj and (active_obj.type == 'MESH'):
+                curveProp = active_obj.gamer.curvatures
                 row = col.row(align=True)
                 row.operator("gamer.compute_curvatures")
                 row.prop(curveProp, "algorithm", text="")
