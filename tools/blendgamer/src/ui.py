@@ -284,10 +284,10 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
                     # row.operator("gamer.plot_differences")
             else:
                 col.label(
-                    text="Select a mesh object to enable estimation of curvatures", icon='LIGHT')
+                    text="Select a mesh object to enable estimation of curvatures", icon=BULB_ICON)
         else:
             col.label(
-                text="Curvature estimations require matplotlib.", icon='LIGHT')
+                text="Curvature estimations require matplotlib.", icon=BULB_ICON)
 
         box = layout.box()
         col = box.column()
