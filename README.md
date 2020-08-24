@@ -1,7 +1,7 @@
 # Geometry-preserving Adaptive MeshER
 [![DOI](https://zenodo.org/badge/122682242.svg)](https://zenodo.org/badge/latestdoi/122682242)
 [![PyPI](https://img.shields.io/pypi/v/pygamer)](https://pypi.org/project/pygamer/)
-[![Master Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=master)](https://travis-ci.org/ctlee/gamer)
+[![Master Build Status](https://travis-ci.com/ctlee/gamer.svg?branch=master)](https://travis-ci.com/ctlee/gamer)
 [![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/master?svg=true)](https://ci.appveyor.com/project/ctlee/gamer)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
 
@@ -25,8 +25,12 @@ GAMer has the following main features:
 ## Acknowledging your use of GAMer
 Thanks for using GAMer! The developers would love to hear how you are using the tool. Please send us an email or post on GitHub letting us know.
 
-Please cite the above Zenodo DOI to acknowledge the software version and cite the following paper:<br/>
-[Lee, C. T.; Laughlin, J. G.; Angliviel de La Beaumelle, N.; Amaro, R.; McCammon, J. A.; Ramamoorthi, R.; Holst, M. J.; Rangamani, P. GAMer 2: A System for 3D Mesh Processing of Cellular Electron Micrographs. bioRxiv 2019, 534479.](https://www.biorxiv.org/content/10.1101/534479v1)
+Please cite the above Zenodo DOI to acknowledge the software version and cite the following papers:<br/>
+[Lee, C. T.; Laughlin, J. G.; Moody, J. B.; Amaro, R. E.; McCammon, J. A.; Holst, M.; Rangamani, P. An Open-Source Mesh Generation Platform for Biophysical Modeling Using Realistic Cellular Geometries. Biophysical Journal 2020, 118 (5), 1003–1008.](https://doi.org/10.1016/j.bpj.2019.11.3400)
+
+[Lee, C. T.; Laughlin, J. G.; Beaumelle, N. A. de L.; Amaro, R. E.; McCammon, J. A.; Ramamoorthi, R.; Holst, M.; Rangamani, P. 3D Mesh Processing Using GAMer 2 to Enable Reaction-Diffusion Simulations in Realistic Cellular Geometries. PLOS Computational Biology 2020, 16 (4), e1007756.](https://doi.org/10.1371/journal.pcbi.1007756)
+
+
 
 ## Installation
 The following instructions are to build the base GAMer library.
@@ -77,6 +81,6 @@ complex data structure.
 
 ## Development Build Status
 
-[![Development Build Status](https://travis-ci.org/ctlee/gamer.svg?branch=development)](https://travis-ci.org/ctlee/gamer)
-[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
+[![Development Build Status](https://travis-ci.com/ctlee/gamer.svg?branch=development)](https://travis-ci.com/ctlee/gamer)
+[![Development Build Status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=development)](https://gamer.readthedocs.io/en/development?badge=development)
