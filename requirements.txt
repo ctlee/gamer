@@ -1,6 +1,6 @@
 # Required for building
 cmake >= 3.10
-scikit-build >= 0.10.0
+scikit-build
 setuptools
 wheel
 numpy

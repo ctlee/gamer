@@ -66,7 +66,7 @@ string(REGEX REPLACE "\n" ";" _PYTHON_VALUES ${_PYTHON_VALUES})
 list(GET _PYTHON_VALUES 0 PYTHON_SITE_PACKAGES)
 
 file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
-             INPUT ${CMAKE_SOURCE_DIR}/cmake-modules/__init__.py.in)
+             INPUT ${CMAKE_SOURCE_DIR}/cmake/__init__.py.in)
 
 if(SKBUILD)
     install(TARGETS pygamer LIBRARY DESTINATION pygamer)

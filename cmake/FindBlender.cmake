@@ -36,7 +36,7 @@ find_program(BLENDER_EXECUTABLE NAMES blender Blender)
 if(BLENDER_EXECUTABLE)
 
     configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake-modules/blenderexec.py.in
+        ${CMAKE_SOURCE_DIR}/cmake/blenderexec.py.in
         ${CMAKE_CURRENT_BINARY_DIR}/blenderexec.py)
 
     # Get the python path and version from blender
