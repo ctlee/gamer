@@ -74,27 +74,27 @@ jobs:
         repo: ctlee/gamer
 
   - stage: deploy
-  os: windows
-  before_install:
-      - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
-      - export PATH="/c/Python:/c/Python/Scripts:$PATH"
-      - python -m pip install --upgrade pip
-      # - python -m pip install numpy
-  install: skip
-  script:
-    - mkdir -p build && cd build;
-    - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83  -G "Visual Studio 15 2017 Win64"..
-    - cmake --build . --config Release
-  deploy:
-    provider: releases
-    token: $GITHUB_TOKEN
-    draft: true
-    file_glob: true
-    file: "*.zip"
-    skip_cleanup: true
-    overwrite: true
-    on:
-      repo: ctlee/gamer
+    os: windows
+    before_install:
+        - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip
+        # - python -m pip install numpy
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83  -G "Visual Studio 15 2017 Win64"..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
 
 
   - stage: deploy
