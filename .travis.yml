@@ -26,41 +26,41 @@ jobs:
   - stage: test
     os: windows
     before_install:
-        - choco install python --version 3.7.0
+        - choco install python3 --version 3.7.0
         - python -m pip install --upgrade pip
-    env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+    env: PATH=/c/Python:/c/Python/Scripts:$PATH
 
   - stage: test
     os: osx
     osx_image: xcode11.6
-    addons:
-      homebrew:
-        packages: ['cmake', 'ninja']
+    # addons:
+    #   homebrew:
+    #     packages: ['cmake', 'ninja']
   
   - stage: test 
     os: osx
     osx_image: xcode12.2
-    addons:
-      homebrew:
-        packages: ['cmake', 'ninja']
+    # addons:
+    #   homebrew:
+    #     packages: ['cmake', 'ninja']
 
   - stage: test 
     os: linux
     dist: bionic
     compiler: gcc
     python: 3.6
-    addons:
-      apt:
-        packages: ['ninja-build']
+    # addons:
+    #   apt:
+    #     packages: ['ninja-build']
 
   - stage: test
     os: linux
     dist: focal
     compiler: gcc
     python: 3.7
-    addons:
-      apt:
-        packages: ['ninja-build']
+    # addons:
+    #   apt:
+    #     packages: ['ninja-build']
 
 
 before_install:
@@ -74,7 +74,7 @@ install:
       if [ "$TRAVIS_OS_NAME" = "windows" ]; then
         cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -G "Visual Studio 15 2017 Win64" ..
       else
-        cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -GNinja ..
+        cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on ..
       fi
   - cmake --build . --config Release
 
