@@ -50,7 +50,9 @@ jobs:
   #################
   # DEPLOYMENT
   #################
+  # windows blender2.79
   - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: windows
     before_install:
         - choco install python3 --version 3.5.4 --params "/InstallDir:C:\\Python"
@@ -71,9 +73,12 @@ jobs:
       skip_cleanup: true
       overwrite: true
       on:
+        tags: true
         repo: ctlee/gamer
 
+  # windows blender2.83
   - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: windows
     before_install:
         - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
@@ -94,10 +99,12 @@ jobs:
       skip_cleanup: true
       overwrite: true
       on:
+        tags: true
         repo: ctlee/gamer
 
-
+  # linux blender2.79
   - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: linux
     dist: focal
     compiler: gcc
@@ -116,7 +123,7 @@ jobs:
     script:
       - mkdir -p build && cd build;
       - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON  -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.79 ..
-      - cmake --build . --config Release
+      - cmake --build . --config Release -j 2
     deploy:
       provider: releases
       token: $GITHUB_TOKEN
@@ -126,9 +133,12 @@ jobs:
       skip_cleanup: true
       overwrite: true
       on:
+        tags: true
         repo: ctlee/gamer
 
+  # linux blender2.83
   - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: linux
     dist: focal
     compiler: gcc
@@ -147,7 +157,7 @@ jobs:
     script:
       - mkdir -p build && cd build;
       - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
-      - cmake --build . --config Release
+      - cmake --build . --config Release -j 2
     deploy:
       provider: releases
       token: $GITHUB_TOKEN
@@ -157,10 +167,12 @@ jobs:
       skip_cleanup: true
       overwrite: true
       on:
+        tags: true
         repo: ctlee/gamer
 
-
+  # osx blender2.79
   - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: osx
     osx_image: xcode12.2
     before_install:
@@ -174,8 +186,8 @@ jobs:
     install: skip
     script:
       - mkdir -p build && cd build;
-      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
-      - cmake --build . --config Release
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.79 ..
+      - cmake --build . --config Release -j 2
     deploy:
       provider: releases
       token: $GITHUB_TOKEN
@@ -185,9 +197,12 @@ jobs:
       skip_cleanup: true
       overwrite: true
       on:
+        tags: true
         repo: ctlee/gamer
 
+  # osx blender2.83
   - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: osx
     osx_image: xcode12.2
     before_install:
@@ -202,7 +217,7 @@ jobs:
     script:
       - mkdir -p build && cd build;
       - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
-      - cmake --build . --config Release
+      - cmake --build . --config Release -j 2
     deploy:
       provider: releases
       token: $GITHUB_TOKEN
@@ -212,8 +227,10 @@ jobs:
       skip_cleanup: true
       overwrite: true
       on:
+        tags: true
         repo: ctlee/gamer
 
+  # Deploy PyPi
   - stage: deploy
     if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
     os: linux
@@ -251,7 +268,7 @@ install:
       else
         cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on ..
       fi
-  - cmake --build . --config Release
+  - cmake --build . --config Release -j 2
 
 script:
   - ctest -C Release -V -j
