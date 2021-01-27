@@ -65,7 +65,9 @@ option(GAMER_DOCS "Download and configure documentation?" OFF)
 
 option(VECTORIZE "Enable vectorization?" OFF)
 
-option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?")
+option(BLENDER_VERSION_OVERRIDE "Override the version number" "")
+mark_as_advanced(BLENDER_VERSION_OVERRIDE)
+option(GAMER_CMAKE_VERBOSE "Print out information for debugging CMake configuration?" OFF)
 mark_as_advanced(GAMER_CMAKE_VERBOSE)
 
 option(FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." OFF)
