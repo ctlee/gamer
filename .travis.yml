@@ -23,45 +23,56 @@ branches:
 jobs:
   fast_finish: true
   include:
+
   - stage: test
     os: windows
     before_install:
-        - choco install python3 --version 3.7.0
+        - choco install python3 --version 3.5.3 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
         - python -m pip install --upgrade pip
-    env: PATH=/c/Python:/c/Python/Scripts:$PATH
+
+  - stage: test
+    os: windows
+    before_install:
+        - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip
 
   - stage: test
     os: osx
     osx_image: xcode11.6
-    # addons:
-    #   homebrew:
-    #     packages: ['cmake', 'ninja']
-  
+    before_install:
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/home/travis/miniconda/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.5.4 pip numpy
+      - source activate env_name
+      
   - stage: test 
     os: osx
     osx_image: xcode12.2
-    # addons:
-    #   homebrew:
-    #     packages: ['cmake', 'ninja']
+    before_install:
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/home/travis/miniconda/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.7.4 pip numpy
+      - source activate env_name
 
   - stage: test 
     os: linux
     dist: bionic
     compiler: gcc
-    python: 3.6
-    # addons:
-    #   apt:
-    #     packages: ['ninja-build']
+    python: 3.5
 
   - stage: test
     os: linux
     dist: focal
     compiler: gcc
     python: 3.7
-    # addons:
-    #   apt:
-    #     packages: ['ninja-build']
-
 
 before_install:
   - uname -a
