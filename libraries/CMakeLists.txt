@@ -25,11 +25,7 @@ if(NOT Git_FOUND)
   message(FATAL_ERROR "Git could not be found. The install process requires Git to download dependencies.")
 endif()
 
-if(${CMAKE_VERSION} VERSION_LESS 3.11)
-    include(FetchContentLocal)
-else()
-    include(FetchContent)
-endif()
+include(FetchContent)
 
 ###########################
 # GET CASC
@@ -38,6 +34,7 @@ FetchContent_Declare(
     casclib
     GIT_REPOSITORY  https://github.com/ctlee/casc.git
     GIT_TAG         v1.0.5
+    GIT_SHALLOW     TRUE 
     SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-src"
     BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-build"
 )
@@ -62,6 +59,7 @@ else()
         eigen
         GIT_REPOSITORY  https://github.com/eigenteam/eigen-git-mirror.git
         GIT_TAG         3.3.7
+        GIT_SHALLOW     TRUE 
         SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-src"
         BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-build"
     )
