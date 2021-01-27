@@ -61,6 +61,13 @@ jobs:
       - conda create --yes -n env_name python=3.7.4 pip numpy
       - source activate env_name
 
+  - stage: test
+    os: linux
+    dist: focal
+    compiler: gcc
+    python: 3.7
+
+
   - stage: deploy
     os: linux
     dist: focal
@@ -72,8 +79,7 @@ jobs:
       - mkdir -p build && cd build;
       - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
     deploy:
-      provide: releases
-      strategy: git
+      provider: releases
       api_key: $GITHUB_TOKEN
       draft: true
       file_glob: true
