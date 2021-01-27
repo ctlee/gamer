@@ -20,7 +20,7 @@
 # ***************************************************************************
 
 # 3.12 required for FetchContent and objectlib INTERFACE include inheritance
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12...3.18)
 
 # Add path to custom modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -151,44 +151,26 @@ list(APPEND GAMER_SOURCES
 #####################################################################
 # LIBRARIES
 #####################################################################
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
-    # OBJECT LIBRARY: compiles the sources only once
-    add_library(gamer_objlib OBJECT ${GAMER_SOURCES})
-    target_include_directories(gamer_objlib PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        )
-    target_link_libraries(gamer_objlib PUBLIC casc tetstatic eigen)
-
-    # SHARED LIBRARY
-    add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
-    target_link_libraries(gamershared PUBLIC gamer_objlib)
-    # set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
-
-    # STATIC LIBRARY
-    add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
-    target_link_libraries(gamerstatic PUBLIC gamer_objlib)
-    # if(NOT WIN32)
-    #     # Shared and static libs will clobber each other on Windows
-    #     set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
-    # endif()
-else() # CMAKE_VERSION < 3.12
-    # SHARED LIBRARY
-    add_library(gamershared SHARED ${GAMER_SOURCES})
-    target_include_directories(gamershared PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        )
-    target_link_libraries(gamershared PUBLIC casc tetstatic eigen)
-
-    # STATIC LIBRARY
-    add_library(gamerstatic STATIC ${GAMER_SOURCES})
-    target_include_directories(gamerstatic PUBLIC
+# OBJECT LIBRARY: compiles the sources only once
+add_library(gamer_objlib OBJECT ${GAMER_SOURCES})
+target_include_directories(gamer_objlib PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
-    target_link_libraries(gamerstatic PUBLIC casc tetstatic eigen)
-endif()
+target_link_libraries(gamer_objlib PUBLIC casc tetstatic Eigen3::Eigen)
+
+# SHARED LIBRARY
+add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
+target_link_libraries(gamershared PUBLIC gamer_objlib)
+# set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
+
+# STATIC LIBRARY
+add_library(gamerstatic STATIC $<TARGET_OBJECTS:gamer_objlib>)
+target_link_libraries(gamerstatic PUBLIC gamer_objlib)
+# if(NOT WIN32)
+#     # Shared and static libs will clobber each other on Windows
+#     set_target_properties(gamerstatic PROPERTIES OUTPUT_NAME gamer)
+# endif()
 
 # Alias library names
 set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
