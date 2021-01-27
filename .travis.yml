@@ -31,14 +31,14 @@ jobs:
     osx_image: xcode11.6
     addons:
       homebrew:
-        packages: ['cmake', 'ninja', 'eigen', 'pybind11']
+        packages: ['cmake', 'ninja']
   
   - stage: test 
     os: osx
     osx_image: xcode12.2
     addons:
       homebrew:
-        packages: ['cmake', 'ninja', 'eigen', 'pybind11']
+        packages: ['cmake', 'ninja']
 
   - stage: test 
     os: linux
@@ -47,7 +47,7 @@ jobs:
     python: 3.6
     addons:
       apt:
-        packages: ['ninja-build', 'libnetcdf-dev', 'libnetcdf-c++4-dev', 'xorg-dev', 'libeigen3-dev', 'pybind11-dev']
+        packages: ['ninja-build']
 
   - stage: test
     os: linux
@@ -56,7 +56,7 @@ jobs:
     python: 3.7
     addons:
       apt:
-        packages: ['ninja-build', 'libnetcdf-dev', 'libnetcdf-c++4-dev', 'xorg-dev', 'libeigen3-dev', 'pybind11-dev']
+        packages: ['ninja-build']
 
 
 before_install:
@@ -69,7 +69,7 @@ install:
       if [ "$TRAVIS_OS_NAME" = "windows" ]; then
         cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -G "Visual Studio 15 2017 Win64" ..
       else
-        cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=OFF -DGETPYBIND11=OFF -DGAMER_TESTS=on -DBUILD_PYGAMER=on -GNinja ..
+        cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -GNinja ..
       fi
   - cmake --build . --config Release
 

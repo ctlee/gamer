@@ -25,7 +25,7 @@
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 ###########################
-# GET PYBIND11 2.2.4
+# GET PYBIND11 2.6.2
 ###########################
 if(NOT GETPYBIND11)
     find_package(pybind11 CONFIG REQUIRED)
