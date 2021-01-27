@@ -62,6 +62,7 @@ jobs:
 before_install:
   - uname -a
   - $CXX --version
+  - cmake --version
 
 install:
   - mkdir -p build && cd build;
