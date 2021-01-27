@@ -1,3 +1,7 @@
+arch: amd64
+os: linux
+dist: focal
+
 notifications:
   email: false
   slack:
@@ -5,130 +9,249 @@ notifications:
 
 language: cpp
 
-dist: xenial
-sudo: false
-
 # Don't shallow clone as this may break the versioning
 git:
   depth: false
-
 
 branches:
   only:
   - master
   - development
+  - /^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$/
 
 # BUILD MATRIX
-matrix:
+jobs:
   fast_finish: true
-  allow_failures:
-  # These xcode versions have a llvm defect
-  - os: osx
-    osx_image: xcode9
-  - os: osx
-    osx_image: xcode9.1
-  - os: osx
-    osx_image: xcode9.2
-
   include:
-  # OSX
-  - os: osx
-    osx_image: xcode8.3
+  - stage: test
+    os: windows
+    before_install:
+        - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip
 
-  - os: osx
-    osx_image: xcode9
+  - stage: test 
+    os: osx
+    osx_image: xcode12.2
+    before_install:
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/Users/travis/miniconda3/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.7.4 pip numpy
+      - source activate env_name
 
-  - os: osx
-    osx_image: xcode9.1
-
-  - os: osx
-    osx_image: xcode9.2
-
-  - os: osx
-    osx_image: xcode9.3
-
-  - os: osx
-    osx_image: xcode9.4
-
-  - os: osx
-    osx_image: xcode10
-
-  - os: osx
-    osx_image: xcode10.1
-
-  - os: osx
-    osx_image: xcode10.2
-
-  # LINUX GCC
-  - os: linux
+  - stage: test
+    os: linux
+    dist: focal
     compiler: gcc
-    env: MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-5', 'ninja-build']
 
-  - os: linux
+  #################
+  # DEPLOYMENT
+  #################
+  - stage: deploy
+    os: windows
+    before_install:
+        - choco install python3 --version 3.5.4 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip
+        # - python -m pip install numpy
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.79 -G "Visual Studio 15 2017 Win64" ..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
+
+  - stage: deploy
+    os: windows
+    before_install:
+        - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip
+        # - python -m pip install numpy
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83  -G "Visual Studio 15 2017 Win64" ..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
+
+
+  - stage: deploy
+    os: linux
+    dist: focal
     compiler: gcc
-    env: MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-6', 'ninja-build']
+    before_install: 
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/home/travis/miniconda3/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.5.4 pip numpy
+      - source activate env_name
+      # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+      # - sudo rm -rf /dev/shm
+      # - sudo ln -s /run/shm /dev/shm
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON  -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.79 ..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
 
-  - os: linux
+  - stage: deploy
+    os: linux
+    dist: focal
     compiler: gcc
-    env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-7', 'ninja-build']
+    before_install: 
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/home/travis/miniconda3/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.7.4 pip numpy
+      - source activate env_name
+      # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+      # - sudo rm -rf /dev/shm
+      # - sudo ln -s /run/shm /dev/shm
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
 
-  - os: linux
+
+  - stage: deploy
+    os: osx
+    osx_image: xcode12.2
+    before_install:
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/Users/travis/miniconda3/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.5.4 pip numpy
+      - source activate env_name
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
+
+  - stage: deploy
+    os: osx
+    osx_image: xcode12.2
+    before_install:
+      - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+      - chmod +x miniconda.sh
+      - ./miniconda.sh -b
+      - export PATH=/Users/travis/miniconda3/bin:$PATH
+      - conda update --yes conda
+      - conda create --yes -n env_name python=3.7.4 pip numpy
+      - source activate env_name
+    install: skip
+    script:
+      - mkdir -p build && cd build;
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
+      - cmake --build . --config Release
+    deploy:
+      provider: releases
+      token: $GITHUB_TOKEN
+      draft: true
+      file_glob: true
+      file: "*.zip"
+      skip_cleanup: true
+      overwrite: true
+      on:
+        repo: ctlee/gamer
+
+  - stage: deploy
+    if: branch =~ ^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
+    os: linux
+    dist: focal
     compiler: gcc
-    env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-8', 'ninja-build']
-
-  # LINUX CLANG
-  - os: linux
-    compiler: clang
-    env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-    addons:
-      apt:
-        sources: ['llvm-toolchain-xenial-7']
-        packages: ['clang-7', 'ninja-build']
-
-  - os: linux
-    compiler: clang
-    env: MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
-    addons:
-      apt:
-        sources: ['llvm-toolchain-xenial-8']
-        packages: ['clang-8', 'ninja-build']
+    cache: pip
+    before_install: skip
+    install: skip
+    script:
+      - python -m pip install scikit-build pytest
+      - python setup.py sdist;
+    deploy:
+      provider: pypi
+      username: "__token__"
+      password:
+        secure: "QDT685JvVcZygQZY7DPc9Yqncn8haVwXddLBYC4jcLgz18pOiJHKXGnF2w+A5UgjjRnF8phNyHmxDd3zYt4/QfZLCGLbxkLEagcUa0ZWaBudOf8kQ7alQI2IPJl4vrU9xpH9U9sUtVMhcPyvfMtvxRnKVrPSX4Sl5JXKFLQJ+hdbu7qVXmpV7zBqBPkC4+bQP1T8RJcm6kKTfd7uE1KAYdb6xD+K5dxXVW4jbOQxsLSqUINLbcTWheq//xB6NmKei49rvaV9/q7MgCvbfFGWRlHwaRn3a6v8GhANfcPKTCCKKDU9BEvn96scGkrCzVaHNqzCXLEPx0qcaZIxEPhDzKk8VQYNYnXp4REpOpJ71EAkaZDSxUKUeYGo1XmNimf9PoLZqUoZ429DJG0eJs3vkKWN4G+X7MZh7eGst1nN8eK0l0QPO5znNPe3nbvTW7V3E5JvrdiGD8sQzEEW7810Elaybznhi2hGHeB/ow7QceUC05a23ZsKlw2i/YeSGkdKvNo7YFqX4pMHuB7KnkFEU5SS1Fu8NIrVfkK9GDcEYpCsDvyz6+RnN6vXiKcUsb7vHnYIQLJll5fYpkl09H7jccf74oNsP4s6rj2FhNl0XLnE8VBRYq5ufEF4hNcPqfdOuv18KljjARba2JI3UzfYscciJR8lcyOKhcQMfPBbaK0="
+      skip_cleanup: true
+      skip_existing: true
+      distributions: "sdist"
+      on:
+        tags: true
+        repo: ctlee/gamer
 
 
 before_install:
-- |
-   if [[ (-x $(which brew)) ]]; then
-     brew update
-     brew install cmake ninja
-     brew upgrade cmake
-     cmake --version
-   fi
-- if [[ "${MATRIX_EVAL}" != "" ]]; then eval ${MATRIX_EVAL}; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then pyenv global 3.7.1; fi
-
-# Show OS/compiler version
-- uname -a
-- $CXX --version
+  - uname -a
+  - $CXX --version
+  - cmake --version
 
 install:
-- mkdir build; cd build;
-- cmake -DGETEIGEN=on -DGAMER_TESTS=on -DBUILD_PYGAMER=on -GNinja ..
-- cmake --build . --config Release
+  - mkdir -p build && cd build;
+  - |
+      if [ "$TRAVIS_OS_NAME" = "windows" ]; then
+        cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on -G "Visual Studio 15 2017 Win64" ..
+      else
+        cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_PYGAMER=on ..
+      fi
+  - cmake --build . --config Release
 
 script:
-- ctest -C Release -V -j
+  - ctest -C Release -V -j

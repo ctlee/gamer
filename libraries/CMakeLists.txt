@@ -25,11 +25,7 @@ if(NOT Git_FOUND)
   message(FATAL_ERROR "Git could not be found. The install process requires Git to download dependencies.")
 endif()
 
-if(${CMAKE_VERSION} VERSION_LESS 3.11)
-    include(FetchContentLocal)
-else()
-    include(FetchContent)
-endif()
+include(FetchContent)
 
 ###########################
 # GET CASC
@@ -38,6 +34,7 @@ FetchContent_Declare(
     casclib
     GIT_REPOSITORY  https://github.com/ctlee/casc.git
     GIT_TAG         v1.0.5
+    GIT_SHALLOW     TRUE 
     SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-src"
     BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/casc-build"
 )
@@ -45,30 +42,6 @@ FetchContent_GetProperties(casclib)
 if(NOT casclib_POPULATED)
   FetchContent_Populate(casclib)
   add_subdirectory(${casclib_SOURCE_DIR} ${casclib_BINARY_DIR})
-endif()
-
-###########################
-# GET PYBIND11 2.2.4
-###########################
-if(NOT GETPYBIND11)
-    find_package(pybind11)
-    if(NOT pybind11_FOUND)
-        message(FATAL_ERROR "Could not find required library pybind11."
-            "Please append -DGETPYBIND11=ON to your cmake call and I will download pybind11 for you.")
-    endif()
-else()
-    FetchContent_Declare(
-        pybind11
-        GIT_REPOSITORY  https://github.com/pybind/pybind11.git
-        GIT_TAG         v2.2.4
-        SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
-        BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build"
-    )
-    FetchContent_GetProperties(pybind11)
-    if(NOT pybind11_POPULATED)
-      FetchContent_Populate(pybind11)
-      add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-    endif()
 endif()
 
 ###########################
@@ -80,13 +53,13 @@ if(NOT GETEIGEN)
         message(FATAL_ERROR "Could not find required library Eigen."
             "Please append -DGETEIGEN=on to your cmake call and I will download Eigen for you.")
     endif()
-    add_library(eigen ALIAS Eigen3::Eigen)
-    target_compile_options(eigen PRIVATE -w)   # Suppress warnings
+    target_compile_options(Eigen3::Eigen PRIVATE -w)
 else()
     FetchContent_Declare(
         eigen
         GIT_REPOSITORY  https://github.com/eigenteam/eigen-git-mirror.git
         GIT_TAG         3.3.7
+        GIT_SHALLOW     TRUE 
         SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-src"
         BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-build"
     )
@@ -94,6 +67,7 @@ else()
     if(NOT eigen_POPULATED)
         FetchContent_Populate(eigen)
         add_library (eigen INTERFACE)
+        add_library (Eigen3::Eigen ALIAS eigen)
         target_include_directories(eigen INTERFACE $<BUILD_INTERFACE:${eigen_SOURCE_DIR}>)
         target_compile_options(eigen INTERFACE -w)   # Suppress warnings
     endif()

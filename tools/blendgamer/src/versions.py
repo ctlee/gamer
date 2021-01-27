@@ -67,7 +67,7 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                 if obj.hide:
                     hidden = True
                     obj.hide = False
-                obj.gamer.remove_all_boundaries(context)
+                obj.gamer.markers.remove_all_boundaries(context)
                 for key, bdry in obj['boundaries'].items():
                     print("Migrating boundary: %s" % (key))
 
@@ -78,8 +78,8 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
                     mat.gamer.boundary_id = newBdryID
                     mat.use_fake_user = True
 
-                    obj.gamer.add_boundary(context)
-                    newBdry = obj.gamer.markers.boundary_list[obj.gamer.active_bnd_index]
+                    obj.gamer.markers.add_boundary(context)
+                    newBdry = obj.gamer.markers.boundary_list[obj.gamer.markers.active_bnd_index]
 
                     newBdry.boundary_name = 'NewBoundaryFrom_%s' % (key)
                     newBdry.marker = bdry['marker']
@@ -195,7 +195,7 @@ def checkVersion():
                 newver = (2, 0, 5)
                 print("Migrating from v%s to v%s" %
                       (str(fileVer), str(newver)))
-                migrate2_0_1__2_0_5()
+                migrate2_0_1__2_0_6()
                 scene.gamer.gamer_version = str(newver)
 
             # No changes since 2.0.5... yet!
