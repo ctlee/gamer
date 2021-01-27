@@ -27,7 +27,7 @@ jobs:
   - stage: test
     os: windows
     before_install:
-        - choco install python3 --version 3.5.3 --params "/InstallDir:C:\\Python"
+        - choco install python3 --version 3.5.4 --params "/InstallDir:C:\\Python"
         - export PATH="/c/Python:/c/Python/Scripts:$PATH"
         - python -m pip install --upgrade pip
 
@@ -45,9 +45,9 @@ jobs:
       - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
       - chmod +x miniconda.sh
       - ./miniconda.sh -b
-      - export PATH=/home/travis/miniconda/bin:$PATH
+      - export PATH=/Users/travis/miniconda3/bin:$PATH
       - conda update --yes conda
-      - conda create --yes -n env_name python=3.5.4 pip numpy
+      - conda create --yes -n env_name python=3.5.3 pip numpy
       - source activate env_name
       
   - stage: test 
@@ -57,7 +57,7 @@ jobs:
       - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
       - chmod +x miniconda.sh
       - ./miniconda.sh -b
-      - export PATH=/home/travis/miniconda/bin:$PATH
+      - export PATH=/Users/travis/miniconda3/bin:$PATH
       - conda update --yes conda
       - conda create --yes -n env_name python=3.7.4 pip numpy
       - source activate env_name
