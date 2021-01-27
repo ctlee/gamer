@@ -77,7 +77,7 @@ jobs:
       api_key: $GITHUB_TOKEN
       draft: true
       file_glob: true
-      file: blendgamer*.zip
+      file: "*.zip"
       skip_cleanup: true
       overwrite: true
 
