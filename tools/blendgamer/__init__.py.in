@@ -25,7 +25,7 @@ bl_info = {
         "description": "Utilities for generating finite elements simulation compatible meshes",
         "author": "Christopher T. Lee, John B. Moody, Zeyun Yu, Tom Bartol, Johan Hake, and Michael Holst",
         "version": (@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@),
-        "blender": (2, 80, 0),
+        "blender": (2, 83, 12),
         "location": "3D View > Tool Shelf",
         "wiki_url": "https://github.com/ctlee/gamer",
         "tracker_url": "https://github.com/ctlee/gamer/issues",
