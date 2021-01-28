@@ -20,6 +20,6 @@
 # ***************************************************************************
 
 colormap_enums = [
-  ('VIRIDIS', 'viridis', 'Viridis'),
-  ('PRGN', 'PRGn', 'Purple-Green diverging'),
+    ("VIRIDIS", "viridis", "Viridis"),
+    ("PRGN", "PRGn", "Purple-Green diverging"),
 ]

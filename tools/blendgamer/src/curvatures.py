@@ -22,12 +22,21 @@
 import bpy
 import bmesh
 from bpy.props import (
-        BoolProperty, CollectionProperty, EnumProperty,
-        FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty,
-        PointerProperty, StringProperty, BoolVectorProperty)
+    BoolProperty,
+    CollectionProperty,
+    EnumProperty,
+    FloatProperty,
+    FloatVectorProperty,
+    IntProperty,
+    IntVectorProperty,
+    PointerProperty,
+    StringProperty,
+    BoolVectorProperty,
+)
 from blendgamer.colormap_enums import colormap_enums
 
 import importlib.util
+
 mpl_spec = importlib.util.find_spec("matplotlib")
 mpl_found = mpl_spec is not None
 
@@ -37,76 +46,83 @@ if mpl_found:
 from blendgamer.util import *
 
 curvatureTypeEnums = [
-    ('K1', 'k1', 'First principle curvature'),
-    ('K2', 'k2', 'Second principle curvature'),
-    ('KG', 'kg', 'Gaussian curvature'),
-    ('KH', 'kh', 'Mean curvature'),
+    ("K1", "k1", "First principle curvature"),
+    ("K2", "k2", "Second principle curvature"),
+    ("KG", "kg", "Gaussian curvature"),
+    ("KH", "kh", "Mean curvature"),
 ]
 
 curvatureCalcEnums = [
-    ('MDSB', 'MDSB', 'Meyer, Desbrun, Schroder, Barr Algorithm'),
-    ('JETS', 'Jet Fitting', 'Cazal and Pouget Jet Fitting'),
+    ("MDSB", "MDSB", "Meyer, Desbrun, Schroder, Barr Algorithm"),
+    ("JETS", "Jet Fitting", "Cazal and Pouget Jet Fitting"),
 ]
 curvatureCalcDict = {
-  'MDSB': 'curvatureViaMDSB',
-  'JETS' : 'curvatureViaJets',
+    "MDSB": "curvatureViaMDSB",
+    "JETS": "curvatureViaJets",
 }
 
+
 class GAMER_OT_remove_curvature(bpy.types.Operator):
-    bl_idname       = "gamer.remove_curvature"
-    bl_label        = "Remove Curvature"
-    bl_description  = "Remove selected curvature from object"
-    bl_options      = {'REGISTER'}
+    bl_idname = "gamer.remove_curvature"
+    bl_label = "Remove Curvature"
+    bl_description = "Remove selected curvature from object"
+    bl_options = {"REGISTER"}
 
     def execute(self, context):
         try:
             context.object.gamer.curvatures.remove_curvature(context)
-            return {'FINISHED'}
+            return {"FINISHED"}
         except Exception as e:
-            self.report({'ERROR'}, str(e))
-            return {'CANCELLED'}
+            self.report({"ERROR"}, str(e))
+            return {"CANCELLED"}
+
 
 class GAMER_OT_remove_all_curvatures(bpy.types.Operator):
-    bl_idname       = "gamer.remove_all_curvatures"
-    bl_label        = "Remove All Curvatures"
-    bl_description  = "Remove all curvatures from object"
-    bl_options      = {'REGISTER'}
+    bl_idname = "gamer.remove_all_curvatures"
+    bl_label = "Remove All Curvatures"
+    bl_description = "Remove all curvatures from object"
+    bl_options = {"REGISTER"}
 
     def execute(self, context):
         try:
             context.object.gamer.curvatures.remove_all_curvatures(context)
-            return {'FINISHED'}
+            return {"FINISHED"}
         except Exception as e:
-            self.report({'ERROR'}, str(e))
-            return {'CANCELLED'}
+            self.report({"ERROR"}, str(e))
+            return {"CANCELLED"}
+
 
 class GAMER_OT_plot_curvature(bpy.types.Operator):
-    bl_idname       = "gamer.plot_curvature"
-    bl_label        = "Plot the selected curvature"
-    bl_description  = "Plot the selected curvature as a heatmap and generate a corresponding vertex color layer"
-    bl_options      = {'REGISTER'}
+    bl_idname = "gamer.plot_curvature"
+    bl_label = "Plot the selected curvature"
+    bl_description = "Plot the selected curvature as a heatmap and generate a corresponding vertex color layer"
+    bl_options = {"REGISTER"}
 
     def execute(self, context):
         try:
             context.object.gamer.curvatures.plot_curvature(context)
-            return {'FINISHED'}
+            return {"FINISHED"}
         except Exception as e:
-            self.report({'ERROR'}, str(e))
-            return {'CANCELLED'}
+            self.report({"ERROR"}, str(e))
+            return {"CANCELLED"}
+
 
 class GAMER_OT_plot_all_curvatures(bpy.types.Operator):
-    bl_idname       = "gamer.plot_all_curvatures"
-    bl_label        = "Plot all curvatures"
-    bl_description  = "Plot all computed curvatures as a heatmap and generate vertex color layers"
-    bl_options      = {'REGISTER'}
+    bl_idname = "gamer.plot_all_curvatures"
+    bl_label = "Plot all curvatures"
+    bl_description = (
+        "Plot all computed curvatures as a heatmap and generate vertex color layers"
+    )
+    bl_options = {"REGISTER"}
 
     def execute(self, context):
         try:
             context.object.gamer.curvatures.plot_all_curvatures(context)
-            return {'FINISHED'}
+            return {"FINISHED"}
         except Exception as e:
-            self.report({'ERROR'}, str(e))
-            return {'CANCELLED'}
+            self.report({"ERROR"}, str(e))
+            return {"CANCELLED"}
+
 
 # class GAMER_OT_plot_differences(bpy.types.Operator):
 #     bl_idname       = "gamer.plot_differences"
@@ -122,11 +138,12 @@ class GAMER_OT_plot_all_curvatures(bpy.types.Operator):
 #             self.report({'ERROR'}, str(e))
 #             return {'CANCELLED'}
 
+
 class GAMER_OT_compute_curvatures(bpy.types.Operator):
-    bl_idname       = "gamer.compute_curvatures"
-    bl_label        = "Compute Curvatures"
-    bl_description  = "Compute curvatures"
-    bl_options      = {'REGISTER'}
+    bl_idname = "gamer.compute_curvatures"
+    bl_label = "Compute Curvatures"
+    bl_description = "Compute curvatures"
+    bl_options = {"REGISTER"}
 
     def execute(self, context):
         try:
@@ -134,29 +151,29 @@ class GAMER_OT_compute_curvatures(bpy.types.Operator):
             curvatures = obj.gamer.curvatures
             algorithm = obj.gamer.curvatures.algorithm
 
-            gmesh = blenderToGamer()
+            gmesh = blender_to_gamer()
             kh, kg, k1, k2 = getattr(gmesh, curvatureCalcDict[algorithm])(0)
 
             with ObjectMode():
-                ml = getCurvatureLayer(obj, algorithm, 'K1')
+                ml = getCurvatureLayer(obj, algorithm, "K1")
                 for i in range(0, len(k1)):
                     ml[i].value = k1[i]
-                curvatures.add_curvature(context, 'K1')
+                curvatures.add_curvature(context, "K1")
 
-                ml = getCurvatureLayer(obj, algorithm, 'K2')
+                ml = getCurvatureLayer(obj, algorithm, "K2")
                 for i in range(0, len(k1)):
                     ml[i].value = k2[i]
-                curvatures.add_curvature(context, 'K2')
+                curvatures.add_curvature(context, "K2")
 
-                ml = getCurvatureLayer(obj, algorithm, 'KG')
+                ml = getCurvatureLayer(obj, algorithm, "KG")
                 for i in range(0, len(k1)):
                     ml[i].value = kg[i]
-                curvatures.add_curvature(context, 'KG')
+                curvatures.add_curvature(context, "KG")
 
-                ml = getCurvatureLayer(obj, algorithm, 'KH')
+                ml = getCurvatureLayer(obj, algorithm, "KH")
                 for i in range(0, len(k1)):
                     ml[i].value = kh[i]
-                curvatures.add_curvature(context, 'KH')
+                curvatures.add_curvature(context, "KH")
 
             # Explicitly free curvature arrays
             del kh
@@ -164,71 +181,82 @@ class GAMER_OT_compute_curvatures(bpy.types.Operator):
             del k1
             del k2
 
-            self.report({'INFO'}, "GAMer: Compute Curvatures complete")
-            return {'FINISHED'}
+            self.report({"INFO"}, "GAMer: Compute Curvatures complete")
+            return {"FINISHED"}
         except Exception as e:
-            self.report({'ERROR'}, str(e))
-            return {'CANCELLED'}
+            self.report({"ERROR"}, str(e))
+            return {"CANCELLED"}
+
 
 class GAMerCurvatureItem(bpy.types.PropertyGroup):
     curvatureType = EnumProperty(
-        name = "Curvature Type",
-        description = "Which curvature?",
-        items = curvatureTypeEnums
-        )
+        name="Curvature Type", description="Which curvature?", items=curvatureTypeEnums
+    )
     algorithm = EnumProperty(
-        name = "Curvature algorithm used",
-        description = "Which algorithm was used?",
-        items = curvatureCalcEnums)
+        name="Curvature algorithm used",
+        description="Which algorithm was used?",
+        items=curvatureCalcEnums,
+    )
 
     ## Addition metadata for saving plot states...
     minCurve = FloatProperty(
-        name="Minimum curvature", default=0,
-        description="Lower bound percentile truncation")
+        name="Minimum curvature",
+        default=0,
+        description="Lower bound percentile truncation",
+    )
 
     maxCurve = FloatProperty(
-        name="Maximum curvature", default=100,
-        description="Upper bound percentile truncation")
+        name="Maximum curvature",
+        default=100,
+        description="Upper bound percentile truncation",
+    )
 
     curveIter = IntProperty(
-        name="Smooth Curvature Iterations", min=0, default = 0,
-        description="How many iterations of curvature smoothing?")
+        name="Smooth Curvature Iterations",
+        min=0,
+        default=0,
+        description="How many iterations of curvature smoothing?",
+    )
 
     limitsArePercentiles = BoolProperty(
-        name="Treat Min/Max as percentiles", default = True,
-        description="Treat min and max as percentiles?")
+        name="Treat Min/Max as percentiles",
+        default=True,
+        description="Treat min and max as percentiles?",
+    )
 
     mixpoint = FloatProperty(
-        name = "Color mixing point", default = 0.5, min=0, max=1,
-        description="Value for color mixing")
+        name="Color mixing point",
+        default=0.5,
+        min=0,
+        max=1,
+        description="Value for color mixing",
+    )
 
     colormap = EnumProperty(
-            name = "Colormap colors",
-            description="Colormap used",
-            items = colormap_enums)
+        name="Colormap colors", description="Colormap used", items=colormap_enums
+    )
 
 
 class GAMerCurvaturesList(bpy.types.PropertyGroup):
     algorithm = EnumProperty(
-        name = "Curvature Algorithm",
-        description = "Which algorithm was used?",
-        items = curvatureCalcEnums)
+        name="Curvature Algorithm",
+        description="Which algorithm was used?",
+        items=curvatureCalcEnums,
+    )
 
     curvature_list = CollectionProperty(
-                            type=GAMerCurvatureItem,
-                            name="List of computed curvatures")
+        type=GAMerCurvatureItem, name="List of computed curvatures"
+    )
 
-    active_index = IntProperty(
-                            name="Active Index",
-                            default=0)
+    active_index = IntProperty(name="Active Index", default=0)
 
     showplots = BoolProperty(
-        name="Show plot", default=False,
-        description="Display the plots")
+        name="Show plot", default=False, description="Display the plots"
+    )
 
     saveplots = BoolProperty(
-        name="Save plots", default=False,
-        description="Save the generated plots")
+        name="Save plots", default=False, description="Save the generated plots"
+    )
 
     def add_curvature(self, context, curvatureType):
         if len(self.curvature_list) > 0:
@@ -240,20 +268,19 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
         new_curve.curvatureType = curvatureType
         new_curve.algorithm = self.algorithm
 
-
     def remove_curvature(self, context):
         crv = self.get_active_index()
         if crv:
             obj = getActiveMeshObject()
 
             with BMeshContext(obj) as bm:
-                name = "%s%s"%(crv.algorithm, crv.curvatureType)
+                name = "%s%s" % (crv.algorithm, crv.curvatureType)
                 layer = bm.verts.layers.float.get(name)
                 bm.verts.layers.float.remove(layer)
 
             self.curvature_list.remove(self.active_index)
             self.active_index -= 1
-            if (self.active_index < 0):
+            if self.active_index < 0:
                 self.active_index = 0
 
     def remove_all_curvatures(self, context):
@@ -263,13 +290,12 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
             for i in range(len(self.curvature_list)):
                 crv = self.curvature_list[0]
 
-                name = "%s%s"%(crv.algorithm, crv.curvatureType)
+                name = "%s%s" % (crv.algorithm, crv.curvatureType)
                 layer = bm.verts.layers.float.get(name)
                 bm.verts.layers.float.remove(layer)
                 self.curvature_list.remove(0)
 
         self.active_index = 0
-
 
     def get_active_index(self):
         idx = None
@@ -278,19 +304,24 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
         return idx
 
     if mpl_found:
+
         def plot_curvature(self, context):
             """
             Wrapper function to avoid importing lots of matplotlib files here.
             """
             crv = self.get_active_index()
-            dataToVertexColor(crv, context, showplot=self.showplots, saveplot=self.saveplots)
+            dataToVertexColor(
+                crv, context, showplot=self.showplots, saveplot=self.saveplots
+            )
 
         def plot_all_curvatures(self, context):
             """
             Wrapper function to plot all curvatures
             """
             for crv in self.curvature_list:
-                dataToVertexColor(crv, context, showplot=self.showplots, saveplot=self.saveplots)
+                dataToVertexColor(
+                    crv, context, showplot=self.showplots, saveplot=self.saveplots
+                )
 
         # def plot_differences(self, context):
         #     differencePlotter(context, 'K1')
@@ -298,22 +329,28 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
         #     # differencePlotter(context, 'KG')
         #     # differencePlotter(context, 'KH')
 
-classes = [GAMER_OT_compute_curvatures,
-           GAMER_OT_remove_curvature,
-           GAMER_OT_remove_all_curvatures,
-           GAMER_OT_plot_curvature,
-           GAMER_OT_plot_all_curvatures,
-           # GAMER_OT_plot_differences,
-           GAMerCurvatureItem,
-           GAMerCurvaturesList]
+
+classes = [
+    GAMER_OT_compute_curvatures,
+    GAMER_OT_remove_curvature,
+    GAMER_OT_remove_all_curvatures,
+    GAMER_OT_plot_curvature,
+    GAMER_OT_plot_all_curvatures,
+    # GAMER_OT_plot_differences,
+    GAMerCurvatureItem,
+    GAMerCurvaturesList,
+]
+
 
 def register():
     from bpy.utils import register_class
+
     for cls in classes:
         register_class(make_annotations(cls))
 
+
 def unregister():
     from bpy.utils import unregister_class
+
     for cls in reversed(classes):
         unregister_class(make_annotations(cls))
-

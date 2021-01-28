@@ -1,4 +1,4 @@
-#****************************************************************************
+# ****************************************************************************
 # This file is part of the GAMer software.
 # Copyright (C) 2016-2018
 # by Christopher Lee, Tom Bartol, John Moody, Rommie Amaro, J. Andrew McCammon,
@@ -23,27 +23,32 @@ import bpy
 import bmesh
 
 import blendgamer.report as report
-from blendgamer.util import UNSETID, UNSETMARKER, make_annotations, getMatByBndID
+from blendgamer.util import (
+    UNSETMARKER,
+    make_annotations,
+    get_material_by_bnd_id,
+    getBndUnsetMat,
+)
 import blendgamer.pygamer as pygamer
 
 
 if bpy.app.version < (2, 80, 0):
     REGION = "TOOLS"
-    BULB_ICON = 'LAMP'
-    ADD_ICON = 'ZOOMIN'
-    REMOVE_ICON = 'ZOOMOUT'
-    LOVE_ICON = 'COLOR_RED'
+    BULB_ICON = "LAMP"
+    ADD_ICON = "ZOOMIN"
+    REMOVE_ICON = "ZOOMOUT"
+    LOVE_ICON = "COLOR_RED"
 else:
     REGION = "UI"
-    BULB_ICON = 'LIGHT'
-    ADD_ICON = 'ADD'
-    REMOVE_ICON = 'REMOVE'
-    LOVE_ICON = 'FUND'
+    BULB_ICON = "LIGHT"
+    ADD_ICON = "ADD"
+    REMOVE_ICON = "REMOVE"
+    LOVE_ICON = "FUND"
 
 
 class GAMER_PT_versionerror(bpy.types.Panel):
     bl_label = "GAMer Version Mismatch"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = "VIEW_3D"
     bl_region_type = REGION
     bl_category = "GAMer"
 
@@ -52,7 +57,7 @@ class GAMER_PT_versionerror(bpy.types.Panel):
         return (context.scene is not None) and context.scene.gamer.versionerror != 0
 
     def draw_header(self, context):
-        self.layout.label(text="", icon='CANCEL')
+        self.layout.label(text="", icon="CANCEL")
 
     def draw(self, context):
         layout = self.layout
@@ -60,14 +65,18 @@ class GAMER_PT_versionerror(bpy.types.Panel):
 
         if context.scene.gamer.versionerror > 0:
             layout.label(
-                text="Warning the current file was generated with a newer version of GAMer!")
+                text="Warning the current file was generated with a newer version of GAMer!"
+            )
             layout.label(
-                text="We strongly recommend you update the plugin before manipulating this file.")
+                text="We strongly recommend you update the plugin before manipulating this file."
+            )
         elif context.scene.gamer.versionerror < 0:
             layout.label(
-                text="Warning the current file was generated with an older version of GAMer which does not support autoupdate!")
+                text="Warning the current file was generated with an older version of GAMer which does not support autoupdate!"
+            )
             layout.label(
-                text="Please be careful manipulating this file as data may be lost.")
+                text="Please be careful manipulating this file as data may be lost."
+            )
             layout.label(text="Use the following converters at your own risk!")
             col = layout.column()
             col.operator("gamer.update_to_2_0_1_from_v_0_1")
@@ -75,33 +84,31 @@ class GAMER_PT_versionerror(bpy.types.Panel):
 
 class GAMER_PT_surfacemesh(bpy.types.Panel):
     bl_label = "Surface Mesh Conditioning"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = "VIEW_3D"
     bl_region_type = REGION
     bl_category = "GAMer"
-    bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {"DEFAULT_CLOSED"}
 
     # Panel will be drawn if this returns True
     @classmethod
     def poll(cls, context):
-        return (context.scene is not None)
+        return context.scene is not None
 
     def draw_header(self, context):
-        self.layout.label(text="", icon='OUTLINER_DATA_MESH')
+        self.layout.label(text="", icon="OUTLINER_DATA_MESH")
 
     def draw(self, context):
         layout = self.layout
 
         smprops = context.scene.gamer.surfmesh_improvement_properties
         active_obj = context.active_object
-        if active_obj and (active_obj.type == 'MESH'):
+        if active_obj and (active_obj.type == "MESH"):
             box = layout.box()
             col = box.column(align=True)
             if not smprops.advanced_options:
-                col.prop(smprops, "advanced_options",
-                         icon='TRIA_RIGHT', emboss=False)
+                col.prop(smprops, "advanced_options", icon="TRIA_RIGHT", emboss=False)
             else:
-                col.prop(smprops, "advanced_options",
-                         icon='TRIA_DOWN', emboss=False)
+                col.prop(smprops, "advanced_options", icon="TRIA_DOWN", emboss=False)
                 col.prop(smprops, "autocorrect_normals")
                 col.prop(smprops, "verbose")
                 col.prop(smprops, "rings")
@@ -113,7 +120,7 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
             row.prop(smprops, "normSmoothAniso")
             col.operator("gamer.fill_holes")
 
-            if active_obj.mode == 'EDIT':
+            if active_obj.mode == "EDIT":
                 col = layout.column()
                 col.label(text="Local operations (applied to selection only): ")
 
@@ -137,10 +144,15 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
             else:
                 col = layout.column()
                 col.label(
-                    text="Change to Edit Mode to enable local improvement options", icon='INFO')
+                    text="Change to Edit Mode to enable local improvement options",
+                    icon="INFO",
+                )
         else:
             layout.label(
-                text="Select a mesh object to use GAMer mesh processing features", icon='HAND')
+                text="Select a mesh object to use GAMer mesh processing features",
+                icon="HAND",
+            )
+
 
 # class GAMER_PT_advanced_options(bpy.types.Panel):
 #     bl_label = "Advanced Options"
@@ -165,21 +177,21 @@ class GAMER_PT_surfacemesh(bpy.types.Panel):
 
 class GAMER_PT_mesh_quality(bpy.types.Panel):
     bl_label = "Mesh Quality Reporting"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = "VIEW_3D"
     bl_region_type = REGION
     bl_category = "GAMer"
-    bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {"DEFAULT_CLOSED"}
 
     _type_to_icon = {
-        bmesh.types.BMVert: 'VERTEXSEL',
-        bmesh.types.BMEdge: 'EDGESEL',
-        bmesh.types.BMFace: 'FACESEL',
+        bmesh.types.BMVert: "VERTEXSEL",
+        bmesh.types.BMEdge: "EDGESEL",
+        bmesh.types.BMFace: "FACESEL",
     }
 
     # Panel will be drawn if this returns True
     @classmethod
     def poll(cls, context):
-        return (context.scene is not None)
+        return context.scene is not None
 
     # This method is from 3D Print Addon
     @staticmethod
@@ -196,9 +208,11 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
             for i, (text, data) in enumerate(info):
                 if obj and data and data[1]:
                     bm_type, bm_array = data
-                    col.operator("gamer.meshstats_select_report",
-                                 text=text,
-                                 icon=GAMER_PT_mesh_quality._type_to_icon[bm_type]).index = i
+                    col.operator(
+                        "gamer.meshstats_select_report",
+                        text=text,
+                        icon=GAMER_PT_mesh_quality._type_to_icon[bm_type],
+                    ).index = i
                 else:
                     col.label(text=text)
 
@@ -231,30 +245,32 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
 
         if context.scene.gamer.matplotlib_found:
             active_obj = context.active_object
-            if active_obj and (active_obj.type == 'MESH'):
+            if active_obj and (active_obj.type == "MESH"):
                 curveProp = active_obj.gamer.curvatures
                 row = col.row(align=True)
                 row.operator("gamer.compute_curvatures")
                 row.prop(curveProp, "algorithm", text="")
 
                 row = layout.row()
-                row.label(text="Computed Curvatures:", icon='FACESEL')
+                row.label(text="Computed Curvatures:", icon="FACESEL")
                 row = layout.row()
                 col = row.column()
-                col.template_list("GAMER_UL_curvature_list",
-                                  "GAMer Curvature List",
-                                  curveProp, "curvature_list",
-                                  curveProp, "active_index",
-                                  rows=2,
-                                  type='DEFAULT'
-                                  )
+                col.template_list(
+                    "GAMER_UL_curvature_list",
+                    "GAMer Curvature List",
+                    curveProp,
+                    "curvature_list",
+                    curveProp,
+                    "active_index",
+                    rows=2,
+                    type="DEFAULT",
+                )
                 col = row.column(align=True)
-                col.operator("gamer.remove_curvature",
-                             icon=REMOVE_ICON, text="")
-                col.operator("gamer.remove_all_curvatures", icon='X', text="")
+                col.operator("gamer.remove_curvature", icon=REMOVE_ICON, text="")
+                col.operator("gamer.remove_all_curvatures", icon="X", text="")
 
                 crv = curveProp.get_active_index()
-                if (crv != None):
+                if crv != None:
                     col = layout.column()
                     row = col.row()
                     row.label(text="Set active curvature properties:")
@@ -284,80 +300,83 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
                     # row.operator("gamer.plot_differences")
             else:
                 col.label(
-                    text="Select a mesh object to enable estimation of curvatures", icon=BULB_ICON)
+                    text="Select a mesh object to enable estimation of curvatures",
+                    icon=BULB_ICON,
+                )
         else:
-            col.label(
-                text="Curvature estimations require matplotlib.", icon=BULB_ICON)
+            col.label(text="Curvature estimations require matplotlib.", icon=BULB_ICON)
 
         box = layout.box()
         col = box.column()
 
         if not qProps.show_extras:
-            col.prop(qProps, "show_extras", icon='TRIA_RIGHT', emboss=False)
+            col.prop(qProps, "show_extras", icon="TRIA_RIGHT", emboss=False)
         else:
-            col.prop(qProps, "show_extras", icon='TRIA_DOWN', emboss=False)
+            col.prop(qProps, "show_extras", icon="TRIA_DOWN", emboss=False)
             col.prop(qProps, "export_path")
             col.prop(qProps, "export_filebase")
             col.operator("gamer.write_quality_info")
 
 
 class GAMER_UL_curvature_list(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data,
-                  active_propname, index):
+    def draw_item(
+        self, context, layout, data, item, icon, active_data, active_propname, index
+    ):
         """
         Draw the UI list for boundary markers
         """
         row = layout.row()
-        row.label(text=layout.enum_item_description(
-            item, 'algorithm', item.algorithm))
+        row.label(text=layout.enum_item_description(item, "algorithm", item.algorithm))
         # row.prop_enum(item, 'algorithm', item.algorithm, text=layout.enum_item_description(item, 'algorithm', item.algorithm))
-        row.prop_enum(item, 'curvatureType', item.curvatureType)
+        row.prop_enum(item, "curvatureType", item.curvatureType)
 
 
 class GAMER_PT_boundary_marking(bpy.types.Panel):
     bl_label = "Boundary Marking"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = "VIEW_3D"
     bl_region_type = REGION
     bl_category = "GAMer"
-    bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
     def poll(cls, context):
-        return (context.scene is not None)
+        return context.scene is not None
 
     def draw_header(self, context):
-        self.layout.label(text="", icon='TPAINT_HLT')
+        self.layout.label(text="", icon="TPAINT_HLT")
 
     def draw(self, context):
         layout = self.layout
 
         active_obj = context.active_object
-        if active_obj and (active_obj.type == 'MESH'):
+        if active_obj and (active_obj.type == "MESH"):
             markerProp = active_obj.gamer.markers
 
             row = layout.row()
             row.label(text="Unmarked marker value = %d" % (UNSETMARKER))
             row = layout.row()
 
-            bnd_unset_mat = getMatByBndID(UNSETID)
-            row.prop(bnd_unset_mat, 'diffuse_color',
-                     text="Unmarked boundary color")
+            bnd_unset_mat = getBndUnsetMat()
+            row.prop(bnd_unset_mat, "diffuse_color", text="Unmarked boundary color")
 
             row = layout.row()
-            row.label(text="Defined Boundaries:", icon='FACESEL')
+            row.label(text="Defined Boundaries:", icon="FACESEL")
             row = layout.row()
             col = row.column()
-            col.template_list("GAMER_UL_boundary_list",
-                              "GAMer Boundary List",
-                              markerProp, "boundary_list",
-                              markerProp, "active_bnd_index",
-                              rows=2,
-                              type='DEFAULT'
-                              )
+            col.template_list(
+                "GAMER_UL_boundary_list",
+                "GAMer Boundary List",
+                markerProp,
+                "boundary_list",
+                markerProp,
+                "active_bnd_index",
+                rows=2,
+                type="DEFAULT",
+            )
             col = row.column(align=True)
             col.operator("gamer.add_boundary", icon=ADD_ICON, text="")
             col.operator("gamer.remove_boundary", icon=REMOVE_ICON, text="")
-            col.operator("gamer.remove_all_boundaries", icon='X', text="")
+            col.operator("gamer.remove_all_boundaries", icon="X", text="")
 
             # Could have boundary item draw itself in new row here:
             active_bnd = markerProp.get_active_boundary()
@@ -374,11 +393,13 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
                 row.prop(active_bnd, "marker", text="")  # suppress default txt
 
                 row = layout.row()
-                if active_obj.mode == 'OBJECT':
+                if active_obj.mode == "OBJECT":
                     row.label(
-                        text="Change to Edit Mode to enable boundary assignment", icon='INFO')
+                        text="Change to Edit Mode to enable boundary assignment",
+                        icon="INFO",
+                    )
 
-            if active_obj.mode == 'EDIT' and active_bnd:
+            if active_obj.mode == "EDIT" and active_bnd:
                 row = layout.row()
                 sub = row.row(align=True)
                 sub.operator("gamer.assign_boundary_faces", text="Assign")
@@ -390,23 +411,30 @@ class GAMER_PT_boundary_marking(bpy.types.Panel):
 
                 layout.separator()
                 row = layout.row()
-                row.operator("gamer.select_all_boundary_faces",
-                             text="Select All Marked Boundaries")
-                row.operator("gamer.deselect_all_boundary_faces",
-                             text="Deselect All Marked Boundaries")
+                row.operator(
+                    "gamer.select_all_boundary_faces",
+                    text="Select All Marked Boundaries",
+                )
+                row.operator(
+                    "gamer.deselect_all_boundary_faces",
+                    text="Deselect All Marked Boundaries",
+                )
         else:
             layout.label(
-                text="Select a mesh object to use GAMer boundary marking features", icon='HAND')
+                text="Select a mesh object to use GAMer boundary marking features",
+                icon="HAND",
+            )
 
 
 class GAMER_UL_boundary_list(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data,
-                  active_propname, index):
+    def draw_item(
+        self, context, layout, data, item, icon, active_data, active_propname, index
+    ):
         """
         Draw the UI list for boundary markers
         """
         if item.status:
-            layout.label(text=item.boundary_name, icon='ERROR')
+            layout.label(text=item.boundary_name, icon="ERROR")
         else:
             layout.label(text=item.boundary_name)
 
@@ -418,47 +446,47 @@ class GAMER_UL_boundary_list(bpy.types.UIList):
         col = split.column()
         col = split.column()
 
-        bnd_mat = getMatByBndID(item.boundary_id)
-        col.prop(bnd_mat, 'diffuse_color', text='')
+        bnd_mat = get_material_by_bnd_id(item.boundary_id)
+        col.prop(bnd_mat, "diffuse_color", text="")
         # Currently no check for if the referenced material does not exist
         # Also doesn't check if it's associated in a material slot for the
         # active object.
 
 
 class GAMER_UL_domain(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        # The draw_item function is called for each item of the collection that is visible in the list.
-        #   data is the RNA object containing the collection,
-        #   item is the current drawn item of the collection,
-        #   icon is the "computed" icon for the item (as an integer, because some objects like materials or textures
-        #        have custom icons ID, which are not available as enum items).
-        #   active_data is the RNA object containing the active property for the collection (i.e. integer pointing to the
-        #        active item of the collection).
-        #   active_propname is the name of the active property (use 'getattr(active_data, active_propname)').
-        #   index is index of the current item in the collection.
-        #   flt_flag is the result of the filtering process for this item.
-        #   Note: as index and flt_flag are optional arguments, you do not have to use/declare them here if you don't
-        #         need them.
+    def draw_item(
+        self, context, layout, data, item, icon, active_data, active_propname, index
+    ):
+        """The draw_item function is called for each item of the collection that is visible in the list.
 
+        Args:
+            context ([type]): the current Blender context
+            layout ([type]): the local layout
+            data ([type]): the RNA object containing the collection
+            item ([type]): the current drawn item of the collection
+            icon ([type]): the "computed" icon for the item (as an integer, because some objects like materials or textures  have custom icons ID, which are not available as enum items).
+            active_data ([type]): ct containing the active property for the collection (i.e. integer pointing to the active item of the collection).
+            active_propname ([type]): the name of the active property (use 'getattr(active_data, active_propname)')
+            index ([type]): index of the current item in the collection
+        """
         # The item will be a GAMerTetDomainPropertyGroup
         # Let it draw itself in a new row:
-
         item.draw_item_in_row(layout.row())
 
 
 class GAMER_PT_tetrahedralization(bpy.types.Panel):
     bl_label = "Tetrahedralization"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = "VIEW_3D"
     bl_region_type = REGION
     bl_category = "GAMer"
-    bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
     def poll(cls, context):
-        return (context.scene is not None)
+        return context.scene is not None
 
     def draw_header(self, context):
-        self.layout.label(text="", icon='MESH_ICOSPHERE')
+        self.layout.label(text="", icon="MESH_ICOSPHERE")
 
     def draw(self, context):
         layout = self.layout
@@ -471,15 +499,20 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
         row = layout.row()
         col = row.column()
 
-        col.template_list("GAMER_UL_domain", "",
-                          tetprops, "domain_list",
-                          tetprops, "active_domain_index",
-                          rows=2)
+        col.template_list(
+            "GAMER_UL_domain",
+            "",
+            tetprops,
+            "domain_list",
+            tetprops,
+            "active_domain_index",
+            rows=2,
+        )
 
         col = row.column(align=True)
         col.operator("gamer.tet_domain_add", icon=ADD_ICON, text="")
         col.operator("gamer.tet_domain_remove", icon=REMOVE_ICON, text="")
-        col.operator("gamer.tet_domain_remove_all", icon='X', text="")
+        col.operator("gamer.tet_domain_remove_all", icon="X", text="")
 
         if len(tetprops.domain_list) > 0:
             domain = tetprops.domain_list[tetprops.active_domain_index]
@@ -491,13 +524,11 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
 
             box = layout.box()
             row = box.row(align=True)
-            row.alignment = 'LEFT'
+            row.alignment = "LEFT"
             if not tetprops.show_settings:
-                row.prop(tetprops, "show_settings",
-                         icon='TRIA_RIGHT', emboss=False)
+                row.prop(tetprops, "show_settings", icon="TRIA_RIGHT", emboss=False)
             else:
-                row.prop(tetprops, "show_settings",
-                         icon='TRIA_DOWN', emboss=False)
+                row.prop(tetprops, "show_settings", icon="TRIA_DOWN", emboss=False)
 
                 row = box.row()
                 row.prop(tetprops, "export_path")
@@ -526,11 +557,10 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
                 col.prop(tetprops, "paraview")
 
             row = layout.row()
-            icon = 'PROP_OFF'
+            icon = "PROP_OFF"
             if tetprops.dolfin or tetprops.paraview:
-                icon = 'PROP_ON'
-            row.operator("gamer.tetrahedralize",
-                         text="Tetrahedralize", icon=icon)
+                icon = "PROP_ON"
+            row.operator("gamer.tetrahedralize", text="Tetrahedralize", icon=icon)
             if len(tetprops.status) > 0:
                 row = layout.row()
                 row.label(text=tetprops.status, icon="ERROR")
@@ -538,14 +568,14 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
 
 class GAMER_PT_version(bpy.types.Panel):
     bl_label = "BlendGAMer Info"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = "VIEW_3D"
     bl_region_type = REGION
     bl_category = "GAMer"
-    bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
     def poll(cls, context):
-        return (context.scene is not None)
+        return context.scene is not None
 
     def draw_header(self, context):
         self.layout.label(text="", icon=LOVE_ICON)
@@ -556,28 +586,33 @@ class GAMER_PT_version(bpy.types.Panel):
 
         layout.label(text="BlendGAMer %s" % (pygamer.__version__()))
         layout.operator(
-            "wm.url_open", text="How to Acknowledge").url = "https://gamer.readthedocs.io/en/latest/#acknowleding-the-use-of-gamer-in-your-work"
+            "wm.url_open", text="How to Acknowledge"
+        ).url = "https://gamer.readthedocs.io/en/latest/#acknowleding-the-use-of-gamer-in-your-work"
 
 
-classes = [GAMER_PT_versionerror,
-           GAMER_PT_surfacemesh,
-           # GAMER_PT_advanced_options,
-           GAMER_PT_mesh_quality,
-           GAMER_UL_curvature_list,
-           GAMER_PT_boundary_marking,
-           GAMER_UL_boundary_list,
-           GAMER_UL_domain,
-           GAMER_PT_tetrahedralization,
-           GAMER_PT_version]
+classes = [
+    GAMER_PT_versionerror,
+    GAMER_PT_surfacemesh,
+    # GAMER_PT_advanced_options,
+    GAMER_PT_mesh_quality,
+    GAMER_UL_curvature_list,
+    GAMER_PT_boundary_marking,
+    GAMER_UL_boundary_list,
+    GAMER_UL_domain,
+    GAMER_PT_tetrahedralization,
+    GAMER_PT_version,
+]
 
 
 def register():
     from bpy.utils import register_class
+
     for cls in classes:
         register_class(make_annotations(cls))
 
 
 def unregister():
     from bpy.utils import unregister_class
+
     for cls in reversed(classes):
         unregister_class(make_annotations(cls))
