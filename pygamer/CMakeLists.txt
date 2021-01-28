@@ -22,11 +22,6 @@
 include(FetchContent)
 
 ###########################
-# FIND PYTHON
-###########################
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-###########################
 # GET PYBIND11 2.6.2
 ###########################
 if(NOT GETPYBIND11)

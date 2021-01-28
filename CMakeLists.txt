@@ -135,6 +135,10 @@ if(GAMER_CMAKE_VERBOSE)
     message(DEBUG "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE})
 endif(GAMER_CMAKE_VERBOSE)
 
+if(BUILD_PYGAMER)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+endif()
+
 # Add and configure library dependencies
 add_subdirectory(libraries EXCLUDE_FROM_ALL)
 
