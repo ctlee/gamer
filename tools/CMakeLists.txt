@@ -91,7 +91,6 @@ add_dependencies(stage_files pygamer)
 
 # Generate the name of the build
 set(_ZIPNAME "blendgamer-${VERSION_SHORT}-")
-message(STATUS "VERISON_INFO ${VERSION_INFO}")
 if(VERSION_INFO)
     string(CONCAT _ZIPNAME ${_ZIPNAME} "${VERSION_INFO}-")
     if(VERSION_SHA1)
