@@ -186,7 +186,7 @@ jobs:
     install: skip
     script:
       - mkdir -p build && cd build;
-      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.79 ..
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DCMAKE_OSX_DEVELOPMENT_TARGET=10.12 -DBLENDER_VERSION_OVERRIDE=2.79 ..
       - cmake --build . --config Release -j 2
     deploy:
       provider: releases
@@ -216,7 +216,7 @@ jobs:
     install: skip
     script:
       - mkdir -p build && cd build;
-      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=2.83 ..
+      - cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DBUILD_PYGAMER=on -DBUILD_BLENDGAMER=ON -DCMAKE_OSX_DEVELOPMENT_TARGET=10.12 -DBLENDER_VERSION_OVERRIDE=2.83 ..
       - cmake --build . --config Release -j 2
     deploy:
       provider: releases
