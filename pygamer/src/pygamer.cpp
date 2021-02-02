@@ -288,6 +288,17 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+    pygamer.def("writeComsol", py::overload_cast<const std::string&, const std::vector<SurfaceMesh const *>&>(&writeComsol),
+        py::arg("filename"), py::arg("meshes"),
+        R"delim(
+            Write a list of surface meshes to comsol mphtxt format.
+
+            Args:
+                filename (:py:class:`string`): Filename for output
+                meshes (:py:class:`list`(:py:class:`surfacemesh.SurfaceMesh`): List of meshes with filled metadata
+        )delim" 
+    );
+
     pygamer.def("__version__",
         [](){
             extern const std::string gVERSION;

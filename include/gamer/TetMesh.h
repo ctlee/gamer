@@ -311,7 +311,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
  * @return     Tetrahedral mesh
  */
 std::unique_ptr<TetMesh>
-makeTetMesh(const std::vector<SurfaceMesh *> &surfmeshes,
+makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
             std::string tetgen_params);
 
 /**

@@ -90,6 +90,19 @@ class GAMER_OT_tetrahedralize(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
+class GAMER_OT_surfaces_to_comsol(bpy.types.Operator):
+    bl_idname = "gamer.surfaces_to_comsol"
+    bl_label = "Export to Comsol"
+    bl_description = "Export surface meshes to Comsol"
+    bl_options = {"REGISTER"}
+
+    def execute(self, context):
+        context.scene.gamer.tet_group.surfaces_to_comsol(self.report)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return self.execute(context)
+
 
 class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     # name = StringProperty()  # This is a reminder that "name" is already defined for all subclasses of PropertyGroup
@@ -236,6 +249,44 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     #     layout = panel.layout
     #     self.draw_layout(context, layout)
 
+    def surfaces_to_comsol(self, report):
+        filename = self.export_path + self.export_filebase
+        filename = bpy.path.abspath(filename)
+        gmeshes = list()
+        for (obj_name, tet_domain) in [(d.object_name, d) for d in self.domain_list]:
+            print("obj_name = " + obj_name + ", tet_domain = " + str(tet_domain))
+
+        current_domain_names = [d.object_name for d in self.domain_list]
+        print("Current domains = " + str(current_domain_names))
+
+        for d in self.domain_list:
+            obj = bpy.data.objects[d.object_name]
+            gmesh = blender_to_gamer(obj=obj, map_boundaries=True)
+            if not gmesh:
+                print("blender_to_gamer returned a gmesh of None")
+            else:
+                print(
+                    "Mesh %s: num verts: %d numfaces: %d"
+                    % (obj_name, gmesh.nVertices, gmesh.nFaces)
+                )
+                # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
+                print("Closed: %d; Marker: %d" % (d.is_hole, d.marker))
+
+                globalInfo = gmesh.getRoot()
+                globalInfo.ishole = d.is_hole
+                globalInfo.marker = d.marker
+                globalInfo.useVolumeConstraint = d.constrain_vol
+                globalInfo.volumeConstraint = d.vol_constraint
+
+                # Write surface mesh to file for debug
+                # g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
+
+                # Add the mesh
+                gmeshes.append(gmesh)
+        if len(gmeshes) > 0:
+            report({"INFO"}, "Writing to Comsol file: " + filename + ".mphtxt")
+            g.writeComsol(filename + ".mphtxt", gmeshes)
+
     def tetrahedralize(self, report):
         print("######################## Begin Tetrahedralize ########################")
 
@@ -341,6 +392,7 @@ classes = [
     GAMER_OT_tet_domain_remove,
     GAMER_OT_tet_domain_remove_all,
     GAMER_OT_tetrahedralize,
+    GAMER_OT_surfaces_to_comsol,
     GAMerTetDomainPropertyGroup,
     GAMerTetrahedralizationPropertyGroup,
 ]
