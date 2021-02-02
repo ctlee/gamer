@@ -48,17 +48,17 @@ void writeComsol(const std::string &filename,
   for (std::size_t idx = 0; idx < meshes.size(); ++idx) {
     std::stringstream ss;
     ss << "mesh" << idx;
-    fout << ss.str().length() << " # " << ss.str() << "\n";
+    fout << ss.str().length() << " " << ss.str() << "\n";
   }
 
   fout << meshes.size() << " # number of types\n";
   fout << "# Types\n";
   for (std::size_t idx = 0; idx < meshes.size(); ++idx)
-    fout << "3 obj\n\n";
+    fout << "3 obj\n";
 
   for (std::size_t idx = 0; idx < meshes.size(); ++idx) {
     const SurfaceMesh &mesh = *meshes[idx];
-    fout << "# --------- Object " << idx << " ----------\n\n";
+    fout << "\n# --------- Object " << idx << " ----------\n\n";
     fout << "0 0 1\n";
     fout << "4 Mesh # class\n";
     fout << "4 # version\n";
