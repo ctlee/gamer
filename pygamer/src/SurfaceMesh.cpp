@@ -1028,6 +1028,14 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
+    SurfMeshCls.def("get_surface_area", &getArea,
+        R"delim(
+            Compute the surface area of the mesh.
+
+            Returns:
+                :py:class:`float`: Surface area of the mesh.
+        )
+    );
 
     SurfMeshCls.def("fillHoles", &fillHoles,
         R"delim(
