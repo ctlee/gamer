@@ -1028,7 +1028,8 @@ void init_SurfaceMesh(py::module& mod){
         )delim"
     );
 
-    SurfMeshCls.def("get_surface_area", &getArea,
+    SurfMeshCls.def("get_surface_area", py::overload_cast<const SurfaceMesh&>(&getArea),
+
         R"delim(
             Compute the surface area of the mesh.
 

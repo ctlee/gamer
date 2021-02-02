@@ -880,7 +880,7 @@ double getArea(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID);
  */
 double getArea(Vertex a, Vertex b, Vertex c);
 
-REAL getArea(std::array<Vertex, 3> t);
+double getArea(std::array<Vertex, 3> t);
 
 /**
  * @brief      Gets the volume.
