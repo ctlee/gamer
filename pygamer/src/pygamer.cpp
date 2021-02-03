@@ -299,6 +299,17 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim" 
     );
 
+    pygamer.def("writeComsol", py::overload_cast<const std::string&, const TetMesh&>(&writeComsol),
+        py::arg("filename"), py::arg("mesh"),
+        R"delim(
+            Write mesh to file in Comsol mphtxt format
+
+            Args:
+                filename (:py:class:`str`): Filename to write to
+                mesh (:py:class:`tetmesh.TetMesh`): Mesh of interest
+        )delim"
+    );
+
     pygamer.def("__version__",
         [](){
             extern const std::string gVERSION;

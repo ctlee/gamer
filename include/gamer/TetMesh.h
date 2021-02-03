@@ -355,6 +355,14 @@ void writeOFF(const std::string &filename, const TetMesh &mesh);
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
 
 /**
+ * @brief      Writes the mesh out in Comsol mphtxt format.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
+void writeComsol(const std::string &filename, const TetMesh &mesh);
+
+/**
  * @brief      Writes the mesh out in triangle format.
  *
  * @param[in]  filename  The filename

@@ -557,6 +557,8 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
                 col.prop(tetprops, "dolfin")
                 col = row.column()
                 col.prop(tetprops, "paraview")
+                col = row.column()
+                col.prop(tetprops, "comsol")
 
             row = layout.row()
             icon = "PROP_OFF"

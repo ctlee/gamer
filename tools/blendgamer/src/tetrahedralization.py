@@ -229,6 +229,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     paraview = BoolProperty(
         name="Paraview", default=False, description="Generate Paraview output"
     )
+    comsol = BoolProperty(
+        name="Comsol", default=False, description="Generate Comsol mphtxt output"
+    )
 
     status = StringProperty(name="status", default="")
 
@@ -341,7 +344,7 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         # filename = self.tet_path
         filename = self.export_path + self.export_filebase
         filename = bpy.path.abspath(filename)
-        if not (self.dolfin or self.paraview):
+        if not (self.dolfin or self.paraview or self.comsol):
             self.status = (
                 "Please select an output format in Tetrahedralization Settings"
             )
@@ -354,6 +357,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 mesh_formats.append("dolfin")
             if self.paraview:
                 mesh_formats.append("paraview")
+            if self.comsol:
+                mesh_formats.append("comsol")
 
             # Vector of SurfaceMeshes
             # gmeshes = g.VectorSM()
@@ -416,8 +421,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 #     g.smoothMesh(tetmesh)
 
                 # Store mesh to files
-                tetmesh_formats = ["dolfin", "paraview"]
-                tetmesh_suffices = [".xml", ".vtk"]
+                tetmesh_formats = ["dolfin", "paraview", "comsol"]
+                tetmesh_suffices = [".xml", ".vtk", ".mphtxt"]
 
                 for fmt in mesh_formats:
                     try:
@@ -430,6 +435,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                             g.writeDolfin(filename + suffix, tetmesh)
                         if fmt == "paraview":
                             g.writeVTK(filename + suffix, tetmesh)
+                        if fmt == "comsol":
+                            g.writeComsol(filename + suffix, tetmesh)
                     except Exception as ex:
                         report({"ERROR"}, str(ex))
 
