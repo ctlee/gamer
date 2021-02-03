@@ -1,23 +1,23 @@
 # ***************************************************************************
 # This file is part of the GAMer software.
-# Copyright (C) 2016-2018
-# by Christopher Lee, Tom Bartol, John Moody, Rommie Amaro, J. Andrew McCammon,
-#    and Michael Holst
-
+# Copyright (C) 2016-2021
+# by Christopher T. Lee and contributors
+#
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 2.1 of the License, or (at your option) any later version.
-
+#
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
-
+#
 # You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-# ***************************************************************************
+# License along with this library; if not, see <http:#www.gnu.org/licenses/>
+# or write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+# Boston, MA 02111-1307 USA
+# **************************************************************************
 
 import bpy
 import sys
@@ -112,9 +112,9 @@ class GAMER_OT_update_to_2_0_1_from_v_0_1(bpy.types.Operator):
         return {"FINISHED"}
 
 
-def migrate2_0_1__2_0_7():
+def migrate2_0_1__2_0_6():
     """
-    Migrate metadata formats from 2.0.1 <= v < 2.0.7 to v2.0.7
+    Migrate metadata formats from 2.0.1 <= v < 2.0.6 to v2.0.6
     """
     for obj in bpy.data.objects:
         if obj.type == "MESH":
@@ -133,6 +133,32 @@ def migrate2_0_1__2_0_7():
             # Remove include
             if "include" in obj["gamer"]:
                 del obj["gamer"]["include"]
+
+
+def migrate2_0_6__2_0_7():
+    """
+    Migrate metadata formats from 2.0.6 <= v < 2.0.7 to v2.0.7
+    """
+    scene = bpy.context.scene
+    domain_list = scene.gamer.tet_group.domain_list
+    for i in range(len(domain_list) - 1, -1, -1):
+        domain = domain_list[i]
+        # print("Processing: ", domain["object_name"])
+
+        if "object_name" in domain:
+            obj = scene.objects[domain["object_name"]]
+            if obj is not None:
+                domain.object_pointer = obj
+                del domain["object_name"]
+            else:
+                print("%s is missing from the scene... removing it from the domain list" % (domain["object_name"]))
+                scene.gamer.tet_group.remove_domain_by_index(i)
+        else:
+            if domain.object_pointer is None:
+                print("Unrecoverable domain found... removing it")
+                scene.gamer.tet_group.remove_domain_by_index(i)
+
+    scene.gamer.tet_group.validate_domain_objects(bpy.context, None)
 
 
 def getGamerVersion():
@@ -173,13 +199,13 @@ def checkVersion():
 
     while scene.gamer.versionerror < 0:
         if scene.gamer.versionerror == -1:
-
             # Throw an error for older versions of GAMer
             if compare_version(fileVer, (2, 0, 0)) < 0:
+                print("trigger old version")
                 bpy.ops.gamer.prompt_old_version()
                 break
 
-            # Update from 2.0.0 to current
+            # Update from 2.0.0 to 2.0.1
             elif compare_version(fileVer, (2, 0, 0)) == 0:
                 newver = (2, 0, 1)
                 print(
@@ -196,18 +222,28 @@ def checkVersion():
                                 del obj["boundaries"]
                 scene.gamer.gamer_version = str(newver)
 
-            # Update 2.0.1--2.0.4 metadata to 2.0.5
+            # Update 2.0.1--2.0.5 metadata to 2.0.6
             elif (
                 compare_version(fileVer, (2, 0, 1)) >= 0
-                and compare_version(fileVer, (2, 0, 5)) < 0
+                and compare_version(fileVer, (2, 0, 6)) < 0
             ):
-                newver = (2, 0, 5)
+                newver = (2, 0, 6)
                 print("Migrating from v%s to v%s" % (str(fileVer), str(newver)))
-                migrate2_0_1__2_0_7()
+                migrate2_0_1__2_0_6()
                 scene.gamer.gamer_version = str(newver)
 
-            # No changes since 2.0.5... yet!
-            elif compare_version(fileVer, (2, 0, 5)) >= 0:
+            # Update 2.0.6 to 2.0.7
+            elif (
+                compare_version(fileVer, (2, 0, 6)) >= 0
+                and compare_version(fileVer, (2, 0, 7)) < 0
+            ):
+                newver = (2, 0, 7)
+                print("Migrating from v%s to v%s" % (str(fileVer), str(newver)))
+                migrate2_0_6__2_0_7()
+                scene.gamer.gamer_version = str(newver)
+
+            # No changes since 2.0.7... yet!
+            elif compare_version(fileVer, (2, 0, 7)) >= 0:
                 print("Migrating from v%s to v%s" % (str(fileVer), str(currVer)))
                 scene.gamer.gamer_version = str(currVer)
 
@@ -225,11 +261,10 @@ def compare_version(v1, v2):
     Args:
         v1 (tuple): The version
         v2 (tuple): The other version
-    
+
     Returns:
         int:  Return 1: v1 > v2, Return 0:  v1 == v2, Return -1: v1 <  v2
     """
-
 
     def cmp(a, b):
         """

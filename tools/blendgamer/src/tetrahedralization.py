@@ -289,11 +289,12 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
     def validate_domain_objects(self, context, report):
         for i in range(len(self.domain_list) - 1, -1, -1):
             d = self.domain_list[i]
-            if context.scene.objects.get(d.object_pointer.name) == None:
+            if d.object_pointer is None:
+                self.remove_domain_by_index(i)
+            elif context.scene.objects.get(d.object_pointer.name) is None:
                 bpy.data.objects.remove(d.object_pointer)
                 self.remove_domain_by_index(i)
-            elif d.object_pointer is None:
-                self.remove_domain_by_index(i)
+            
 
     def surfaces_to_comsol(self, context, report):
         self.validate_domain_objects(context, report)

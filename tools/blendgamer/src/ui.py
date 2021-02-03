@@ -72,7 +72,7 @@ class GAMER_PT_versionerror(bpy.types.Panel):
             )
         elif context.scene.gamer.versionerror < 0:
             layout.label(
-                text="Warning the current file was generated with an older version of GAMer which does not support autoupdate!"
+                text="Warning the current file was generated with an older version of GAMer could not autoupdate!"
             )
             layout.label(
                 text="Please be careful manipulating this file as data may be lost."
