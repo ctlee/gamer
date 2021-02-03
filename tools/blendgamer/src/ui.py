@@ -207,7 +207,7 @@ class GAMER_PT_mesh_quality(bpy.types.Panel):
             # box.alert = True
             for i, (text, data) in enumerate(info):
                 if obj and data and data[1]:
-                    bm_type, bm_array = data
+                    bm_type, _ = data
                     col.operator(
                         "gamer.meshstats_select_report",
                         text=text,
@@ -513,6 +513,8 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
         col.operator("gamer.tet_domain_add", icon=ADD_ICON, text="")
         col.operator("gamer.tet_domain_remove", icon=REMOVE_ICON, text="")
         col.operator("gamer.tet_domain_remove_all", icon="X", text="")
+        row = col.row()
+        row.operator("gamer.cleanup_domains", icon="GHOST_DISABLED", text="")
 
         if len(tetprops.domain_list) > 0:
             domain = tetprops.domain_list[tetprops.active_domain_index]

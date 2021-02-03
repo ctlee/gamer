@@ -18,7 +18,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # ***************************************************************************
-#
+
 import bpy
 from bpy.props import (
     BoolProperty,
@@ -48,8 +48,7 @@ class GAMER_OT_tet_domain_add(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        context.scene.gamer.tet_group.add_tet_domain(context)
-        self.report({"INFO"}, "Added a new Tet domain")
+        context.scene.gamer.tet_group.add_tet_domain(self.report, context)
         return {"FINISHED"}
 
 
@@ -84,11 +83,12 @@ class GAMER_OT_tetrahedralize(bpy.types.Operator):
     bl_options = {"REGISTER"}
 
     def execute(self, context):
-        context.scene.gamer.tet_group.tetrahedralize(self.report)
+        context.scene.gamer.tet_group.tetrahedralize(context, self.report)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
+
 
 class GAMER_OT_surfaces_to_comsol(bpy.types.Operator):
     bl_idname = "gamer.surfaces_to_comsol"
@@ -97,7 +97,21 @@ class GAMER_OT_surfaces_to_comsol(bpy.types.Operator):
     bl_options = {"REGISTER"}
 
     def execute(self, context):
-        context.scene.gamer.tet_group.surfaces_to_comsol(self.report)
+        context.scene.gamer.tet_group.surfaces_to_comsol(context, self.report)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return self.execute(context)
+
+
+class GAMER_OT_cleanup_domains(bpy.types.Operator):
+    bl_idname = "gamer.cleanup_domains"
+    bl_label = "Clean up domains"
+    bl_description = "Clean up missing objects from domains"
+    bl_options = {"REGISTER"}
+
+    def execute(self, context):
+        context.scene.gamer.tet_group.validate_domain_objects(context,self.report)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -107,7 +121,11 @@ class GAMER_OT_surfaces_to_comsol(bpy.types.Operator):
 class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     # name = StringProperty()  # This is a reminder that "name" is already defined for all subclasses of PropertyGroup
     domain_id = IntProperty(name="ID", default=-1, description="Domain ID")
-    object_name = StringProperty(name="ObjName", default="", description="Object Name")
+    # Deprecated in 2.0.7 in favor of pointer properties
+    # object_name = StringProperty(name="ObjName", default="", description="Object Name")
+    object_pointer = PointerProperty(
+        type=bpy.types.Object, name="Test", description="Object"
+    )
     marker = IntProperty(name="Marker", default=-1, description="Domain Marker Integer")
     is_hole = BoolProperty(
         name="Hole", default=False, description="Use this domain as a hole"
@@ -118,6 +136,11 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     vol_constraint = FloatProperty(
         name="Vol Constraint", default=10.0, description="Volume Constraint"
     )
+
+    def get_name(self):
+        if self.object_pointer is not None:
+            return self.object_pointer.name
+        return None
 
     def draw_layout(self, layout):
         row = layout.row()
@@ -134,8 +157,18 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
                 col.prop(self, "vol_constraint")
 
     def draw_item_in_row(self, row):
+        name = self.get_name()
+        if name is None:
+            row.alert = True
+            row.label(text="Object is missing")
+            return
+        elif bpy.context.scene.objects.get(self.object_pointer.name) == None:
+            row.alert = True
+            row.label(text="Object(%s) is not linked to scene"%(name))
+            return
+
         col = row.column()
-        col.label(text=str(self.object_name))
+        col.label(text=name)
         col = row.column()
         col.label(text="Domain ID: " + str(self.domain_id))
         col = row.column()
@@ -199,27 +232,26 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
     status = StringProperty(name="status", default="")
 
-    def add_tet_domain(self, context):
-        # print("Adding a Tet Domain")
+    def add_tet_domain(self, report, context):
         """ Add a new tet domain to the list of tet domains for each selected object """
-        # mcell = context.scene.mcell
-
         # From the list of selected objects, only add MESH objects.
         objs = [obj for obj in context.selected_objects if obj.type == "MESH"]
         if len(objs) > 0:
             for obj in objs:
                 # Check by name to see if it's already listed
-                current_domain_names = [d.object_name for d in self.domain_list]
-                print("Current domains = " + str(current_domain_names))
+                current_domain_names = [d.get_name() for d in self.domain_list]
+                # print("Current domains = " + str(current_domain_names))
                 if not (obj.name in current_domain_names):
                     new_id = (
                         self.allocate_available_id()
                     )  # Do this first to check for empty list before adding
                     new_dom = self.domain_list.add()
+                    new_dom.name = str(new_id)
                     new_dom.domain_id = new_id
                     new_dom.marker = new_id
-                    new_dom.object_name = obj.name
+                    new_dom.object_pointer = obj
                     self.active_domain_index = len(self.domain_list) - 1
+                    report({"INFO"}, "Added a new Tet domain")
 
     def remove_active_tet_domain(self, context):
         # print("Removing active Tet Domain")
@@ -227,6 +259,15 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         self.domain_list.remove(self.active_domain_index)
         self.active_domain_index -= 1
         if self.active_domain_index < 0:
+            self.active_domain_index = 0
+
+    def remove_domain_by_index(self, idx):
+        """ Remove the tet domain by index from the list of domains """
+        self.domain_list.remove(idx)
+        if not (
+            self.active_domain_index >= 0
+            and self.active_domain_index < len(self.domain_list)
+        ):
             self.active_domain_index = 0
 
     def remove_all_tet_domains(self, context):
@@ -245,29 +286,34 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         self.next_id += 1
         return self.next_id - 1
 
-    # def draw_panel(self, context, panel):
-    #     layout = panel.layout
-    #     self.draw_layout(context, layout)
+    def validate_domain_objects(self, context, report):
+        for i in range(len(self.domain_list) - 1, -1, -1):
+            d = self.domain_list[i]
+            if context.scene.objects.get(d.object_pointer.name) == None:
+                bpy.data.objects.remove(d.object_pointer)
+                self.remove_domain_by_index(i)
+            elif d.object_pointer is None:
+                self.remove_domain_by_index(i)
 
-    def surfaces_to_comsol(self, report):
+    def surfaces_to_comsol(self, context, report):
+        self.validate_domain_objects(context, report)
+
         filename = self.export_path + self.export_filebase
         filename = bpy.path.abspath(filename)
         gmeshes = list()
-        for (obj_name, tet_domain) in [(d.object_name, d) for d in self.domain_list]:
-            print("obj_name = " + obj_name + ", tet_domain = " + str(tet_domain))
 
-        current_domain_names = [d.object_name for d in self.domain_list]
+        current_domain_names = [d.get_name() for d in self.domain_list]
         print("Current domains = " + str(current_domain_names))
 
         for d in self.domain_list:
-            obj = bpy.data.objects[d.object_name]
+            obj = d.object_pointer
             gmesh = blender_to_gamer(obj=obj, map_boundaries=True)
             if not gmesh:
                 print("blender_to_gamer returned a gmesh of None")
             else:
                 print(
                     "Mesh %s: num verts: %d numfaces: %d"
-                    % (obj_name, gmesh.nVertices, gmesh.nFaces)
+                    % (obj.name, gmesh.nVertices, gmesh.nFaces)
                 )
                 # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
                 print("Closed: %d; Marker: %d" % (d.is_hole, d.marker))
@@ -287,7 +333,8 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             report({"INFO"}, "Writing to Comsol file: " + filename + ".mphtxt")
             g.writeComsol(filename + ".mphtxt", gmeshes)
 
-    def tetrahedralize(self, report):
+    def tetrahedralize(self, context, report):
+        self.validate_domain_objects(context, report)
         print("######################## Begin Tetrahedralize ########################")
 
         # filename = self.tet_path
@@ -310,23 +357,24 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             # Vector of SurfaceMeshes
             # gmeshes = g.VectorSM()
             gmeshes = list()
-            for (obj_name, tet_domain) in [
-                (d.object_name, d) for d in self.domain_list
-            ]:
-                print("obj_name = " + obj_name + ", tet_domain = " + str(tet_domain))
+            # for (obj_name, tet_domain) in [
+            #     (d.object_name, d) for d in self.domain_list
+            # ]:
+            #     print("obj_name = " + obj_name + ", tet_domain = " + str(tet_domain))
 
-            current_domain_names = [d.object_name for d in self.domain_list]
+            current_domain_names = [d.get_name() for d in self.domain_list]
             print("Current domains = " + str(current_domain_names))
 
             for d in self.domain_list:
-                obj = bpy.data.objects[d.object_name]
+                obj = d.object_pointer
                 gmesh = blender_to_gamer(obj=obj, map_boundaries=True)
+
                 if not gmesh:
                     print("blender_to_gamer returned a gmesh of None")
                 else:
                     print(
                         "Mesh %s: num verts: %d numfaces: %d"
-                        % (obj_name, gmesh.nVertices, gmesh.nFaces)
+                        % (obj.name, gmesh.nVertices, gmesh.nFaces)
                     )
                     # Set the domain data on the SurfaceMesh these are the per/domain items as_hole, marker, and volume constraints
                     print("Closed: %d; Marker: %d" % (d.is_hole, d.marker))
@@ -393,6 +441,7 @@ classes = [
     GAMER_OT_tet_domain_remove_all,
     GAMER_OT_tetrahedralize,
     GAMER_OT_surfaces_to_comsol,
+    GAMER_OT_cleanup_domains,
     GAMerTetDomainPropertyGroup,
     GAMerTetrahedralizationPropertyGroup,
 ]
