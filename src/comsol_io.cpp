@@ -206,7 +206,7 @@ void writeComsol(const std::string &filename, const TetMesh &mesh) {
 
   fout << "2 # number of element types\n\n";
   fout << "# Type #0\n\n";
-  fout << "2 tet # type name\n\n";
+  fout << "3 tet # type name\n\n";
   fout << "4 # number of vertices per element\n";
   fout << mesh.size<4>() << " # number of elements\n";
   fout << "# Elements\n";
@@ -248,8 +248,8 @@ void writeComsol(const std::string &filename, const TetMesh &mesh) {
     fout << (*tetID).marker << "\n";
   }
 
-  fout << "\n# Type #0\n\n";
-  fout << "2 tri # type name\n\n";
+  fout << "\n# Type #1\n\n";
+  fout << "3 tri # type name\n\n";
   fout << "3 # number of vertices per element\n";
   fout << mesh.size<3>() << " # number of elements\n";
   fout << "# Elements\n";
