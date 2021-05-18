@@ -146,13 +146,17 @@ def migrate2_0_6__2_0_7():
         # print("Processing: ", domain["object_name"])
 
         if "object_name" in domain:
-            obj = scene.objects[domain["object_name"]]
-            if obj is not None:
-                domain.object_pointer = obj
-                del domain["object_name"]
-            else:
-                print("%s is missing from the scene... removing it from the domain list" % (domain["object_name"]))
+            if domain["object_name"] not in scene.objects: 
+                print("Domain %s is missing... removing it from the domain list" % (domain["object_name"]))
                 scene.gamer.tet_group.remove_domain_by_index(i)
+            else:
+                obj = scene.objects[domain["object_name"]]
+                if obj is not None:
+                    domain.object_pointer = obj
+                    del domain["object_name"]
+                else:
+                    print("Domain %s is missing from the scene... removing it from the domain list" % (domain["object_name"]))
+                    scene.gamer.tet_group.remove_domain_by_index(i)
         else:
             if domain.object_pointer is None:
                 print("Unrecoverable domain found... removing it")
