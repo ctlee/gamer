@@ -27,6 +27,7 @@ jobs:
       - name: Get target python version
         id: python
         run: |
+          pwd
           pythonver=$(python ./scripts/blender_pyversion_lookup.py ${{ matrix.blender }})
           echo ::set-output name=version::$pythonver
         shell: bash
