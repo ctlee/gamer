@@ -16,7 +16,7 @@ on:
 
 jobs:
   build_test:
-    name: Setup build environment and test
+    name: Setup, build, and test
     strategy:
       fail-fast: false
       matrix:
@@ -39,11 +39,29 @@ jobs:
       - run: echo python --version
         # Do I need to install numpy here?
       
-      - name: build
+      - name: Build and test
         run: |
           mkdir -p build && cd build;
           cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on ..
           cmake --build . --config Release -j 
+          ctest -C Release -V -j
         # Do I need to separate out windows generator?
-      - name: test
-        run: ctest -C Release -V -j
+
+      - name: Get blendgamer filename
+        id: pkg
+        run: |
+          pwd
+          cd gamer/build
+          zipfile=$(ls -1 *.zip)
+          echo ::set-output name=filename::$zipfile 
+
+      - name: Stash blendgamer
+        # if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.pkg.outputs.filename }}
+          path: gamer/build/blendgamer*.zip
+        # run: echo "Tag ${{ github.ref }}"
+
+  # stage_releases:
+  #   on: 
