@@ -54,8 +54,9 @@ jobs:
         run: |
           pwd
           cd build
-          zipfile=$(ls -1 *.zip)
-          echo ::set-output name=filename::$zipfile 
+          zipfile=$(ls *.zip)
+          echo ::set-output name=filename::$zipfile
+        shell: bash
 
       - name: Stash blendgamer
         # if: startsWith(github.ref, 'refs/tags/')
