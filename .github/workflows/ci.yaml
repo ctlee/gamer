@@ -31,13 +31,14 @@ jobs:
           echo ::set-output name=version::$pythonver
         shell: bash
       - name: Set python version
-        - uses: actions/setup-python@v2
-          with: ${{ steps.python.outputs.version }}
-        - run: echo python --version
+        uses: actions/setup-python@v2
+        with: 
+          python-version: ${{ steps.python.outputs.version }}
+      - run: echo python --version
         # Do I need to install numpy here?
       
       - name: build
-        - run: cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on ..
+        run: cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on ..
         # Do I need to separate out windows generator?
       - name: test
-        - run: ctest -C Release -V -j
+        run: ctest -C Release -V -j
