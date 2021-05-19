@@ -25,11 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Get target python version
-          id: python
-          run: |
-            pythonver=$(python ./scripts/blender_pyversion_lookup.py ${{ matrix.blender }})
-            echo ::set-output name=version::$pythonver
-          shell: bash
+        id: python
+        run: |
+          pythonver=$(python ./scripts/blender_pyversion_lookup.py ${{ matrix.blender }})
+          echo ::set-output name=version::$pythonver
+        shell: bash
       - name: Set python version
         - uses: actions/setup-python@v2
           with: ${{ steps.python.outputs.version }}
