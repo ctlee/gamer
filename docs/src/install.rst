@@ -318,7 +318,8 @@ Note that the prebuilt Blender binaries from the Blender Foundation do not conta
           Blender Version  Python Version
           ===============  ==============
           2.79b            3.5
-          2.8X             3.7
+          2.83LTS          3.7.4
+          2.93             3.9.1
           ===============  ==============
 
           Create a new environment corresponding to the Python version.

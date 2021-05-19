@@ -1,0 +1,43 @@
+
+name: Testing
+
+on:
+  push:
+    branches:
+      - master
+      - development
+    tags:
+      # The regex: /^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
+      - 'v[0-9].[0-9]+.[0-9]+*'
+  pull_request:
+    branches: 
+      - master
+      - development
+
+jobs:
+  build_test:
+    name: Setup build environment and test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        blender: [2.79, 2.83, 2.93]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get target python version
+          id: python
+          run: |
+            pythonver=$(python ./scripts/blender_pyversion_lookup.py ${{ matrix.blender }})
+            echo ::set-output name=version::$pythonver
+          shell: bash
+      - name: Set python version
+        - uses: actions/setup-python@v2
+          with: ${{ steps.python.outputs.version }}
+        - run: echo python --version
+        # Do I need to install numpy here?
+      
+      - name: build
+        - run: cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on ..
+        # Do I need to separate out windows generator?
+      - name: test
+        - run: ctest -C Release -V -j
