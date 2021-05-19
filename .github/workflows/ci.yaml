@@ -36,8 +36,10 @@ jobs:
         uses: actions/setup-python@v2
         with: 
           python-version: ${{ steps.python.outputs.version }}
-      - run: echo python --version
-        # Do I need to install numpy here?
+      - run: |
+        echo python --version
+        python -m pip install pytest
+      # Do I need to install numpy here?
       
       - name: Build and test
         run: |
@@ -51,7 +53,7 @@ jobs:
         id: pkg
         run: |
           pwd
-          cd gamer/build
+          cd build
           zipfile=$(ls -1 *.zip)
           echo ::set-output name=filename::$zipfile 
 
@@ -60,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.pkg.outputs.filename }}
-          path: gamer/build/blendgamer*.zip
+          path: build/blendgamer*.zip
         # run: echo "Tag ${{ github.ref }}"
 
   # stage_releases:
