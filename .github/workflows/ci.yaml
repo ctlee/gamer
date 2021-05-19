@@ -39,7 +39,10 @@ jobs:
         # Do I need to install numpy here?
       
       - name: build
-        run: cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on ..
+        run: |
+          mkdir -p build && cd build;
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on ..
+          cmake --build . --config Release -j 
         # Do I need to separate out windows generator?
       - name: test
         run: ctest -C Release -V -j
