@@ -37,8 +37,8 @@ jobs:
         with: 
           python-version: ${{ steps.python.outputs.version }}
       - run: |
-        echo python --version
-        python -m pip install pytest
+          echo python --version
+          python -m pip install pytest
       # Do I need to install numpy here?
       
       - name: Build and test
