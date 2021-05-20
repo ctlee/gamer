@@ -46,7 +46,7 @@ jobs:
       - name: Setup python libs
         id: pyexe
         run: |
-          echo python --version
+          python --version
           python -m pip install pytest
           py_exe_path=$(which python)
           echo ::set-output name=path::$py_exe_path
@@ -54,7 +54,7 @@ jobs:
       - name: Build and test
         run: |
           mkdir -p build && cd build;
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.pyexe.outputs.exe_path }} ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.pyexe.outputs.path }} ..
           cmake --build . --config Release -j 4
           ctest -C Release -V -j 4
 
@@ -91,7 +91,7 @@ jobs:
 
     - name: Collect zipfiles
       run: |
-        mv gamer/artifacts/blendgamer*.zip .
+        mv artifacts/blendgamer*.zip .
     
     - name: Display structure of downloaded files
       run: ls -R
