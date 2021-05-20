@@ -122,7 +122,7 @@ if(GAMER_CMAKE_VERBOSE)
 endif(GAMER_CMAKE_VERBOSE)
 
 if(BUILD_PYGAMER)
-    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
 endif()
 
 # Add and configure library dependencies
