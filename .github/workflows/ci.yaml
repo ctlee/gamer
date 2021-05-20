@@ -86,9 +86,13 @@ jobs:
       with:
         path: artifacts
 
+
+    - name: Display structure of files
+      run: ls -R
+
     - name: Collect zipfiles
       run: |
-        mv artifacts/*.zip/blendgamer*.zip .
+        mv gamer/artifacts/*.zip/blendgamer*.zip .
     
     - name: Display structure of downloaded files
       run: ls -R
