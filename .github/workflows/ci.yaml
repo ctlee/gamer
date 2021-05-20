@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.pkg.outputs.filename }}
-          path: build/plugin/blendgamer
+          path: build/*.zip
 
   stage_releases:
     name: Stage GitHub Release
@@ -91,7 +91,7 @@ jobs:
 
     - name: Collect zipfiles
       run: |
-        mv artifacts/blendgamer*.zip .
+        mv artifacts/blendgamer*.zip/blendgamer*.zip .
     
     - name: Display structure of downloaded files
       run: ls -R
