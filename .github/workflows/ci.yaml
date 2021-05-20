@@ -63,7 +63,7 @@ jobs:
         run: |
           pwd
           cd build
-          zipfile=$(basename $(ls *.zip) .zip)
+          zipfile=$(ls *.zip)
           echo ::set-output name=filename::$zipfile
 
       - name: Stash blendgamer
@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.pkg.outputs.filename }}
-          path: build/plugin/blendgamer/
+          path: build/blendgamer*.zip
 
   stage_releases:
     runs-on: ubuntu-latest
@@ -104,6 +104,6 @@ jobs:
         draft: true
         files: |
           *.zip
-          SHA256SUMS.txt
+          ./SHA256SUMS.txt
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
