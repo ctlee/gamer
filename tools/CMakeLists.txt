@@ -139,7 +139,7 @@ add_custom_target(zip_plugin
         ../${_ZIPNAME} --format=zip
         blendgamer
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/plugin
-    COMMENT "Zipping up addon components"
+    COMMENT "Zipping up addon components to: ${_ZIPNAME}"
     VERBATIM
 )
 add_dependencies(zip_plugin stage_files)
