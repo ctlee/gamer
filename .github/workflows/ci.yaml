@@ -54,7 +54,7 @@ jobs:
       - name: Build and test
         run: |
           mkdir -p build && cd build;
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.pyexe.outputs.path }} ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DGETEIGEN=ON -DGETPYBIND11=ON -DGAMER_TESTS=on -DBUILD_BLENDGAMER=ON -DBLENDER_VERSION_OVERRIDE=${{ matrix.blender }} -DBUILD_PYGAMER=on -DPython_EXECUTABLE:FILEPATH=${{ steps.pyexe.outputs.path }} ..
           cmake --build . --config Release -j 4
           ctest -C Release -V -j 4
 
