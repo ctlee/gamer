@@ -1,8 +1,7 @@
 # Geometry-preserving Adaptive MeshER
 [![DOI](https://zenodo.org/badge/122682242.svg)](https://zenodo.org/badge/latestdoi/122682242)
 [![PyPI](https://img.shields.io/pypi/v/pygamer)](https://pypi.org/project/pygamer/)
-[![Master Build Status](https://travis-ci.com/ctlee/gamer.svg?branch=master)](https://travis-ci.com/ctlee/gamer)
-[![Build status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/master?svg=true)](https://ci.appveyor.com/project/ctlee/gamer)
+[![Master Build Status](https://github.com/ctlee/gamer/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/ctlee/gamer/actions/workflows/ci.yaml)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
 
 GAMer is a surface mesh improvement library developed to condition surface meshes derived from noisy biological imaging data.
@@ -81,6 +80,5 @@ complex data structure.
 
 ## Development Build Status
 
-[![Development Build Status](https://travis-ci.com/ctlee/gamer.svg?branch=development)](https://travis-ci.com/ctlee/gamer)
-[![Development Build Status](https://ci.appveyor.com/api/projects/status/urffu7062fnohidl/branch/development?svg=true)](https://ci.appveyor.com/project/ctlee/gamer/branch/development)
+[![Development Build Status](https://github.com/ctlee/gamer/actions/workflows/ci.yaml/badge.svg?branch=development)](https://github.com/ctlee/gamer/actions/workflows/ci.yaml)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=development)](https://gamer.readthedocs.io/en/development?badge=development)
