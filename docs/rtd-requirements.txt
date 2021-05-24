@@ -8,6 +8,7 @@ pytest==6.2.3
 
 # For building documentation
 sphinx==4.0.2
+docutils==0.16
 breathe==4.30.0
 exhale==0.2.3
 # pandoc
