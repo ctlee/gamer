@@ -18,5 +18,5 @@ python:
   version: 3
   install:
     - requirements: docs/rtd-requirements.txt
-    - method: pip
+    - method: setuptools
       path: .

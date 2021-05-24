@@ -22,8 +22,8 @@ _on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # -- Project information -----------------------------------------------------
 
 project = '@CMAKE_PROJECT_NAME@'
-copyright = '2019, Christopher T. Lee'
-author = 'Christopher T. Lee'
+copyright = '2019-2021, Christopher T. Lee and Contributors'
+author = 'Christopher T. Lee and Contributors'
 
 version = '@VERSION_SHORT@'
 release = '@VERSION@'
@@ -152,4 +152,4 @@ html_context = {
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
-                       'numpy': ('http://docs.scipy.org/doc/numpy', None)}
+                       'numpy': ('https://numpy.org/doc/stable/', None)}

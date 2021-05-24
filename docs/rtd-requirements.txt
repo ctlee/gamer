@@ -1,21 +1,19 @@
 # Required for building
 cmake 
 scikit-build
-setuptools
-wheel
 numpy
 
 # Recommended
-pytest
+pytest==6.2.3
 
 # For building documentation
-sphinx
-breathe
-exhale
-pandoc
-sphinx-issues
-nbsphinx
-jupyter_sphinx
+sphinx==4.0.2
+breathe==4.30.0
+exhale==0.2.3
+pandoc==2.13
+sphinx-issues==1.2.0
+nbsphinx==0.8.5
+jupyter_sphinx==0.3.1
 
 # Required to run FEniCS notebooks
 # dolfin
