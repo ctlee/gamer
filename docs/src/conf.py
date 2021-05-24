@@ -12,7 +12,7 @@
 
 # Add the local lib to path if desired
 # import sys
-# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build2.82/lib/'))
+# sys.path.insert(0, os.path.abspath('/Users/ctlee/gamer/gamer/build-cmake/lib/'))
 
 import os
 import pygamer
@@ -25,8 +25,8 @@ project = 'GAMer'
 copyright = '2019, Christopher T. Lee'
 author = 'Christopher T. Lee'
 
-version = '2.0.6'
-release = 'v2.0.6-2-gce4c27c'
+version = '2.0.7'
+release = 'v2.0.7-alpha1-3-g3ff38dc-dirty'
 
 # -- General configuration ---------------------------------------------------
 
@@ -40,7 +40,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx_issues',
     'nbsphinx',
-    'jupyter_sphinx.execute',
+    'jupyter_sphinx',
 ]
 
 # Github repo

@@ -40,7 +40,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx_issues',
     'nbsphinx',
-    'jupyter_sphinx.execute',
+    'jupyter_sphinx',
 ]
 
 # Github repo
