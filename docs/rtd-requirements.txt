@@ -10,7 +10,7 @@ pytest==6.2.3
 sphinx==4.0.2
 breathe==4.30.0
 exhale==0.2.3
-pandoc==2.13
+# pandoc
 sphinx-issues==1.2.0
 nbsphinx==0.8.5
 jupyter_sphinx==0.3.1
