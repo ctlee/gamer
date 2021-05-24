@@ -147,7 +147,7 @@ These can be used in addition to the standard `CMake flags`_.
   * -  Build the ``PyGAMer`` extension.
     - ``-DBUILD_PYGAMER=on``
   * - Specify the Python executable path.
-    - ``-DPYTHON_EXECUTABLE:FILEPATH=/path/to/python3``
+    - ``-DPython_EXECUTABLE:FILEPATH=/path/to/python3``
   * - Package the Blender addon. This flag automatically builds the Python extension.
     - ``-DBUILD_BLENDGAMER=on``
   * - Use single precision floating point numbers.

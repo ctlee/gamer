@@ -73,7 +73,7 @@ if(NOT PYTEST_FOUND AND BUILD_PYGAMER)
 elseif(BUILD_PYGAMER)
     # Add a test for pytest
     add_test(NAME python-tests
-      COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMAND ${Python_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:pygamer>
     )
 endif()
