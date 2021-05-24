@@ -27,6 +27,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 if(SKBUILD)
     message(STATUS "The project is being built using scikit-build")
+    # Currently, Scikit-build does not support FindPython, so we convert the
+    # provided hints ourselves.
+    set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
+    set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
+    set(Python_LIBRARY "${PYTHON_LIBRARY}")
+    set(Python_VERSION "${PYTHON_VERSION_STRING}")
 endif()
 
 include(Macros)

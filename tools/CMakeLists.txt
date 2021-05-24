@@ -23,7 +23,7 @@ set(_BPY_STRICT FALSE)
 if(BLENDER_PLUGIN_INSTALL OR BLENDER_VERSION_STRICT)
     set(_BPY_STRICT TRUE)
 
-    execute_process(COMMAND "${Python3_EXECUTABLE}" "-c"
+    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
     "import sys;import struct;print(struct.calcsize('@P'));"
         RESULT_VARIABLE _PYTHON_SUCCESS
         OUTPUT_VARIABLE _PYTHON_VALUES
@@ -43,14 +43,14 @@ endif()
 # If strict then ensure system Python matches Blender's closely
 if(_BPY_STRICT)
     find_package(Blender REQUIRED)
-    set(_PYTHON_CMP_VERSION "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}"
+    set(_PYTHON_CMP_VERSION "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
         )
     set(_BPY_CMP_VERSION "${BLENDER_PYTHON_VERSION_MAJOR}.${BLENDER_PYTHON_VERSION_MINOR}")
     if(NOT _PYTHON_CMP_VERSION VERSION_EQUAL _BPY_CMP_VERSION)
         message(FATAL_ERROR
             "Blender Addon Config Failure: "
             "Blender embedded Python version (${BLENDER_PYTHON_VERSION}) "
-            "does not match the linked version of Python (${Python3_VERSION}).")
+            "does not match the linked version of Python (${Python_VERSION}).")
     elseif(NOT PYTHON_SIZEOF_VOID_P EQUAL BLENDER_PYTHON_SIZEOF_VOID_P)
         math(EXPR _PYTHON_BITS "${PYTHON_SIZEOF_VOID_P} * 8")
         math(EXPR _BLENDER_BITS "${BLENDER_PYTHON_SIZEOF_VOID_P} * 8")
