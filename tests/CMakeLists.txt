@@ -30,7 +30,7 @@ FetchContent_Declare(
     # URL https://github.com/google/googletest/archive/master.zip
     # URL https://github.com/google/googletest/archive/release-1.8.1.tar.gz
     GIT_REPOSITORY    https://github.com/google/googletest.git
-    GIT_TAG           release-1.8.1
+    # GIT_TAG           release-1.10.0
     SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
     BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
 )
@@ -73,7 +73,7 @@ if(NOT PYTEST_FOUND AND BUILD_PYGAMER)
 elseif(BUILD_PYGAMER)
     # Add a test for pytest
     add_test(NAME python-tests
-      COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMAND ${Python_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:pygamer>
     )
 endif()

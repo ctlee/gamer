@@ -1,8 +1,7 @@
 # ***************************************************************************
 # This file is part of the GAMer software.
-# Copyright (C) 2016-2018
-# by Christopher Lee, John Moody, Rommie Amaro, J. Andrew McCammon,
-#    and Michael Holst
+# Copyright (C) 2016-2021
+# by Christopher T. Lee and contributors
 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,8 +14,9 @@
 # Lesser General Public License for more details.
 
 # You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# License along with this library; if not, see <http://www.gnu.org/licenses/>
+# or write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+# Boston, MA 02111-1307 USA
 # ***************************************************************************
 
 # 3.12 required for FetchContent and objectlib INTERFACE include inheritance
@@ -27,6 +27,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 if(SKBUILD)
     message(STATUS "The project is being built using scikit-build")
+    # Currently, Scikit-build does not support FindPython, so we convert the
+    # provided hints ourselves.
+    set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
+    set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
+    set(Python_LIBRARY "${PYTHON_LIBRARY}")
+    set(Python_VERSION "${PYTHON_VERSION_STRING}")
 endif()
 
 include(Macros)
@@ -37,15 +43,7 @@ get_version_from_git()
 # Project GAMer
 #####################################################################
 project(GAMer VERSION ${VERSION_SHORT})
-
 message(STATUS "GAMer version: ${VERSION}")
-
-# Configure version.cpp to give access to version in code
-configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.cpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
-set(version_file "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
-list(APPEND GAMER_SOURCES "${version_file}")
 
 #####################################################################
 # Options
@@ -106,6 +104,11 @@ endif()
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 
+set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+cmake_policy(SET CMP0063 NEW)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+
 # # Add -fPIC to all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -121,44 +124,29 @@ endif()
 
 ## Print compile flags
 if(GAMER_CMAKE_VERBOSE)
-    message(DEBUG "CMAKE_C_FLAGS is: ${CMAKE_C_FLAGS}")
-    message(DEBUG "CMAKE_C_FLAGS_DEBUG is: ${CMAKE_C_FLAGS_DEBUG}")
-    message(DEBUG "CMAKE_C_FLAGS_RELEASE is: ${CMAKE_C_FLAGS_RELEASE}")
-    message(DEBUG "CMAKE_C_FLAGS_RELWITHDEBINFO is: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-    message(DEBUG "CMAKE_C_FLAGS_MINSIZEREL is: ${CMAKE_C_FLAGS_MINSIZEREL}")
-    message(DEBUG "CMAKE_CXX_FLAGS is: ${CMAKE_CXX_FLAGS}")
-    message(DEBUG "CMAKE_CXX_FLAGS_DEBUG is: ${CMAKE_CXX_FLAGS_DEBUG}")
-    message(DEBUG "CMAKE_CXX_FLAGS_RELEASE is: ${CMAKE_CXX_FLAGS_RELEASE}")
-    message(DEBUG "CMAKE_CXX_FLAGS_RELWITHDEBINFO is: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-    message(DEBUG "CMAKE_CXX_FLAGS_MINSIZEREL is: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
-    message(DEBUG "Build type: ${CMAKE_BUILD_TYPE}")
-    message(DEBUG "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE})
+    print_debug_messages()
 endif(GAMER_CMAKE_VERBOSE)
 
 if(BUILD_PYGAMER)
-    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
 endif()
 
 # Add and configure library dependencies
 add_subdirectory(libraries EXCLUDE_FROM_ALL)
-
-list(APPEND GAMER_SOURCES
-    "src/OFF_SurfaceMesh.cpp"
-    "src/OBJ_SurfaceMesh.cpp"
-    "src/SurfaceMesh.cpp"
-    "src/SurfaceMeshDetail.cpp"
-    "src/CurvatureCalcs.cpp"
-    "src/Vertex.cpp"
-    "src/TetMesh.cpp"
-    "src/PDBReader.cpp"
-    "src/pdb2mesh.cpp"
-)
+add_subdirectory(include)
+# Src must be traversed prior to appending to GAMER_SOURCES
+add_subdirectory(src)
+# Configure version.cpp to give access to version in code
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.cpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+list(APPEND GAMER_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version.cpp")
 
 #####################################################################
 # LIBRARIES
 #####################################################################
 # OBJECT LIBRARY: compiles the sources only once
-add_library(gamer_objlib OBJECT ${GAMER_SOURCES})
+add_library(gamer_objlib OBJECT ${GAMER_INCLUDES} ${GAMER_SOURCES})
 target_include_directories(gamer_objlib PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -168,6 +156,7 @@ target_link_libraries(gamer_objlib PUBLIC casc tetstatic Eigen3::Eigen)
 # SHARED LIBRARY
 add_library(gamershared SHARED $<TARGET_OBJECTS:gamer_objlib>)
 target_link_libraries(gamershared PUBLIC gamer_objlib)
+target_compile_definitions(gamershared PRIVATE GAMER_DLL)
 # set_target_properties(gamershared PROPERTIES OUTPUT_NAME gamer)
 
 # STATIC LIBRARY

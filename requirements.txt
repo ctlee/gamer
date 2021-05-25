@@ -1,8 +1,6 @@
 # Required for building
 cmake >= 3.10
 scikit-build
-setuptools
-wheel
 numpy
 
 # Recommended
@@ -11,11 +9,12 @@ pytest
 
 # For building documentation
 sphinx>=3.0
-breathe>=4.17.0
-exhale
-pandoc
+breathe>=4.30.0
+exhale>=0.2.3
+# pandoc
 sphinx-issues
 nbsphinx
 jupyter_sphinx
+
 sphinx-rtd-theme
 threevis

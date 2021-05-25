@@ -1,11 +1,11 @@
 
-find_package(PythonInterp)
-if(PYTHONINTERP_FOUND)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from importlib import util;print(util.find_spec('exhale') is not None)"
+find_package(Python QUIET COMPONENTS Interpreter )
+if(Python_Interpreter_FOUND)
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "from importlib import util;print(util.find_spec('exhale') is not None)"
                     OUTPUT_VARIABLE EXHALE_IMPORT_STATUS
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif(PYTHONINTERP_FOUND)
+endif(Python_Interpreter_FOUND)
 
 include(FindPackageHandleStandardArgs)
 

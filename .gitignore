@@ -71,4 +71,5 @@ docs/src/_pythonapi/
 docs/src/tutorials/
 docs/src/conf.py
 
-/.vscode
+.vscode
+.pytest_cache

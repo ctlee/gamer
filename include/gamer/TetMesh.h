@@ -311,7 +311,7 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio);
  * @return     Tetrahedral mesh
  */
 std::unique_ptr<TetMesh>
-makeTetMesh(const std::vector<SurfaceMesh *> &surfmeshes,
+makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
             std::string tetgen_params);
 
 /**
@@ -353,6 +353,14 @@ void writeOFF(const std::string &filename, const TetMesh &mesh);
  * @param[in]  mesh      The mesh
  */
 void writeDolfin(const std::string &filename, const TetMesh &mesh);
+
+/**
+ * @brief      Writes the mesh out in Comsol mphtxt format.
+ *
+ * @param[in]  filename  The filename
+ * @param[in]  mesh      The mesh
+ */
+void writeComsol(const std::string &filename, const TetMesh &mesh);
 
 /**
  * @brief      Writes the mesh out in triangle format.
