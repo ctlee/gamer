@@ -206,9 +206,12 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
   // in.save_nodes(plc);
   // in.save_poly(plc);
 
+  std::vector<char> tetgen_params_c(
+      tetgen_params.c_str(), tetgen_params.c_str() + tetgen_params.size() + 1);
+
   // Call TetGen
   try {
-    tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
+    tetrahedralize(tetgen_params_c.data(), &in, &out, NULL);
   } catch (int e) {
     switch (e) {
     case 1:

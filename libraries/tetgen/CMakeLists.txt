@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(Tetgen VERSION 1.5.0)
+project(Tetgen VERSION 1.6.0)
 
 set(TETGEN_MASTER_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
