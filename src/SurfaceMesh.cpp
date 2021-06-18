@@ -148,18 +148,14 @@ void printQualityInfo(const std::string &filename, const SurfaceMesh &mesh) {
 
   std::ofstream angleOut(anglefilename.str());
   if (!angleOut.is_open()) {
-    std::stringstream ss;
-    ss << "Couldn't open file " << filename << ".angle";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error("Couldn't open file ", filename, ".angle");
   }
 
   std::stringstream areafilename;
   areafilename << filename << ".area";
   std::ofstream areaOut(areafilename.str());
   if (!areaOut.is_open()) {
-    std::stringstream ss;
-    ss << "Couldn't open file " << filename << ".area";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error("Couldn't open file ", filename, ".area");
   }
 
   for (auto faceID : mesh.get_level_id<3>()) {
@@ -199,7 +195,7 @@ std::tuple<double, double, int, int> getMinMaxAngles(const SurfaceMesh &mesh,
       angles[2] = angleDeg(a, c, b);
     } catch (std::runtime_error &e) {
       std::cout << e.what() << std::endl;
-      throw std::runtime_error("ERROR(getMinMaxAngles): Cannot compute angles "
+      gamer_runtime_error("ERROR(getMinMaxAngles): Cannot compute angles "
                                "of face with zero area.");
     }
 
@@ -412,11 +408,7 @@ Vector getNormal(const SurfaceMesh &mesh, SurfaceMesh::SimplexID<3> faceID) {
   } else if ((*faceID).orientation == -1) {
     norm = cross(a - b, c - b);
   } else {
-    // std::cerr << "ERROR(getNormal): Orientation undefined, cannot compute
-    // "
-    // << "normal. Did you call compute_orientation()?" << std::endl;
-    throw std::runtime_error(
-        "ERROR(getNormal): Orientation undefined, cannot compute normal. Did "
+    gamer_runtime_error("Orientation undefined, cannot compute normal. Did "
         "you call compute_orientation()?");
   }
   return norm;

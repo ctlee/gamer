@@ -544,7 +544,7 @@ void selectFlipEdges(
           // std::cerr << "This edge participates in more than 2
           // faces. "
           //           << "Returning..." << std::endl;
-          throw std::runtime_error("SurfaceMesh is not pseudomanifold. Found "
+          gamer_runtime_error("SurfaceMesh is not pseudomanifold. Found "
                                    "an edge connected to more than 2 faces.");
         } else if (up.size() < 2) // Edge is a boundary
         {
