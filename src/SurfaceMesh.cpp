@@ -958,7 +958,10 @@ std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh) {
 void cacheNormals(SurfaceMesh &mesh) {
   for (auto fID : mesh.get_level_id<3>()) {
     auto norm = getNormal(mesh, fID);
-    normalize(norm);
+    // A zero value face normal is OK for LST
+    REAL mag = length(norm);
+    if (mag != 0)
+      norm /= mag; 
     (*fID).normal = norm;
   }
 
@@ -968,7 +971,9 @@ void cacheNormals(SurfaceMesh &mesh) {
     for (auto faceID : faces) {
       norm += (*faceID).normal;
     }
-    normalize(norm);
+    REAL mag = length(norm);
+    if (mag != 0)
+      norm /= mag; 
     (*vID).normal = norm;
   }
 }

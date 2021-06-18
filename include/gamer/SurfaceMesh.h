@@ -1100,6 +1100,13 @@ std::unique_ptr<SurfaceMesh> cube(int order);
  */
 std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
 
+/**
+ * @brief Cache face and vertex normals
+ * 
+ * A zero vector normal will be stored instead of raising an error
+ * 
+ * @param mesh Surface mesh of interest
+ */
 void cacheNormals(SurfaceMesh &mesh);
 
 std::tuple<bool, int, int, int> getBettiNumbers(SurfaceMesh &mesh);
