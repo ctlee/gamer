@@ -44,6 +44,10 @@ void throw_runtime_error(const char *function, const char *file, const int line,
 } // namespace detail
 } // namespace gamer
 
+#ifdef _MSC_VER 
+  #define __PRETTY_FUNCTION__ __FUNCSIG__ 
+#endif
+
 #define gamer_runtime_error(...)                                               \
   gamer::detail::throw_runtime_error(__PRETTY_FUNCTION__, __FILE__, __LINE__,  \
                                      __VA_ARGS__);
