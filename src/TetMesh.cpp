@@ -57,7 +57,7 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
       std::stringstream ss;
       ss << "SurfaceMesh " << i << " contains no data."
          << " Cannot tetrahedralize nothing.";
-      throw std::runtime_error(ss.str());
+      gamer_runtime_error(ss.str());
     }
 
     auto metadata = *surfmesh->get_simplex_up();
@@ -67,7 +67,7 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
       std::stringstream ss;
       ss << "SurfaceMesh " << i
          << " is not closed. Cannot tetrahedralize non-manifold objects.";
-      throw std::runtime_error(ss.str());
+      gamer_runtime_error(ss.str());
     }
 
     metadata.ishole ? ++nHoles : ++nRegions;
@@ -78,8 +78,8 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
   }
 
   if (nRegions < 1) {
-    throw std::runtime_error("No non-hole Surface Meshes found. makeTetMesh "
-                             "expects at least one non-hole SurfaceMesh");
+    gamer_runtime_error("No non-hole Surface Meshes found. makeTetMesh "
+                        "expects at least one non-hole SurfaceMesh");
   }
 
   std::cout << "Number of vertices: " << nVertices << std::endl;
@@ -206,27 +206,29 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
   // in.save_nodes(plc);
   // in.save_poly(plc);
 
+  std::vector<char> tetgen_params_c(
+      tetgen_params.c_str(), tetgen_params.c_str() + tetgen_params.size() + 1);
+
   // Call TetGen
   try {
-    tetrahedralize(tetgen_params.c_str(), &in, &out, NULL);
+    tetrahedralize(tetgen_params_c.data(), &in, &out, NULL);
   } catch (int e) {
     switch (e) {
     case 1:
-      throw std::runtime_error("Tetgen: Out of memory");
+      gamer_runtime_error("Tetgen: Out of memory");
     case 2:
-      throw std::runtime_error("Tetgen: internal error");
+      gamer_runtime_error("Tetgen: internal error");
     case 3:
-      throw std::runtime_error(
+      gamer_runtime_error(
           "Tetgen: A self intersection was detected. Program stopped. Hint: "
           "use -d option to detect all self-intersections");
     case 4:
-      throw std::runtime_error(
+      gamer_runtime_error(
           "Tetgen: A very small input feature size was detected.");
     case 5:
-      throw std::runtime_error(
-          "Tetgen: Two very close input facets were detected");
+      gamer_runtime_error("Tetgen: Two very close input facets were detected");
     case 10:
-      throw std::runtime_error("Tetgen: An input error was detected");
+      gamer_runtime_error("Tetgen: An input error was detected");
     }
   }
   // auto result = const_cast<char*>("result");
@@ -240,8 +242,8 @@ std::unique_ptr<TetMesh> tetgenioToTetMesh(tetgenio &tetio) {
   std::unique_ptr<TetMesh> mesh(new TetMesh);
 
   if (tetio.mesh_dim == 2) {
-    throw std::runtime_error("tetgenioToTetMesh expects a tetrahedral "
-                             "tetgenio. Found surface instead.");
+    gamer_runtime_error("tetgenioToTetMesh expects a tetrahedral "
+                        "tetgenio. Found surface instead.");
   }
 
   auto &metadata = *mesh->get_simplex_up();
@@ -385,7 +387,7 @@ void writeVTK(const std::string &filename, const TetMesh &mesh) {
   if (!fout.is_open()) {
     std::stringstream ss;
     ss << "File '" << filename << "' could not be written to.";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error(ss.str());
   }
 
   fout << "# vtk DataFile Version 2.0\n"
@@ -458,7 +460,7 @@ void writeOFF(const std::string &filename, const TetMesh &mesh) {
   if (!fout.is_open()) {
     std::stringstream ss;
     ss << "File '" << filename << "' could not be written to.";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error(ss.str());
   }
 
   fout << "OFF\n";
@@ -510,15 +512,14 @@ void writeOFF(const std::string &filename, const TetMesh &mesh) {
 void writeDolfin(const std::string &filename, const TetMesh &mesh) {
 
   if ((*mesh.get_simplex_up()).higher_order == true) {
-    throw std::runtime_error(
-        "Dolfin output does not support higher order meshes.");
+    gamer_runtime_error("Dolfin output does not support higher order meshes.");
   }
 
   std::ofstream fout(filename);
   if (!fout.is_open()) {
     std::stringstream ss;
     ss << "File '" << filename << "' could not be written to.";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error(ss.str());
   }
 
   fout << "<?xml version=\"1.0\"?>\n"
@@ -635,7 +636,7 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh) {
     std::stringstream ss;
     ss << "File '" << filename + ".node"
        << "' could not be written to.";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error(ss.str());
   }
 
   std::map<typename TetMesh::KeyType, typename TetMesh::KeyType> sigma;
@@ -665,7 +666,7 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh) {
     std::stringstream ss;
     ss << "File '" << filename + ".ele"
        << "' could not be written to.";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error(ss.str());
   }
 
   // nTetrahedra, nodes per tet, nAttributes

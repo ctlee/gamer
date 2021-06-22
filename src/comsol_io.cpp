@@ -153,7 +153,7 @@ void writeComsol(const std::string &filename, const SurfaceMesh &mesh) {
 void writeComsol(const std::string &filename, const TetMesh &mesh) {
 
   if ((*mesh.get_simplex_up()).higher_order == true) {
-    throw std::runtime_error(
+    gamer_runtime_error(
         "Comsol output does not support higher order meshes at this point.");
   }
 
@@ -161,7 +161,7 @@ void writeComsol(const std::string &filename, const TetMesh &mesh) {
   if (!fout.is_open()) {
     std::stringstream ss;
     ss << "File '" << filename << "' could not be written to.";
-    throw std::runtime_error(ss.str());
+    gamer_runtime_error(ss.str());
   }
 
   fout << "# Generated using GAMer\n\n";
