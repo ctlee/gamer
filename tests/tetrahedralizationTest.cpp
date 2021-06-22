@@ -37,6 +37,7 @@ protected:
   virtual void SetUp() {
     outermesh = sphere(0);
     scale(*outermesh, outerScaleFactor);
+
     auto &omGlobal = outermesh->get_simplex_up().data();
     omGlobal.ishole = false;
     omGlobal.marker = volumeMarker;
@@ -45,8 +46,9 @@ protected:
     }
 
     for (auto &vdata : outermesh->get_level<1>()) {
-      EXPECT_TRUE(
-          std::sqrt(vdata.position | vdata.position) - outerScaleFactor < 1e-5);
+      EXPECT_TRUE((vdata.position | vdata.position) -
+                      (outerScaleFactor * outerScaleFactor) <
+                  tolerance);
     }
 
     innermesh = sphere(0);
@@ -59,8 +61,9 @@ protected:
     }
 
     for (auto &vdata : innermesh->get_level<1>()) {
-      EXPECT_TRUE(
-          std::sqrt(vdata.position | vdata.position) - innerScaleFactor < 1e-5);
+      EXPECT_TRUE((vdata.position | vdata.position) -
+                      (innerScaleFactor * innerScaleFactor) <
+                  tolerance);
     }
   }
   virtual void TearDown() {}
@@ -71,16 +74,17 @@ protected:
   int outerSurfaceMarker = 2;
   int innerSurfaceMarker = 7;
   double innerScaleFactor = 2;
-  double outerScaleFactor = 5;
+  double outerScaleFactor = 7;
+  double tolerance = 1e-3;
 };
 
 TEST_F(TetrahedralizationTest, tetrahedralize) {
   std::vector<SurfaceMesh const *> meshes{outermesh.get(), innermesh.get()};
-  auto tetmesh = makeTetMesh(meshes, "q1.3/10O8/7AYCaQ");
+  auto tetmesh = makeTetMesh(meshes, "q1.3/10a1O8/7AYCQ");
   EXPECT_TRUE(tetmesh->size<4>() > 0);
-  EXPECT_TRUE(tetmesh->size<3>() > outermesh->size<3>());
-  EXPECT_TRUE(tetmesh->size<2>() > outermesh->size<2>());
-  EXPECT_TRUE(tetmesh->size<1>() > outermesh->size<1>());
+  EXPECT_TRUE(tetmesh->size<3>() > outermesh->size<3>() + innermesh->size<3>());
+  EXPECT_TRUE(tetmesh->size<2>() > outermesh->size<2>() + innermesh->size<2>());
+  EXPECT_TRUE(tetmesh->size<1>() > outermesh->size<1>() + innermesh->size<1>());
 
   for (auto &tetData : tetmesh->get_level<4>()) {
     EXPECT_EQ(tetData.marker, volumeMarker);
@@ -91,6 +95,12 @@ TEST_F(TetrahedralizationTest, tetrahedralize) {
       EXPECT_TRUE(fID.data().marker == outerSurfaceMarker ||
                   fID.data().marker == innerSurfaceMarker);
     }
+  }
+
+  for (auto &vData : tetmesh->get_level<1>()) {
+    double dist = vData.position | vData.position;
+    EXPECT_TRUE(dist - (innerScaleFactor * innerScaleFactor) > -tolerance);
+    EXPECT_TRUE(dist - (outerScaleFactor * outerScaleFactor) < tolerance);
   }
 }
 
