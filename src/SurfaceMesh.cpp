@@ -347,6 +347,7 @@ void centeralize(SurfaceMesh &mesh) {
 
 void normalSmooth(SurfaceMesh &mesh, double k) {
   for (auto nid : mesh.get_level_id<1>()) {
+    if (mesh.onBoundary(nid)) continue;
     surfacemesh_detail::normalSmoothH(mesh, nid, k);
   }
   double min, max;
