@@ -38,7 +38,15 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp)
+set(GAMER_TEST_SOURCES
+    "main.cpp" 
+    "VertexTest.cpp" 
+    "tensorTest.cpp" 
+    "SurfaceMeshTest.cpp"
+    "tetrahedralizationTest.cpp"
+)
+
+add_executable(objecttests ${GAMER_TEST_SOURCES})
 target_link_libraries(objecttests gamerstatic gtest_main)
 # target_compile_options(objecttests PRIVATE -Werror -Wall -Weverything
 #           -Wextra -pedantic-errors -Wconversion -Wsign-conversion

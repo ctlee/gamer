@@ -557,10 +557,8 @@ void normalSmoothH(SurfaceMesh &mesh, SurfaceMesh::SimplexID<1> vertexID,
   double areaSum = 0;
 
   auto p = (*vertexID).position;
-  Eigen::Vector4d pos_e;
-  pos_e << p[0], p[1], p[2], 1; // 4D for affine3D
-  Eigen::Vector4d newPos_e;
-  newPos_e << 0, 0, 0, 0;
+  Eigen::Vector4d pos_e{p[0], p[1], p[2], 1}; // 4D for affine3D
+  Eigen::Vector4d newPos_e{0,0,0,0};
 
   // For each incident face get the average normal
   auto incidentFaces = mesh.up(mesh.up(vertexID));
