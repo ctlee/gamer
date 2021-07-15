@@ -17,7 +17,6 @@
 // or write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 // Boston, MA 02111-1307 USA
 
-
 /**
  * @file gamer.h
  * @brief Contains various global definitions and type definitions used in
@@ -26,27 +25,50 @@
 
 #pragma once
 
-#include <Eigen/Dense>
 #include "gamer/tensor.h"
+#include <Eigen/Dense>
+#include <sstream>
+
+namespace gamer {
+namespace detail {
+template <typename... T>
+void throw_runtime_error(const char *function, const char *file, const int line,
+                         T &&...ts) {
+  std::stringstream ss;
+  ss << "Error: ";
+  int dummy[] = {0, ((ss << std::forward<T>(ts)), 0)...};
+  static_cast<void>(dummy); // Avoid warning for unused variable
+  ss << " in function " << function << " at " << file << ":" << line;
+  throw std::runtime_error(ss.str());
+}
+} // namespace detail
+} // namespace gamer
+
+#ifdef _MSC_VER 
+  #define __PRETTY_FUNCTION__ __FUNCSIG__ 
+#endif
+
+#define gamer_runtime_error(...)                                               \
+  gamer::detail::throw_runtime_error(__PRETTY_FUNCTION__, __FILE__, __LINE__,  \
+                                     __VA_ARGS__);
 
 /// Namespace for all things gamer
-namespace gamer
-{
+namespace gamer {
 /// Blurring blobbyness to use in conversion from PDB/PQR to 3D volumes
-#define BLOBBYNESS        -0.2f
+#define BLOBBYNESS -0.2f
 
 /// Discretization rate of 3D volumes
-#define DIM_SCALE         1.99
+#define DIM_SCALE 1.99
 
 /// The minimal volume (in voxels) of islands to be automatically removed
-#define MIN_VOLUME        333333
+#define MIN_VOLUME 333333
 
 #ifdef SINGLE
 /// Defines REAL to be float
-  #define REAL float
+#define REAL float
 #else
 /// Defines REAL to be double
-  #define REAL double
+#define REAL double
 #endif
 
 /// Floating point vector with precision defined by user at compile time
@@ -92,8 +114,8 @@ using EigenVectorN = Eigen::Matrix<REAL, Eigen::Dynamic, 1>;
  * @return     Index of flat array corresponding to indices in
  *             3D array.
  */
-inline std::size_t Vect2Index(const std::size_t i, const std::size_t j, const std::size_t k, const Vector3szt &dim)
-{
-    return k*dim[0]*dim[1] + j*dim[0] + i;
+inline std::size_t Vect2Index(const std::size_t i, const std::size_t j,
+                              const std::size_t k, const Vector3szt &dim) {
+  return k * dim[0] * dim[1] + j * dim[0] + i;
 }
 } // end namespace gamer

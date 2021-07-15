@@ -168,7 +168,7 @@ public:
       if ((i == 0 || i == 1) && coefficients().size() >= 2) {
         return coefficients()[i];
       } else {
-        throw std::runtime_error(
+        gamer_runtime_error(
             "Index out of bounds for principal curvatures.");
       }
     }
@@ -184,7 +184,7 @@ public:
       if (i <= 3 && coefficients().size() >= 6) {
         return coefficients()[i + 2];
       } else {
-        throw std::runtime_error(
+        gamer_runtime_error(
             "Index out of bounds for third order coefficients.");
       }
     }
@@ -200,7 +200,7 @@ public:
       if (i <= 4 && coefficients().size() >= 11) {
         return coefficients()[i + 6];
       } else {
-        throw std::runtime_error(
+        gamer_runtime_error(
             "Index out of bounds for fourth order coefficients.");
       }
     }
@@ -258,7 +258,7 @@ public:
     }
     void dump_4ogl(std::ostream &out_stream, const REAL scale) {
       if (coefficients().size() < 2)
-        throw std::runtime_error("Insufficient coefficients");
+        gamer_runtime_error("Insufficient coefficients");
       out_stream << origin() << " " << maximal_principal_direction() * scale
                  << " " << minimal_principal_direction() * scale << " "
                  << coefficients()[0] << " " << coefficients()[1] << " "
@@ -291,7 +291,7 @@ public:
       std::stringstream ss;
       ss << "Cannot compute " << dPrime << "-order differential property using "
          << dJet << "-jet.";
-      throw std::runtime_error(ss.str());
+      gamer_runtime_error(ss.str());
     }
     // Degree of jet fitting
     deg = static_cast<int>(dJet);
@@ -303,7 +303,7 @@ public:
     nb_input_pts = static_cast<int>(end - begin);
     // Check that enough points are given to fit d-jet
     if (nb_input_pts < nb_d_jet_coeff)
-      throw std::runtime_error(
+      gamer_runtime_error(
           "Insufficient points provided to perform jet fitting.");
 
     // Initialize MongeForm
@@ -353,7 +353,7 @@ public:
    */
   const std::pair<REAL, Vector> pca_basis(std::size_t i) const {
     if (i >= 3)
-      throw std::runtime_error("Out of bounds for PCA basis...");
+      gamer_runtime_error("Out of bounds for PCA basis...");
     return m_pca_basis[i];
   }
 

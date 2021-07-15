@@ -45,7 +45,7 @@ if(NOT casclib_POPULATED)
 endif()
 
 ###########################
-# FIND/GET EIGEN 3.3.7
+# FIND/GET EIGEN
 ###########################
 if(NOT GETEIGEN)
     find_package (Eigen3 3.3 NO_MODULE)
@@ -57,8 +57,8 @@ if(NOT GETEIGEN)
 else()
     FetchContent_Declare(
         eigen
-        GIT_REPOSITORY  https://github.com/eigenteam/eigen-git-mirror.git
-        GIT_TAG         3.3.7
+        GIT_REPOSITORY  https://gitlab.com/libeigen/eigen.git
+        GIT_TAG         3.3.9
         GIT_SHALLOW     TRUE 
         SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-src"
         BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/eigen-build"

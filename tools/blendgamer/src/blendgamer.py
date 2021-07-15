@@ -141,14 +141,10 @@ classes = [GAMerAddonProperties, GAMerObjectProperties]
 
 
 def register():
-    from bpy.utils import register_class
-
     for cls in classes:
-        register_class(make_annotations(cls))
+        bpy.utils.register_class(make_annotations(cls))
 
 
 def unregister():
-    from bpy.utils import unregister_class
-
     for cls in reversed(classes):
-        unregister_class(make_annotations(cls))
+        bpy.utils.unregister_class(make_annotations(cls))

@@ -544,7 +544,7 @@ void selectFlipEdges(
           // std::cerr << "This edge participates in more than 2
           // faces. "
           //           << "Returning..." << std::endl;
-          throw std::runtime_error("SurfaceMesh is not pseudomanifold. Found "
+          gamer_runtime_error("SurfaceMesh is not pseudomanifold. Found "
                                    "an edge connected to more than 2 faces.");
         } else if (up.size() < 2) // Edge is a boundary
         {
@@ -1100,6 +1100,13 @@ std::unique_ptr<SurfaceMesh> cube(int order);
  */
 std::vector<std::unique_ptr<SurfaceMesh>> splitSurfaces(SurfaceMesh &mesh);
 
+/**
+ * @brief Cache face and vertex normals
+ * 
+ * A zero vector normal will be stored instead of raising an error
+ * 
+ * @param mesh Surface mesh of interest
+ */
 void cacheNormals(SurfaceMesh &mesh);
 
 std::tuple<bool, int, int, int> getBettiNumbers(SurfaceMesh &mesh);

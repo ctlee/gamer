@@ -78,7 +78,7 @@ public:
       // std::stringstream ss;
       // ss << "getEigenvalues has encountered Eigen error " <<
       // eigensolver.info();
-      // throw std::runtime_error(ss.str());
+      // gamer_runtime_error(ss.str());
     }
 
     eigenvalues = eigensolver.eigenvalues();

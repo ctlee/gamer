@@ -374,7 +374,7 @@ inline REAL length(const Vector &A) { return std::sqrt(A | A); }
 inline void normalize(Vector &A) {
   REAL mag = length(A);
   if (mag == 0)
-    throw std::runtime_error("Cannot normalize a vector with length of 0.");
+    gamer_runtime_error("Cannot normalize a vector with length of 0.");
   A /= mag;
 }
 
