@@ -111,7 +111,7 @@ class GAMER_OT_cleanup_domains(bpy.types.Operator):
     bl_options = {"REGISTER"}
 
     def execute(self, context):
-        context.scene.gamer.tet_group.validate_domain_objects(context,self.report)
+        context.scene.gamer.tet_group.validate_domain_objects(context, self.report)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -164,7 +164,7 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
             return
         elif bpy.context.scene.objects.get(self.object_pointer.name) == None:
             row.alert = True
-            row.label(text="Object(%s) is not linked to scene"%(name))
+            row.label(text="Object(%s) is not linked to scene" % (name))
             return
 
         col = row.column()
@@ -230,13 +230,15 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         name="Paraview", default=False, description="Generate Paraview output"
     )
     comsol = BoolProperty(
-        name="Comsol", default=False, description="Generate Comsol mphtxt output"
+        name="Comsol (β)",
+        default=False,
+        description="(Untested) Generate Comsol mphtxt output",
     )
 
     status = StringProperty(name="status", default="")
 
     def add_tet_domain(self, report, context):
-        """ Add a new tet domain to the list of tet domains for each selected object """
+        """Add a new tet domain to the list of tet domains for each selected object"""
         # From the list of selected objects, only add MESH objects.
         objs = [obj for obj in context.selected_objects if obj.type == "MESH"]
         if len(objs) > 0:
@@ -258,14 +260,14 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
     def remove_active_tet_domain(self, context):
         # print("Removing active Tet Domain")
-        """ Remove the active tet domain from the list of domains """
+        """Remove the active tet domain from the list of domains"""
         self.domain_list.remove(self.active_domain_index)
         self.active_domain_index -= 1
         if self.active_domain_index < 0:
             self.active_domain_index = 0
 
     def remove_domain_by_index(self, idx):
-        """ Remove the tet domain by index from the list of domains """
+        """Remove the tet domain by index from the list of domains"""
         self.domain_list.remove(idx)
         if not (
             self.active_domain_index >= 0
@@ -275,13 +277,13 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
     def remove_all_tet_domains(self, context):
         # print("Removing All Tet Domains")
-        """ Remove all tet domains from the list of domains """
+        """Remove all tet domains from the list of domains"""
         while len(self.domain_list) > 0:
             self.domain_list.remove(0)
         self.active_domain_index = 0
 
     def allocate_available_id(self):
-        """ Return a unique domain ID for a new domain """
+        """Return a unique domain ID for a new domain"""
         # print ("Next ID is " + str(self.next_id))
         if len(self.domain_list) <= 0:
             # Reset the ID to 1 when there are no more molecules
@@ -297,7 +299,6 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
             elif context.scene.objects.get(d.object_pointer.name) is None:
                 bpy.data.objects.remove(d.object_pointer)
                 self.remove_domain_by_index(i)
-            
 
     def surfaces_to_comsol(self, context, report):
         self.validate_domain_objects(context, report)
@@ -334,7 +335,10 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                 # Add the mesh
                 gmeshes.append(gmesh)
         if len(gmeshes) > 0:
-            report({"INFO"}, "Writing to Comsol file: " + filename + ".mphtxt")
+            report(
+                {"INFO"},
+                "Writing surface meshes to Comsol file: " + filename + ".mphtxt",
+            )
             g.writeComsol(filename + ".mphtxt", gmeshes)
 
     def tetrahedralize(self, context, report):
