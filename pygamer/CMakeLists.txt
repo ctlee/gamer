@@ -22,7 +22,7 @@
 include(FetchContent)
 
 ###########################
-# GET PYBIND11 2.6.2
+# GET PYBIND11
 ###########################
 if(NOT GETPYBIND11)
     find_package(pybind11 CONFIG REQUIRED)
@@ -34,7 +34,7 @@ else()
     FetchContent_Declare(
         pybind11
         GIT_REPOSITORY  https://github.com/pybind/pybind11.git
-        GIT_TAG         v2.6.2
+        GIT_TAG         v2.7.1
         GIT_SHALLOW     TRUE 
         SOURCE_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
         BINARY_DIR      "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build"
