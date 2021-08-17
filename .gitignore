@@ -70,3 +70,6 @@ docs/src/_cppapi/
 docs/src/_pythonapi/
 docs/src/tutorials/
 docs/src/conf.py
+
+.vscode
+.pytest_cache

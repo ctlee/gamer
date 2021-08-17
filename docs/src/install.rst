@@ -147,7 +147,7 @@ These can be used in addition to the standard `CMake flags`_.
   * -  Build the ``PyGAMer`` extension.
     - ``-DBUILD_PYGAMER=on``
   * - Specify the Python executable path.
-    - ``-DPYTHON_EXECUTABLE:FILEPATH=/path/to/python3``
+    - ``-DPython_EXECUTABLE:FILEPATH=/path/to/python3``
   * - Package the Blender addon. This flag automatically builds the Python extension.
     - ``-DBUILD_BLENDGAMER=on``
   * - Use single precision floating point numbers.
@@ -318,7 +318,8 @@ Note that the prebuilt Blender binaries from the Blender Foundation do not conta
           Blender Version  Python Version
           ===============  ==============
           2.79b            3.5
-          2.8X             3.7
+          2.83LTS          3.7.4
+          2.93             3.9.1
           ===============  ==============
 
           Create a new environment corresponding to the Python version.

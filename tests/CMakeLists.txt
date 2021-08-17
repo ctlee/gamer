@@ -27,10 +27,8 @@ endif()
 
 FetchContent_Declare(
     googletest
-    # URL https://github.com/google/googletest/archive/master.zip
-    # URL https://github.com/google/googletest/archive/release-1.8.1.tar.gz
     GIT_REPOSITORY    https://github.com/google/googletest.git
-    GIT_TAG           release-1.8.1
+    GIT_TAG           origin/master
     SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
     BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
 )
@@ -38,25 +36,17 @@ FetchContent_Declare(
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 
-FetchContent_GetProperties(googletest)
-if(NOT googletest_POPULATED)
-    FetchContent_Populate(googletest)
-    # Add googletest directly to our build. This defines
-    # the gtest and gtest_main targets.
-    add_subdirectory(${googletest_SOURCE_DIR}
-                     ${googletest_BINARY_DIR}
-                     EXCLUDE_FROM_ALL)
-endif()
+set(GAMER_TEST_SOURCES
+    "main.cpp" 
+    "VertexTest.cpp" 
+    "tensorTest.cpp" 
+    "SurfaceMeshTest.cpp"
+    "tetrahedralizationTest.cpp"
+)
 
-# The gtest/gtest_main targets carry header search path
-# dependencies automatically when using CMake 2.8.11 or
-# later. Otherwise we have to add them here ourselves.
-if (CMAKE_VERSION VERSION_LESS 2.8.11)
-  include_directories("${googletest_SOURCE_DIR}/include")
-endif()
-
-add_executable(objecttests main.cpp VertexTest.cpp tensorTest.cpp SurfaceMeshTest.cpp)
+add_executable(objecttests ${GAMER_TEST_SOURCES})
 target_link_libraries(objecttests gamerstatic gtest_main)
 # target_compile_options(objecttests PRIVATE -Werror -Wall -Weverything
 #           -Wextra -pedantic-errors -Wconversion -Wsign-conversion
@@ -73,7 +63,7 @@ if(NOT PYTEST_FOUND AND BUILD_PYGAMER)
 elseif(BUILD_PYGAMER)
     # Add a test for pytest
     add_test(NAME python-tests
-      COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMAND ${Python_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}
       WORKING_DIRECTORY $<TARGET_FILE_DIR:pygamer>
     )
 endif()

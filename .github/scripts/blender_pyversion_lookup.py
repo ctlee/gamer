@@ -19,7 +19,13 @@
 # Boston, MA 02111-1307 USA
 # ***************************************************************************
 
-colormap_enums = [
-    ("VIRIDIS", "viridis", "Viridis"),
-    ("PRGN", "PRGn", "Purple-Green diverging"),
-]
+import sys
+
+bver_to_pyver = {
+    "2.79": '3.5',
+    "2.83": '3.7',
+    "2.93": '3.9'
+}
+
+if __name__ == "__main__":
+    print(bver_to_pyver[sys.argv[1]])

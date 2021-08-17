@@ -1,29 +1,33 @@
 include VERSION
+include COPYING.md
 include README.md
 include pyproject.toml
 
 # CMake Helpers
-include cmake-modules/*
+graft cmake
 include CMakeLists.txt
 
 # C++ sources
-include include/gamer/*
-include src/*
-recursive-include libraries *
+graft include
+graft src
+graft libraries
 
 # PyGAMer sources
-recursive-include pygamer *
+graft pygamer
 
 # Unit Tests
-include tests/*
+graft tests
 
 # Blender addon
-recursive-include tools *
+graft tools
 
 # Documentation
-recursive-include docs *
+graft docs
 prune docs/src/_cppapi
 prune docs/src/_doxyoutput
 prune docs/src/_pythonapi
 prune docs/src/tutorials
 exclude docs/src/conf.py
+
+# Exclusions
+global-exclude *.py[co]

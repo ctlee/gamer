@@ -31,7 +31,7 @@ int  main(int argc, char *argv[])
         gamer::flipNormals(*mesh);
     }
 
-    gamer::curvatureViaJets(*mesh, 2, 2);
-
+    // gamer::curvatureViaJets(*mesh, 2, 2);
+    gamer::writeComsol("test.mphtxt", *mesh);
     std::cout << "EOF" << std::endl;
 }
