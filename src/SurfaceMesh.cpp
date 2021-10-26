@@ -713,7 +713,7 @@ void flipNormals(SurfaceMesh &mesh) {
 bool hasHole(const SurfaceMesh &mesh) {
   for (auto eID : mesh.get_level_id<2>()) {
     auto cover = mesh.get_cover(eID);
-    if (cover.size() != 2) {
+    if (cover.size() < 2) {
       return true;
     }
   }
