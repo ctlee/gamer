@@ -237,6 +237,9 @@ void triangulateHole(SurfaceMesh &mesh,
       mesh, std::move(keys), backupVerts.begin(), backupVerts.end());
 
   if (!computeLocalOrientation(mesh, holeEdges)) {
+    for (auto item : holeEdges){
+      std::cout << item << std::endl;
+    }
     gamer_runtime_error(
         "ERROR(triangulateHole): Mesh became non-orientable");
   }
