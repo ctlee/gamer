@@ -50,6 +50,7 @@ curvatureTypeEnums = [
     ("K2", "k2", "Second principle curvature"),
     ("KG", "kg", "Gaussian curvature"),
     ("KH", "kh", "Mean curvature"),
+    ("D", "d", "Deviatoric curvature")
 ]
 
 curvatureCalcEnums = [
@@ -175,6 +176,11 @@ class GAMER_OT_compute_curvatures(bpy.types.Operator):
                     ml[i].value = kh[i]
                 curvatures.add_curvature(context, "KH")
 
+                ml = getCurvatureLayer(obj, algorithm, "D")
+                for i in range(0, len(k1)):
+                    ml[i].value = (k1[i]-k2[i]) / 2
+                curvatures.add_curvature(context, "D")
+
             # Explicitly free curvature arrays
             del kh
             del kg
@@ -276,7 +282,8 @@ class GAMerCurvaturesList(bpy.types.PropertyGroup):
             with BMeshContext(obj) as bm:
                 name = "%s%s" % (crv.algorithm, crv.curvatureType)
                 layer = bm.verts.layers.float.get(name)
-                bm.verts.layers.float.remove(layer)
+                if layer:
+                    bm.verts.layers.float.remove(layer)
 
             self.curvature_list.remove(self.active_index)
             self.active_index -= 1
