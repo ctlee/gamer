@@ -116,6 +116,21 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+    pygamer.def("readPDB_distgrid", &readPDB_distgrid,
+        py::arg("filename"),
+        py::arg("radius") = 1.4,
+        R"delim(
+            Compute the Connolly surface using a distance grid based strategy
+
+            Args:
+                filename (:py:class:`str`): PDB file to read.
+                radius (:py:class:`float`): Radius in Angstroms of ball to roll over surface.
+            
+            Returns:
+                :py:class:`surfacemesh.SurfaceMesh`: Meshed object.
+        )delim"
+    );
+    
     pygamer.def("readPDB_gauss", &readPDB_gauss,
         py::arg("filename"),
         py::arg("blobbyness") = -0.2,

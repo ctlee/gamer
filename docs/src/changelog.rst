@@ -3,6 +3,28 @@ Changelog
 #########
 
 ******************
+2.0.7 (08-17-2021)
+******************
+
+This is a maintenance release which improves compatibility with ``blender`` add-on development ideals along with some fixes.
+
+**New Features**:
+
+- CI and packaging using Github Actions
+- Make runtime errors more informative
+- Preliminary support for exporting to COMSOL
+- BlendGAMer support for Blender 2.93LTS
+
+**Fixes**:
+
+- Normal smooth no longer applies on the boundaries of a mesh
+- Resolves an issue where computing normals fails due to zero-area faces
+
+**Other**:
+
+- Update versions of dependencies (Eigen, Tetgen, Pybind11, Google-Test)
+
+******************
 2.0.6 (02-25-2020)
 ******************
 

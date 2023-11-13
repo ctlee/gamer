@@ -38,7 +38,6 @@ colormapDict = {
     "PRGN": plt.cm.PRGn,
 }
 
-
 def curveToData(crv, context):
     """
     Helper function to take a curvature object and return smoothed data.
@@ -218,6 +217,7 @@ def dataToVertexColor(crv, context, showplot=False, saveplot=False):
 
     # Add axis for colorbar and plot it
     ax = fig.add_axes([0.75, 0.05, 0.05, 0.9])
+
     cb = mpl.colorbar.Colorbar(
         ax, cmap=curvature_map, norm=norm, orientation="vertical"
     )
