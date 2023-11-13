@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        blender: [2.79, 2.83, 2.93, 3.3, 3.6]
+        blender: [2.83, 2.93, 3.3, 3.6]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
