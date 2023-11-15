@@ -325,6 +325,18 @@ PYBIND11_MODULE(pygamer, pygamer) {
         )delim"
     );
 
+    pygamer.def("curvatureMDSBtoDolfin", &curvatureMDSBtoDolfin,
+            py::arg("filename"), py::arg("mesh"), py::arg("tetmesh"),
+        R"delim(
+            Write curvature to dolfin
+
+            Args:
+                filename (:py:class:`str`): Filename to write to
+                mesh (:py:class:`surfacemesh.SurfaceMesh`): list of surface meshes
+                tetmesh (:py:class:`tetmesh.TetMesh`): Tet mesh
+        )delim"
+    );
+
     pygamer.def("__version__",
         [](){
             extern const std::string gVERSION;

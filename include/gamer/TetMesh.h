@@ -79,7 +79,7 @@ struct TMVertexProperties {
 struct TMVertex : Vertex, TMVertexProperties {
   TMVertex() : TMVertex(Vertex(), TMVertexProperties()) {}
   template <typename... Args>
-  TMVertex(Args &&... args) : TMVertex(Vertex(std::forward<Args>(args)...)) {}
+  TMVertex(Args &&...args) : TMVertex(Vertex(std::forward<Args>(args)...)) {}
   TMVertex(Vertex v) : TMVertex(v, TMVertexProperties(-1)) {}
   TMVertex(Vertex v, TMVertexProperties p) : Vertex(v), TMVertexProperties(p) {}
 
@@ -324,6 +324,16 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
 std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh &mesh);
 
 /**
+ * @brief      Extracts the boundary surfaces of a tetrahedral mesh from
+ * boundary markers
+ *
+ * @param[in]  mesh  The mesh
+ *
+ * @return     Bounding surface meshes
+ */
+std::unique_ptr<SurfaceMesh> extractSurfaceFromBoundary(const TetMesh &mesh);
+
+/**
  * @brief      Laplacian smoothing of tetrahedral mesh
  *
  * @param      mesh  The mesh
@@ -382,4 +392,15 @@ void writeTriangle(const std::string &filename, const TetMesh &mesh);
  * @return     Tetrahedral mesh
  */
 std::unique_ptr<TetMesh> readDolfin(const std::string &filename);
+
+/**
+ * @brief Compute curvatures and write them to dolfin file
+ *
+ * @param filename The filename
+ * @param mesh     The mesh
+ * @param tetmesh  Tetrahedral mesh
+ */
+void curvatureMDSBtoDolfin(const std::string &filename, const SurfaceMesh &mesh,
+                           const TetMesh &tetmesh);
+
 } // end namespace gamer
