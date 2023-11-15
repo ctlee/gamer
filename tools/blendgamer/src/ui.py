@@ -566,6 +566,8 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
                 col.prop(tetprops, "paraview")
                 col = row.column()
                 col.prop(tetprops, "comsol")
+                col = row.column()
+                col.prop(tetprops, "export_mean_curvature")
 
             row = layout.row()
             icon = "PROP_OFF"

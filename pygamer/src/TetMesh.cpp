@@ -517,6 +517,19 @@ void init_TetMesh(py::module& mod){
         )delim"
     );
 
+      TetMeshCls.def("extractSurfaceFromBoundary",
+        &extractSurfaceFromBoundary,
+        R"delim(
+            Extract the surface of the TetMesh from boundary markers
+
+            Args:
+                tetmesh (TetMesh): Tetrahedral mesh to extract from.
+
+            Returns:
+                :py:class:`SurfaceMesh`: Surface meshes.
+        )delim"
+    );
+
     /************************************
      *  ITERATORS
      ************************************/

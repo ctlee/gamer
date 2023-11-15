@@ -299,6 +299,12 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         description="(Untested) Generate Comsol mphtxt output",
     )
 
+    export_mean_curvature = BoolProperty(
+        name="Dolfin kH",
+        default=False,
+        description="(Untested) Write out mean curvatures in dolfin format",
+    )
+
     status = StringProperty(name="status", default="")
 
     def associate_region_point(self, report, context):
@@ -528,9 +534,11 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     except Exception as ex:
                         report({"ERROR"}, str(ex))
 
-                sm = tetmesh.extractSurface()
-
-                g.writeOFF("test.off", sm)
+                if self.export_mean_curvature:
+                    surfaces = tetmesh.extractSurfaceFromBoundary()
+                    g.curvatureMDSBtoDolfin(
+                        f"{filename}_mean_curvature", surfaces, tetmesh
+                    )
 
         print("######################## End Tetrahedralize ########################")
 
