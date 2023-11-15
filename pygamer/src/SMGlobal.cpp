@@ -19,26 +19,31 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 
 #include "gamer/SurfaceMesh.h"
 
 /// Namespace for all things gamer
-namespace gamer
-{
+namespace gamer {
 
 namespace py = pybind11;
 
-void init_SMGlobal(py::module& mod){
-    py::class_<SMGlobal> global(mod, "Global",
-        R"delim(
+void init_SMGlobal(py::module &mod) {
+  py::class_<SMGlobal> global(mod, "Global",
+                              R"delim(
             Wrapper around a :cpp:class:`gamer::SMGlobal`.
-        )delim"
-    );
+        )delim");
 
-    global.def_readwrite("marker", &SMGlobal::marker, "Domain marker to use when tetrahedralizing.");
-    global.def_readwrite("volumeConstraint", &SMGlobal::volumeConstraint, "Domain volumeConstraint to use when tetrahedralizing.");
-    global.def_readwrite("useVolumeConstraint", &SMGlobal::useVolumeConstraint, "Use a volume constraint when tetrahedralizing.");
-    global.def_readwrite("ishole", &SMGlobal::ishole, "Does this domain represent a hole or not?");
+  global.def_readwrite("marker", &SMGlobal::marker,
+                       "Domain marker to use when tetrahedralizing.");
+  global.def_readwrite("volumeConstraint", &SMGlobal::volumeConstraint,
+                       "Domain volumeConstraint to use when tetrahedralizing.");
+  global.def_readwrite("useVolumeConstraint", &SMGlobal::useVolumeConstraint,
+                       "Use a volume constraint when tetrahedralizing.");
+  global.def_readwrite("ishole", &SMGlobal::ishole,
+                       "Does this domain represent a hole or not?");
+  global.def_readwrite("regionPoint", &SMGlobal::regionPoint,
+                       "Point within the region.");
 }
 
 } // end namespace gamer

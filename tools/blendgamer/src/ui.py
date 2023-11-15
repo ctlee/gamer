@@ -522,6 +522,13 @@ class GAMER_PT_tetrahedralization(bpy.types.Panel):
             # row = layout.row()
             # row.label ( "Active Index = " + str ( self.active_domain_index ) + ", ID = " + str ( domain.domain_id ) )
 
+            row = layout.row()
+            col = row.column()
+            col.operator("gamer.associate_region_point", icon="EMPTY_DATA")
+            if domain.region_point is not None:
+                col = row.column()
+                col.operator("gamer.dissociate_region_point", icon="X")
+
             domain.draw_layout(layout)
 
             box = layout.box()
