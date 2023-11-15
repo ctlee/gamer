@@ -38,77 +38,6 @@ colormapDict = {
     "PRGN": plt.cm.PRGn,
 }
 
-
-class DivergingNorm(mpl.colors.Normalize):
-    def __init__(self, vcenter, vmin=None, vmax=None):
-        """
-        Normalize data with a set center.
-
-        Useful when mapping data with an unequal rates of change around a
-        conceptual center, e.g., data that range from -2 to 4, with 0 as
-        the midpoint.
-
-        Parameters
-        ----------
-        vcenter : float
-            The data value that defines ``0.5`` in the normalization.
-        vmin : float, optional
-            The data value that defines ``0.0`` in the normalization.
-            Defaults to the min value of the dataset.
-        vmax : float, optional
-            The data value that defines ``1.0`` in the normalization.
-            Defaults to the the max value of the dataset.
-
-        Examples
-        --------
-        This maps data value -4000 to 0., 0 to 0.5, and +10000 to 1.0; data
-        between is linearly interpolated::
-
-            >>> import matplotlib.colors as mcolors
-            >>> offset = mcolors.DivergingNorm(vmin=-4000.,
-                                               vcenter=0., vmax=10000)
-            >>> data = [-4000., -2000., 0., 2500., 5000., 7500., 10000.]
-            >>> offset(data)
-            array([0., 0.25, 0.5, 0.625, 0.75, 0.875, 1.0])
-        """
-
-        self.vcenter = vcenter
-        self.vmin = vmin
-        self.vmax = vmax
-        if not (vcenter and vmin and vmax) and (vcenter >= vmax or vcenter <= vmin):
-            raise ValueError(
-                "vmin(%f), vcenter(%f), and vmax(%f) must be in "
-                "ascending order" % (vmin, vcenter, vmax)
-            )
-
-    def autoscale_None(self, A):
-        """
-        Get vmin and vmax, and then clip at vcenter
-        """
-        super().autoscale_None(A)
-        if self.vmin > self.vcenter:
-            self.vmin = self.vcenter
-        if self.vmax < self.vcenter:
-            self.vmax = self.vcenter
-
-    def __call__(self, value, clip=False):
-        """
-        Map value to the interval [0, 1].
-        """
-        result, is_scalar = self.process_value(value)
-        self.autoscale_None(result)  # sets self.vmin, self.vmax if None
-
-        if not self.vmin <= self.vcenter <= self.vmax:
-            raise ValueError("vmin, vcenter, vmax must increase monotonically")
-        result = np.ma.masked_array(
-            np.interp(result, [self.vmin, self.vcenter, self.vmax], [0, 0.5, 1.0]),
-            mask=np.ma.getmask(result),
-        )
-        if is_scalar:
-            result = np.atleast_1d(result)[0]
-        return result
-
-
 def curveToData(crv, context):
     """
     Helper function to take a curvature object and return smoothed data.
@@ -241,7 +170,6 @@ def dataToVertexColor(crv, context, showplot=False, saveplot=False):
 
     amin = np.amin(data)
     amax = np.amax(data)
-
     # if amin > tmin:
     #     amin = tmin
     # if amax < tmax:
@@ -249,9 +177,7 @@ def dataToVertexColor(crv, context, showplot=False, saveplot=False):
 
     # Construct the norm and colorbar
     if amin < 0 and amax > 0:
-        norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
-        # Python 3.5 matplotlib may not support?
-        # norm = mpl.colors.DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
+        norm = mpl.colors.TwoSlopeNorm(0, vmin=amin, vmax=amax)
         colors_neg = cmap(np.linspace(0, crv.mixpoint, 256))
         colors_pos = cmap(np.linspace(crv.mixpoint, 1, 256))
 
@@ -271,13 +197,15 @@ def dataToVertexColor(crv, context, showplot=False, saveplot=False):
         colors = colors[:, :3]
 
     mesh = bpy.context.object.data
-    vlayer = "%s%s" % (crv.algorithm, crv.curvatureType)
+    vlayer = "%s%s_color" % (crv.algorithm, crv.curvatureType)
+
 
     if vlayer not in mesh.vertex_colors:
-        if len(mesh.vertex_colors) == 8:
-            raise RuntimeError(
-                "Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue."
-            )
+        if bpy.app.version < (3, 3, 0):
+            if len(mesh.vertex_colors) == 8:
+                raise RuntimeError(
+                    "Maximum of 8 vertex Layers reached cannot create a new layer. Please delete a layer to continue."
+                )
         mesh.vertex_colors.new(name=vlayer)
 
     color_layer = mesh.vertex_colors[vlayer]
@@ -289,12 +217,18 @@ def dataToVertexColor(crv, context, showplot=False, saveplot=False):
 
     # Add axis for colorbar and plot it
     ax = fig.add_axes([0.75, 0.05, 0.05, 0.9])
-    cb = mpl.colorbar.ColorbarBase(
+
+    cb = mpl.colorbar.Colorbar(
         ax, cmap=curvature_map, norm=norm, orientation="vertical"
     )
 
     ticks = cb.get_ticks()
     ticks.sort()
+
+    if ticks[0] < amin:
+        ticks = ticks[1:-1]
+    if ticks[-1] > amax:
+        ticks = ticks[0:-2]
 
     if amin != ticks[0]:
         ticks = np.insert(ticks, 0, amin)
@@ -399,9 +333,7 @@ def differencePlotter(context, difftype="K1"):
 
     # Construct the norm and colorbar
     if amin < 0 and amax > 0:
-        norm = DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
-        # Python 3.5 matplotlib may not support?
-        # norm = mpl.colors.DivergingNorm(vmin=amin, vcenter=0, vmax=amax)
+        norm = mpl.colors.TwoSlopeNorm(0, vmin=amin, vmax=amax)
         colors_neg = cmap(np.linspace(0, 0.5, 256))
         colors_pos = cmap(np.linspace(0.5, 1, 256))
 

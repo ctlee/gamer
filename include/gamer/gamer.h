@@ -36,7 +36,8 @@ void throw_runtime_error(const char *function, const char *file, const int line,
                          T &&...ts) {
   std::stringstream ss;
   ss << "Error: ";
-  int dummy[] = {0, ((ss << std::forward<T>(ts)), 0)...};
+  // https://stackoverflow.com/questions/25680461/variadic-template-pack-expansion/25683817#25683817
+  int dummy[] = {0, ((ss << std::forward<T>(ts) << " "), 0)...};
   static_cast<void>(dummy); // Avoid warning for unused variable
   ss << " in function " << function << " at " << file << ":" << line;
   throw std::runtime_error(ss.str());

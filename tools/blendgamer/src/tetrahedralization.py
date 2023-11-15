@@ -41,6 +41,47 @@ import os
 import numpy as np
 
 
+class GAMER_OT_select_domain(bpy.types.Operator):
+    """Select domain"""
+
+    bl_idname = "gamer.select_domain"
+    bl_label = "Select Domain"
+    bl_options = {"INTERNAL"}
+
+    index = StringProperty()
+
+    def execute(self, context):
+        new_active = bpy.data.objects[self.index]
+        context.view_layer.objects.active.select_set(False)
+        context.view_layer.objects.active = new_active
+        new_active.select_set(True)
+        return {"FINISHED"}
+
+
+class GAMER_OT_associate_region_point(bpy.types.Operator):
+    bl_idname = "gamer.associate_region_point"
+    bl_label = "Associate region point"
+    bl_description = "Associate selected region point with currently selected domain"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        if context.scene.gamer.tet_group.associate_region_point(self.report, context):
+            return {"FINISHED"}
+        else:
+            return {"CANCELLED"}
+
+
+class GAMER_OT_dissociate_region_point(bpy.types.Operator):
+    bl_idname = "gamer.dissociate_region_point"
+    bl_label = "Dissociate region point"
+    bl_description = "Dissociate region point with currently selected domain"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        context.scene.gamer.tet_group.dissociate_region_point(self.report, context)
+        return {"FINISHED"}
+
+
 class GAMER_OT_tet_domain_add(bpy.types.Operator):
     bl_idname = "gamer.tet_domain_add"
     bl_label = "Add a Tet Domain"
@@ -126,6 +167,13 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
     object_pointer = PointerProperty(
         type=bpy.types.Object, name="Test", description="Object"
     )
+
+    region_point = PointerProperty(
+        type=bpy.types.Object,
+        name="Region point",
+        description="Empty referencing a point within the region",
+    )
+
     marker = IntProperty(name="Marker", default=-1, description="Domain Marker Integer")
     is_hole = BoolProperty(
         name="Hole", default=False, description="Use this domain as a hole"
@@ -168,7 +216,12 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
             return
 
         col = row.column()
-        col.label(text=name)
+        # col.label(text=name)
+        col.operator(
+            "gamer.select_domain",
+            text=name,
+            icon="OUTLINER_DATA_MESH",
+        ).index = self.object_pointer.name
         col = row.column()
         col.label(text="Domain ID: " + str(self.domain_id))
         col = row.column()
@@ -176,6 +229,17 @@ class GAMerTetDomainPropertyGroup(bpy.types.PropertyGroup):
             col.label(text="Hole")
         else:
             col.label(text="Domain Marker: " + str(self.marker))
+
+        col = row.column()
+        if self.region_point is not None:
+            # col.label(text=self.region_point.name)
+            col.operator(
+                "gamer.select_domain",
+                text=self.region_point.name,
+                icon="EMPTY_DATA",
+            ).index = self.region_point.name
+        else:
+            col.label(text="Not set")
 
 
 class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
@@ -235,7 +299,31 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
         description="(Untested) Generate Comsol mphtxt output",
     )
 
+    export_mean_curvature = BoolProperty(
+        name="Dolfin kH",
+        default=False,
+        description="(Untested) Write out mean curvatures in dolfin format",
+    )
+
     status = StringProperty(name="status", default="")
+
+    def associate_region_point(self, report, context):
+        """Associate region point with selected domain"""
+        if not context.active_object.type == "EMPTY":
+            report(
+                {"ERROR"}, "Active object denoting region point must be of EMPTY type"
+            )
+            return False
+        # print(self.domain_list[self.active_domain_index].name)
+
+        self.domain_list[self.active_domain_index].region_point = context.active_object
+        report({"INFO"}, "Associated region point with domain")
+        return True
+
+    def dissociate_region_point(self, report, context):
+        """Dissociate region point with selected domain"""
+        self.domain_list[self.active_domain_index].region_point = None
+        report({"INFO"}, "Dissociated region point with domain")
 
     def add_tet_domain(self, report, context):
         """Add a new tet domain to the list of tet domains for each selected object"""
@@ -395,6 +483,9 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     globalInfo.useVolumeConstraint = d.constrain_vol
                     globalInfo.volumeConstraint = d.vol_constraint
 
+                    if d.region_point is not None:
+                        globalInfo.regionPoint = d.region_point.location
+                        # print(d.region_point.location)
                     # Write surface mesh to file for debug
                     # g.writeOFF("surfmesh_%s.off"%(obj_name), gmesh)
 
@@ -403,7 +494,6 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
 
             # Tetrahedralize mesh
             if len(gmeshes) > 0:
-
                 quality_str = "q%.4f/%.4fO8/7AYVCa" % (
                     self.max_aspect_ratio,
                     self.min_dihedral,
@@ -444,10 +534,19 @@ class GAMerTetrahedralizationPropertyGroup(bpy.types.PropertyGroup):
                     except Exception as ex:
                         report({"ERROR"}, str(ex))
 
+                if self.export_mean_curvature:
+                    surfaces = tetmesh.extractSurfaceFromBoundary()
+                    g.curvatureMDSBtoDolfin(
+                        f"{filename}_mean_curvature", surfaces, tetmesh
+                    )
+
         print("######################## End Tetrahedralize ########################")
 
 
 classes = [
+    GAMER_OT_select_domain,
+    GAMER_OT_associate_region_point,
+    GAMER_OT_dissociate_region_point,
     GAMER_OT_tet_domain_add,
     GAMER_OT_tet_domain_remove,
     GAMER_OT_tet_domain_remove_all,

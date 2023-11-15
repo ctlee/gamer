@@ -43,10 +43,6 @@ namespace gamer {
 std::unique_ptr<TetMesh>
 makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
             std::string tetgen_params) {
-
-  // Create new tetmesh object
-  std::unique_ptr<TetMesh> tetmesh(new TetMesh);
-
   size_t nVertices = 0, nFaces = 0, nRegions = 0, nHoles = 0;
   int i = 0;
   for (auto &surfmesh : surfmeshes) {
@@ -151,23 +147,30 @@ makeTetMesh(const std::vector<SurfaceMesh const *> &surfmeshes,
 
     auto metadata = *surfmesh->get_simplex_up();
 
-    // TODO: (25) Improve region point picking strategy
-    // Pick a point inside the region
-    auto faceID = *surfmesh->template get_level_id<3>().begin();
-    Vector normal = getNormal(*surfmesh, faceID);
-    normal /= std::sqrt(normal | normal);
+    Vector regionPoint;
+    if (metadata.regionPoint.isApprox(
+            Eigen::Vector3d(std::numeric_limits<double>::max(),
+                            std::numeric_limits<double>::max(),
+                            std::numeric_limits<double>::max()))) {
+      // Pick a point inside the region
+      auto faceID = *surfmesh->template get_level_id<3>().begin();
+      Vector normal = getNormal(*surfmesh, faceID);
+      normal /= std::sqrt(normal | normal);
 
-    auto fname = surfmesh->get_name(faceID);
-    Vector a = (*surfmesh->get_simplex_up({fname[0]})).position;
-    Vector b = (*surfmesh->get_simplex_up({fname[1]})).position;
-    Vector c = (*surfmesh->get_simplex_up({fname[2]})).position;
+      auto fname = surfmesh->get_name(faceID);
+      Vector a = (*surfmesh->get_simplex_up({fname[0]})).position;
+      Vector b = (*surfmesh->get_simplex_up({fname[1]})).position;
+      Vector c = (*surfmesh->get_simplex_up({fname[2]})).position;
 
-    Vector d = a - b;
-    double weight = std::sqrt(d | d);
+      Vector d = a - b;
+      double weight = std::sqrt(d | d);
 
-    // flip normal and scale by weight
-    normal *= weight;
-    Vector regionPoint((a + b + c) / 3.0 - normal);
+      // flip normal and scale by weight
+      normal *= weight / 2;
+      regionPoint = (a + b + c) / 3.0 - normal;
+    } else {
+      regionPoint = metadata.regionPoint;
+    }
 
     std::cout << "Region point: " << regionPoint << std::endl;
 
@@ -380,6 +383,32 @@ std::unique_ptr<SurfaceMesh> extractSurface(const TetMesh &tetmesh) {
 
   casc::compute_orientation(*surfmesh);
   return surfmesh;
+}
+
+std::unique_ptr<SurfaceMesh>
+extractSurfaceFromBoundary(const TetMesh &tetmesh) {
+  std::unique_ptr<SurfaceMesh> mesh(new SurfaceMesh);
+  std::vector<int> keys;
+
+  for (auto faceID : tetmesh.get_level_id<3>()) {
+    auto name = tetmesh.get_name(faceID);
+    auto data = *faceID;
+    if (data.marker != 0) {
+      mesh->insert(name, SMFace(data.marker, false));
+    }
+  }
+
+  for (auto vertexID : mesh->get_level_id<1>()) {
+    auto &data = *vertexID;
+    auto name = mesh->get_name(vertexID); // Same as in tetmesh
+    data.position = (*tetmesh.get_simplex_up(name)).position;
+  }
+  casc::compute_orientation(*mesh);
+
+  if (getVolume(*mesh) < 0)
+    flipNormals(*mesh);
+
+  return mesh;
 }
 
 void writeVTK(const std::string &filename, const TetMesh &mesh) {
@@ -597,6 +626,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh) {
   fout << "    </cells>\n";
   fout << "    <domains>\n";
 
+  // Write face markers
   fout << "      <mesh_value_collection name=\"m\" type=\"uint\" dim=\"2\" "
           "size=\""
        << faceMarkerList.size() << "\">\n";
@@ -608,8 +638,9 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh) {
          << " local_entity=\"" << local_entity << "\" "
          << " value=\"" << marker << "\" />\n";
   }
-
   fout << "      </mesh_value_collection>\n";
+
+  // Write cell markers
   fout << "      <mesh_value_collection name=\"m\" type=\"uint\" dim=\"3\" "
           "size=\""
        << mesh.size<4>() << "\">\n";
@@ -623,6 +654,7 @@ void writeDolfin(const std::string &filename, const TetMesh &mesh) {
          << " value=\"" << marker << "\" />\n";
   }
   fout << "      </mesh_value_collection>\n";
+
   fout << "    </domains>\n";
   fout << "  </mesh>\n";
   fout << "</dolfin>\n";
@@ -876,6 +908,68 @@ std::unique_ptr<TetMesh> readDolfin(const std::string &filename) {
   }
 
   return mesh;
+}
+
+void curvatureMDSBtoDolfin(const std::string &filename, const SurfaceMesh &mesh,
+                           const TetMesh &tetmesh) {
+  double *kh;
+  double *kg;
+  double *k1;
+  double *k2;
+  std::map<typename SurfaceMesh::KeyType, typename SurfaceMesh::KeyType> sigma;
+  std::tie(kh, kg, k1, k2, sigma) = curvatureViaMDSB(mesh);
+
+  std::ofstream fout(filename + "kh.xml");
+  if (!fout.is_open()) {
+    std::stringstream ss;
+    ss << "File '" << filename << "' could not be written to.";
+    gamer_runtime_error(ss.str());
+  }
+
+  fout << "<?xml version=\"1.0\"?>\n"
+       << "<dolfin xmlns:dolfin=\"http://fenicsproject.org\">\n";
+  fout << "  <mesh_function>\n";
+  fout << "    <mesh_value_collection name=\"kh\" type=\"double\" dim=\"0\" "
+          "size=\""
+       << mesh.size<1>() << "\">\n";
+
+  // hacky way to regenerate cell ids...
+  std::map<TetMesh::SimplexID<4>, std::size_t> simplex_map;
+  std::size_t cnt = 0;
+  for (const auto tetID : tetmesh.get_level_id<4>()) {
+    simplex_map.emplace(tetID, cnt++);
+  }
+
+  for (const auto vertexID : mesh.get_level_id<1>()) {
+    auto idx = mesh.get_name(vertexID)[0];
+
+    auto tet =
+        *(tetmesh.up(tetmesh.up(tetmesh.up(tetmesh.get_simplex_up({idx}))))
+              .begin());
+    auto tetname = tetmesh.get_name(tet);
+    std::size_t local_entity = 0;
+    for (; local_entity < 4; ++local_entity) {
+      if (tetname[local_entity] == idx)
+        break;
+    }
+
+    // std::cout << "vid:" << idx << " cid:" << simplex_map[tet] << " "
+    //           << casc::to_string(tetname) << " " << local_entity <<
+    //           std::endl;
+
+    fout << "        <value cell_index=\"" << simplex_map[tet] << "\" "
+         << " local_entity=\"" << local_entity << "\" "
+         << " value=\"" << kh[sigma[idx]] << "\" />\n";
+  }
+
+  fout << "    </mesh_value_collection>\n";
+  fout << "  </mesh_function>\n";
+  fout << "</dolfin>\n";
+
+  delete[] kh;
+  delete[] kg;
+  delete[] k2;
+  delete[] k1;
 }
 
 } // end namespace gamer
