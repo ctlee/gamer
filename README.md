@@ -1,7 +1,7 @@
 # Geometry-preserving Adaptive MeshER
 [![DOI](https://zenodo.org/badge/122682242.svg)](https://zenodo.org/badge/latestdoi/122682242)
 [![PyPI](https://img.shields.io/pypi/v/pygamer)](https://pypi.org/project/pygamer/)
-[![Master Build Status](https://github.com/ctlee/gamer/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/ctlee/gamer/actions/workflows/ci.yaml)
+[![Main Build Status](https://github.com/ctlee/gamer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/ctlee/gamer/actions/workflows/ci.yaml)
 [![Documentation Status](https://readthedocs.org/projects/gamer/badge/?version=latest)](https://gamer.readthedocs.io/en/latest/?badge=latest)
 
 GAMer is a surface mesh improvement library developed to condition surface meshes derived from noisy biological imaging data.
