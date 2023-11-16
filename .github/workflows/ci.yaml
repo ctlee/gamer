@@ -3,14 +3,14 @@ name: Testing and release
 on:
   push:
     branches:
-      - master
+      - main
       - development
     tags:
       # The regex: /^v?((\d+)(\.\d+)*)(-?(a|b|c|rc|alpha|beta)([0-9]+)?)?$
       - 'v[0-9].[0-9]+.[0-9]+*'
   pull_request:
     branches: 
-      - master
+      - main
       - development
 
 jobs:
